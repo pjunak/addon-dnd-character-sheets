@@ -42,24 +42,43 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version-file: ttrpg-codex/go.mod
-          cache-dependency-path: ttrpg-codex/go.sum
+          go-version-file: addon-dnd-character-sheets/go.mod
+          cache-dependency-path: |
+            addon-dnd-character-sheets/go.sum
+            addon-dnd-engine/go.sum
+            ttrpg-codex/go.sum
       - run: npm ci
         working-directory: addon-dnd-character-sheets
       - run: npm run package
         working-directory: addon-dnd-character-sheets
       - run: npm test
         working-directory: addon-dnd-character-sheets
+      - run: go test ./...
+        working-directory: addon-dnd-character-sheets
+      - run: go vet ./...
+        working-directory: addon-dnd-character-sheets
+      - run: go test -race ./internal/character
+        working-directory: addon-dnd-character-sheets
       - name: Verify committed browser output matches source
         run: git diff --exit-code -- web
         working-directory: addon-dnd-character-sheets
+      - name: Locate built package
+        id: package
+        shell: bash
+        run: |
+          archive="$(jq -er '"dist/\(.id)-\(.version).zip"' addon.json)"
+          test -f "$archive"
+          printf 'archive=%s/%s\n' "$PWD" "$archive" >> "$GITHUB_OUTPUT"
+        working-directory: addon-dnd-character-sheets
       - name: Inspect release package with the host
-        run: go run ./cmd/codex-addon-inspect ../addon-dnd-character-sheets/dist/dnd-sheets-3.0.0.zip
+        env:
+          ADDON_ARCHIVE: ${{ steps.package.outputs.archive }}
+        run: go run ./cmd/codex-addon-inspect "$ADDON_ARCHIVE"
         working-directory: ttrpg-codex
 
       - uses: actions/upload-artifact@v7
         with:
           name: reviewed-package
-          path: addon-dnd-character-sheets/dist/*.zip
+          path: ${{ steps.package.outputs.archive }}
           if-no-files-found: error
           retention-days: 14
