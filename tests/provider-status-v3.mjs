@@ -1,13 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { RulesEngineClient, connectRulesEngine } from '../web/engine-client.js';
-import { savedProviderStatus } from '../web/rules-status.js';
+import { savedProviderStatus, requiresRulesReview, canRefreshEquipmentRules } from '../web/rules-status.js';
 import { sheetText, sheetMessageKeys } from '../web/sheet-catalogs.js';
 import { blankSheet } from '../web/sheet-state.js';
 
 const engine = { addonId: 'independent-rules', contractVersion: '3.0.0', generation: 'a'.repeat(64), bindingRevision: 3 };
 const identity = { providerAddonId: 'independent-data', providerContractVersion: '3.0.0', providerGeneration: 'b'.repeat(64), contentRevision: 'content-1', rulesetId: 'rules', rulesetVersion: 1, edition: '2024' };
 const context = (status = 'ready') => ({ contractVersion: 'rules-engine-context.v1', available: status === 'ready', status, identity: status === 'ready' ? identity : {}, errors: status === 'ready' ? [] : [`Provider reports ${status}`] });
+
+test('equipment refresh and rules actions retain values until changed sources are reviewed', () => {
+  const current = { ...identity, engineAddonId: engine.addonId, engineContractVersion: engine.contractVersion, engineGeneration: engine.generation, engineBindingRevision: engine.bindingRevision };
+  assert.equal(canRefreshEquipmentRules('auto', current, current), true);
+  assert.equal(canRefreshEquipmentRules('manual', current, current), false);
+  assert.equal(canRefreshEquipmentRules('auto', null, current), false);
+  for (const changed of [{ ...current, contentRevision: 'new-books' }, { ...current, engineAddonId: 'replacement-engine' }, undefined]) {
+    assert.equal(canRefreshEquipmentRules('auto', current, changed), false);
+    assert.equal(requiresRulesReview(current, changed), true);
+  }
+  assert.equal(requiresRulesReview(null, current), false);
+  assert.equal(requiresRulesReview({ edition: '2024' }, current), true);
+});
 
 test('provider inspection uses the read-only context contract and preserves the exact engine/data identity', async () => {
   const calls = [], client = new RulesEngineClient({ available: true, providers: [engine], call: async (...args) => { calls.push(args); return context(); } }, new AbortController().signal);

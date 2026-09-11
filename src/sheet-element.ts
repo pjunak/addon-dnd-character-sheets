@@ -1,4 +1,5 @@
 import { applyDecisions, materializeHydration, type BuilderChoice, type BuilderPlan, type Hydration, type PlayChange, type RuleRecord } from "./engine-client.js";
+import { canRefreshEquipmentRules, requiresRulesReview, savedProviderStatus } from "./rules-status.js";
 import { runtimeFor, type SheetRuntime } from "./runtime.js";
 import type { ContributionContext } from "./sdk.js";
 import { parseSheet, serializeSheet } from "./sheet-transfer.js";
@@ -612,6 +613,7 @@ export function defineSheetElement(generation: string): string {
         const decisions = applyDecisions(changed, reconciled.decisions);
         const hydration = await runtime.engine.hydrate(decisions);
         if (epoch !== this.#epoch) return;
+        this.#requireReviewedRules(hydration);
         const materialized = this.#withClassFallback(materializeHydration(decisions, hydration, runtime.engine.providerIdentity));
         if (epoch !== this.#epoch || !await this.#save((draft) => replaceState(draft, materialized))) return;
         this.#builderPlan = undefined;
@@ -633,6 +635,7 @@ export function defineSheetElement(generation: string): string {
         const decisions = applyDecisions(snapshot.state, applied.decisions);
         const hydration = await runtime.engine.hydrate(decisions);
         if (epoch !== this.#epoch) return;
+        this.#requireReviewedRules(hydration);
         const materialized = this.#withClassFallback(materializeHydration(decisions, hydration, runtime.engine.providerIdentity));
         if (epoch !== this.#epoch || !await this.#save((draft) => replaceState(draft, materialized))) return;
         this.#builderPlan = undefined;
@@ -725,11 +728,12 @@ export function defineSheetElement(generation: string): string {
       const epoch = this.#epoch; this.#busy = true; this.#render();
       let next = cloneSheet(snapshot.state); change(next);
       try {
-        if (runtime?.engine.available) {
+        if (runtime?.engine.available && snapshot.state.rulesMode === "auto") {
           try {
             const hydration = await runtime.engine.hydrate(next);
             if (epoch !== this.#epoch) return;
-            if (hydration.identity && Number(asRecord(hydration.sheet["derived"])["maxHp"]) > 0) next = materializeHydration(next, hydration, runtime.engine.providerIdentity);
+            const current = hydration.identity ? { ...runtime.engine.providerIdentity, ...hydration.identity } : undefined;
+            if (canRefreshEquipmentRules(next.rulesMode, next.rulesProvider?.["identity"], current) && Number(asRecord(hydration.sheet["derived"])["maxHp"]) > 0) next = materializeHydration(next, hydration, runtime.engine.providerIdentity);
           } catch { /* Authored equipment changes remain usable without rules data. */ }
         }
         if (epoch === this.#epoch) await this.#save(draft => replaceState(draft, next));
@@ -744,6 +748,7 @@ export function defineSheetElement(generation: string): string {
         const result = await runtime.engine.playChange(snapshot.state, change);
         if (epoch !== this.#epoch) return;
         if (!result.available || !result.identity) throw new Error(result.errors.join(" ") || this.#t("rules.actionUnavailable"));
+        this.#requireReviewedRules(result);
         const next = materializeHydration(applyDecisions(snapshot.state, result.decisions), result, runtime.engine.providerIdentity);
         // Keep human-readable spell snapshots when the catalog is later removed.
         for (const spell of next.spells) {
@@ -770,12 +775,23 @@ export function defineSheetElement(generation: string): string {
       finally { if (epoch === this.#epoch) { this.#busy = false; this.#render(); } }
     }
 
+    #requireReviewedRules(hydration: Hydration, allowPreview = false): void {
+      const runtime = this.#runtime, state = this.#snapshot?.state;
+      if (!runtime || !state) return;
+      const current = hydration.identity ? { ...runtime.engine.providerIdentity, ...hydration.identity } : undefined;
+      if (!requiresRulesReview(state.rulesProvider?.["identity"], current)) return;
+      const preview = this.#hydration?.identity ? { ...runtime.engine.providerIdentity, ...this.#hydration.identity } : undefined;
+      if (!allowPreview || savedProviderStatus(preview, current) !== "same") throw new Error(this.#t("rules.reviewChanged"));
+    }
+
     async #materialize(): Promise<void> {
       const runtime = this.#runtime; const snapshot = this.#snapshot; if (runtime === undefined || snapshot === undefined || !this.#canEdit() || this.#busy || this.#editor?.dirty) return;
       const refreshBuilder = this.#builderPlan !== undefined;
       const epoch = this.#epoch; this.#busy = true; this.#render();
       try {
-        const hydration = await runtime.engine.hydrate(snapshot.state); const materialized = this.#withClassFallback(materializeHydration(snapshot.state, hydration, runtime.engine.providerIdentity));
+        const hydration = await runtime.engine.hydrate(snapshot.state);
+        this.#requireReviewedRules(hydration, true);
+        const materialized = this.#withClassFallback(materializeHydration(snapshot.state, hydration, runtime.engine.providerIdentity));
         if (epoch !== this.#epoch || !await this.#save((draft) => replaceState(draft, materialized))) return; this.#hydration = hydration; this.#message = this.#t("rules.saved"); this.#messageKind = "status";
         if (refreshBuilder) {
           const result = await runtime.engine.builderPlan(materialized).catch(() => undefined);

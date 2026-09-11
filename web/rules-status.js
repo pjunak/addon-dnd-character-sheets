@@ -1,4 +1,11 @@
 export const identityFields = ["engineAddonId", "engineContractVersion", "engineGeneration", "engineBindingRevision", "providerAddonId", "providerContractVersion", "providerGeneration", "contentRevision", "rulesetId", "rulesetVersion", "edition"];
+export function requiresRulesReview(saved, current) {
+    const status = savedProviderStatus(saved, current);
+    return status === "changed" || status === "unverified";
+}
+export function canRefreshEquipmentRules(mode, saved, current) {
+    return mode === "auto" && savedProviderStatus(saved, current) === "same";
+}
 export function savedProviderStatus(saved, current) {
     if (!saved || typeof saved !== "object" || Array.isArray(saved) || !Object.keys(saved).length)
         return "none";

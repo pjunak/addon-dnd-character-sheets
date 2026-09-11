@@ -1,4 +1,5 @@
 import { applyDecisions, materializeHydration } from "./engine-client.js";
+import { canRefreshEquipmentRules, requiresRulesReview, savedProviderStatus } from "./rules-status.js";
 import { runtimeFor } from "./runtime.js";
 import { parseSheet, serializeSheet } from "./sheet-transfer.js";
 import { abilities, cloneSheet, createId } from "./sheet-state.js";
@@ -896,6 +897,7 @@ export function defineSheetElement(generation) {
                 const hydration = await runtime.engine.hydrate(decisions);
                 if (epoch !== this.#epoch)
                     return;
+                this.#requireReviewedRules(hydration);
                 const materialized = this.#withClassFallback(materializeHydration(decisions, hydration, runtime.engine.providerIdentity));
                 if (epoch !== this.#epoch || !await this.#save((draft) => replaceState(draft, materialized)))
                     return;
@@ -939,6 +941,7 @@ export function defineSheetElement(generation) {
                 const hydration = await runtime.engine.hydrate(decisions);
                 if (epoch !== this.#epoch)
                     return;
+                this.#requireReviewedRules(hydration);
                 const materialized = this.#withClassFallback(materializeHydration(decisions, hydration, runtime.engine.providerIdentity));
                 if (epoch !== this.#epoch || !await this.#save((draft) => replaceState(draft, materialized)))
                     return;
@@ -1124,12 +1127,13 @@ export function defineSheetElement(generation) {
             let next = cloneSheet(snapshot.state);
             change(next);
             try {
-                if (runtime?.engine.available) {
+                if (runtime?.engine.available && snapshot.state.rulesMode === "auto") {
                     try {
                         const hydration = await runtime.engine.hydrate(next);
                         if (epoch !== this.#epoch)
                             return;
-                        if (hydration.identity && Number(asRecord(hydration.sheet["derived"])["maxHp"]) > 0)
+                        const current = hydration.identity ? { ...runtime.engine.providerIdentity, ...hydration.identity } : undefined;
+                        if (canRefreshEquipmentRules(next.rulesMode, next.rulesProvider?.["identity"], current) && Number(asRecord(hydration.sheet["derived"])["maxHp"]) > 0)
                             next = materializeHydration(next, hydration, runtime.engine.providerIdentity);
                     }
                     catch { /* Authored equipment changes remain usable without rules data. */ }
@@ -1157,6 +1161,7 @@ export function defineSheetElement(generation) {
                     return;
                 if (!result.available || !result.identity)
                     throw new Error(result.errors.join(" ") || this.#t("rules.actionUnavailable"));
+                this.#requireReviewedRules(result);
                 const next = materializeHydration(applyDecisions(snapshot.state, result.decisions), result, runtime.engine.providerIdentity);
                 // Keep human-readable spell snapshots when the catalog is later removed.
                 for (const spell of next.spells) {
@@ -1207,6 +1212,17 @@ export function defineSheetElement(generation) {
                 }
             }
         }
+        #requireReviewedRules(hydration, allowPreview = false) {
+            const runtime = this.#runtime, state = this.#snapshot?.state;
+            if (!runtime || !state)
+                return;
+            const current = hydration.identity ? { ...runtime.engine.providerIdentity, ...hydration.identity } : undefined;
+            if (!requiresRulesReview(state.rulesProvider?.["identity"], current))
+                return;
+            const preview = this.#hydration?.identity ? { ...runtime.engine.providerIdentity, ...this.#hydration.identity } : undefined;
+            if (!allowPreview || savedProviderStatus(preview, current) !== "same")
+                throw new Error(this.#t("rules.reviewChanged"));
+        }
         async #materialize() {
             const runtime = this.#runtime;
             const snapshot = this.#snapshot;
@@ -1218,6 +1234,7 @@ export function defineSheetElement(generation) {
             this.#render();
             try {
                 const hydration = await runtime.engine.hydrate(snapshot.state);
+                this.#requireReviewedRules(hydration, true);
                 const materialized = this.#withClassFallback(materializeHydration(snapshot.state, hydration, runtime.engine.providerIdentity));
                 if (epoch !== this.#epoch || !await this.#save((draft) => replaceState(draft, materialized)))
                     return;

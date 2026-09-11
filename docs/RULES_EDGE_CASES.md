@@ -2,7 +2,7 @@
 
 This document defines behavior owned by `dnd-sheets`. D&D computation belongs
 to `dnd5e.rules-engine` v3; rulebook records belong to the selected
-`dnd5e.rules-data` provider.
+compatible `dnd5e.rules-data` providers under the host's instance source policy.
 
 ## Standalone is the baseline
 
@@ -23,6 +23,15 @@ replaces only the mounted sheet's connection, invalidates computed previews
 and catalog caches, and retains the existing editor and failed-save draft.
 It neither saves nor automatically applies computed values. Requests are
 cancelled with the mount and never silently retry or select a provider by ID.
+
+Sourcebook and provider settings never save or recalculate characters. The
+engine's combined content revision covers every contributing package. When
+saved provenance changes or cannot be verified, Builder/play materialization
+requires an explicit current rules preview and apply first. A stale preview
+cannot authorize values from another source snapshot. Manual equipment edits
+never invoke recalculation; automatic equipment refresh requires a complete
+matching saved identity. Inventory edits still save when rules are unavailable
+or changed, preserving existing computed fallback fields.
 
 Saved provenance compares engine identity, generation and binding revision
 plus data-provider identity, generation, content revision, ruleset and edition.

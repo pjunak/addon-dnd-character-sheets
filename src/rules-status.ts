@@ -9,6 +9,15 @@ export interface RulesDiagnostics {
 export const identityFields = ["engineAddonId", "engineContractVersion", "engineGeneration", "engineBindingRevision", "providerAddonId", "providerContractVersion", "providerGeneration", "contentRevision", "rulesetId", "rulesetVersion", "edition"] as const;
 export type IdentityField = typeof identityFields[number];
 
+export function requiresRulesReview(saved: unknown, current: Readonly<Record<string, unknown>> | undefined): boolean {
+  const status = savedProviderStatus(saved, current);
+  return status === "changed" || status === "unverified";
+}
+
+export function canRefreshEquipmentRules(mode: string, saved: unknown, current: Readonly<Record<string, unknown>> | undefined): boolean {
+  return mode === "auto" && savedProviderStatus(saved, current) === "same";
+}
+
 export function savedProviderStatus(saved: unknown, current: Readonly<Record<string, unknown>> | undefined): "none" | "unverified" | "same" | "changed" {
   if (!saved || typeof saved !== "object" || Array.isArray(saved) || !Object.keys(saved).length) return "none";
   if (!current) return "unverified";
