@@ -1,6 +1,162 @@
 {
   "additionalProperties": false,
   "properties": {
+    "adoptRules": {
+      "type": "boolean"
+    },
+    "before": {
+      "maximum": 1000000,
+      "minimum": -1000000,
+      "type": "integer"
+    },
+    "change": {
+      "additionalProperties": {},
+      "maxProperties": 1000,
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "compareRevision": {
+      "maximum": 1000000,
+      "minimum": -1000000,
+      "type": "integer"
+    },
+    "contractVersion": {
+      "maxLength": 30000,
+      "type": "string"
+    },
+    "expectedRevision": {
+      "maximum": 1000000,
+      "minimum": -1000000,
+      "type": "integer"
+    },
+    "grant": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "actorId": {
+          "maxLength": 30000,
+          "type": "string"
+        },
+        "condition": {
+          "maxLength": 30000,
+          "type": "string"
+        },
+        "effectiveLevel": {
+          "maximum": 1000000,
+          "minimum": -1000000,
+          "type": "integer"
+        },
+        "effects": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "key": {
+                "maxLength": 30000,
+                "type": "string"
+              },
+              "mode": {
+                "maxLength": 30000,
+                "type": "string"
+              },
+              "target": {
+                "maxLength": 30000,
+                "type": "string"
+              },
+              "value": {
+                "maximum": 1000000,
+                "minimum": -1000000,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "target",
+              "mode",
+              "value"
+            ],
+            "type": "object"
+          },
+          "maxItems": 500,
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "expiresAt": {
+          "maxLength": 30000,
+          "type": "string"
+        },
+        "feat": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "maxLength": 30000,
+              "type": "string"
+            },
+            "kind": {
+              "maxLength": 30000,
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "id"
+          ],
+          "type": "object"
+        },
+        "grantedAt": {
+          "maxLength": 30000,
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 30000,
+          "type": "string"
+        },
+        "itemId": {
+          "maxLength": 30000,
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 30000,
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 30000,
+          "type": "string"
+        },
+        "waivers": {
+          "items": {
+            "maxLength": 30000,
+            "type": "string"
+          },
+          "maxItems": 500,
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "reason",
+        "actorId",
+        "grantedAt",
+        "active",
+        "effectiveLevel",
+        "condition",
+        "effects",
+        "waivers"
+      ],
+      "type": "object"
+    },
+    "grantId": {
+      "maxLength": 30000,
+      "type": "string"
+    },
     "inputs": {
       "additionalProperties": false,
       "properties": {
@@ -717,316 +873,42 @@
       ],
       "type": "object"
     },
+    "key": {
+      "maxLength": 30000,
+      "type": "string"
+    },
+    "operation": {
+      "maxLength": 30000,
+      "type": "string"
+    },
     "operationId": {
       "maxLength": 30000,
       "type": "string"
     },
-    "projection": {
-      "additionalProperties": false,
-      "properties": {
-        "evidence": {
-          "items": {
-            "additionalProperties": false,
-            "properties": {
-              "book": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "contentRevision": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "facts": {
-                "additionalProperties": {},
-                "maxProperties": 1000,
-                "type": [
-                  "object",
-                  "null"
-                ]
-              },
-              "hash": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "name": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "packageGeneration": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "packageId": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "reference": {
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "maxLength": 30000,
-                    "type": "string"
-                  },
-                  "kind": {
-                    "maxLength": 30000,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "kind",
-                  "id"
-                ],
-                "type": "object"
-              },
-              "summary": {
-                "maxLength": 30000,
-                "type": "string"
-              }
-            },
-            "required": [
-              "reference",
-              "name",
-              "hash",
-              "summary",
-              "facts"
-            ],
-            "type": "object"
-          },
-          "maxItems": 500,
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "explanations": {
-          "additionalProperties": {
-            "additionalProperties": false,
-            "properties": {
-              "formula": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "label": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "maximum": {
-                "maximum": 1000000,
-                "minimum": -1000000,
-                "type": "integer"
-              },
-              "minimum": {
-                "maximum": 1000000,
-                "minimum": -1000000,
-                "type": "integer"
-              },
-              "sources": {
-                "items": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "id": {
-                      "maxLength": 30000,
-                      "type": "string"
-                    },
-                    "kind": {
-                      "maxLength": 30000,
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "id"
-                  ],
-                  "type": "object"
-                },
-                "maxItems": 500,
-                "type": [
-                  "array",
-                  "null"
-                ]
-              },
-              "terms": {
-                "items": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "grantId": {
-                      "maxLength": 30000,
-                      "type": "string"
-                    },
-                    "label": {
-                      "maxLength": 30000,
-                      "type": "string"
-                    },
-                    "source": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "id": {
-                          "maxLength": 30000,
-                          "type": "string"
-                        },
-                        "kind": {
-                          "maxLength": 30000,
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "kind",
-                        "id"
-                      ],
-                      "type": "object"
-                    },
-                    "status": {
-                      "maxLength": 30000,
-                      "type": "string"
-                    },
-                    "value": {}
-                  },
-                  "required": [
-                    "label",
-                    "value"
-                  ],
-                  "type": "object"
-                },
-                "maxItems": 500,
-                "type": [
-                  "array",
-                  "null"
-                ]
-              },
-              "unit": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "value": {}
-            },
-            "required": [
-              "label",
-              "formula",
-              "value",
-              "terms",
-              "sources"
-            ],
-            "type": "object"
-          },
-          "maxProperties": 1000,
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "issues": {
-          "items": {
-            "additionalProperties": false,
-            "properties": {
-              "id": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "message": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "reference": {
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "maxLength": 30000,
-                    "type": "string"
-                  },
-                  "kind": {
-                    "maxLength": 30000,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "kind",
-                  "id"
-                ],
-                "type": "object"
-              },
-              "severity": {
-                "maxLength": 30000,
-                "type": "string"
-              },
-              "target": {
-                "maxLength": 30000,
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "target",
-              "message",
-              "severity"
-            ],
-            "type": "object"
-          },
-          "maxItems": 500,
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "sheet": {
-          "additionalProperties": {},
-          "maxProperties": 1000,
-          "type": [
-            "object",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "sheet",
-        "explanations",
-        "evidence",
-        "issues"
-      ],
-      "type": "object"
+    "reauthorizeGrants": {
+      "type": "boolean"
     },
-    "rules": {
-      "additionalProperties": false,
-      "properties": {
-        "engineGeneration": {
-          "maxLength": 30000,
-          "type": "string"
-        },
-        "engineId": {
-          "maxLength": 30000,
-          "type": "string"
-        },
-        "engineVersion": {
-          "maxLength": 30000,
-          "type": "string"
-        },
-        "identity": {
-          "additionalProperties": {},
-          "maxProperties": 1000,
-          "type": [
-            "object",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "engineId",
-        "engineVersion",
-        "engineGeneration",
-        "identity"
-      ],
-      "type": "object"
+    "restoreScope": {
+      "maxLength": 30000,
+      "type": "string"
     },
-    "schemaVersion": {
+    "revision": {
+      "maximum": 1000000,
+      "minimum": -1000000,
+      "type": "integer"
+    },
+    "summary": {
+      "maxLength": 30000,
+      "type": "string"
+    },
+    "token": {
       "maxLength": 30000,
       "type": "string"
     }
   },
   "required": [
-    "schemaVersion",
-    "inputs",
-    "projection",
-    "rules",
-    "operationId"
+    "contractVersion",
+    "key"
   ],
   "type": "object"
 }

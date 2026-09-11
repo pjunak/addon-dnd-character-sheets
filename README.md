@@ -1,104 +1,70 @@
 # D&D Character Sheets
 
-`dnd-sheets` is the hand-fillable D&D character sheet for TTRPG Codex. It is
-an Add-on API v3 integrated TypeScript package and adds a section beneath the
-host-owned character profile. The host continues to own identity, portrait,
-lore, relationships, routing, and authorization.
+`dnd-sheets` adds a reversible character workspace beneath the host-owned
+profile. **Play**, **Build** and **History** share the same saved decisions,
+calculated projection and source explanations. Compact and Classic are layout
+preferences. The interface has English and Czech catalogs; authored source
+names, rule prose and character notes keep their source language.
 
-## What it provides
+## Character workflow
 
-- Directly editable identity, abilities, saves, skills, vitals, resources,
-  spells, inventory, currency, and notes.
-- Compact and Classic ability-card layouts, a vitals strip and split backpack,
-  with the original per-character layout preference and an explicit edit mode.
-- Saved attacks and resource counters alongside hand-entered play resources.
-- Retained drafts after failed writes, explicit retry/reload and draft export.
-- A useful read-only view for players without edit authority.
-- Versioned per-sheet JSON export and import.
-- An optional guided Builder through `dnd5e.rules-engine` v3.
-- Builder species/lineage, background, base scores, subclass selection and
-  split ability grants, with point-buy and choice counts.
-- The original Builder progress rail, Character/class tabs and level rows,
-  with actionable reminders, labeled advanced choices and extra feats/rewards.
-- A searchable equipment folder tree with breadcrumbs, a quantity tray and
-  one batch save; custom items also work without a provider. Worn slots equip,
-  replace and remove armor/shields, and manage attunement from the backpack.
-- Class spellbook/cantrip/preparation controls and slot casting, plus reviewed
-  short/long rests, average hit-die healing and feature activation.
-- Species/feat spell choices and casting abilities, free casts, ritual casts,
-  reviewed spell copying with GP/scroll changes, and recorded known-spell swaps.
-- Durable materialized values after every successful Builder change, so a
-  sheet remains useful when the engine or rules data is unavailable.
-- Rules connection status, explicit reconnect, and a comparison of current
-  providers with the source of saved computed values. Checking never writes.
-- English/Czech navigation, play controls, Builder, equipment and spell tools,
-  reviews, settings, save recovery and diagnostics, using the host language
-  preference. Authored names, notes and provider content keep their language.
-- A localized host-owned section heading through reviewed contribution metadata.
+Build records origin, abilities, ordered class levels, choices, spells, inventory
+and notes. A preview shows invalidated choices and resulting changes before a
+new revision is saved. The native worker authenticates commands and stores
+retained revisions through the host's history capability. Browsers cannot write
+the character extension directly.
 
-The package does not implement D&D rules or carry rulebook data. Those belong
-to the selected rules engine and its selected rules-data provider. Missing or
-failing services never block ordinary hand editing.
+Play offers bounded HP, temporary HP, resources, currency, rest, recorded hit
+dice, activations, casting and copying. DM rewards, feats and typed exceptions
+carry the authenticated DM, reason, effective level and optional condition or
+expiry. Amendments retain the prior grant and record a replacement. Reusable
+homebrew uses compatible versioned source add-ons.
 
-## Saved state
+History can inspect, compare, export and print saved revisions. Restoration
+appends a revision. Build-only restoration preserves current play, notes and
+paid spell acquisitions; play and complete restoration are explicit alternatives.
+Undo uses a reviewed complete restoration of the previous revision.
 
-The add-on ID and record-extension ID are both permanently `dnd-sheets`. API v3
-stores the value at:
+Drafts survive reload and failed saves on the same device/browser/origin/editor.
+Concurrent changes preserve the draft for comparison and explicit rebase.
+JSON export/import uses only `dnd-character.v1` / schema 4.0.0. File and paste
+share parsing and exact replacement review. Imported DM grants need a current
+DM's approval; imported roll/acquisition provenance is labeled as external.
+Print/PDF always uses a selected saved revision, with optional long sections and
+source/build details. Browser printing supports A4 and Letter.
+
+The optional `dnd5e.rules-engine` ^4.0.0 provider supplies all calculations.
+Without compatible rules, existing revisions, history, notes, printing and export
+remain usable. Mechanical edits require compatible rules. A changed engine,
+book policy or source package requires explicit review/adoption before play.
+
+## Contracts and ownership
+
+- Public character service: `dnd5e.character` 1.0.0, native-worker transport.
+- Permanent extension ID: `dnd-sheets`, schema 4.0.0, retained.
+- `internal/character`: authenticated review/commit and persistence coordination.
+- `src/character-client.ts`: browser service, transfer and local draft boundary.
+- `src/character-element.ts`: workspace composition and asynchronous lifetime.
+- Shared Build, Play, grant, comparison and projection renderers under `src/`.
+- Generated schemas and TypeScript types come from Go contract types; catalogs
+  compile from `locales/en.json` and `locales/cs.json`.
+
+See [failure and restore semantics](docs/RULES_EDGE_CASES.md), the engine's
+[public contract](../addon-dnd-engine/contract/README.md), and the host's
+[retirement procedure](../ttrpg-codex/docs/rewrite/CHARACTER_SHEET_CUTOVER.md).
+The old hand-filled sheet format and engine handlers are retired.
+
+## Development
+
+Use the declared Node toolchain and Go 1.27.1:
 
 ```text
-(characters, character ID, dnd-sheets, dnd-sheets)
-```
-
-This is the deliberate destination for the old
-`character.addonData["dnd-sheets"]` blob during the one-time campaign
-conversion. The v3 schema describes known fields but permits unknown fields so
-older and homebrew values survive that move. Runtime normalization preserves
-those values as well.
-
-## Architecture
-
-- `src/index.ts` activates the generation, connects the optional service, and
-  binds the declared section.
-- `src/sheet-element.ts` owns the mounted section and browser interaction.
-- `src/play-view.ts` owns ability cards, vitals, backpack and combat display.
-- `src/workflow-view.ts` owns Builder foundation fields, equipment selection,
-  spell management and rest previews.
-- `src/spell-tools.ts` renders grant choices, casting, copying and swap reviews.
-- `src/builder-view.ts` renders progress, class navigation and extra rewards.
-- `src/equipment-state.ts` manages worn-slot placement using catalog snapshots.
-- `src/sheet-editor.ts` owns draft retention and save sequencing.
-- `src/sheet-state.ts` owns defaults, forward normalization, and manual math.
-- `src/sheet-repository.ts` owns revisioned record-extension persistence.
-- `src/engine-client.ts` is the only rules-engine service boundary.
-- `src/rules-status.ts` compares saved provenance and classifies service failures;
-  `src/provider-view.ts` renders the connection summary and optional details.
-- `src/sheet-catalogs.ts` owns the English/Czech interface messages.
-- `src/sheet-transfer.ts` owns bounded per-sheet JSON transfer.
-- `contracts/sheet-state.schema.json` is the durable storage contract.
-
-The former `dnd-sheets.renderer` browser-object service is intentionally not
-part of v3. Styles no longer receive character blobs or inject HTML across an
-add-on boundary. Presentation is package-owned and scoped; future alternate
-renderers should use a serializable host-selected renderer contract if there is
-a real second consumer.
-
-## Develop
-
-Use Node.js 26:
-
-```powershell
-npm install
 npm run check
 npm run package
 ```
 
-`npm run package` produces a deterministic release archive under `dist/` with
-SHA-256 checksums. Inspect it from the host repository before the supervised
-browser test:
-
-```powershell
-go run ./cmd/codex-addon-inspect ../addon-dnd-character-sheets/dist/dnd-sheets-3.0.0.zip
-```
-
-Deployment and campaign conversion are intentionally performed later with the
-site owner present.
+Inspect the resulting ZIP from the host with
+`go run ./cmd/codex-addon-inspect ../addon-dnd-character-sheets/dist/dnd-sheets-4.0.0.zip`.
+The package includes generated web assets and native workers. Source checkout
+edits become visible only after rebuilding and reviewed activation. Current
+integration tests live in the host's installed character/rules/sheets suites.

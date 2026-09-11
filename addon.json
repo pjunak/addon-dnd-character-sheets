@@ -3,22 +3,39 @@
   "packageFormat": 1,
   "id": "dnd-sheets",
   "name": "D&D Character Sheets",
-  "version": "3.0.0",
-  "description": "Hand-fillable D&D character sheets with optional rules-engine guidance.",
+  "version": "4.0.0",
+  "description": "Reversible character builds, tracked DM grants and explained rules.",
   "license": "MIT",
   "compatibility": {
     "host": ">=2.0.0 <3.0.0",
-    "addonApi": "^3.0.0"
+    "addonApi": "^3.0.0",
+    "workerProtocol": "^1.0.0"
   },
   "capabilities": {
-    "required": ["ui.contributions"],
+    "required": [
+      "ui.contributions",
+      "worker.native",
+      "data.history",
+      "ui.rule-details"
+    ],
     "optional": []
   },
   "runtime": {
     "ui": {
       "mode": "integrated",
       "entry": "web/index.js",
-      "styles": ["web/index.css"]
+      "styles": [
+        "web/index.css"
+      ]
+    },
+    "worker": {
+      "type": "native",
+      "protocol": "^1.0.0",
+      "entrypoints": {
+        "windows-amd64": "worker/windows-amd64/dnd-sheets.exe",
+        "linux-amd64": "worker/linux-amd64/dnd-sheets",
+        "linux-arm64": "worker/linux-arm64/dnd-sheets"
+      }
     }
   },
   "permissions": [],
@@ -27,10 +44,20 @@
       "id": "sheet.section",
       "surface": "article-section",
       "label": "D&D Character Sheet",
-      "roles": ["dm", "player"],
+      "roles": [
+        "dm",
+        "player"
+      ],
       "order": 100,
-      "requires": ["ui.contributions"],
-      "config": { "collection": "characters", "labels": { "cs": "Deník postavy D&D" } }
+      "requires": [
+        "ui.contributions"
+      ],
+      "config": {
+        "collection": "characters",
+        "labels": {
+          "cs": "Deník postavy D&D"
+        }
+      }
     }
   ],
   "recordExtensions": [
@@ -39,17 +66,33 @@
       "target": "characters",
       "visibility": "public",
       "schema": "contracts/sheet-state.schema.json",
-      "schemaVersion": "3.0.0"
+      "schemaVersion": "4.0.0",
+      "retained": true
     }
   ],
   "services": {
     "consumes": [
       {
         "contract": "dnd5e.rules-engine",
-        "range": "^3.0.0",
+        "range": "^4.0.0",
         "cardinality": "one",
         "required": false,
         "selection": "operator"
+      },
+      {
+        "contract": "dnd5e.character",
+        "range": "^1.0.0",
+        "cardinality": "many",
+        "required": false,
+        "selection": "all-compatible"
+      }
+    ],
+    "provides": [
+      {
+        "contract": "dnd5e.character",
+        "version": "1.0.0",
+        "transport": "worker",
+        "schema": "contracts/character.service.json"
       }
     ]
   }

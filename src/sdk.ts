@@ -28,6 +28,7 @@ export interface ServiceHandle {
   readonly available: boolean;
   readonly providers: readonly ServiceProvider[];
   call<TResponse>(method: string, params: unknown, options?: {
+    readonly providerAddonId?: string;
     readonly deadlineMs?: number;
     readonly signal?: AbortSignal;
   }): Promise<TResponse>;
@@ -38,12 +39,14 @@ export interface AddonContext {
   readonly signal: AbortSignal;
   readonly capabilities: { require(capability: string): void };
   readonly data: {
+    subscribe(listener: (change: { readonly reason: string }) => void, options?: { readonly signal?: AbortSignal }): () => void;
     recordExtension<T>(target: string, id: string): AddonDataHandle<T>;
   };
   readonly services: {
     connect(contract: string, options: {
       readonly range: string;
-      readonly cardinality: "one";
+      readonly cardinality: "one" | "many";
+      readonly includeOwn?: boolean;
       readonly signal?: AbortSignal;
     }): Promise<ServiceHandle>;
   };

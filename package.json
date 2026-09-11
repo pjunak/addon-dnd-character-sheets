@@ -1,13 +1,13 @@
 {
   "name": "@ttrpg-codex/dnd-character-sheets",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node tools/clean-web.ts && tsc -p tsconfig.json && node tools/copy-style.ts",
-    "package": "npm run build && node tools/package.ts",
+    "build": "go run ./cmd/character-contract && node tools/build-locales.ts && node tools/clean-web.ts && tsc -p tsconfig.json && node tools/copy-style.ts",
+    "package": "npm run build && node tools/build-worker.ts && node tools/package.ts",
     "test": "node --test tests/*.mjs",
-    "check": "npm run build && npm test"
+    "check": "npm run build && npm test && go test ./... && go vet ./..."
   },
   "devDependencies": {
     "@types/archiver": "^7.0.0",

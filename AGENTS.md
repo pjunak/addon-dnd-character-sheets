@@ -25,22 +25,23 @@ instructions were loaded or read unrelated sibling implementations.
 - The host owns the core character record. This package contributes one
   additive `article-section`; it never replaces the host article or reads
   private host DOM.
-- `sheet-state.ts` is authoritative for stored field names and forward
-  normalization. Preserve unknown JSON fields so one-time conversion and
-  homebrew data remain lossless.
-- `sheet-repository.ts` is the only persistent record-extension boundary.
-  Writes use optimistic revisions; conflicts retain the local draft for export
-  and explicit reload instead of overwriting concurrent changes.
-- `engine-client.ts` is the only rules-engine boundary. Requests and responses
-  stay serializable and versioned. Never name a provider add-on in runtime
-  policy.
-- The sheet remains fully hand-fillable without services. Every successful
-  Builder mutation materializes computed values into durable fallback fields.
+- `internal/character/model.go` and the engine's public `character` types own
+  the closed stored schema. Generate schemas and TypeScript types through the
+  owning build; unsupported formats fail without partial normalization.
+- The native `internal/character` coordinator is the only persistent character
+  boundary. It authenticates DM commands, previews exact candidates and writes
+  optimistic, idempotent retained revisions. Conflicts preserve browser drafts.
+- `src/character-client.ts` owns browser service, transfer and draft access.
+  Rules-engine calls remain serializable and versioned; runtime policy must
+  never select providers by a sibling add-on ID.
+- Without compatible rules, saved projections, history, notes, print and export
+  remain usable. Mechanical changes require rules; no manual stat fallback.
 - Current HP, inventory, currency, resources, spells, and notes are authored
   play state. Recalculation must preserve them unless a user explicitly edits
   them.
 - Panels and controls do not implement edition-dependent rules. Local math is
-  limited to display helpers such as an ability modifier.
+  limited to formatting. Ability modifiers and all mechanical bounds come from
+  the engine with structured explanations.
 - The removed v2 renderer service must not return as a live object/function or
   raw-HTML boundary. A future renderer contract must be serializable,
   schema-owned, selected by the host, and justified by a real consumer.
@@ -70,7 +71,7 @@ Use the host inspector on the produced ZIP when manifest, contract, or package
 layout changes:
 
 ```powershell
-go run ./cmd/codex-addon-inspect ../addon-dnd-character-sheets/dist/dnd-sheets-3.0.0.zip
+go run ./cmd/codex-addon-inspect ../addon-dnd-character-sheets/dist/dnd-sheets-4.0.0.zip
 ```
 
 Integration uses the staged-package review and activation lifecycle. Source

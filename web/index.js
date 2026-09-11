@@ -1,15 +1,11 @@
-import { connectRulesEngine } from "./engine-client.js";
-import { defineSheetElement } from "./sheet-element.js";
-import { registerRuntime } from "./runtime.js";
-import { SheetRepository } from "./sheet-repository.js";
+import { connectCharacter } from "./character-client.js";
+import { defineCharacterElement } from "./character-element.js";
 export async function activate(context) {
     context.capabilities.require("ui.contributions");
     context.signal.throwIfAborted();
-    const engine = await connectRulesEngine(context);
+    const client = await connectCharacter(context);
     context.signal.throwIfAborted();
-    const repository = new SheetRepository(context.data.recordExtension("characters", "dnd-sheets"), context.signal);
-    const unregister = registerRuntime(context.addon.generation, { repository, engine, connectEngine: signal => connectRulesEngine(context, signal), signal: context.signal });
-    const sheetElementTag = defineSheetElement(context.addon.generation);
+    const sheetElementTag = defineCharacterElement(context.addon.generation, client);
     const binding = context.ui.bind("sheet.section", { kind: "element", tag: sheetElementTag });
     let disposed = false;
     return Object.freeze({
@@ -18,7 +14,6 @@ export async function activate(context) {
                 return;
             disposed = true;
             binding.dispose();
-            unregister();
         },
     });
 }

@@ -5,4 +5,4 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const outputDirectory = resolve(repositoryRoot, "web");
 await mkdir(outputDirectory, { recursive: true });
-await copyFile(resolve(repositoryRoot, "src", "index.css"), resolve(outputDirectory, "index.css"));
+await copyFile(resolve(repositoryRoot, "src", "character.css"), resolve(outputDirectory, "index.css"));
