@@ -68,7 +68,7 @@ export class DraftStore {
     write(inputs, baseRevision) { this.storage.setItem(this.key, JSON.stringify({ version: 1, inputs, baseRevision, updatedAt: new Date().toISOString() })); }
     clear() { this.storage.removeItem(this.key); }
 }
-export const transferLimit = 1000000;
+const transferLimit = 1000000;
 export function exportCharacter(state, history) {
     const body = JSON.stringify({ format: "dnd-character.v1", schemaVersion: "4.0.0", inputs: state.inputs, savedRules: state.rules, savedProjection: state.projection, ...(history ? { externalHistory: history } : {}) }, null, 2);
     if (history && (history.length > 5 || new TextEncoder().encode(body).length > transferLimit))

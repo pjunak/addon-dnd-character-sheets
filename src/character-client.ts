@@ -50,7 +50,7 @@ export class DraftStore {
   write(inputs: Inputs, baseRevision: number): void { this.storage.setItem(this.key, JSON.stringify({ version: 1, inputs, baseRevision, updatedAt: new Date().toISOString() })); }
   clear(): void { this.storage.removeItem(this.key); }
 }
-export const transferLimit = 1000000;
+const transferLimit = 1000000;
 export interface ExternalRevision { revision: number; actorId: string; occurredAt: string; summary: string; state: State }
 export function exportCharacter(state: State, history?: ExternalRevision[]): string {
   const body = JSON.stringify({ format: "dnd-character.v1", schemaVersion: "4.0.0", inputs: state.inputs, savedRules: state.rules, savedProjection: state.projection, ...(history ? { externalHistory: history } : {}) }, null, 2);

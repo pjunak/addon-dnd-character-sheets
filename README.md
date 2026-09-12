@@ -52,13 +52,20 @@ book policy or source package requires explicit review/adoption before play.
 See [failure and restore semantics](docs/RULES_EDGE_CASES.md), the engine's
 [public contract](../addon-dnd-engine/contract/README.md), and the host's
 [retirement procedure](../ttrpg-codex/docs/rewrite/CHARACTER_SHEET_CUTOVER.md).
-The old hand-filled sheet format and engine handlers are retired.
+The package owns both layouts; there is no external renderer service.
+The old hand-filled format is retired. See the
+[character workflow](../ttrpg-codex/docs/rewrite/CHARACTER_BUILD_HISTORY.md) for
+a step-by-step explanation of revisions and rules changes.
 
 ## Development
 
-Use the declared Node toolchain and Go 1.27.1:
+Use Node.js 26 and the Go version in [go.mod](go.mod). Its local module
+replacements expect compatible `ttrpg-codex` and `addon-dnd-engine` checkouts
+beside this repository. This build dependency does not require an installed
+engine at runtime.
 
 ```text
+npm ci
 npm run check
 npm run package
 ```

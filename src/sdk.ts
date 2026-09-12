@@ -1,22 +1,3 @@
-export interface AddonDocument<T> {
-  readonly key: string;
-  readonly revision: number;
-  readonly value: T;
-}
-
-export interface AddonCommitReceipt {
-  readonly results: readonly {
-    readonly dataId: string;
-    readonly key: string;
-    readonly afterRevision: number;
-  }[];
-}
-
-export interface AddonDataHandle<T> {
-  get(key: string, options?: { readonly signal?: AbortSignal }): Promise<AddonDocument<T>>;
-  put(key: string, value: T, expectedRevision: number, options?: { readonly signal?: AbortSignal }): Promise<AddonCommitReceipt>;
-}
-
 export interface ServiceProvider {
   readonly addonId: string;
   readonly contractVersion: string;
@@ -40,7 +21,6 @@ export interface AddonContext {
   readonly capabilities: { require(capability: string): void };
   readonly data: {
     subscribe(listener: (change: { readonly reason: string }) => void, options?: { readonly signal?: AbortSignal }): () => void;
-    recordExtension<T>(target: string, id: string): AddonDataHandle<T>;
   };
   readonly services: {
     connect(contract: string, options: {
