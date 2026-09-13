@@ -75,3 +75,23 @@ Inspect the resulting ZIP from the host with
 The package includes generated web assets and native workers. Source checkout
 edits become visible only after rebuilding and reviewed activation. Current
 integration tests live in the host's installed character/rules/sheets suites.
+
+
+## Install and update from tested commits
+
+Successful main builds publish the inspected ZIP to a permanent
+[commit release](https://github.com/pjunak/addon-dnd-character-sheets/releases). Each release identifies
+the source commit even when the package version is unchanged. CI uses GitHub's
+automatic repository token; it does not deploy to anyone's server.
+
+In your website, open **Settings → Add-ons → Add add-on → GitHub**, enter
+`pjunak/addon-dnd-character-sheets` and use **Latest published package**. For an installed ZIP, use
+**Update source** to link the same repository. **Check for updates** offers the
+latest tested package; **Download and review** leads to explicit permission and
+compatibility review before **Approve and activate**. Publishing never forces
+an update on an installation.
+
+Public release downloads do not require a GitHub token.
+
+Existing Actions-build sources remain supported, but their artifacts expire.
+Switch an existing source to **Latest published package** to use durable releases.
