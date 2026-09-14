@@ -14,7 +14,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	methods := map[string]string{}
-	for _, method := range []string{"load", "evaluate", "preview", "commit", "history", "revision"} {
+	for _, method := range []string{"load", "evaluate", "save", "preview", "commit"} {
 		methods["service/"+character.Contract+"/"+method] = character.Version
 	}
 	err := workerrpc.RunNativeWorker(ctx, workerrpc.NativeWorkerConfig{Reader: os.Stdin, Writer: os.Stdout, Methods: methods, HandlerFactory: workerrpc.NativeWorkerHandlerFactoryFunc(func(worker workerrpc.NativeWorkerContext) (workerrpc.RequestHandler, error) {

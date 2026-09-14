@@ -8,10 +8,9 @@ export type Layout = "compact" | "classic";
 export type EquipmentSlot = "armor" | "shield" | "worn" | "attuned";
 export interface SheetView {
   locale: string; layout: Layout; input: Inputs; projection: Projection | undefined; catalogs: Map<string, CatalogRecord[]>;
-  editing: boolean; canPlay: boolean;
+  editing: boolean; canPlay: boolean; equipment: Record<string, unknown>;
   change(): void; refresh(): void; addItem(): void; fillSlot(slot: EquipmentSlot): void;
   act(change: Record<string, unknown>, summary: string): Promise<void>;
-  review(): Promise<void>;
 }
 function icon(path: string): SVGSVGElement { const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"), shape = document.createElementNS("http://www.w3.org/2000/svg", "path"); svg.setAttribute("viewBox","0 0 24 24"); svg.setAttribute("aria-hidden","true"); shape.setAttribute("d",path); svg.append(shape); return svg; }
 const abilityNames: Record<string, string> = { STR: "Strength", DEX: "Dexterity", CON: "Constitution", INT: "Intelligence", WIS: "Wisdom", CHA: "Charisma" };
@@ -71,11 +70,11 @@ export function vitals(view: SheetView): HTMLElement {
   const t = translator(view.locale), sheet = view.projection?.sheet ?? {}, derived = object(sheet["derived"]), band = styled("div", "dse-vitals");
   const hp = styled("div", "codex-tile dse-hp", styled("span", "dse-stat-label", t("Hit points")));
   const adjust = (operation: string, title: string, initial: number): void => {
-    const area = styled("div", "dse-hp-adjust"), input = numberInput(initial, () => {}, 0);
+    const area = styled("div", "dse-hp-adjust"), input = numberInput(initial, () => {}, 0, operation === "set-hp" ? Number(derived["maxHp"]) : 1000000);
     area.append(field(t("Amount"), input), button(title, async () => { if (input.reportValidity()) await view.act({ operation, amount: input.valueAsNumber }, title); }));
     hp.querySelector(".dse-hp-adjust")?.remove(); hp.append(area); input.focus(); input.select();
   };
-  const current = button(String(view.input.play.hp), () => adjust("set-hp", t("Set hp"), view.input.play.hp), !view.canPlay); current.className = "dse-hp-current"; current.setAttribute("aria-label", t("Set hp")); current.title = t("Set hp");
+  const current = numberInput(view.input.play.hp, value => { view.input.play.hp = value ?? 0; view.change(); }, 0, Number(derived["maxHp"] ?? 0)); current.disabled = !view.canPlay; current.className = "dse-hp-current dse-number"; current.setAttribute("aria-label", t("Current HP"));
   hp.append(styled("div", "dse-counter", current, el("span", "/"), savedRule(view.projection, human(derived["maxHp"]), "derived.maxHp")));
   hp.append(styled("span", "dse-temp", t("Temporary HP {0}", [view.input.play.temporaryHp])));
   const actions = styled("div", "dnd-workflow-controls");
@@ -113,9 +112,10 @@ export function backpack(view: SheetView): HTMLElement {
       const row = styled("div", "dse-item"); row.dataset["item"] = item.id;
       row.append(styled("span", "dse-item-name", savedRule(view.projection, item.name, undefined, item.reference)));
       if (view.editing) {
-        const quantity = numberInput(item.quantity, value => { item.quantity = value ?? 0; view.change(); }, 0); quantity.className = "dse-number"; quantity.setAttribute("aria-label", t("{0} quantity", [item.name]));
-        const attune = button(item.attuned ? "★" : "☆", () => { item.attuned = !item.attuned; view.change(); view.refresh(); }); attune.setAttribute("aria-label", t("Attune {0}", [item.name])); attune.setAttribute("aria-pressed", String(item.attuned));
-        const move = select(item.location, ["equipped", "carried", "stored"].map(id => ({ id, label: t(label(id)) })), value => { if (value) { item.location = value; view.change(); view.refresh(); } }, t); move.className = "dse-item-location"; move.setAttribute("aria-label", t("Move {0}", [item.name]));
+        const quantity = numberInput(item.quantity, value => { item.quantity = value ?? 0; if (item.quantity === 0) item.attuned = false; view.change(); }, 0); quantity.className = "dse-number"; quantity.setAttribute("aria-label", t("{0} quantity", [item.name]));
+        const eligibility = object(view.equipment[item.id]);
+        const attune = button(item.attuned ? "★" : "☆", () => { item.attuned = !item.attuned; view.change(); view.refresh(); }, !item.attuned && eligibility["canAttune"] !== true); attune.setAttribute("aria-label", t("Attune {0}", [item.name])); attune.setAttribute("aria-pressed", String(item.attuned));
+        const move = select(item.location, ["equipped", "carried", "stored"].map(id => ({ id, label: t(label(id)), disabled: id === "equipped" && eligibility["canEquip"] !== true })), value => { if (value) { if (value === "equipped" && ["armor","shield"].includes(String(eligibility["slot"]))) for (const current of view.input.play.inventory) if (current.id !== item.id && object(view.equipment[current.id])["slot"] === eligibility["slot"]) current.location = "carried"; item.location = value; view.change(); view.refresh(); } }, t); move.className = "dse-item-location"; move.setAttribute("aria-label", t("Move {0}", [item.name]));
         const remove = button("×", () => { view.input.play.inventory = view.input.play.inventory.filter(row => row.id !== item.id); view.change(); view.refresh(); }); remove.setAttribute("aria-label", t("Remove {0}", [item.name]));
         row.append(quantity, attune, move, remove);
         const details = styled("details", "dse-item-notes", el("summary", t("Details")));
@@ -136,7 +136,6 @@ export function backpack(view: SheetView): HTMLElement {
     control.className = "dse-number"; control.setAttribute("aria-label", coin.toUpperCase()); coins.append(el("label", el("span", coin.toUpperCase()), control));
   }
   pack.append(coins);
-  if (view.editing) pack.append(button(t("Review inventory changes"), view.review));
   return pack;
 }
 export function combatDetails(view: SheetView): HTMLElement {
@@ -151,7 +150,6 @@ export function combatDetails(view: SheetView): HTMLElement {
     if (view.editing) { const spent = numberInput(view.input.play.resourceUses[key] ?? 0, value => { view.input.play.resourceUses[key] = value ?? 0; view.change(); }, 0, Number(resource["max"])); spent.setAttribute("aria-label", t("{0} — spent / {1}", [name, resource["max"]])); row.append(spent); }
     resources.append(row);
   }
-  if (view.editing) resources.append(button(t("Review counter changes"), view.review));
   for (const activation of rows(sheet["activations"])) { const key = String(activation["key"]), name = String(activation["name"]); resources.append(button(t("{0} {1}", [t(view.input.play.activeFeatures[key] ? "End" : "Activate"), name]), () => view.act({ operation: "toggle-feature", key, enabled: !view.input.play.activeFeatures[key] }, name), !view.canPlay)); }
   const traits = panel(t("Features and traits")); traits.className = "dse-section";
   for (const feature of rows(sheet["features"])) { const id = String(feature["id"]); traits.append(el("details", el("summary", savedRule(view.projection, String(feature["name"] ?? id), undefined, { kind: "feature", id })), el("p", view.projection?.evidence.find(row => row.reference.id === id)?.summary ?? ""))); }

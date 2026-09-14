@@ -21,9 +21,7 @@ import (
 
 type Data interface {
 	Get(context.Context, *workerrpc.Meta, workerrpc.AddonDataReference, string) (workerrpc.AddonDataDocument, error)
-	History(context.Context, *workerrpc.Meta, workerrpc.AddonDataReference, string, int64, int) (workerrpc.AddonHistoryResult, error)
-	Revision(context.Context, *workerrpc.Meta, workerrpc.AddonDataReference, string, int64) (workerrpc.AddonHistoryEntry, error)
-	TransactRecorded(context.Context, *workerrpc.Meta, []workerrpc.AddonDataMutation, workerrpc.RecordedOperation) (workerrpc.AddonDataCommit, error)
+	Transact(context.Context, *workerrpc.Meta, []workerrpc.AddonDataMutation) (workerrpc.AddonDataCommit, error)
 }
 type Engine interface {
 	Call(context.Context, *workerrpc.Meta, workerrpc.ServiceCall) (workerrpc.ServiceResult, error)
@@ -47,52 +45,16 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 		return nil, failure(workerrpc.KindUnauthorized, "An authenticated character editor is required.")
 	}
 	var request Request
-	if len(rpc.Params) > 190000 || decode(rpc.Params, &request) != nil || request.ContractVersion != "character.v1" || request.Key == "" || len(request.Key) > 200 || request.ExpectedRevision < 0 || request.Revision < 0 || request.Before < 0 {
+	if len(rpc.Params) > 190000 || decode(rpc.Params, &request) != nil || request.ContractVersion != "character.v2" || request.Key == "" || len(request.Key) > 200 || request.ExpectedRevision < 0 {
 		return nil, failure(workerrpc.KindInvalidRequest, "Character request is invalid.")
 	}
 	if request.Change != nil && request.Operation != "play" {
 		return nil, failure(workerrpc.KindInvalidRequest, "Play commands require a play operation.")
 	}
-	response := Response{ContractVersion: "character-response.v1", Status: "ready", Key: request.Key, ActorID: rpc.Meta.Actor.ID, Role: rpc.Meta.Actor.Role}
+	response := Response{ContractVersion: "character-response.v2", Status: "ready", Key: request.Key, ActorID: rpc.Meta.Actor.ID, Role: rpc.Meta.Actor.Role}
 	method := strings.TrimPrefix(rpc.Method, "service/"+Contract+"/")
 	switch method {
-	case "history":
-		history, err := c.data.History(ctx, rpc.Meta, reference, request.Key, request.Before, 30)
-		if err != nil {
-			return nil, err
-		}
-		response.History = history.Entries
-		response.NextBefore = history.NextBefore
-		return response, nil
-	case "revision", "compare":
-		entry, err := c.data.Revision(ctx, rpc.Meta, reference, request.Key, request.Revision)
-		if err != nil {
-			return nil, err
-		}
-		var state State
-		if entry.Deleted || decode(entry.Value, &state) != nil || state.SchemaVersion != SchemaVersion {
-			return nil, failure(workerrpc.KindValidationFailed, "This revision is not a current character snapshot.")
-		}
-		response.State = &state
-		response.Revision = entry.Revision
-		if method == "compare" {
-			if request.CompareRevision < 1 {
-				return nil, failure(workerrpc.KindInvalidRequest, "Choose two saved revisions to compare.")
-			}
-			comparison, err := c.data.Revision(ctx, rpc.Meta, reference, request.Key, request.CompareRevision)
-			if err != nil {
-				return nil, err
-			}
-			var after State
-			if comparison.Deleted || decode(comparison.Value, &after) != nil || after.SchemaVersion != SchemaVersion {
-				return nil, failure(workerrpc.KindValidationFailed, "This revision is not a current character snapshot.")
-			}
-			response.Changes = diff(&state, &after)
-			response.State = &after
-			response.Revision = comparison.Revision
-		}
-		return response, nil
-	case "load", "evaluate", "preview", "commit":
+	case "load", "evaluate", "preview", "commit", "save":
 	default:
 		return nil, workerrpc.NewRPCError(workerrpc.JSONRPCMethodNotFound, workerrpc.KindNotFound, "Character method is unavailable.", false, nil)
 	}
@@ -109,10 +71,13 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 	if state != nil {
 		input = state.Inputs
 	}
-	if method == "preview" || method == "evaluate" {
+	if method == "save" && state != nil && state.OperationID == request.OperationID && operationPattern.MatchString(request.OperationID) {
+		return response, nil
+	}
+	if method == "preview" || method == "evaluate" || method == "save" {
 		if request.ExpectedRevision != revision {
 			response.Status = "conflict"
-			response.Message = "The saved character changed. Keep your draft and review it against the latest revision."
+			response.Message = "The character changed in another session. Reload before editing the same values."
 			return response, nil
 		}
 		input, err = c.propose(ctx, rpc.Meta, request, state, input)
@@ -141,12 +106,12 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 			return nil, err
 		}
 		response.Status = "unavailable"
-		response.Message = "Compatible rules are unavailable. The saved revision remains readable, printable and exportable."
+		response.Message = "Compatible rules are unavailable. The saved character remains readable, printable and exportable."
 		return response, nil
 	}
-	// A reduced maximum and its current-HP correction are reviewed atomically.
+	// A reduced maximum and its current-HP correction are saved atomically.
 	// Increasing maximum HP never silently heals the character.
-	if state != nil && (request.Operation == "build" || request.Operation == "restore" || request.Operation == "grant" || request.Operation == "amend-grant" || request.Operation == "revoke-grant" || request.Operation == "adopt-rules") {
+	if state != nil && (request.Operation == "build" || request.Operation == "grant" || request.Operation == "amend-grant" || request.Operation == "revoke-grant" || request.Operation == "adopt-rules") {
 		if derived, ok := evaluation.Evaluation.Sheet["derived"].(map[string]any); ok {
 			if maximum, ok := derived["maxHp"].(float64); ok && maximum >= 0 && input.Play.HP > int(maximum) {
 				input.Play.HP = int(maximum)
@@ -154,6 +119,37 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 				if err != nil {
 					return nil, err
 				}
+			}
+		}
+	}
+	// A changed origin or level can withdraw earlier grants. Remove only
+	// previously saved selections that the engine now marks as unavailable;
+	// a newly supplied illegal option is still rejected.
+	if request.Operation == "build" && state != nil {
+		for pass := 0; pass < 4; pass++ {
+			invalid := map[string]bool{}
+			for _, issue := range evaluation.Evaluation.Issues {
+				if strings.HasPrefix(issue.ID, "unavailable-choice:") || strings.HasPrefix(issue.ID, "invalid-option:") {
+					invalid[issue.Target] = true
+				}
+			}
+			kept := []model.Choice{}
+			for _, choice := range input.Build.Choices {
+				previous := false
+				for _, old := range state.Inputs.Build.Choices {
+					previous = previous || reflect.DeepEqual(old, choice)
+				}
+				if !invalid[choice.ID] || !previous {
+					kept = append(kept, choice)
+				}
+			}
+			if len(kept) == len(input.Build.Choices) {
+				break
+			}
+			input.Build.Choices = kept
+			evaluation, rules, err = c.evaluate(ctx, rpc.Meta, input, nil)
+			if err != nil {
+				return nil, err
 			}
 		}
 	}
@@ -168,22 +164,28 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 	}
 	next := State{SchemaVersion: SchemaVersion, Inputs: evaluation.Evaluation.Inputs, Projection: Projection{Sheet: evaluation.Evaluation.Sheet, Explanations: evaluation.Evaluation.Explanations, Evidence: evaluation.Evaluation.Evidence, Issues: evaluation.Evaluation.Issues}, Rules: rules, OperationID: request.OperationID}
 	// Document limits include the saved explanation/evidence, not the transient
-	// catalogs and builder guidance. Never silently truncate character history.
+	// catalogs and builder guidance.
 	if len(raw(next)) > 250000 {
 		response.Status = "invalid"
 		response.Message = "This character snapshot exceeds the storage limit. Reduce authored notes or inventory before committing."
 		return response, nil
 	}
 	response.Changes = diff(state, &next)
-	if !evaluation.Evaluation.Ready {
+	if !saveable(evaluation.Evaluation) {
 		response.Status = "invalid"
-		response.Message = "Resolve the highlighted choices and bounds before saving."
+		response.Message = "This change is outside the character rules."
 		return response, nil
 	}
 	if response.RulesChanged && !request.AdoptRules {
 		response.Status = "rules-changed"
 		response.Message = "Rules or allowed sources changed. Review and explicitly adopt this rules revision."
 		return response, nil
+	}
+	if method == "save" {
+		if request.Operation == "import" {
+			return response, failure(workerrpc.KindInvalidRequest, "Imports require replacement review.")
+		}
+		return c.persist(ctx, rpc.Meta, request.Key, revision, next, response)
 	}
 	token, err := randomID()
 	if err != nil {
@@ -213,14 +215,6 @@ func (c *Coordinator) load(ctx context.Context, meta *workerrpc.Meta, key string
 	if err != nil {
 		var rpc *workerrpc.RPCError
 		if errors.As(err, &rpc) && rpc.Data != nil && rpc.Data.Kind == workerrpc.KindNotFound {
-			// A missing extension is not proof that its core record is visible/existing.
-			history, accessErr := c.data.History(ctx, meta, reference, key, 0, 1)
-			if accessErr != nil {
-				return nil, 0, accessErr
-			}
-			if len(history.Entries) > 0 {
-				return nil, 0, failure(workerrpc.KindConflict, "This character head was deleted. Restore it through campaign recovery before editing.")
-			}
 			return nil, 0, nil
 		}
 		return nil, 0, err
@@ -259,7 +253,7 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 		}
 		if r.Inputs != nil {
 			if !equalGrants(input.Grants, r.Inputs.Grants) {
-				return input, failure(workerrpc.KindUnauthorized, "The draft cannot introduce previously unauthorized grants.")
+				return input, failure(workerrpc.KindUnauthorized, "This edit cannot introduce previously unauthorized grants.")
 			}
 			input = *r.Inputs
 		}
@@ -272,8 +266,10 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 			found := false
 			for index := range input.Grants {
 				if input.Grants[index].ID == r.GrantID && input.Grants[index].Active {
-					input.Grants[index].Active = false
+					grant.ID = r.GrantID
+					input.Grants = append(input.Grants[:index], input.Grants[index+1:]...)
 					found = true
+					break
 				}
 			}
 			if !found {
@@ -303,46 +299,13 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 		found := false
 		for index := range input.Grants {
 			if input.Grants[index].ID == r.GrantID {
-				input.Grants[index].Active = false
+				input.Grants = append(input.Grants[:index], input.Grants[index+1:]...)
 				found = true
+				break
 			}
 		}
 		if !found {
 			return input, failure(workerrpc.KindNotFound, "This grant was not found.")
-		}
-	case "restore":
-		entry, err := c.data.Revision(ctx, meta, reference, r.Key, r.Revision)
-		if err != nil {
-			return input, err
-		}
-		var previous State
-		if entry.Deleted || decode(entry.Value, &previous) != nil || previous.SchemaVersion != SchemaVersion {
-			return input, failure(workerrpc.KindValidationFailed, "Only current character snapshots can be restored.")
-		}
-		switch r.RestoreScope {
-		case "", "build":
-			acquisitions := input.Build.Spells.Acquisitions
-			input.Build = previous.Inputs.Build
-			input.Build.Spells.Acquisitions = acquisitions
-			for _, acquisition := range acquisitions {
-				if input.Build.Spells.Spellbook == nil {
-					input.Build.Spells.Spellbook = map[string][]string{}
-				}
-				found := false
-				for _, id := range input.Build.Spells.Spellbook[acquisition.ClassID] {
-					found = found || id == acquisition.SpellID
-				}
-				if !found {
-					input.Build.Spells.Spellbook[acquisition.ClassID] = append(input.Build.Spells.Spellbook[acquisition.ClassID], acquisition.SpellID)
-				}
-			}
-			input.Grants = previous.Inputs.Grants
-		case "play":
-			input.Play = previous.Inputs.Play
-		case "complete":
-			input = previous.Inputs
-		default:
-			return input, failure(workerrpc.KindInvalidRequest, "Choose build, play or complete restoration.")
 		}
 	case "import":
 		if r.Inputs == nil {
@@ -388,18 +351,16 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 			grants = base.Inputs.Grants
 		}
 		if !equalGrants(grants, input.Grants) {
-			if r.Operation != "restore" || meta.Actor.Role != "dm" || !r.ReauthorizeGrants {
-				return input, failure(workerrpc.KindUnauthorized, "DM grants can only change through a DM grant, revocation, or explicitly authorized restore.")
-			}
+			return input, failure(workerrpc.KindUnauthorized, "DM grants require a DM grant command.")
 		}
 	}
-	if r.Operation != "restore" && r.Operation != "import" {
+	if r.Operation != "import" {
 		previous := model.Blank()
 		if base != nil {
 			previous = base.Inputs
 		}
 		if !bytes.Equal(raw(input.Play.Rolls), raw(previous.Play.Rolls)) || !bytes.Equal(raw(input.Build.Spells.Acquisitions), raw(previous.Build.Spells.Acquisitions)) || !bytes.Equal(raw(input.Build.Spells.Swaps), raw(previous.Build.Spells.Swaps)) {
-			return input, failure(workerrpc.KindUnauthorized, "Recorded play rolls and spell acquisitions can only change through their play commands or an explicit restoration.")
+			return input, failure(workerrpc.KindUnauthorized, "Recorded play rolls and spell acquisitions can only change through their play commands.")
 		}
 	}
 	return input, nil
@@ -432,7 +393,7 @@ func (c *Coordinator) commit(ctx context.Context, meta *workerrpc.Meta, r Reques
 	p, ok := c.previews[r.Token]
 	c.mu.Unlock()
 	if !ok || !c.now().Before(p.Expires) || p.ActorID != meta.Actor.ID || p.Role != meta.Actor.Role || p.Generation != meta.Generation || p.Key != r.Key || p.OperationID != r.OperationID {
-		return response, failure(workerrpc.KindConflict, "This review expired or belongs to another session. Keep the draft and review again.")
+		return response, failure(workerrpc.KindConflict, "This review expired or belongs to another session. Review again.")
 	}
 	// A confirmed repeated commit returns the saved result without replaying it.
 	if response.State != nil && response.State.OperationID == p.OperationID {
@@ -440,7 +401,7 @@ func (c *Coordinator) commit(ctx context.Context, meta *workerrpc.Meta, r Reques
 	}
 	if response.Revision != p.Revision || r.ExpectedRevision != p.Revision {
 		response.Status = "conflict"
-		response.Message = "The character changed since this review. Your draft is preserved."
+		response.Message = "The character changed since this review."
 		return response, nil
 	}
 	for _, grant := range p.State.Inputs.Grants {
@@ -456,24 +417,29 @@ func (c *Coordinator) commit(ctx context.Context, meta *workerrpc.Meta, r Reques
 		if err != nil {
 			return response, err
 		}
-		if !reflect.DeepEqual(rules, p.State.Rules) || !evaluation.Evaluation.Ready || !reflect.DeepEqual(raw(evaluation.Evaluation.Sheet), raw(p.State.Projection.Sheet)) {
+		if !reflect.DeepEqual(rules, p.State.Rules) || !saveable(evaluation.Evaluation) || !reflect.DeepEqual(raw(evaluation.Evaluation.Sheet), raw(p.State.Projection.Sheet)) {
 			response.Status = "rules-changed"
 			response.Message = "Rules changed during review. Review the character again."
 			return response, nil
 		}
 	}
-	receipt, err := c.data.TransactRecorded(ctx, meta, []workerrpc.AddonDataMutation{{Operation: "put", Reference: reference, Key: p.Key, ExpectedRevision: p.Revision, Value: p.State}}, workerrpc.RecordedOperation{ID: p.OperationID, Operation: "character." + p.Operation, Summary: p.Summary})
+	return c.persist(ctx, meta, p.Key, p.Revision, p.State, response)
+}
+func saveable(result model.Result) bool { return result.Ready || result.Guidance["canSave"] == true }
+func (c *Coordinator) persist(ctx context.Context, meta *workerrpc.Meta, key string, revision int64, state State, response Response) (Response, error) {
+	receipt, err := c.data.Transact(ctx, meta, []workerrpc.AddonDataMutation{{Operation: "put", Reference: reference, Key: key, ExpectedRevision: revision, Value: state}})
 	if err != nil {
 		return response, err
 	}
 	if len(receipt.Results) != 1 {
-		return response, errors.New("invalid character commit receipt")
+		return response, errors.New("invalid character save receipt")
 	}
 	response.Revision = receipt.Results[0].AfterRevision
-	response.State = &p.State
-	response.Message = "Character revision saved."
+	response.State = &state
+	response.Message = "Saved"
 	return response, nil
 }
+
 func equalGrants(a, b []model.Grant) bool {
 	if len(a) == 0 && len(b) == 0 {
 		return true

@@ -30,5 +30,5 @@ export function grantForm(input: Inputs, evaluation: Result | undefined, feats: 
     field(t("Condition"), select(grant.condition, ["always", "equipped", "attuned"].map(id => ({ id, label: t(label(id)) })), value => { grant.condition = value; }, t)),
     field(t("Item instance"), select(grant.itemId ?? "", input.play.inventory.map(item => ({ id: item.id, label: item.name })), value => { grant.itemId = value; }, t)),
     field(t("Expires at (RFC 3339, optional)"), textInput(grant.expiresAt ?? "", value => { grant.expiresAt = value; })),
-    button(t("Review DM grant"), () => { if (!name.reportValidity() || !reason.reportValidity()) return; return submit(grant); })];
+    button(t("Apply DM grant"), () => { if (!name.reportValidity() || !reason.reportValidity()) return; return submit(grant); })];
 }

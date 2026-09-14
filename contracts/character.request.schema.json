@@ -4,11 +4,6 @@
     "adoptRules": {
       "type": "boolean"
     },
-    "before": {
-      "maximum": 1000000,
-      "minimum": -1000000,
-      "type": "integer"
-    },
     "change": {
       "additionalProperties": {},
       "maxProperties": 1000,
@@ -16,11 +11,6 @@
         "object",
         "null"
       ]
-    },
-    "compareRevision": {
-      "maximum": 1000000,
-      "minimum": -1000000,
-      "type": "integer"
     },
     "contractVersion": {
       "maxLength": 30000,
@@ -887,15 +877,6 @@
     },
     "reauthorizeGrants": {
       "type": "boolean"
-    },
-    "restoreScope": {
-      "maxLength": 30000,
-      "type": "string"
-    },
-    "revision": {
-      "maximum": 1000000,
-      "minimum": -1000000,
-      "type": "integer"
     },
     "summary": {
       "maxLength": 30000,

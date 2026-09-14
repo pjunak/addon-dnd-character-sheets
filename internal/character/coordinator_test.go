@@ -14,7 +14,6 @@ type memoryData struct {
 	state     *State
 	revision  int64
 	writes    int
-	history   []workerrpc.AddonHistoryEntry
 	forbidden bool
 }
 
@@ -27,24 +26,7 @@ func (data *memoryData) Get(_ context.Context, _ *workerrpc.Meta, _ workerrpc.Ad
 	}
 	return workerrpc.AddonDataDocument{Key: key, Revision: data.revision, Value: raw(data.state)}, nil
 }
-func (data *memoryData) History(context.Context, *workerrpc.Meta, workerrpc.AddonDataReference, string, int64, int) (workerrpc.AddonHistoryResult, error) {
-	if data.forbidden {
-		return workerrpc.AddonHistoryResult{}, failure(workerrpc.KindUnauthorized, "hidden character")
-	}
-	return workerrpc.AddonHistoryResult{Entries: data.history}, nil
-}
-func (data *memoryData) Revision(_ context.Context, _ *workerrpc.Meta, _ workerrpc.AddonDataReference, _ string, revision int64) (workerrpc.AddonHistoryEntry, error) {
-	if data.forbidden {
-		return workerrpc.AddonHistoryEntry{}, failure(workerrpc.KindUnauthorized, "hidden character")
-	}
-	for _, entry := range data.history {
-		if entry.Revision == revision {
-			return entry, nil
-		}
-	}
-	return workerrpc.AddonHistoryEntry{}, failure(workerrpc.KindNotFound, "missing")
-}
-func (data *memoryData) TransactRecorded(_ context.Context, meta *workerrpc.Meta, mutations []workerrpc.AddonDataMutation, operation workerrpc.RecordedOperation) (workerrpc.AddonDataCommit, error) {
+func (data *memoryData) Transact(_ context.Context, _ *workerrpc.Meta, mutations []workerrpc.AddonDataMutation) (workerrpc.AddonDataCommit, error) {
 	m := mutations[0]
 	if m.ExpectedRevision != data.revision {
 		return workerrpc.AddonDataCommit{}, failure(workerrpc.KindConflict, "changed")
@@ -53,11 +35,11 @@ func (data *memoryData) TransactRecorded(_ context.Context, meta *workerrpc.Meta
 	data.state = &state
 	data.revision++
 	data.writes++
-	data.history = append(data.history, workerrpc.AddonHistoryEntry{Revision: data.revision, ActorID: meta.Actor.ID, Operation: operation.Operation, OperationID: operation.ID, Value: raw(state)})
 	return workerrpc.AddonDataCommit{Results: []workerrpc.AddonDataMutationResult{{AfterRevision: data.revision}}}, nil
 }
 
 type fakeEngine struct {
+	inspect     func(model.Inputs) []model.Issue
 	generation  string
 	unavailable bool
 	invalid     bool
@@ -70,6 +52,10 @@ func (engine *fakeEngine) Call(_ context.Context, _ *workerrpc.Meta, call worker
 	params := call.Params.(map[string]any)
 	input := params["inputs"].(model.Inputs)
 	result := evaluated{ContractVersion: "rules-character-response.v1", Identity: map[string]any{"rulesetId": "synthetic"}, Policy: map[string]any{}, Evaluation: model.Result{ContractVersion: model.ContractVersion, Inputs: input, Ready: !engine.invalid, Sheet: map[string]any{"notesLength": len(input.Notes)}, Evidence: []model.Evidence{}, Explanations: map[string]model.Explanation{}, Issues: []model.Issue{}}}
+	if engine.inspect != nil {
+		result.Evaluation.Issues = engine.inspect(input)
+		result.Evaluation.Ready = len(result.Evaluation.Issues) == 0
+	}
 	return workerrpc.ServiceResult{ProviderAddonID: "synthetic-engine", ProviderContractVersion: "4.0.0", ProviderGeneration: engine.generation, Result: raw(result)}, nil
 }
 func fixture(t *testing.T) (*Coordinator, *memoryData, *fakeEngine, *workerrpc.Meta) {
@@ -83,7 +69,7 @@ func fixture(t *testing.T) (*Coordinator, *memoryData, *fakeEngine, *workerrpc.M
 }
 func invoke(t *testing.T, c *Coordinator, meta *workerrpc.Meta, method string, r Request) (Response, error) {
 	t.Helper()
-	r.ContractVersion = "character.v1"
+	r.ContractVersion = "character.v2"
 	r.Key = "hero"
 	value, err := c.HandleRPC(context.Background(), workerrpc.Request{Method: "service/" + Contract + "/" + method, Params: raw(r), Meta: meta})
 	if err != nil {
@@ -122,38 +108,7 @@ func TestReviewedCommitIsActorBoundAndRetrySafe(t *testing.T) {
 	if err != nil || again.Revision != 1 || data.writes != 1 {
 		t.Fatal("retry duplicated revision")
 	}
-	if data.history[0].ActorID != "player-one" || data.history[0].Operation != "character.build" {
-		t.Fatal("missing authoritative provenance")
-	}
-}
 
-func TestHistoricalComparisonIsReadOnlyAndWorksWithoutRules(t *testing.T) {
-	c, data, engine, meta := fixture(t)
-	input := model.Blank()
-	for index, notes := range []string{"Before", "After"} {
-		input.Notes = notes
-		r := Request{ExpectedRevision: int64(index), Operation: "build", OperationID: "compare-" + notes, Summary: notes, Inputs: &input}
-		p := review(t, c, meta, r)
-		if _, err := invoke(t, c, meta, "commit", Request{ExpectedRevision: int64(index), OperationID: r.OperationID, Token: p.Token}); err != nil {
-			t.Fatal(err)
-		}
-	}
-	engine.unavailable = true
-	compared, err := invoke(t, c, meta, "compare", Request{Revision: 1, CompareRevision: 2})
-	if err != nil || compared.State.Inputs.Notes != "After" || data.writes != 2 {
-		t.Fatalf("comparison: %+v %v", compared, err)
-	}
-	found := false
-	for _, change := range compared.Changes {
-		found = found || change.Path == "/inputs/notes" && change.Before == "Before" && change.After == "After"
-	}
-	if !found {
-		t.Fatal("missing semantic difference")
-	}
-	data.forbidden = true
-	if _, err := invoke(t, c, meta, "compare", Request{Revision: 1, CompareRevision: 2}); err == nil {
-		t.Fatal("hidden history was accessible")
-	}
 }
 
 func TestDMAmendmentRecordsNewAuthorityAndExpiryInvalidatesReview(t *testing.T) {
@@ -178,7 +133,7 @@ func TestDMAmendmentRecordsNewAuthorityAndExpiryInvalidatesReview(t *testing.T) 
 	if _, err := invoke(t, c, meta, "commit", Request{ExpectedRevision: 2, OperationID: "amend-reward", Token: p.Token}); err != nil {
 		t.Fatal(err)
 	}
-	if len(data.state.Inputs.Grants) != 2 || data.state.Inputs.Grants[0].Active || data.state.Inputs.Grants[1].ID == original.ID || data.state.Inputs.Grants[1].ActorID != meta.Actor.ID {
+	if len(data.state.Inputs.Grants) != 1 || !data.state.Inputs.Grants[0].Active || data.state.Inputs.Grants[0].ID != original.ID || data.state.Inputs.Grants[0].ActorID != meta.Actor.ID {
 		t.Fatal("amendment lost original authority or reward")
 	}
 	input = data.state.Inputs
@@ -257,38 +212,11 @@ func TestHiddenCoreAndUnknownFieldsRejected(t *testing.T) {
 	if _, err := invoke(t, c, meta, "load", Request{}); err == nil {
 		t.Fatal("hidden core exposed")
 	}
-	_, err := c.HandleRPC(context.Background(), workerrpc.Request{Method: "service/" + Contract + "/preview", Meta: meta, Params: json.RawMessage(`{"contractVersion":"character.v1","key":"hero","admin":true}`)})
+	_, err := c.HandleRPC(context.Background(), workerrpc.Request{Method: "service/" + Contract + "/preview", Meta: meta, Params: json.RawMessage(`{"contractVersion":"character.v2","key":"hero","admin":true}`)})
 	if err == nil {
 		t.Fatal("unknown request accepted")
 	}
 }
-func TestRestoreAppendsWithoutRewritingHistory(t *testing.T) {
-	c, data, _, meta := fixture(t)
-	input := model.Blank()
-	input.Notes = "first"
-	p := review(t, c, meta, Request{Operation: "build", OperationID: "operation-one", Summary: "First", Inputs: &input})
-	_, err := invoke(t, c, meta, "commit", Request{Token: p.Token, OperationID: "operation-one"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	first := append([]byte(nil), data.history[0].Value...)
-	input = data.state.Inputs
-	input.Notes = "second"
-	p = review(t, c, meta, Request{Operation: "notes", OperationID: "operation-two", Summary: "Second", Inputs: &input, ExpectedRevision: 1})
-	_, err = invoke(t, c, meta, "commit", Request{Token: p.Token, OperationID: "operation-two", ExpectedRevision: 1})
-	if err != nil {
-		t.Fatal(err)
-	}
-	p = review(t, c, meta, Request{Operation: "restore", RestoreScope: "complete", OperationID: "operation-restore", Summary: "Restore first", Revision: 1, ExpectedRevision: 2})
-	_, err = invoke(t, c, meta, "commit", Request{Token: p.Token, OperationID: "operation-restore", ExpectedRevision: 2})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if data.revision != 3 || data.state.Inputs.Notes != "first" || !reflect.DeepEqual(first, []byte(data.history[0].Value)) {
-		t.Fatal("restore rewrote history")
-	}
-}
-
 func TestNewCharactersCannotForgePlayLedger(t *testing.T) {
 	c, _, _, meta := fixture(t)
 	for _, mutate := range []func(*model.Inputs){
@@ -336,28 +264,6 @@ func TestNotesRemainWritableWithoutRulesAndDoNotChangeProjection(t *testing.T) {
 	}
 }
 
-func TestRestoreDefaultsToBuildAndPreservesCurrentPlay(t *testing.T) {
-	c, data, _, meta := fixture(t)
-	old := State{SchemaVersion: SchemaVersion, Inputs: model.Blank()}
-	old.Inputs.Build.Species = "previous-species"
-	old.Inputs.Play.HP = 5
-	old.Inputs.Notes = "old notes"
-	data.history = []workerrpc.AddonHistoryEntry{{Revision: 1, Value: raw(old)}}
-	current := State{SchemaVersion: SchemaVersion, Inputs: model.Blank()}
-	current.Inputs.Build.Species = "current-species"
-	current.Inputs.Play.HP = 2
-	current.Inputs.Notes = "current notes"
-	current.Inputs.Play.Inventory = []model.Item{{ID: "bought-item", Name: "Rope", Quantity: 1}}
-	current.Inputs.Build.Spells.Acquisitions = []model.SpellAcquisition{{ID: "copied-afterward", ClassID: "mage", SpellID: "paid-copy"}}
-	next, err := c.propose(context.Background(), meta, Request{Operation: "restore", Key: "hero", Revision: 1}, &current, current.Inputs)
-	if err != nil || next.Build.Species != "previous-species" || !reflect.DeepEqual(next.Play, current.Inputs.Play) || next.Notes != "current notes" {
-		t.Fatalf("build restore rewound play: %+v %v", next, err)
-	}
-	if len(next.Build.Spells.Acquisitions) != 1 || !reflect.DeepEqual(next.Build.Spells.Spellbook["mage"], []string{"paid-copy"}) {
-		t.Fatal("build restoration erased a paid spell acquisition")
-	}
-}
-
 func TestImportedGrantItemReferencesAreRemapped(t *testing.T) {
 	c, _, _, meta := fixture(t)
 	meta.Actor.Role = "dm"
@@ -367,5 +273,66 @@ func TestImportedGrantItemReferencesAreRemapped(t *testing.T) {
 	next, err := c.propose(context.Background(), meta, Request{Operation: "import", OperationID: "import-operation", Inputs: &input, ReauthorizeGrants: true}, nil, model.Blank())
 	if err != nil || next.Play.Inventory[0].GrantID != next.Grants[0].ID || next.Grants[0].ActorID != meta.Actor.ID {
 		t.Fatalf("imported grant lost ownership: %+v %v", next, err)
+	}
+}
+
+func TestAutosaveUsesCurrentStateAndRejectsHistory(t *testing.T) {
+	c, data, engine, meta := fixture(t)
+	input := model.Blank()
+	request := Request{Operation: "build", OperationID: "automatic-save", Summary: "Update character", Inputs: &input}
+	saved, err := invoke(t, c, meta, "save", request)
+	if err != nil || saved.Revision != 1 || data.writes != 1 {
+		t.Fatalf("save: %+v %v", saved, err)
+	}
+	again, err := invoke(t, c, meta, "save", request)
+	if err != nil || again.Revision != 1 || data.writes != 1 {
+		t.Fatal("retry repeated write", err)
+	}
+	for _, method := range []string{"history", "revision", "compare"} {
+		if _, err := invoke(t, c, meta, method, Request{}); err == nil {
+			t.Fatal("removed method remained callable", method)
+		}
+	}
+	stale, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "stale-save", Summary: "Stale", Inputs: &input})
+	if err != nil || stale.Status != "conflict" || data.writes != 1 {
+		t.Fatal("stale save wrote", stale, err)
+	}
+	engine.invalid = true
+	invalid, err := invoke(t, c, meta, "save", Request{Operation: "build", ExpectedRevision: 1, OperationID: "invalid-save", Summary: "Invalid", Inputs: &input})
+	if err != nil || invalid.Status != "invalid" || data.writes != 1 {
+		t.Fatal("invalid save wrote", invalid, err)
+	}
+	if _, err := invoke(t, c, meta, "save", Request{Operation: "restore", ExpectedRevision: 1, OperationID: "removed-restore", Summary: "Restore"}); err == nil {
+		t.Fatal("restore remained available")
+	}
+}
+
+func TestRetroactiveOriginEditWithdrawsOnlyPreviouslySavedChoices(t *testing.T) {
+	c, data, engine, meta := fixture(t)
+	input := model.Blank()
+	input.Build.Species = "old-origin"
+	input.Build.Choices = []model.Choice{{ID: "origin-choice", Value: json.RawMessage(`"old-option"`)}}
+	saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "original-origin", Summary: "Origin", Inputs: &input})
+	if err != nil || saved.Status != "ready" {
+		t.Fatal(saved, err)
+	}
+	engine.inspect = func(input model.Inputs) []model.Issue {
+		for _, choice := range input.Build.Choices {
+			if choice.ID == "origin-choice" && input.Build.Species != "old-origin" {
+				return []model.Issue{{ID: "unavailable-choice:origin-choice/0", Target: "origin-choice", Severity: "blocker"}}
+			}
+		}
+		return nil
+	}
+	input.Build.Species = "new-origin"
+	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "changed-origin", Summary: "Origin", Inputs: &input, ExpectedRevision: 1})
+	if err != nil || saved.Status != "ready" || len(data.state.Inputs.Build.Choices) != 0 {
+		t.Fatal("withdrawn choice blocked retroactive edit", saved, err)
+	}
+	input = data.state.Inputs
+	input.Build.Choices = []model.Choice{{ID: "origin-choice", Value: json.RawMessage(`"forged-option"`)}}
+	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "illegal-new-choice", Summary: "Origin", Inputs: &input, ExpectedRevision: 2})
+	if err != nil || saved.Status != "invalid" || data.writes != 2 {
+		t.Fatal("new illegal choice was silently accepted", saved, err)
 	}
 }

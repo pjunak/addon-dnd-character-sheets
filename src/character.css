@@ -11,8 +11,8 @@
 .addon-dnd-sheets *, .addon-dnd-sheets *::before, .addon-dnd-sheets *::after { box-sizing:border-box; }
 .addon-dnd-sheets button, .addon-dnd-sheets input, .addon-dnd-sheets select, .addon-dnd-sheets textarea { font:inherit; color:inherit; }
 .addon-dnd-sheets input, .addon-dnd-sheets select, .addon-dnd-sheets textarea { min-width:0; max-width:100%; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--bg-raised); padding:var(--space-1) var(--space-2); }
-.addon-dnd-sheets input[type=number] { appearance:textfield; }
-.addon-dnd-sheets input[type=number]::-webkit-inner-spin-button { appearance:none; }
+.addon-dnd-sheets input[type=number] { appearance:auto; }
+.addon-dnd-sheets input[type=number]::-webkit-inner-spin-button { opacity:1; }
 .addon-dnd-sheets button { cursor:pointer; }
 .addon-dnd-sheets button:disabled { cursor:default; }
 .addon-dnd-sheets :is(button,input,select,textarea):focus-visible { outline:2px solid var(--accent-gold); outline-offset:2px; }
@@ -321,3 +321,38 @@
 .addon-dnd-character .dse-counter .dse-hp-current { font-size:1.7rem; font-weight:700; background:transparent; border:0; border-bottom:1px dotted var(--accent-gold); padding:0 .2rem; }
 .addon-dnd-character .dse-counter .dse-hp-current:disabled { opacity:1; border-bottom-color:transparent; }
 .addon-dnd-character .dse-build-level > codex-addon-rule-details { display:block; margin-block:.5rem; }
+/* Editable controls share the host palette and stay within narrow panels. */
+.addon-dnd-character { width:100%; min-width:0; }
+.dnd-sheet-shell { gap:.65rem; }
+.dnd-sheet-heading h2 { font-size:1.1rem; }
+.dnd-sheet-heading p, .dnd-save-status { font-size:.8rem; color:var(--text-muted); }
+.dse-builder-shell { grid-template-columns:minmax(0,1fr); gap:.6rem; }
+.dse-build-rail { position:static; box-shadow:none; }
+.dse-build-progress-head { display:flex; gap:.8rem; align-items:center; padding:.5rem .75rem; flex-wrap:wrap; }
+.dse-build-progress-head progress { width:8rem; }
+.dse-build-rail:not([open]) .dse-build-progress-head { margin:0; }
+.dnd-builder-tabs { overflow-x:auto; min-width:0; }
+.dnd-builder-tabs button { white-space:nowrap; flex-shrink:0; }
+.character-build { display:grid; gap:.75rem; }
+.addon-dnd-character .character-build > .character-panel { margin:0; padding:.85rem; }
+.character-foundation { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; }
+.character-foundation > h3, .character-foundation > .character-stats, .character-foundation > .dnd-builder-progress { grid-column:1/-1; }
+.character-stepper { display:flex; min-width:0; align-items:stretch; }
+.character-stepper input { width:100%; text-align:center; font-size:1.25rem; appearance:textfield!important; border-radius:4px 0 0 4px; }
+.character-stepper input::-webkit-inner-spin-button { appearance:none; }
+.character-stepper-arrows { display:grid; }
+.character-stepper-arrows button { min-height:1.5rem; padding:0 .65rem; border-radius:0; line-height:1; background:var(--bg-raised); border:1px solid var(--border-subtle); }
+.character-stepper-arrows button:disabled { opacity:.35; }
+.character-combo { position:relative; display:flex; min-width:0; }
+.character-combo > input { width:100%; padding-right:2.5rem; }
+.character-combo > button { position:absolute; right:0; inset-block:0; padding:.25rem .65rem; border:0; background:transparent; }
+.character-combo-menu { position:absolute; inset-inline:0; top:100%; z-index:30; background:var(--bg-raised,#211c16); border:1px solid var(--accent-gold); border-radius:4px; box-shadow:0 .5rem 1rem #0006; }
+.character-combo-menu[hidden], .character-option-hint[hidden] { display:none; }
+.character-combo-options { max-height:16rem; overflow-y:auto; overscroll-behavior:contain; }
+.character-combo-options [role=option] { padding:.6rem .7rem; cursor:pointer; overflow-wrap:anywhere; }
+.character-combo-options [role=option].is-active { background:rgba(var(--accent-gold-rgb),.2); }
+.character-combo-options [aria-disabled=true] { opacity:.45; cursor:default; }
+.character-option-hint { padding:.65rem; border-top:1px solid var(--border-subtle); max-height:8rem; overflow:hidden; font-size:.8rem; color:var(--text-muted); white-space:pre-line; pointer-events:none; }
+.character-field > label { display:block; margin-bottom:.3rem; }
+.character-field textarea { width:100%; min-height:16rem; }
+@media(max-width:550px) { .character-foundation { grid-template-columns:1fr; } .character-stepper-arrows button { min-height:1.7rem; padding:0 .8rem; } }

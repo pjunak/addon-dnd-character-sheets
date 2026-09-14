@@ -20,8 +20,8 @@ export class CharacterClient {
         this.subscribe = subscribe;
     }
     async call(method, request) {
-        const result = await this.service.call(method, { ...request, contractVersion: "character.v1" }, { providerAddonId: this.providerId, deadlineMs: 30000, signal: this.signal });
-        if (result.contractVersion !== "character-response.v1" || result.key !== request.key)
+        const result = await this.service.call(method, { ...request, contractVersion: "character.v2" }, { providerAddonId: this.providerId, deadlineMs: 30000, signal: this.signal });
+        if (result.contractVersion !== "character-response.v2" || result.key !== request.key)
             throw new Error("The character service returned an incompatible response.");
         return result;
     }
@@ -42,75 +42,55 @@ export class CharacterClient {
 }
 export async function connectCharacter(context) {
     const [service, engine] = await Promise.all([
-        context.services.connect("dnd5e.character", { range: "^1.0.0", cardinality: "many", includeOwn: true, signal: context.signal }),
+        context.services.connect("dnd5e.character", { range: "^2.0.0", cardinality: "many", includeOwn: true, signal: context.signal }),
         context.services.connect("dnd5e.rules-engine", { range: "^4.0.0", cardinality: "one", signal: context.signal }),
     ]);
     if (!service.providers.some(provider => provider.addonId === context.addon.id))
         throw new Error("The character worker is unavailable.");
     return new CharacterClient(service, context.addon.id, engine, context.signal, context.data.subscribe);
 }
-export class DraftStore {
-    storage;
-    key;
-    constructor(actor, character, storage = localStorage) {
-        this.storage = storage;
-        this.key = `dnd-character-draft.v1:${location.origin}:${actor}:${character}`;
-    }
-    read() {
-        const body = this.storage.getItem(this.key);
-        if (body === null)
-            return undefined;
-        const value = JSON.parse(body);
-        if (value.version !== 1 || !Number.isSafeInteger(value.baseRevision) || !value.inputs?.build || !value.inputs.play)
-            throw new Error("The saved draft cannot be read. Export it before clearing local storage.");
-        return value;
-    }
-    write(inputs, baseRevision) { this.storage.setItem(this.key, JSON.stringify({ version: 1, inputs, baseRevision, updatedAt: new Date().toISOString() })); }
-    clear() { this.storage.removeItem(this.key); }
-}
 const transferLimit = 1000000;
-export function exportCharacter(state, history) {
-    const body = JSON.stringify({ format: "dnd-character.v1", schemaVersion: "4.0.0", inputs: state.inputs, savedRules: state.rules, savedProjection: state.projection, ...(history ? { externalHistory: history } : {}) }, null, 2);
-    if (history && (history.length > 5 || new TextEncoder().encode(body).length > transferLimit))
-        throw new Error("This history archive exceeds the transfer limit. Export fewer revisions; full installation backups retain all history.");
+export function exportCharacter(state) {
+    const body = JSON.stringify({ format: "dnd-character.v1", schemaVersion: "4.0.0", inputs: state.inputs, savedRules: state.rules, savedProjection: state.projection }, null, 2);
+    if (new TextEncoder().encode(body).length > transferLimit)
+        throw new Error("This character exceeds the transfer limit.");
     return body;
 }
-// Imported snapshots are untrusted reference material, never a local audit or
-// rules result. Keep the original transfer on this device until explicitly
-// discarded, including when no provider can evaluate its mechanical inputs.
-export class TransferStore {
-    storage;
-    key;
-    constructor(actor, character, storage = localStorage) {
-        this.storage = storage;
-        this.key = `dnd-character-transfer.v1:${location.origin}:${actor}:${character}`;
-    }
-    read() { return this.storage.getItem(this.key) ?? ""; }
-    write(body) { parseCharacter(body); this.storage.setItem(this.key, body); }
-    clear() { this.storage.removeItem(this.key); }
-}
-export function externalHistory(body) {
-    const value = object(JSON.parse(body))["externalHistory"];
-    if (value === undefined)
-        return [];
-    if (!Array.isArray(value) || value.length > 5 || value.some(entry => {
-        const row = object(entry), state = object(row["state"]);
-        return !Number.isSafeInteger(row["revision"]) || Number(row["revision"]) < 1 || !["actorId", "occurredAt", "summary"].every(key => typeof row[key] === "string" && String(row[key]).length <= 1000) || state["schemaVersion"] !== "4.0.0";
-    }))
-        throw new Error("The external history archive is invalid or exceeds five revisions.");
-    return value;
-}
 export function parseCharacter(body) {
-    if (new TextEncoder().encode(body).length > 1000000)
+    if (new TextEncoder().encode(body).length > transferLimit)
         throw new Error("This character file exceeds the import limit.");
     const envelope = object(JSON.parse(body));
-    if (envelope["format"] !== "dnd-character.v1" || envelope["schemaVersion"] !== "4.0.0" || Object.keys(envelope).some(key => !["format", "schemaVersion", "inputs", "savedRules", "savedProjection", "externalHistory"].includes(key)))
-        throw new Error("Choose a current dnd-character.v1 export. Retired sheets and raw objects are not supported.");
-    externalHistory(body);
+    if (envelope["format"] !== "dnd-character.v1" || envelope["schemaVersion"] !== "4.0.0" || Object.keys(envelope).some(key => !["format", "schemaVersion", "inputs", "savedRules", "savedProjection"].includes(key)))
+        throw new Error("Choose a current character export without history.");
     const input = object(envelope["inputs"]);
     if (!input["build"] || !input["play"] || !Array.isArray(input["grants"]) || typeof input["notes"] !== "string")
         throw new Error("The character export is incomplete.");
     if (new TextEncoder().encode(JSON.stringify(input)).length > 180000)
         throw new Error("The character inputs exceed the import limit.");
-    return input; // Full closed-schema validation is server-owned.
+    return input;
+}
+// Rebase independent edits only. Arrays (ordered levels, choices, inventory) are
+// atomic so concurrent edits to the same collection never silently overwrite.
+export function mergeCharacter(base, local, remote) {
+    const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    let conflict = false;
+    const merge = (a, b, c) => {
+        if (equal(a, b))
+            return c;
+        if (equal(a, c) || equal(b, c))
+            return b;
+        if ([a, b, c].every(value => value !== null && typeof value === "object" && !Array.isArray(value))) {
+            const result = {};
+            for (const key of new Set([...Object.keys(object(a)), ...Object.keys(object(b)), ...Object.keys(object(c))])) {
+                const value = merge(object(a)[key], object(b)[key], object(c)[key]);
+                if (value !== undefined)
+                    result[key] = value;
+            }
+            return result;
+        }
+        conflict = true;
+        return b;
+    };
+    const result = merge(base, local, remote);
+    return conflict ? undefined : result;
 }

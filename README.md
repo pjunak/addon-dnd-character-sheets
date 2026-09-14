@@ -1,75 +1,53 @@
 # D&D Character Sheets
 
-`dnd-sheets` restores the character workspace alongside the host-owned profile.
-**Sheet** and **Combat** use the Compact/Classic ability-card rail, vitals strip,
-worn equipment and split backpack. **Spells** and **Notes** have their own tabs;
-**Builder** restores the progress rail, Character/class navigation and level
-choices. **History** retains the new revision workflow, and **Tools** contains
-layout preferences, rules status, import, export and printing.
+The workspace has **Sheet**, **Combat**, **Spells**, **Notes**, **Builder** and
+**Tools** tabs. Compact and Classic layouts share one engine-calculated
+character. Authorized editors can change inventory, equipment, currency, HP,
+resources, spells and notes directly in their tabs.
 
-**Edit sheet** enables inventory, equipment, currency and resource edits. The
-equipment picker has searchable folders and a quantity tray; adding items keeps
-them in the draft until reviewed. Calculated scores, saves and skills come from
-the saved engine projection, with linked explanations. HP, spell and rest actions
-still use the worker-owned review/commit path. Previous per-character
-Compact/Classic preferences remain readable.
+Valid changes save automatically. Build completion is separate from validity:
+an unfinished character is saved as it is built, while rules-dependent play
+requires outstanding choices to be completed. There are no device drafts,
+manual save buttons, revision history, undo or restore commands.
 
-The interface has English and Czech catalogs; authored source names, rule prose
-and character notes keep their source language.
+Builder separates **Character**, **Levels**, and one tab per selected class.
+Use **+** to add an eligible class and the class tab to add or remove levels.
+Point buy and granted ability increases show live used/remaining budgets with
+bounded steppers. Searchable dropdowns display descriptions while browsing and
+accept only offered options. The engine supplies class and feat eligibility;
+duplicate granted selections are excluded.
 
-## Character workflow
+**Tools** owns export, reviewed replacement import, printing, layout and rules
+status. Transfers use `dnd-character.v1` / schema 4.0.0 and contain the current
+character only. Changed installed rules require explicit adoption. Without
+compatible rules, saved values, notes, export and printing remain usable.
 
-Build records origin, abilities, ordered class levels, choices, spells, inventory
-and notes. A preview shows invalidated choices and resulting changes before a
-new revision is saved. The native worker authenticates commands and stores
-retained revisions through the host's history capability. Browsers cannot write
-the character extension directly.
+The host owns the core profile, portrait and relationships. The native worker
+provides `dnd5e.character` 2.0.0 and is the only writer of the `dnd-sheets`
+schema-4 extension. Its `workerOnly` declaration preserves authorization without
+retaining character snapshots. Install the compatible updated host before this
+package. Existing schema-4 characters keep their inputs and saved projection.
 
-Play offers bounded HP, temporary HP, resources, currency, rest, recorded hit
-dice, activations, casting and copying. DM rewards, feats and typed exceptions
-carry the authenticated DM, reason, effective level and optional condition or
-expiry. Amendments retain the prior grant and record a replacement. Reusable
-homebrew uses compatible versioned source add-ons.
+Autosave serializes requests and rebases disjoint concurrent edits. Conflicting
+edits and failed requests remain visible in the open page; pending input is not
+stored in browser storage. The host's pending-edit guard protects navigation.
+DM grants remain authenticated; amending or removing a grant changes its current
+entry. Ordered levels and mechanics-required spell acquisitions are character
+facts rather than a log of edits.
 
-History can inspect, compare, export and print saved revisions. Restoration
-appends a revision. Build-only restoration preserves current play, notes and
-paid spell acquisitions; play and complete restoration are explicit alternatives.
-Undo uses a reviewed complete restoration of the previous revision.
+English and Czech catalogs cover controls; source prose and authored notes keep
+their original language. See [save semantics](docs/RULES_EDGE_CASES.md), the
+engine's [public contract](../addon-dnd-engine/contract/README.md), and the
+[character workflow](../ttrpg-codex/docs/rewrite/CHARACTER_BUILD_HISTORY.md).
 
-Drafts survive reload and failed saves on the same device/browser/origin/editor.
-Concurrent changes preserve the draft for comparison and explicit rebase.
-JSON export/import uses only `dnd-character.v1` / schema 4.0.0. File and paste
-share parsing and exact replacement review. Imported DM grants need a current
-DM's approval; imported roll/acquisition provenance is labeled as external.
-Print/PDF always uses a selected saved revision, with optional long sections and
-source/build details. Browser printing supports A4 and Letter.
+## Code ownership
 
-The optional `dnd5e.rules-engine` ^4.0.0 provider supplies all calculations.
-Without compatible rules, existing revisions, history, notes, printing and export
-remain usable. Mechanical edits require compatible rules. A changed engine,
-book policy or source package requires explicit review/adoption before play.
-
-## Contracts and ownership
-
-- Public character service: `dnd5e.character` 1.0.0, native-worker transport.
-- Permanent extension ID: `dnd-sheets`, schema 4.0.0, retained.
-- `internal/character`: authenticated review/commit and persistence coordination.
-- `src/character-client.ts`: browser service, transfer and local draft boundary.
-- `src/character-element.ts`: workspace composition and asynchronous lifetime.
-- `src/character-sheet.ts`: ability cards, vitals, backpack and combat display.
-- `src/character-builder-nav.ts` and `character-build.ts`: guided Builder and level choices.
-- `src/character-equipment.ts`: folder picker and quantity tray.
-- Shared spell, grant, comparison and saved-projection renderers under `src/`.
-- Generated schemas and TypeScript types come from Go contract types; catalogs
-  compile from `locales/en.json` and `locales/cs.json`.
-
-See [failure and restore semantics](docs/RULES_EDGE_CASES.md), the engine's
-[public contract](../addon-dnd-engine/contract/README.md), and the host's
-[retirement procedure](../ttrpg-codex/docs/rewrite/CHARACTER_SHEET_CUTOVER.md).
-The package owns both layouts; there is no external renderer service.
-The old hand-filled format is retired. See the
-[character workflow](../ttrpg-codex/docs/rewrite/CHARACTER_BUILD_HISTORY.md) for
-a step-by-step explanation of revisions and rules changes.
+- `internal/character`: authentication, evaluation, current writes and import review.
+- `src/character-client.ts`: service calls, current transfers and conflict merging.
+- `src/character-element.ts`: autosave queue and workspace lifetime.
+- `src/character-build.ts` and `character-builder-nav.ts`: Builder controls and tabs.
+- `src/character-sheet.ts`: direct play controls and calculated display.
+- Go types generate schemas; the owning build generates web assets and locales.
 
 ## Development
 
@@ -90,7 +68,7 @@ The package includes generated web assets and native workers. Source checkout
 edits become visible only after rebuilding and reviewed activation. Current
 integration tests live in the host's installed character/rules/sheets suites.
 The installed-character suite checks both layouts on desktop and phone, keyboard
-tabs, engine-owned score values, reviewed equipment changes, retained revisions
+tabs, engine-owned score values, automatic equipment saves, current-state persistence
 and provider-absence behavior.
 
 

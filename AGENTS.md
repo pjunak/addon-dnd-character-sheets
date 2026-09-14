@@ -29,18 +29,17 @@ instructions were loaded or read unrelated sibling implementations.
   the closed stored schema. Generate schemas and TypeScript types through the
   owning build; unsupported formats fail without partial normalization.
 - The native `internal/character` coordinator is the only persistent character
-  boundary. It authenticates DM commands, previews exact candidates and writes
-  optimistic, idempotent retained revisions. Conflicts preserve browser drafts.
-- `src/character-client.ts` owns browser service, transfer and draft access.
+  boundary. It authenticates DM commands and writes optimistic current state automatically.
+  Imports use exact replacement previews. No character history or device drafts.
+- `src/character-client.ts` owns browser service, transfer and conflict merging.
   Rules-engine calls remain serializable and versioned; runtime policy must
   never select providers by a sibling add-on ID.
-- Without compatible rules, saved projections, history, notes, print and export
+- Without compatible rules, saved projections, notes, print and export
   remain usable. Mechanical changes require rules; no manual stat fallback.
 - Current HP, inventory, currency, resources, spells, and notes are authored
   play state. Recalculation must preserve them unless a user explicitly edits
   them.
-- Panels and controls do not implement edition-dependent rules. Local math is
-  limited to formatting. Ability modifiers and all mechanical bounds come from
+- Panels and controls do not implement edition-dependent rules. Controls consume engine-provided budgets, costs and eligibility. Ability modifiers and all mechanical bounds come from
   the engine with structured explanations.
 - The removed v2 renderer service must not return as a live object/function or
   raw-HTML boundary. A future renderer contract must be serializable,

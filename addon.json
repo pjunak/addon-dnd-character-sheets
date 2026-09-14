@@ -15,7 +15,6 @@
     "required": [
       "ui.contributions",
       "worker.native",
-      "data.history",
       "ui.rule-details"
     ],
     "optional": []
@@ -67,7 +66,7 @@
       "visibility": "public",
       "schema": "contracts/sheet-state.schema.json",
       "schemaVersion": "4.0.0",
-      "retained": true
+      "workerOnly": true
     }
   ],
   "services": {
@@ -81,7 +80,7 @@
       },
       {
         "contract": "dnd5e.character",
-        "range": "^1.0.0",
+        "range": "^2.0.0",
         "cardinality": "many",
         "required": false,
         "selection": "all-compatible"
@@ -90,7 +89,7 @@
     "provides": [
       {
         "contract": "dnd5e.character",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "transport": "worker",
         "schema": "contracts/character.service.json"
       }

@@ -19,39 +19,7 @@
       "requestSchema": "contracts/character.request.schema.json",
       "responseSchema": "contracts/character.response.schema.json"
     },
-    "compare": {
-      "errors": [
-        "INVALID_REQUEST",
-        "UNAUTHORIZED",
-        "NOT_FOUND",
-        "CONFLICT",
-        "UNAVAILABLE",
-        "VALIDATION_FAILED",
-        "RATE_LIMITED",
-        "STALE_BINDING"
-      ],
-      "idempotency": "none",
-      "maxDeadlineMs": 30000,
-      "requestSchema": "contracts/character.request.schema.json",
-      "responseSchema": "contracts/character.response.schema.json"
-    },
     "evaluate": {
-      "errors": [
-        "INVALID_REQUEST",
-        "UNAUTHORIZED",
-        "NOT_FOUND",
-        "CONFLICT",
-        "UNAVAILABLE",
-        "VALIDATION_FAILED",
-        "RATE_LIMITED",
-        "STALE_BINDING"
-      ],
-      "idempotency": "none",
-      "maxDeadlineMs": 30000,
-      "requestSchema": "contracts/character.request.schema.json",
-      "responseSchema": "contracts/character.response.schema.json"
-    },
-    "history": {
       "errors": [
         "INVALID_REQUEST",
         "UNAUTHORIZED",
@@ -99,7 +67,7 @@
       "requestSchema": "contracts/character.request.schema.json",
       "responseSchema": "contracts/character.response.schema.json"
     },
-    "revision": {
+    "save": {
       "errors": [
         "INVALID_REQUEST",
         "UNAUTHORIZED",
@@ -116,5 +84,5 @@
       "responseSchema": "contracts/character.response.schema.json"
     }
   },
-  "version": "1.0.0"
+  "version": "2.0.0"
 }

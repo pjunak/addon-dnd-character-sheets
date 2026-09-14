@@ -79,17 +79,17 @@ export function projectionView(projection, locale = "en") {
         root.append(panel(t("Active conditions"), ...active.map(row => el("p", t("{0}: {1}", [human(row["name"]), human(row["condition"])])))));
     return root;
 }
-export function printCharacter(state, revision, name, options, locale = "en") {
+export function printCharacter(state, _revision, name, options, locale = "en") {
     const t = translator(locale);
     const view = window.open("about:blank", "_blank", "popup,width=1000,height=850");
     if (!view)
         throw new Error("Allow the print window, then try again.");
-    view.document.title = `${name} — revision ${revision}`;
+    view.document.title = name;
     view.document.documentElement.lang = locale;
     const style = view.document.createElement("style");
     style.textContent = "body{font:12pt system-ui;max-width:1000px;margin:2rem;color:#111;overflow-wrap:anywhere}h1,h2,h3,summary{break-after:avoid}section,details{margin-block:1rem}details,tr,dl{break-inside:avoid}p{white-space:pre-wrap;orphans:3;widows:3}small{display:block;margin-top:.25rem}dl{display:grid;grid-template-columns:1fr 2fr;gap:.35rem}dd{margin:0} .character-stats{display:flex;gap:1rem;flex-wrap:wrap}.character-stats>div{min-width:6rem}strong{display:block}button{display:none}@page{margin:15mm}@media print{body{margin:0;font-size:10pt}}";
     view.document.head.append(style);
-    const root = el("main", el("h1", name), el("p", t("Saved character revision {0}", [revision])), el("p", t("Calculated with engine {0}. This print preserves the saved rules revision.", [state.rules.engineVersion])));
+    const root = el("main", el("h1", name), el("p", t("Calculated with engine {0}. This print preserves the saved rules revision.", [state.rules.engineVersion])));
     const projection = structuredClone(state.projection);
     if (!options.spells)
         delete projection.sheet["spellcasting"];
@@ -117,7 +117,7 @@ export function printCharacter(state, revision, name, options, locale = "en") {
             root.append(panel(t("Spell acquisitions"), ...build.spells.acquisitions.map(entry => el("p", `${recordName("spell", entry.spellId)} · ${entry.costGp} GP · ${entry.origin === "import" ? t("Imported claim") : t("Recorded")}`))));
         root.append(panel(t("Sources"), ...state.projection.evidence.map(source => el("p", t("{0} ({1}:{2}), {3}, {4}", [source.name, source.reference.kind, source.reference.id, source.book ?? "", source.hash]), ...(source.packageId ? [el("small", `${t("Source package")}: ${source.packageId} · ${source.packageGeneration ?? ""}`)] : [])))));
     }
-    // Print is frozen text from the selected revision; no provider is contacted.
+    // Print is frozen text from the saved character; no provider is contacted.
     for (const details of root.querySelectorAll("details"))
         details.open = true;
     for (const component of root.querySelectorAll("codex-addon-rule-details")) {

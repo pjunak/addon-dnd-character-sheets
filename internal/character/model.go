@@ -1,4 +1,4 @@
-// Package character coordinates authenticated, reviewed character revisions.
+// Package character coordinates authenticated current character state.
 // All rules belong to the selected engine; this package owns persistence only.
 package character
 
@@ -10,7 +10,7 @@ import (
 )
 
 const Contract = "dnd5e.character"
-const Version = "1.0.0"
+const Version = "2.0.0"
 const SchemaVersion = "4.0.0"
 
 var reference = workerrpc.AddonDataReference{Kind: workerrpc.AddonDataRecordExtension, DataID: "dnd-sheets"}
@@ -38,10 +38,6 @@ type Request struct {
 	ContractVersion   string         `json:"contractVersion"`
 	Key               string         `json:"key"`
 	ExpectedRevision  int64          `json:"expectedRevision,omitempty"`
-	Before            int64          `json:"before,omitempty"`
-	Revision          int64          `json:"revision,omitempty"`
-	CompareRevision   int64          `json:"compareRevision,omitempty"`
-	RestoreScope      string         `json:"restoreScope,omitempty"`
 	Operation         string         `json:"operation,omitempty"`
 	OperationID       string         `json:"operationId,omitempty"`
 	Summary           string         `json:"summary,omitempty"`
@@ -54,22 +50,20 @@ type Request struct {
 	ReauthorizeGrants bool           `json:"reauthorizeGrants,omitempty"`
 }
 type Response struct {
-	ContractVersion string                        `json:"contractVersion"`
-	Status          string                        `json:"status"`
-	Message         string                        `json:"message"`
-	Key             string                        `json:"key"`
-	Revision        int64                         `json:"revision"`
-	ActorID         string                        `json:"actorId"`
-	Role            string                        `json:"role"`
-	State           *State                        `json:"state,omitempty"`
-	Evaluation      *model.Result                 `json:"evaluation,omitempty"`
-	Policy          map[string]any                `json:"policy,omitempty"`
-	Changes         []Difference                  `json:"changes,omitempty"`
-	Token           string                        `json:"token,omitempty"`
-	ExpiresAt       string                        `json:"expiresAt,omitempty"`
-	History         []workerrpc.AddonHistoryEntry `json:"history,omitempty"`
-	NextBefore      int64                         `json:"nextBefore,omitempty"`
-	RulesChanged    bool                          `json:"rulesChanged"`
+	ContractVersion string         `json:"contractVersion"`
+	Status          string         `json:"status"`
+	Message         string         `json:"message"`
+	Key             string         `json:"key"`
+	Revision        int64          `json:"revision"`
+	ActorID         string         `json:"actorId"`
+	Role            string         `json:"role"`
+	State           *State         `json:"state,omitempty"`
+	Evaluation      *model.Result  `json:"evaluation,omitempty"`
+	Policy          map[string]any `json:"policy,omitempty"`
+	Changes         []Difference   `json:"changes,omitempty"`
+	Token           string         `json:"token,omitempty"`
+	ExpiresAt       string         `json:"expiresAt,omitempty"`
+	RulesChanged    bool           `json:"rulesChanged"`
 }
 type Difference struct {
 	Path   string `json:"path"`
