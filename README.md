@@ -1,10 +1,21 @@
 # D&D Character Sheets
 
-`dnd-sheets` adds a reversible character workspace beneath the host-owned
-profile. **Play**, **Build** and **History** share the same saved decisions,
-calculated projection and source explanations. Compact and Classic are layout
-preferences. The interface has English and Czech catalogs; authored source
-names, rule prose and character notes keep their source language.
+`dnd-sheets` restores the character workspace alongside the host-owned profile.
+**Sheet** and **Combat** use the Compact/Classic ability-card rail, vitals strip,
+worn equipment and split backpack. **Spells** and **Notes** have their own tabs;
+**Builder** restores the progress rail, Character/class navigation and level
+choices. **History** retains the new revision workflow, and **Tools** contains
+layout preferences, rules status, import, export and printing.
+
+**Edit sheet** enables inventory, equipment, currency and resource edits. The
+equipment picker has searchable folders and a quantity tray; adding items keeps
+them in the draft until reviewed. Calculated scores, saves and skills come from
+the saved engine projection, with linked explanations. HP, spell and rest actions
+still use the worker-owned review/commit path. Previous per-character
+Compact/Classic preferences remain readable.
+
+The interface has English and Czech catalogs; authored source names, rule prose
+and character notes keep their source language.
 
 ## Character workflow
 
@@ -45,7 +56,10 @@ book policy or source package requires explicit review/adoption before play.
 - `internal/character`: authenticated review/commit and persistence coordination.
 - `src/character-client.ts`: browser service, transfer and local draft boundary.
 - `src/character-element.ts`: workspace composition and asynchronous lifetime.
-- Shared Build, Play, grant, comparison and projection renderers under `src/`.
+- `src/character-sheet.ts`: ability cards, vitals, backpack and combat display.
+- `src/character-builder-nav.ts` and `character-build.ts`: guided Builder and level choices.
+- `src/character-equipment.ts`: folder picker and quantity tray.
+- Shared spell, grant, comparison and saved-projection renderers under `src/`.
 - Generated schemas and TypeScript types come from Go contract types; catalogs
   compile from `locales/en.json` and `locales/cs.json`.
 
@@ -75,6 +89,9 @@ Inspect the resulting ZIP from the host with
 The package includes generated web assets and native workers. Source checkout
 edits become visible only after rebuilding and reviewed activation. Current
 integration tests live in the host's installed character/rules/sheets suites.
+The installed-character suite checks both layouts on desktop and phone, keyboard
+tabs, engine-owned score values, reviewed equipment changes, retained revisions
+and provider-absence behavior.
 
 
 ## Install and update from tested commits

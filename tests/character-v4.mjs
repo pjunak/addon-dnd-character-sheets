@@ -48,3 +48,16 @@ test('bounded history transfers remain separate from playable inputs and recover
   assert.throws(()=>transfer.write('{invalid')); assert.equal(transfer.read(),body);
   transfer.clear(); assert.equal(transfer.read(),'');
 });
+
+test('restored layouts read the former character preference without rewriting it', async () => {
+  const { preferredLayout } = await import('../web/character-sheet.js');
+  const entries = new Map([['dse-ui:renderer:hero', 'builtin:classic']]);
+  const storage = { getItem: key => entries.get(key) ?? null };
+  assert.equal(preferredLayout(storage, 'dm', 'hero'), 'classic');
+  assert.equal(preferredLayout(storage, 'dm', 'other'), 'compact');
+  entries.set('dnd-character-layout:dm:hero', 'compact');
+  assert.equal(preferredLayout(storage, 'dm', 'hero'), 'compact');
+  assert.equal(preferredLayout(storage, 'player', 'hero'), 'classic');
+  assert.equal(entries.get('dse-ui:renderer:hero'), 'builtin:classic');
+  assert.equal(preferredLayout({ getItem() { throw new Error('Storage unavailable'); } }, 'dm', 'hero'), 'compact');
+});

@@ -2,31 +2,35 @@ import { grantForm } from "./character-grant.js";
 import { comparisonView } from "./character-comparison.js";
 import { translator } from "./character-locale.js";
 import { playActions } from "./character-play.js";
+import { abilityRail, backpack, combatDetails, equipmentSlot, preferredLayout, recordName, savedRule, vitals, type EquipmentSlot, type Layout, type SheetView } from "./character-sheet.js";
+import { equipmentPicker } from "./character-equipment.js";
+import { builderShell, type BuilderNavigation } from "./character-builder-nav.js";
 import type { ContributionContext } from "./sdk.js";
 import type { Grant, Inputs, Request, Response, Result, State } from "./character-model.js";
 import { CharacterClient, DraftStore, TransferStore, blank, exportCharacter, externalHistory, newId, object, parseCharacter, rows, strings, type CatalogRecord, type ExternalRevision } from "./character-client.js";
-import { buildView, inventoryView, type BuildView } from "./character-build.js";
+import { buildView, type BuildView } from "./character-build.js";
 import { projectionView, printCharacter } from "./character-projection.js";
-import { button, checkbox, download, el, field, human, label, numberInput, panel, rule, select, textInput } from "./character-ui.js";
+import { button, checkbox, download, el, field, human, label, numberInput, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
 
-type Tab = "play" | "build" | "history";
-const navigation = { en: { play: "Play", build: "Build", history: "History" }, cs: { play: "Hra", build: "Tvorba", history: "Historie" } };
+type Tab = "sheet" | "combat" | "spells" | "notes" | "builder" | "history" | "tools";
 export function defineCharacterElement(generation: string, client: CharacterClient): string {
   const tag = `dnd-character-${generation}`;
   if (customElements.get(tag)) return tag;
   class CharacterElement extends HTMLElement {
     #context: ContributionContext | undefined; #response: Response | undefined; #input: Inputs = blank(); #evaluation: Result | undefined;
-    #baseRevision = 0; #dirty = false; #busy = false; #tab: Tab = "play"; #draft: DraftStore | undefined; #message = ""; #epoch = 0;
+    #baseRevision = 0; #dirty = false; #busy = false; #tab: Tab = "sheet"; #draft: DraftStore | undefined; #message = ""; #epoch = 0;
     #catalogs = new Map<string, CatalogRecord[]>(); #dialog: HTMLDialogElement | undefined; #timer: ReturnType<typeof setTimeout> | undefined;
     #historyResponse: Response | undefined;
     #historyFilter = "all";
     #transfer: TransferStore | undefined;
-    #layout = "compact";
+    #layout: Layout = "compact";
+    #editing = false;
+    #builderNav: BuilderNavigation = { tab: "character", target: "", open: true };
     #t = (key: string, values?: readonly unknown[]): string => translator(this.#context?.host.locale ?? "en")(key, values);
     #unsubscribe: (() => void) | undefined;
     #refreshTimer: ReturnType<typeof setTimeout> | undefined;
     set codexContribution(value: ContributionContext) { const previous = this.#context; this.#context = value; if (this.isConnected && previous?.host.key !== value.host.key) { this.#epoch++; this.#busy = false; this.#response = undefined; this.#historyResponse = undefined; this.#evaluation = undefined; this.#catalogs.clear(); this.#dialog?.close(); clearTimeout(this.#timer); void this.#load(); } else this.#render(); }
-    connectedCallback(): void { this.classList.add("addon-dnd-character"); this.#unsubscribe = client.subscribe(() => { clearTimeout(this.#refreshTimer); this.#refreshTimer = setTimeout(() => { void this.#refreshSaved(); }, 250); }); void this.#load(); }
+    connectedCallback(): void { this.classList.add("addon-dnd-character", "addon-dnd-sheets"); this.#busy = false; this.#unsubscribe = client.subscribe(() => { clearTimeout(this.#refreshTimer); this.#refreshTimer = setTimeout(() => { void this.#refreshSaved(); }, 250); }); void this.#load(); }
     disconnectedCallback(): void { this.#epoch++; this.#unsubscribe?.(); clearTimeout(this.#refreshTimer); clearTimeout(this.#timer); this.#dialog?.close(); this.#context?.edits.set({ dirty: false, saving: false }); }
     get #key(): string { return this.#context?.host.key ?? ""; }
     get #editable(): boolean { return this.#context?.host.canEdit === true && !this.#busy; }
@@ -38,7 +42,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       return response;
     }
     async #guard(action: () => Promise<void>): Promise<void> {
-      if (this.#busy) return; const epoch = this.#epoch; this.#busy = true; this.setAttribute("aria-busy", "true"); this.#publish(); this.#syncBusyButtons();
+      if (this.#busy) return; const epoch = this.#epoch; this.#busy = true; this.setAttribute("aria-busy", "true"); this.#publish(); this.#syncBusyButtons(); if (!this.#response) this.#render();
       try { await action(); } catch (error) { if (epoch === this.#epoch && !client.signal.aborted && this.isConnected) this.#message = error instanceof Error ? error.message : "The character request failed. Your draft is preserved."; }
       finally { if (epoch === this.#epoch) { this.#busy = false; this.removeAttribute("aria-busy"); this.#publish(); this.#syncBusyButtons(); this.#render(); } }
     }
@@ -55,11 +59,12 @@ export function defineCharacterElement(generation: string, client: CharacterClie
         this.#response = response; this.#evaluation = response.evaluation; this.#input = structuredClone(response.state?.inputs ?? blank()); this.#baseRevision = response.revision; this.#dirty = false; this.#message = response.message;
         this.#draft = new DraftStore(response.actorId, this.#key);
         this.#transfer = new TransferStore(response.actorId, this.#key);
-        try { this.#layout = localStorage.getItem(`dnd-character-layout:${response.actorId}`) === "classic" ? "classic" : "compact"; } catch { /* The presentation remains usable without local storage. */ }
+        this.#layout = preferredLayout(localStorage, response.actorId, this.#key);
         const draft = this.#draft.read();
-        if (draft) { this.#input = draft.inputs; this.#baseRevision = draft.baseRevision; this.#dirty = true; this.#tab = "build"; this.#message = draft.baseRevision === response.revision ? "Your unsaved draft was recovered. Review it before saving." : "Your draft was recovered, but the saved character has changed. Review the latest revision before rebasing."; }
-        if (!response.state) this.#tab = "build";
+        if (draft) { this.#input = draft.inputs; this.#baseRevision = draft.baseRevision; this.#dirty = true; this.#tab = "builder"; this.#message = draft.baseRevision === response.revision ? "Your unsaved draft was recovered. Review it before saving." : "Your draft was recovered, but the saved character has changed. Review the latest revision before rebasing."; }
+        if (!response.state) this.#tab = "builder";
         const kinds = ["class", "species", "background", "subclass", "feat", "armor", "weapon", "magic-item", "gear", "spell"];
+        this.#render();
         const results = await Promise.allSettled(kinds.map(kind => client.catalog(kind)));
         if (epoch !== this.#epoch || !this.isConnected) return;
         results.forEach((result, index) => { if (result.status === "fulfilled") this.#catalogs.set(kinds[index]!, result.value); });
@@ -83,7 +88,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       catch { this.#message = "This browser could not save your draft. Export the draft before leaving this page."; }
       this.#status(); clearTimeout(this.#timer); this.#timer = setTimeout(() => { void this.#evaluate(false); }, 600);
     };
-    #status(): void { const node = this.querySelector<HTMLElement>("[data-character-status]"); if (node) node.textContent = this.#t(this.#message); }
+    #status(): void { const node = this.querySelector<HTMLElement>("[data-character-status]"); if (node?.firstElementChild) node.firstElementChild.textContent = this.#t(this.#message); }
     async #evaluate(render: boolean): Promise<void> {
       if (this.#busy) return; const epoch = this.#epoch, inputs = structuredClone(this.#input);
       try {
@@ -103,53 +108,132 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     }
     #render(): void {
       if (!this.isConnected || !this.#context) return;
-      const heading = el("header", el("h2", this.#name), el("p", this.#response?.state ? this.#t("Saved revision {0}{1}", [this.#response.revision, this.#dirty ? this.#t(" · draft changes") : ""]) : this.#t("New character · unsaved draft")));
-      const status = el("p", this.#t(this.#message)); status.dataset["characterStatus"] = ""; status.setAttribute("role", "status");
-      const nav = el("nav"); nav.setAttribute("aria-label", this.#t("Character views")); const names = navigation[this.#context.host.locale ?? "en"];
-      for (const tab of ["play", "build", "history"] as const) { const control = button(names[tab], () => { this.#tab = tab; this.#render(); if (tab === "history") void this.#history(); }); control.setAttribute("aria-current", this.#tab === tab ? "page" : "false"); nav.append(control); }
-      const tools = el("div"); tools.className = "character-toolbar";
+      const dialog = this.#dialog?.open ? this.#dialog : undefined;
+      const root = styled("section", "dnd-sheet-shell dse-layout-" + this.#layout);
       this.dataset["layout"] = this.#layout;
-      tools.append(field(this.#t("Sheet layout"), select(this.#layout, [{id:"compact",label:this.#t("Compact")},{id:"classic",label:this.#t("Classic")}], value => { if (!value) return; this.#layout=value; try { localStorage.setItem(`dnd-character-layout:${this.#response?.actorId}`, value); } catch { /* Session-only preference. */ } this.#render(); }, this.#t)));
+      if (!this.#response) {
+        const status = el("p", this.#t(this.#message || "Loading character…")); status.setAttribute("role", "status");
+        root.append(status); if (!this.#busy) root.append(button(this.#t("Reload saved character"), () => this.#load()));
+        for (const child of [...this.children]) if (child !== dialog) child.remove();
+        this.prepend(root); return;
+      }
+      const view = this.#sheetView(), classes = [...new Set(this.#input.build.levels.map(level => level.classId))];
+      const title = classes.map(id => recordName(view, "class", id) + " " + this.#input.build.levels.filter(level => level.classId === id).length).join(" / ") || this.#t("D&D Character Sheet");
+      const subtitle = [this.#input.build.species && recordName(view, "species", this.#input.build.species), this.#input.build.background && recordName(view, "background", this.#input.build.background), this.#response.state ? this.#t("Saved revision {0}{1}", [this.#response.revision, this.#dirty ? this.#t(" · draft changes") : ""]) : this.#t("New character · unsaved draft")].filter(Boolean).join(" · ");
+      const heading = styled("div", "dnd-sheet-heading", el("div", el("h2", title), el("p", subtitle)));
+      const connection = button(this.#t(this.#response.status === "unavailable" ? "Rules unavailable" : this.#response.rulesChanged ? "Rules changed" : "Rules connected"), () => { this.#tab = "tools"; this.#render(); }); connection.className = "dnd-sheet-engine"; heading.append(connection);
+      if (this.#context.host.canEdit) heading.append(button(this.#t(this.#editing ? "Done editing" : "Edit sheet"), () => { this.#editing = !this.#editing; this.#render(); }, this.#busy || this.#dirty));
+      const options = ["sheet", "combat", "spells", "notes", "builder", "history", "tools"].map(id => ({ id, label: this.#t(({ sheet: "Sheet", combat: "Combat", spells: "Spells", notes: "Notes", builder: "Builder", history: "History", tools: "Tools" } as Record<string,string>)[id]!) }));
+      const nav = tabStrip(this.#t("Character views"), options, this.#tab, id => { this.#tab = id as Tab; this.#render(); if (id === "history") void this.#history(); }, "dnd");
+      nav.classList.add("dnd-sheet-tabs");
+      const status = styled("div", "dnd-save-status", el("span", this.#t(this.#message))); status.dataset["characterStatus"] = ""; status.setAttribute("role", "status");
+      if (this.#dirty) status.append(button(this.#t("Review draft changes"), () => this.#review({ ...this.#base("build"), inputs: structuredClone(this.#input) }), this.#busy), button(this.#t("Export draft"), () => download(this.#key + ".draft.json", JSON.stringify({ format: "dnd-character.v1", schemaVersion: "4.0.0", inputs: this.#input }, null, 2))));
+      if (this.#dirty && this.#baseRevision !== this.#response.revision) status.append(button(this.#t("Rebase this draft for a new review"), () => { this.#baseRevision = this.#response?.revision ?? 0; this.#changed(); void this.#evaluate(true); }));
+      const content = styled("div", "dnd-sheet-panel"); content.id = "dnd-panel-" + this.#tab; content.setAttribute("role", "tabpanel"); content.setAttribute("aria-labelledby", "dnd-tab-" + this.#tab);
+      if (this.#tab === "builder") content.append(this.#builder());
+      else if (this.#tab === "history") content.append(this.#historyView());
+      else if (this.#tab === "tools") content.append(this.#tools());
+      else if (this.#tab === "notes") content.append(this.#notes());
+      else if (this.#tab === "spells") content.append(vitals(view), this.#spells());
+      else {
+        const main = styled("div", "dse-cols-main", vitals(view));
+        if (!this.#response.state) main.append(panel(this.#t("Create your character"), el("p", this.#t("Choose your origin, abilities and first class to start building.")), button(this.#t("Open Builder"), () => { this.#tab = "builder"; this.#render(); })));
+        main.append(this.#tab === "combat" ? this.#combat() : backpack(view));
+        content.append(styled("div", "dse-cols", abilityRail(view), main));
+      }
+      root.append(heading, nav, status, content);
+      for (const child of [...this.children]) if (child !== dialog) child.remove();
+      this.prepend(root); this.#syncBusyButtons();
+    }
+    #sheetView(): SheetView {
+      return { locale: this.#context?.host.locale ?? "en", layout: this.#layout, input: this.#input, projection: this.#response?.state?.projection, catalogs: this.#catalogs,
+        editing: this.#editable && this.#editing && this.#response?.status !== "unavailable" && !this.#response?.rulesChanged,
+        canPlay: this.#editable && !this.#dirty && !!this.#response?.state && this.#response.status !== "unavailable" && !this.#response.rulesChanged,
+        change: this.#changed, refresh: () => this.#render(), addItem: () => this.#equipment(), fillSlot: slot => this.#slot(slot),
+        act: (change, summary) => this.#review({ ...this.#base("play"), change, summary }),
+        review: () => this.#review({ ...this.#base("inventory"), inputs: structuredClone(this.#input), summary: "Update inventory, resources and currency" }) };
+    }
+    #equipment(): void {
+      this.#open(this.#t("Add equipment"), [equipmentPicker(this.#catalogs, this.#context?.host.locale ?? "en", items => {
+        this.#input.play.inventory.push(...items); this.#changed(); this.#dialog?.close(); this.#render();
+      })]);
+    }
+    #slot(slot: EquipmentSlot): void {
+      const choices = this.#input.play.inventory.filter(item => item.quantity > 0 && (slot === "attuned" ? !item.attuned : equipmentSlot({ ...item, attuned: false }, this.#catalogs) === slot));
+      this.#open(this.#t("Choose {0}", [this.#t(label(slot))]), [styled("div", "dnd-slot-picker", ...choices.map(item => button(item.name, () => {
+        if (slot === "attuned") item.attuned = true;
+        else { if (slot === "armor" || slot === "shield") for (const current of this.#input.play.inventory) if (current.location === "equipped" && equipmentSlot({ ...current, attuned: false }, this.#catalogs) === slot) current.location = "carried"; item.location = "equipped"; }
+        this.#changed(); this.#dialog?.close(); this.#render();
+      }))), ...(!choices.length ? [el("p", this.#t("Add an item to your backpack first."))] : []), button(this.#t("Add item"), () => this.#equipment())]);
+    }
+    #builder(): HTMLElement {
+      const body = el("fieldset"); body.disabled = !this.#editable;
+      const view = this.#view();
+      if (!["character","spells", ...rows(this.#evaluation?.guidance["classes"]).map(row => String(row["classId"]))].includes(this.#builderNav.tab)) this.#builderNav.tab = "character";
+      if (this.#builderNav.tab === "spells") body.append(this.#spellChoices());
+      else body.append(buildView(view, this.#builderNav.tab));
+      if (this.#builderNav.tab === "character") body.append(this.#grants());
+      const review = styled("div", "dnd-workflow-controls", button(this.#t("Refresh choices and preview"), () => this.#evaluate(true)), button(this.#t("Review build changes"), () => this.#review({ ...this.#base("build"), inputs: structuredClone(this.#input) })));
+      body.append(review);
+      const details = el("details", el("summary", this.#t("Rules review")), this.#issues()); details.dataset["characterEvaluation"] = "";
+      if (this.#evaluation) details.append(projectionView(this.#evaluation, this.#context?.host.locale ?? "en")); body.append(details);
+      return builderShell(view, this.#builderNav, body, (tab, target = "") => {
+        this.#builderNav.tab = tab; this.#builderNav.target = target; this.#render();
+        if (target) { const node = this.querySelector<HTMLElement>('[data-builder-target="' + CSS.escape(target) + '"]') ?? this.querySelector<HTMLElement>("#character-choice-" + CSS.escape(encodeURIComponent(target)));
+          for (let parent = node?.parentElement; parent && parent !== this; parent = parent.parentElement) if (parent instanceof HTMLDetailsElement) parent.open = true;
+          node?.scrollIntoView({ block: "center", behavior: "smooth" }); node?.querySelector<HTMLElement>("input,select,button")?.focus({ preventScroll: true }); }
+      });
+    }
+    #combat(): HTMLElement {
+      const view = this.#sheetView(), root = styled("div", "dse-combat"), rest = styled("div", "dnd-rest-controls");
+      for (const value of ["short", "long"]) rest.append(button(this.#t("{0} rest", [this.#t(label(value))]), () => view.act({ operation: "rest", rest: value }, value + " rest"), !view.canPlay));
+      root.append(rest, combatDetails(view));
+      if (this.#evaluation) {
+        const recovery = el("fieldset"); recovery.disabled = !view.canPlay;
+        recovery.append(playActions(this.#input, this.#evaluation, this.#catalogs.get("spell") ?? [], view.act, view.locale, "recovery")); root.append(recovery);
+      }
+      return root;
+    }
+    #spells(): HTMLElement {
+      const root = styled("div", "dnd-spell-browser"), view = this.#sheetView();
+      const controls = el("fieldset"); controls.disabled = !view.canPlay;
+      if (this.#evaluation) controls.append(playActions(this.#input, this.#evaluation, this.#catalogs.get("spell") ?? [], view.act, view.locale, "spells"));
+      else {
+        for (const [title, groups] of [["Cantrips", this.#input.build.spells.cantrips], ["Spellbook", this.#input.build.spells.spellbook], ["Prepared spells", this.#input.play.preparedSpells]] as const) {
+          for (const [classId, ids] of Object.entries(groups)) controls.append(panel(this.#t(title) + " · " + recordName(view, "class", classId), ...ids.map(id => savedRule(view.projection, recordName(view, "spell", id), undefined, {kind:"spell", id}))));
+        }
+      }
+      const choices = el("details", el("summary", this.#t("Manage spells"))), fields = el("fieldset"); fields.disabled = !this.#editable || this.#response?.status === "unavailable";
+      fields.append(this.#spellChoices(), button(this.#t("Review spell changes"), () => this.#review({ ...this.#base("spells"), inputs: structuredClone(this.#input), summary: "Update selected spells" }))); choices.append(fields);
+      root.append(controls, choices);
+      if (this.#input.build.spells.swaps.length) root.append(el("details", el("summary", this.#t("Recorded spell replacements")), ...this.#input.build.spells.swaps.map(swap => el("p", this.#t("Level {0}: {1} → {2}", [swap.level, recordName(view, "spell", swap.out), recordName(view, "spell", swap.in)])))));
+      if (this.#input.build.spells.acquisitions.length) root.append(el("details", el("summary", this.#t("Spell acquisitions")), ...this.#input.build.spells.acquisitions.map(entry => el("p", recordName(view, "spell", entry.spellId) + " · " + entry.costGp + " GP"))));
+      return root;
+    }
+    #notes(): HTMLElement {
+      const notes = textInput(this.#input.notes, value => { this.#input.notes = value; this.#changed(); }, true); notes.disabled = !this.#editable;
+      return panel(this.#t("Notes"), field(this.#t("Character notes"), notes), button(this.#t("Save notes"), () => this.#review({ ...this.#base("notes"), inputs: structuredClone(this.#input), summary: "Update character notes" }), !this.#editable));
+    }
+    #tools(): HTMLElement {
+      const tools = styled("div", "character-toolbar");
+      tools.append(field(this.#t("Sheet layout"), select(this.#layout, [{id:"compact",label:this.#t("Compact")},{id:"classic",label:this.#t("Classic")}], value => {
+        if (!value) return; this.#layout = value as Layout; try { localStorage.setItem("dnd-character-layout:" + this.#response?.actorId + ":" + this.#key, value); } catch { /* Session-only preference. */ } this.#render();
+      }, this.#t)));
       if ((this.#response?.revision ?? 0) > 1) tools.append(button(this.#t("Undo last change"), () => this.#restore(this.#response!.revision - 1, "complete"), !this.#editable || this.#dirty));
-      if (this.#response?.state) tools.append(button(this.#t("Export saved revision"), () => download(`${this.#key}.character.json`, exportCharacter(this.#response!.state!))), button(this.#t("Print / PDF"), () => this.#print(this.#response!.state!, this.#response!.revision)));
-      if (this.#dirty) tools.append(button(this.#t("Export draft"), () => download(`${this.#key}.draft.json`, JSON.stringify({ format: "dnd-character.v1", schemaVersion: "4.0.0", inputs: this.#input }, null, 2))));
+      if (this.#response?.state) tools.append(button(this.#t("Export saved revision"), () => download(this.#key + ".character.json", exportCharacter(this.#response!.state!))), button(this.#t("Print / PDF"), () => this.#print(this.#response!.state!, this.#response!.revision)));
       tools.append(button(this.#t("Import character"), () => this.#import(), !this.#editable), button(this.#t("Reload saved character"), () => {
         if (!this.#dirty) return this.#load();
         this.#open(this.#t("Discard this local draft?"), [el("p", this.#t("The saved character and its history will remain. Export this draft first if you want to keep it.")), button(this.#t("Discard draft and reload"), () => { this.#draft?.clear(); this.#dialog?.close(); return this.#load(); })]);
       }, this.#busy));
-      const content = el("div"); content.className = "character-content";
-      if (this.#tab === "build") {
-        const editor = el("fieldset"); editor.disabled = !this.#editable; editor.append(buildView(this.#view()), this.#spellChoices(), inventoryView(this.#view()), field(this.#t("Character notes"), textInput(this.#input.notes, value => { this.#input.notes = value; this.#changed(); }, true)), button(this.#t("Refresh choices and preview"), () => this.#evaluate(true)), button(this.#t("Review build changes"), () => this.#review({ ...this.#base("build"), inputs: structuredClone(this.#input) })));
-        const evaluation = el("aside"); evaluation.dataset["characterEvaluation"] = ""; evaluation.append(this.#issues()); if (this.#evaluation) evaluation.append(projectionView(this.#evaluation, this.#context?.host.locale ?? "en")); content.classList.add("character-columns"); content.append(editor, evaluation); editor.append(this.#grants());
-        if (this.#baseRevision !== this.#response?.revision) editor.prepend(panel(this.#t("Concurrent changes"), el("p", this.#t("This draft started from an earlier saved revision. Open History to compare it with the current character.")), button(this.#t("Rebase this draft for a new review"), () => { this.#baseRevision = this.#response?.revision ?? 0; this.#changed(); void this.#evaluate(true); })));
-      } else if (this.#tab === "play") {
-        if (this.#response?.state) content.append(this.#play(), projectionView(this.#response.state.projection, this.#context?.host.locale ?? "en"), this.#grants()); else content.append(el("p", this.#t("Finish the build and save its first revision to start playing.")));
-      } else content.append(this.#historyView());
-      const dialog = this.#dialog?.open ? this.#dialog : undefined;
-      // Keep modal nodes mounted: removing an open native dialog closes it.
-      for (const child of [...this.children]) if (child !== dialog) child.remove();
-      this.prepend(heading, status, nav, tools, content);
-    }
-    #play(): HTMLElement {
-      const state = this.#response!.state!, play = state.inputs.play, root = panel(this.#t("Play state"), el("p", this.#t("HP {0} / {1} · Temporary HP {2}", [play.hp, human(object(state.projection.sheet["derived"])["maxHp"]), play.temporaryHp])));
-      const controls = el("fieldset"); controls.disabled = !this.#editable || this.#response?.status === "unavailable" || this.#response?.rulesChanged === true;
-      let amount = 0; controls.append(field(this.#t("Amount"), numberInput(0, value => { amount = value ?? 0; }, 0)));
-      for (const operation of ["damage", "heal", "set-hp", "set-temporary-hp"]) controls.append(button(this.#t(label(operation)), () => this.#review({ ...this.#base("play"), change: { operation, amount }, summary: `${this.#t(label(operation))} ${amount}` }), this.#dirty));
-      for (const rest of ["short", "long"]) controls.append(button(this.#t("{0} rest", [this.#t(label(rest))]), () => this.#review({ ...this.#base("play"), change: { operation: "rest", rest }, summary: `${this.#t(label(rest))} rest` }), this.#dirty));
-      for (const resource of rows(state.projection.sheet["resources"])) { const key = String(resource["key"]), maximum = Number(resource["max"]); controls.append(field(this.#t("{0} — spent / {1}", [human(resource["name"]), maximum]), numberInput(this.#input.play.resourceUses[key] ?? 0, value => { this.#input.play.resourceUses[key] = value ?? 0; this.#changed(); }, 0, maximum))); }
-      for (const coin of ["cp", "sp", "ep", "gp", "pp"]) controls.append(field(coin.toUpperCase(), numberInput(this.#input.play.currency[coin] ?? 0, value => { this.#input.play.currency[coin] = value ?? 0; this.#changed(); }, 0)));
-      controls.append(button(this.#t("Review counter changes"), () => this.#review({ ...this.#base("inventory"), inputs: structuredClone(this.#input), summary: "Update resources and currency" })));
-      for (const activation of rows(state.projection.sheet["activations"])) { const key = String(activation["key"]); controls.append(button(this.#t("{0} {1}", [this.#t(play.activeFeatures[key] ? "End" : "Activate"), human(activation["name"])]), () => this.#review({ ...this.#base("play"), change: { operation: "toggle-feature", key, enabled: !play.activeFeatures[key] }, summary: `Toggle ${human(activation["name"])}` }), this.#dirty)); }
-      if (this.#response?.rulesChanged) root.append(el("p", this.#t("The installed rules or allowed sources changed. Review and adopt them in Build before playing.")));
-      if (this.#dirty) root.append(el("p", this.#t("Review your draft before applying other play actions."))); if (this.#evaluation) controls.append(playActions(this.#input, this.#evaluation, this.#catalogs.get("spell") ?? [], (change, summary) => this.#review({ ...this.#base("play"), change, summary }), this.#context?.host.locale)); root.append(controls);
-      const notes = textInput(this.#input.notes, value => { this.#input.notes = value; this.#changed(); }, true); notes.disabled = !this.#editable;
-      root.append(field(this.#t("Character notes"), notes), button(this.#t("Save notes"), () => this.#review({ ...this.#base("notes"), inputs: structuredClone(this.#input), summary: "Update character notes" }), !this.#editable)); return root;
+      const provider = panel(this.#t("Rules connection"), el("p", this.#t(this.#response?.status === "unavailable" ? "Compatible rules are unavailable. Saved values, notes and history remain readable." : this.#response?.rulesChanged ? "The installed rules or allowed sources changed. Review and adopt them in Build before playing." : "Rules are connected.")));
+      if (this.#response?.state) provider.append(el("p", this.#t("Saved with engine {0}", [this.#response.state.rules.engineVersion])));
+      return el("div", provider, tools);
     }
     #spellChoices(): HTMLElement {
       const root = panel(this.#t("Spells")), options = this.#evaluation?.spellOptions ?? {}, casting = object(this.#evaluation?.sheet["spellcasting"]), spells = this.#catalogs.get("spell") ?? [];
       const picks = (title: string, ids: string[], current: string[], set: (ids: string[]) => void): HTMLElement => {
         const details = el("details", el("summary", this.#t("{0} ({1} selected)", [title, current.length]))), list = el("div"); let query = "";
-        const render = (): void => { list.replaceChildren(); const shown = [...new Set([...current, ...ids])].filter(id => `${spells.find(record => record.id === id)?.value["name"] ?? id}`.toLowerCase().includes(query)).slice(0, 100); for (const id of shown) { const record = spells.find(record => record.id === id); list.append(el("div", checkbox(String(record?.value["name"] ?? id), current.includes(id), selected => { current = selected ? [...current, id] : current.filter(item => item !== id); set(current); this.#changed(); }), rule(this.#t("Details"), { kind: "spell", id }))); } };
+        const render = (): void => { list.replaceChildren(); const shown = [...new Set([...current, ...ids])].filter(id => `${spells.find(record => record.id === id)?.value["name"] ?? id}`.toLowerCase().includes(query)).slice(0, 100); for (const id of shown) { const record = spells.find(record => record.id === id); list.append(el("div", checkbox(String(record?.value["name"] ?? id), current.includes(id), selected => { current = selected ? [...current, id] : current.filter(item => item !== id); set(current); details.querySelector("summary")!.textContent = this.#t("{0} ({1} selected)", [title, current.length]); this.#changed(); }), rule(this.#t("Details"), { kind: "spell", id }))); } };
         details.append(field(this.#t("Filter spells"), textInput("", value => { query = value.toLowerCase(); render(); })), list); render(); return details;
       };
       for (const classOptions of rows(options["classes"])) {
@@ -196,7 +280,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
           if (JSON.stringify(request) !== reviewedRequest) { this.#message = "Refresh the review to include your changed description or authorization."; return; }
           const saved = await this.#call("commit", { key: this.#key, expectedRevision: response.revision, operationId: request.operationId!, token }); if (saved.status !== "ready") { this.#message = saved.message; return; }
           const frozen = request.operation === "notes" && this.#response?.status === "unavailable";
-          this.#response = { ...this.#response, ...saved, ...(frozen ? { status: "unavailable" } : {}) }; this.#input = structuredClone(saved.state!.inputs); this.#baseRevision = saved.revision; this.#dirty = false; this.#draft?.clear(); this.#dialog?.close(); this.#tab = "play"; this.#message = saved.message;
+          this.#response = { ...this.#response, ...saved, ...(frozen ? { status: "unavailable" } : {}) }; this.#input = structuredClone(saved.state!.inputs); this.#baseRevision = saved.revision; this.#dirty = false; this.#draft?.clear(); this.#dialog?.close(); this.#editing = false; this.#tab = "sheet"; this.#message = saved.message;
         }))); }
         this.#open(this.#t("Review character changes"), content);
       });
