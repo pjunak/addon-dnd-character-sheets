@@ -31,7 +31,7 @@ export function defineCharacterElement(generation, client) {
         #changeVersion = 0;
         #blocked = false;
         #layout = "compact";
-        #builderNav = { tab: "character", target: "", open: false };
+        #builderNav = { tab: "character", target: "", open: true };
         #t = (key, values) => translator(this.#context?.host.locale ?? "en")(key, values);
         #unsubscribe;
         #refreshTimer;
@@ -174,9 +174,7 @@ export function defineCharacterElement(generation, client) {
             const run = async () => {
                 while (this.#dirty && !this.#blocked && this.isConnected && epoch === this.#epoch) {
                     const version = this.#changeVersion, inputs = structuredClone(this.#input), base = this.#response?.state?.inputs ?? blank();
-                    const onlyNotes = JSON.stringify({ ...inputs, notes: base.notes }) === JSON.stringify(base);
-                    const frozen = onlyNotes && this.#response?.status === "unavailable", changedRules = onlyNotes && this.#response?.rulesChanged;
-                    const response = await this.#call("save", { ...this.#base(onlyNotes ? "notes" : "build"), inputs });
+                    const response = await this.#call("save", { ...this.#base("build"), inputs });
                     if (response.status === "conflict" && response.state) {
                         const merged = mergeCharacter(base, this.#input, response.state.inputs);
                         if (merged) {
@@ -191,7 +189,7 @@ export function defineCharacterElement(generation, client) {
                         this.#status();
                         break;
                     }
-                    if (response.evaluation && !onlyNotes)
+                    if (response.evaluation)
                         this.#evaluation = response.evaluation;
                     if (response.status !== "ready" || !response.state) {
                         this.#blocked = true;
@@ -203,7 +201,7 @@ export function defineCharacterElement(generation, client) {
                         this.#render();
                         break;
                     }
-                    this.#response = { ...this.#response, ...response, ...(frozen ? { status: "unavailable" } : {}), ...(changedRules ? { rulesChanged: true } : {}) };
+                    this.#response = { ...this.#response, ...response };
                     this.#baseRevision = response.revision;
                     // Incorporate server corrections without replacing objects bound to active fields.
                     if (this.#input.play.asOf === inputs.play.asOf)
@@ -271,12 +269,9 @@ export function defineCharacterElement(generation, client) {
                 this.prepend(root);
                 return;
             }
-            const view = this.#sheetView(), classes = [...new Set(this.#input.build.levels.map(level => level.classId))];
-            const title = classes.map(id => recordName(view, "class", id) + " " + this.#input.build.levels.filter(level => level.classId === id).length).join(" / ") || this.#name;
-            const subtitle = [this.#input.build.species && recordName(view, "species", this.#input.build.species), this.#input.build.background && recordName(view, "background", this.#input.build.background)].filter(Boolean).join(" · ");
-            const heading = styled("div", "dnd-sheet-heading", el("div", el("h2", title), ...(subtitle ? [el("p", subtitle)] : [])));
-            const options = ["sheet", "combat", "spells", "notes", "builder", "tools"].map(id => ({ id, label: this.#t({ sheet: "Sheet", combat: "Combat", spells: "Spells", notes: "Notes", builder: "Builder", tools: "Tools" }[id]) }));
-            const nav = tabStrip(this.#t("Character views"), options, this.#tab, id => { this.#tab = id; this.#render(); }, "dnd");
+            const view = this.#sheetView();
+            const options = ["sheet", "combat", "spells", "builder", "tools"].map(id => ({ id, label: this.#t({ sheet: "Sheet", combat: "Combat", spells: "Spells", builder: "Builder", tools: "Tools" }[id]) }));
+            const nav = tabStrip(this.#t("Character views"), options, this.#tab, id => { this.#tab = id; this.#render(); }, "dnd", "vertical");
             nav.classList.add("dnd-sheet-tabs");
             const status = styled("div", "dnd-save-status", el("span", this.#t(this.#message)));
             status.dataset["characterStatus"] = "";
@@ -291,8 +286,6 @@ export function defineCharacterElement(generation, client) {
                 content.append(this.#builder());
             else if (this.#tab === "tools")
                 content.append(this.#tools());
-            else if (this.#tab === "notes")
-                content.append(this.#notes());
             else if (this.#tab === "spells")
                 content.append(vitals(view), this.#spells());
             else {
@@ -302,7 +295,7 @@ export function defineCharacterElement(generation, client) {
                 main.append(this.#tab === "combat" ? this.#combat() : backpack(view));
                 content.append(styled("div", "dse-cols", abilityRail(view), main));
             }
-            root.append(heading, nav, status, content);
+            root.append(nav, styled("div", "dnd-sheet-workspace", status, content));
             for (const child of [...this.children])
                 if (child !== dialog)
                     child.remove();
@@ -356,14 +349,14 @@ export function defineCharacterElement(generation, client) {
             const body = el("fieldset");
             body.disabled = !this.#editable || this.#response?.status === "unavailable" || !!this.#response?.rulesChanged;
             const view = this.#view();
-            if (!["character", "levels", "spells", "add-class", ...this.#input.build.levels.map(level => level.classId)].includes(this.#builderNav.tab))
+            if (!["character", "levels", "spells", "add-class", "dm-given", ...this.#input.build.levels.map(level => level.classId)].includes(this.#builderNav.tab))
                 this.#builderNav.tab = "character";
-            if (this.#builderNav.tab === "spells")
+            if (this.#builderNav.tab === "dm-given")
+                body.append(this.#grants());
+            else if (this.#builderNav.tab === "spells")
                 body.append(this.#spellChoices());
             else
                 body.append(buildView(view, this.#builderNav.tab));
-            if (this.#builderNav.tab === "character")
-                body.append(this.#grants());
             return builderShell(view, this.#builderNav, body, (tab, target = "") => {
                 this.#builderNav.tab = tab;
                 this.#builderNav.target = target;
@@ -409,11 +402,6 @@ export function defineCharacterElement(generation, client) {
             choices.append(fields);
             root.append(controls, choices);
             return root;
-        }
-        #notes() {
-            const notes = textInput(this.#input.notes, value => { this.#input.notes = value; this.#changed(); }, true);
-            notes.disabled = !this.#editable;
-            return field(this.#t("Character notes"), notes);
         }
         #tools() {
             const tools = styled("div", "character-toolbar", field(this.#t("Sheet layout"), select(this.#layout, [{ id: "compact", label: this.#t("Compact") }, { id: "classic", label: this.#t("Classic") }], value => {
@@ -588,7 +576,7 @@ export function defineCharacterElement(generation, client) {
                 })]);
         }
         #print(state, revision) {
-            const options = { spells: true, equipment: true, notes: true, provenance: false };
+            const options = { spells: true, equipment: true, provenance: false };
             this.#open(this.#t("Print / PDF"), [el("p", this.#t("Choose Save as PDF in the browser print dialog for a PDF copy.")), ...Object.entries(options).map(([key, value]) => checkbox(this.#t(label(key)), value, enabled => { options[key] = enabled; })), button(this.#t("Open print preview"), () => { try {
                     printCharacter(state, revision, this.#name, options, this.#context?.host.locale);
                 }

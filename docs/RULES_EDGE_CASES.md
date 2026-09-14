@@ -38,8 +38,9 @@ page, with the host navigation guard, and is not durable until saved.
 ## Rules and transfer
 
 Without a compatible provider, saved projections and explanations render as
-stored. Notes save against their accepted projection; mechanical changes stay
-disabled. Loading never adopts changed rules. Tools provides explicit adoption.
+stored; mechanical changes stay disabled. The versioned notes service remains
+compatible for existing clients, but the sheet offers no character notes editor.
+Loading never adopts changed rules. Tools provides explicit adoption.
 
 Imports validate a closed current envelope, recalculate mechanics and preview
 replacement before confirmation. Imported DM grants need the current DM's
@@ -57,3 +58,11 @@ Changing retention preserves the existing worker-authority schema identity.
 Pre-existing retained archives and historical installation backups are left
 untouched; the character service no longer exposes them or creates new entries.
 Live installation and any archive deletion remain separate operational actions.
+
+## Profile notes and presentation
+
+Character notes are edited through the host profile. The sheet no longer renders
+a character Notes tab, editor, or printed notes section. Existing schema-4 notes
+and the versioned service remain compatible for saved data and transfer; this UI
+change does not erase existing character content. Item-specific notes remain
+part of inventory.

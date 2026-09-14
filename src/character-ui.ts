@@ -62,14 +62,14 @@ export function styled<K extends keyof HTMLElementTagNameMap>(tag: K, className:
 }
 export function signed(value: unknown): string { return typeof value === "number" ? `${value >= 0 ? "+" : ""}${value}` : "—"; }
 export interface TabOption { id: string; label: string }
-export function tabStrip(name: string, options: readonly TabOption[], active: string, change: (id: string) => void, prefix: string): HTMLElement {
-  const nav = styled("nav", "codex-tab-strip"); nav.setAttribute("role", "tablist"); nav.setAttribute("aria-label", name);
+export function tabStrip(name: string, options: readonly TabOption[], active: string, change: (id: string) => void, prefix: string, orientation: "horizontal" | "vertical" = "horizontal"): HTMLElement {
+  const nav = styled("nav", "codex-tab-strip"); nav.setAttribute("role", "tablist"); nav.setAttribute("aria-label", name); nav.setAttribute("aria-orientation", orientation);
   options.forEach((option, index) => {
     const selected = option.id === active, item = button(option.label, () => change(option.id));
     item.className = `codex-tab${selected ? " is-active" : ""}`; item.id = `${prefix}-tab-${option.id}`;
     item.setAttribute("role", "tab"); item.setAttribute("aria-selected", String(selected)); item.setAttribute("aria-controls", `${prefix}-panel-${option.id}`); item.tabIndex = selected ? 0 : -1;
     item.addEventListener("keydown", event => {
-      const next = event.key === "Home" ? 0 : event.key === "End" ? options.length - 1 : event.key === "ArrowRight" ? (index + 1) % options.length : event.key === "ArrowLeft" ? (index + options.length - 1) % options.length : -1;
+      const next = event.key === "Home" ? 0 : event.key === "End" ? options.length - 1 : event.key === (orientation === "vertical" ? "ArrowDown" : "ArrowRight") ? (index + 1) % options.length : event.key === (orientation === "vertical" ? "ArrowUp" : "ArrowLeft") ? (index + options.length - 1) % options.length : -1;
       if (next < 0) return; event.preventDefault(); const id = options[next]!.id; change(id); document.getElementById(`${prefix}-tab-${id}`)?.focus();
     }); nav.append(item);
   }); return nav;

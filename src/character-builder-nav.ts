@@ -16,7 +16,7 @@ export function builderShell(view: BuildView, state: BuilderNavigation, body: HT
     rail.append(step);
   }
   if (!rows(guidance["sections"]).length) rail.append(styled("section", "dse-build-step", el("p", t("Choose your origin, abilities and first class to start building."))));
-  const classes = [...new Set(view.input.build.levels.map(level => level.classId))], tabs = [{ id: "character", label: t("Character") }, { id: "levels", label: t("Levels") }, ...classes.map(id => ({ id, label: String(view.catalogs.get("class")?.find(record => record.id === id)?.value["name"] ?? id) + " " + view.input.build.levels.filter(level => level.classId === id).length })), { id: "add-class", label: "+" }, { id: "spells", label: t("Spells") }];
+  const classes = [...new Set(view.input.build.levels.map(level => level.classId))], tabs = [{ id: "character", label: t("Character") }, { id: "levels", label: t("Levels") }, ...classes.map(id => ({ id, label: String(view.catalogs.get("class")?.find(record => record.id === id)?.value["name"] ?? id) + " " + view.input.build.levels.filter(level => level.classId === id).length })), { id: "add-class", label: "+" }, { id: "spells", label: t("Spells") }, { id: "dm-given", label: t("DM given") }];
   const nav = tabStrip(t("Builder sections"), tabs, state.tab, id => navigate(id), "dnd-builder"); nav.classList.add("dnd-builder-tabs"); nav.querySelector("#dnd-builder-tab-add-class")?.setAttribute("aria-label", t("Add class"));
   body.id = "dnd-builder-panel-" + state.tab; body.setAttribute("role", "tabpanel"); body.setAttribute("aria-labelledby", "dnd-builder-tab-" + state.tab);
   return styled("div", "dse-builder-shell", rail, styled("div", "dse-builder-main", nav, body));

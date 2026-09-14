@@ -54,7 +54,7 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
   return root;
 }
 
-export function printCharacter(state: State, _revision: number, name: string, options: { spells: boolean; equipment: boolean; notes: boolean; provenance: boolean }, locale = "en"): void {
+export function printCharacter(state: State, _revision: number, name: string, options: { spells: boolean; equipment: boolean; provenance: boolean }, locale = "en"): void {
   const t = translator(locale);
   const view = window.open("about:blank", "_blank", "popup,width=1000,height=850");
   if (!view) throw new Error("Allow the print window, then try again.");
@@ -75,7 +75,6 @@ export function printCharacter(state: State, _revision: number, name: string, op
       if (entries.length) root.append(panel(t(title), ...entries.map(([id, ids]) => el("p", `${recordName("class", id)}: ${ids.map(spell => recordName("spell", spell)).join(", ")}`))));
     }
   }
-  if (options.notes) root.append(panel(t("Notes"), el("p", state.inputs.notes)));
   if (state.inputs.grants.length) root.append(panel(t("DM given"), ...state.inputs.grants.map(grant => el("p", t("{0}: {1}; {2}; {3}; {4}", [grant.name, grant.reason, grant.actorId, grant.grantedAt, t(grant.active ? "active" : "revoked")])))));
   if (options.provenance) {
     const build = state.inputs.build;

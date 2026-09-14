@@ -12,7 +12,7 @@ import { buildView, type BuildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
 import { button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
 
-type Tab = "sheet" | "combat" | "spells" | "notes" | "builder" | "tools";
+type Tab = "sheet" | "combat" | "spells" | "builder" | "tools";
 export function defineCharacterElement(generation: string, client: CharacterClient): string {
   const tag = `dnd-character-${generation}`;
   if (customElements.get(tag)) return tag;
@@ -24,7 +24,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     #changeVersion = 0;
     #blocked = false;
     #layout: Layout = "compact";
-    #builderNav: BuilderNavigation = { tab: "character", target: "", open: false };
+    #builderNav: BuilderNavigation = { tab: "character", target: "", open: true };
     #t = (key: string, values?: readonly unknown[]): string => translator(this.#context?.host.locale ?? "en")(key, values);
     #unsubscribe: (() => void) | undefined;
     #refreshTimer: ReturnType<typeof setTimeout> | undefined;
@@ -94,15 +94,13 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       const run = async (): Promise<void> => {
         while (this.#dirty && !this.#blocked && this.isConnected && epoch === this.#epoch) {
           const version = this.#changeVersion, inputs = structuredClone(this.#input), base = this.#response?.state?.inputs ?? blank();
-          const onlyNotes = JSON.stringify({ ...inputs, notes: base.notes }) === JSON.stringify(base);
-          const frozen = onlyNotes && this.#response?.status === "unavailable", changedRules = onlyNotes && this.#response?.rulesChanged;
-          const response = await this.#call("save", { ...this.#base(onlyNotes ? "notes" : "build"), inputs });
+          const response = await this.#call("save", { ...this.#base("build"), inputs });
           if (response.status === "conflict" && response.state) {
             const merged = mergeCharacter(base, this.#input, response.state.inputs);
             if (merged) { this.#response = { ...this.#response, ...response }; this.#baseRevision = response.revision; this.#input = merged; this.#render(); continue; }
             this.#blocked = true; this.#message = "This character was edited elsewhere. Your pending input remains on this page. Reload the character before continuing."; this.#status(); break;
           }
-          if (response.evaluation && !onlyNotes) this.#evaluation = response.evaluation;
+          if (response.evaluation) this.#evaluation = response.evaluation;
           if (response.status !== "ready" || !response.state) {
             this.#blocked = true; this.#message = response.message;
             if (response.status === "invalid" && version === this.#changeVersion) {
@@ -110,7 +108,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
             }
             this.#render(); break;
           }
-          this.#response = { ...this.#response, ...response, ...(frozen ? { status: "unavailable" } : {}), ...(changedRules ? { rulesChanged: true } : {}) }; this.#baseRevision = response.revision;
+          this.#response = { ...this.#response, ...response }; this.#baseRevision = response.revision;
           // Incorporate server corrections without replacing objects bound to active fields.
           if (this.#input.play.asOf === inputs.play.asOf) this.#input.play.asOf = response.state.inputs.play.asOf;
           if (this.#input.play.hp === inputs.play.hp) this.#input.play.hp = response.state.inputs.play.hp;
@@ -148,19 +146,15 @@ export function defineCharacterElement(generation: string, client: CharacterClie
         for (const child of [...this.children]) if (child !== dialog) child.remove();
         this.prepend(root); return;
       }
-      const view = this.#sheetView(), classes = [...new Set(this.#input.build.levels.map(level => level.classId))];
-      const title = classes.map(id => recordName(view, "class", id) + " " + this.#input.build.levels.filter(level => level.classId === id).length).join(" / ") || this.#name;
-      const subtitle = [this.#input.build.species && recordName(view, "species", this.#input.build.species), this.#input.build.background && recordName(view, "background", this.#input.build.background)].filter(Boolean).join(" · ");
-      const heading = styled("div", "dnd-sheet-heading", el("div", el("h2", title), ...(subtitle ? [el("p", subtitle)] : [])));
-      const options = ["sheet", "combat", "spells", "notes", "builder", "tools"].map(id => ({ id, label: this.#t(({ sheet: "Sheet", combat: "Combat", spells: "Spells", notes: "Notes", builder: "Builder", tools: "Tools" } as Record<string,string>)[id]!) }));
-      const nav = tabStrip(this.#t("Character views"), options, this.#tab, id => { this.#tab = id as Tab; this.#render(); }, "dnd");
+      const view = this.#sheetView();
+      const options = ["sheet", "combat", "spells", "builder", "tools"].map(id => ({ id, label: this.#t(({ sheet: "Sheet", combat: "Combat", spells: "Spells", builder: "Builder", tools: "Tools" } as Record<string,string>)[id]!) }));
+      const nav = tabStrip(this.#t("Character views"), options, this.#tab, id => { this.#tab = id as Tab; this.#render(); }, "dnd", "vertical");
       nav.classList.add("dnd-sheet-tabs");
       const status = styled("div", "dnd-save-status", el("span", this.#t(this.#message))); status.dataset["characterStatus"] = ""; status.setAttribute("role", "status");
       if (this.#blocked && this.#dirty) status.append(button(this.#t("Retry"), () => { this.#blocked = false; return this.#flush(); }));
       const content = styled("div", "dnd-sheet-panel"); content.id = "dnd-panel-" + this.#tab; content.setAttribute("role", "tabpanel"); content.setAttribute("aria-labelledby", "dnd-tab-" + this.#tab);
       if (this.#tab === "builder") content.append(this.#builder());
       else if (this.#tab === "tools") content.append(this.#tools());
-      else if (this.#tab === "notes") content.append(this.#notes());
       else if (this.#tab === "spells") content.append(vitals(view), this.#spells());
       else {
         const main = styled("div", "dse-cols-main", vitals(view));
@@ -168,7 +162,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
         main.append(this.#tab === "combat" ? this.#combat() : backpack(view));
         content.append(styled("div", "dse-cols", abilityRail(view), main));
       }
-      root.append(heading, nav, status, content);
+      root.append(nav, styled("div", "dnd-sheet-workspace", status, content));
       for (const child of [...this.children]) if (child !== dialog) child.remove();
       this.prepend(root); this.#syncBusyButtons();
       for (const field of root.querySelectorAll<HTMLElement>(".character-field")) {
@@ -203,10 +197,10 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     #builder(): HTMLElement {
       const body = el("fieldset"); body.disabled = !this.#editable || this.#response?.status === "unavailable" || !!this.#response?.rulesChanged;
       const view = this.#view();
-      if (!["character","levels","spells","add-class", ...this.#input.build.levels.map(level => level.classId)].includes(this.#builderNav.tab)) this.#builderNav.tab = "character";
-      if (this.#builderNav.tab === "spells") body.append(this.#spellChoices());
+      if (!["character","levels","spells","add-class","dm-given", ...this.#input.build.levels.map(level => level.classId)].includes(this.#builderNav.tab)) this.#builderNav.tab = "character";
+      if (this.#builderNav.tab === "dm-given") body.append(this.#grants());
+      else if (this.#builderNav.tab === "spells") body.append(this.#spellChoices());
       else body.append(buildView(view, this.#builderNav.tab));
-      if (this.#builderNav.tab === "character") body.append(this.#grants());
       return builderShell(view, this.#builderNav, body, (tab, target = "") => {
         this.#builderNav.tab = tab; this.#builderNav.target = target; this.#render();
         if (target) { const node = this.querySelector<HTMLElement>('[data-builder-target="' + CSS.escape(target) + '"]') ?? this.querySelector<HTMLElement>("#character-choice-" + CSS.escape(encodeURIComponent(target)));
@@ -237,10 +231,6 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       fields.append(this.#spellChoices()); choices.append(fields);
       root.append(controls, choices);
       return root;
-    }
-    #notes(): HTMLElement {
-      const notes = textInput(this.#input.notes, value => { this.#input.notes = value; this.#changed(); }, true); notes.disabled = !this.#editable;
-      return field(this.#t("Character notes"), notes);
     }
     #tools(): HTMLElement {
       const tools = styled("div", "character-toolbar", field(this.#t("Sheet layout"), select(this.#layout, [{id:"compact",label:this.#t("Compact")},{id:"classic",label:this.#t("Classic")}], value => {
@@ -335,7 +325,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       })]);
     }
     #print(state: State, revision: number): void {
-      const options = { spells: true, equipment: true, notes: true, provenance: false };
+      const options = { spells: true, equipment: true, provenance: false };
       this.#open(this.#t("Print / PDF"), [el("p", this.#t("Choose Save as PDF in the browser print dialog for a PDF copy.")), ...Object.entries(options).map(([key, value]) => checkbox(this.#t(label(key)), value, enabled => { options[key as keyof typeof options] = enabled; })), button(this.#t("Open print preview"), () => { try { printCharacter(state, revision, this.#name, options, this.#context?.host.locale); } catch (error) { this.#message = error instanceof Error ? error.message : "Printing failed."; this.#status(); } })]);
     }
   }

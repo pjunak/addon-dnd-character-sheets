@@ -34,9 +34,9 @@ instructions were loaded or read unrelated sibling implementations.
 - `src/character-client.ts` owns browser service, transfer and conflict merging.
   Rules-engine calls remain serializable and versioned; runtime policy must
   never select providers by a sibling add-on ID.
-- Without compatible rules, saved projections, notes, print and export
+- Without compatible rules, saved projections, print and export
   remain usable. Mechanical changes require rules; no manual stat fallback.
-- Current HP, inventory, currency, resources, spells, and notes are authored
+- Current HP, inventory, currency, resources, spells, and item notes are authored
   play state. Recalculation must preserve them unless a user explicitly edits
   them.
 - Panels and controls do not implement edition-dependent rules. Controls consume engine-provided budgets, costs and eligibility. Ability modifiers and all mechanical bounds come from

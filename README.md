@@ -1,16 +1,19 @@
 # D&D Character Sheets
 
-The workspace has **Sheet**, **Combat**, **Spells**, **Notes**, **Builder** and
-**Tools** tabs. Compact and Classic layouts share one engine-calculated
+The workspace has **Sheet**, **Combat**, **Spells**, **Builder** and **Tools**
+tabs in a vertical left rail, with Builder and Tools at the bottom. Compact and Classic layouts share one engine-calculated
 character. Authorized editors can change inventory, equipment, currency, HP,
-resources, spells and notes directly in their tabs.
+resources and spells directly in their tabs. Character notes belong to the core
+profile; the sheet has no Notes tab or notes section in print.
 
 Valid changes save automatically. Build completion is separate from validity:
 an unfinished character is saved as it is built, while rules-dependent play
 requires outstanding choices to be completed. There are no device drafts,
 manual save buttons, revision history, undo or restore commands.
 
-Builder separates **Character**, **Levels**, and one tab per selected class.
+Builder separates **Character**, **Levels**, one tab per selected class, and
+**DM given**. Progress starts expanded in a left sidebar; narrow layouts stack
+it above the form.
 Use **+** to add an eligible class and the class tab to add or remove levels.
 Point buy and granted ability increases show live used/remaining budgets with
 bounded steppers. Searchable dropdowns display descriptions while browsing and
@@ -20,7 +23,10 @@ duplicate granted selections are excluded.
 **Tools** owns export, reviewed replacement import, printing, layout and rules
 status. Transfers use `dnd-character.v1` / schema 4.0.0 and contain the current
 character only. Changed installed rules require explicit adoption. Without
-compatible rules, saved values, notes, export and printing remain usable.
+compatible rules, saved values, export and printing remain usable.
+
+The sheet is limited to 1,120 px and has no duplicate character heading. Compact
+uses tighter ability cards and places currency directly below inventory.
 
 The host owns the core profile, portrait and relationships. The native worker
 provides `dnd5e.character` 2.0.0 and is the only writer of the `dnd-sheets`
