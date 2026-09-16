@@ -411,5 +411,11 @@
   "Choose {0} spellbook spells": "Choose {0} spellbook spells",
   "Choose spells: {0}": "Choose spells: {0}",
   "Choose casting ability: {0}": "Choose casting ability: {0}",
-  "Granted spells · choose {0}": "Granted spells · choose {0}"
+  "Granted spells · choose {0}": "Granted spells · choose {0}",
+  "{0} · {1} · {2} level {3}": "{0} · {1} · {2} level {3}",
+  "Assign saved feat choices": "Assign saved feat choices",
+  "Granting source": "Granting source",
+  "Discard saved choices": "Discard saved choices",
+  "{0} · {1}": "{0} · {1}",
+  "{0} · {1} level {2}": "{0} · {1} level {2}"
 }

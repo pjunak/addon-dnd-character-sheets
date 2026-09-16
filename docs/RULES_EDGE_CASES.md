@@ -26,7 +26,7 @@ Point buy, granted budgets, source choices and class prerequisites come from the
 engine. UI controls prevent overspending and duplicate selections; server
 validation also protects against stale or forged requests.
 
-Changing an earlier origin or level removes only previously saved selections
+Changing an earlier origin or level, or amending/revoking a DM grant, removes only previously saved selections
 that the Engine identifies as unavailable choices, ineligible options or slots
 beyond the new choice count. Stable issue IDs identify the exact slot; valid
 siblings and newly edited replacements survive. Dependent withdrawals settle
@@ -68,6 +68,15 @@ section and focus its first unfinished visible control. Host `ui.controls.v1`
 owns comboboxes and tabs; refresh enhancement before restoring keyboard focus
 so the hidden native value select never receives focus. Reduced-motion settings
 disable animated navigation.
+
+Repeatable feat choices carry Engine-owned acquisition IDs and source labels.
+The shared Builder controls render each set independently. A single historical
+unscoped choice is attached to its sole owner in the Engine's detached result
+and becomes durable only on an authorized save/adoption. Ambiguous historical
+choices remain visible in an assignment panel: select an empty granting source
+or explicitly discard them. They never populate every repeat or get silently
+withdrawn as unavailable. Removing one acquisition preserves other acquisitions'
+IDs, exact slots and authored play state.
 
 ## Rules and transfer
 

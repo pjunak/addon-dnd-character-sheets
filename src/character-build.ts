@@ -60,6 +60,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
     }
     root.append(foundation);
     const choices = panel(t("Granted choices"));
+    for (const repair of unassignedFeatChoices(view, rows(plan["creationChoices"]), guidance)) choices.append(repair);
     for (const key of ["creationChoices", "creationAbilityChoices"]) for (const descriptor of rows(plan[key])) choices.append(choiceView(descriptor,object(guidance[String(descriptor["id"])]),view));
     if (choices.children.length>1) root.append(choices);
     return root;
@@ -103,6 +104,29 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
   if(active!=="levels") levels.append(button(t("Add level"),()=>add(active),!available.some(option=>option.id===active)));
   if(!build.levels.length) levels.append(el("p",t("Use + to choose your first class.")));
   root.append(levels); return root;
+}
+
+function unassignedFeatChoices(view: BuildView, descriptors: Record<string, unknown>[], guidance: Record<string, unknown>): HTMLElement[] {
+  const t=translator(view.locale), result: HTMLElement[]=[], aliases=new Set(descriptors.map(row=>String(row["legacyId"]??"")).filter(Boolean));
+  for(const alias of aliases) {
+    if(!view.input.build.choices.some(choice=>choice.id===alias))continue;
+    const owners=descriptors.filter(row=>row["legacyId"]===alias);
+    const repair=panel(t("Assign saved feat choices")); repair.id=`character-choice-${encodeURIComponent(alias)}`;
+    const available=owners.filter(row=>!view.input.build.choices.some(choice=>choice.id===row["id"])).map(row=>({
+      id:String(row["id"]), label:builderLabel(object(guidance[String(row["id"])]),view.locale,String(row["name"]??row["id"]))
+    }));
+    repair.append(field(t("Granting source"),combo("",available,id=>{
+      if(!id)return;
+      view.input.build.choices=view.input.build.choices.map(choice=>choice.id===alias?{...choice,id}:choice);
+      view.changed(); view.refresh();
+    },t)));
+    repair.append(button(t("Discard saved choices"),()=>{
+      view.input.build.choices=view.input.build.choices.filter(choice=>choice.id!==alias);
+      view.changed(); view.refresh();
+    },false));
+    result.push(repair);
+  }
+  return result;
 }
 
 function choiceView(descriptor: Record<string, unknown>, guidance: Record<string, unknown>, view: BuildView): HTMLElement {

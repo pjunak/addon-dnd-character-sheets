@@ -122,10 +122,11 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 			}
 		}
 	}
-	// A changed origin or level can withdraw earlier grants. Remove only
-	// previously saved selections that the engine now marks as unavailable;
-	// a newly supplied illegal option is still rejected.
-	if request.Operation == "build" && state != nil {
+	// Structural edits can withdraw earlier grants. Remove only previously
+	// saved selections that the engine now marks as unavailable; a newly
+	// supplied illegal option is still rejected.
+	repairChoices := request.Operation == "build" || request.Operation == "amend-grant" || request.Operation == "revoke-grant"
+	if repairChoices && state != nil {
 		// Each pass removes at least one saved selection, so dependent grants
 		// settle without an arbitrary depth limit.
 		for {

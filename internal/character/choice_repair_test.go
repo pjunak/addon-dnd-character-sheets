@@ -44,6 +44,41 @@ func TestEarlierEditPreservesUnaffectedChoiceSlots(t *testing.T) {
 	}
 }
 
+func TestDMGrantChangesWithdrawOnlyTheirSavedChoices(t *testing.T) {
+	for _, operation := range []string{"amend-grant", "revoke-grant"} {
+		t.Run(operation, func(t *testing.T) {
+			c, data, engine, meta := fixture(t)
+			meta.Actor.Role = "dm"
+			grant := model.Grant{Name: "Training", Reason: "Study", Condition: "always", EffectiveLevel: 1, Feat: &model.Reference{Kind: "feat", ID: "training"}}
+			added, err := invoke(t, c, meta, "save", Request{Operation: "grant", OperationID: "training-reward", Summary: "Training", Grant: &grant})
+			if err != nil || added.Status != "ready" {
+				t.Fatal(added, err)
+			}
+			input := added.State.Inputs
+			input.Notes = "Preserve these notes"
+			input.Build.Choices = []model.Choice{{ID: "origin-training", Value: raw("kept")}, {ID: "reward-training", Value: raw("withdrawn")}}
+			saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "training-selections", Summary: "Choices", Inputs: &input, ExpectedRevision: 1})
+			if err != nil || saved.Status != "ready" {
+				t.Fatal(saved, err)
+			}
+			engine.inspect = func(input model.Inputs) []model.Issue {
+				available := len(input.Grants) > 0 && input.Grants[0].Feat != nil && input.Grants[0].Feat.ID == "training"
+				for _, choice := range input.Build.Choices {
+					if !available && choice.ID == "reward-training" {
+						return []model.Issue{{ID: "unavailable-choice:reward-training#0", Target: "reward-training", Severity: "blocker"}}
+					}
+				}
+				return nil
+			}
+			grant.Feat = &model.Reference{Kind: "feat", ID: "replacement"}
+			changed, err := invoke(t, c, meta, "save", Request{Operation: operation, OperationID: "changed-reward", Summary: "Change reward", GrantID: added.State.Inputs.Grants[0].ID, Grant: &grant, ExpectedRevision: 2})
+			if err != nil || changed.Status != "ready" || data.writes != 3 || !reflect.DeepEqual(data.state.Inputs.Build.Choices, input.Build.Choices[:1]) || data.state.Inputs.Notes != input.Notes {
+				t.Fatal("grant change lost unrelated input or could not withdraw its own choices", changed, err)
+			}
+		})
+	}
+}
+
 func TestEarlierEditRepairsTheFullWithdrawnDependencyChain(t *testing.T) {
 	c, data, engine, meta := fixture(t)
 	input := model.Blank()

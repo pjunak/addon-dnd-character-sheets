@@ -260,7 +260,7 @@
 .addon-dnd-character .character-build .character-stats { grid-template-columns:repeat(6,minmax(0,1fr)); }
 .addon-dnd-character .character-field { margin-block:.6rem; }
 .addon-dnd-character .character-field label { font-size:.875rem; font-weight:500; color:var(--text-muted); }
-.addon-dnd-character .character-panel h3 { font-size:1.05rem; }
+.addon-dnd-character .character-panel h3 { font-size:1.05rem; overflow-wrap:anywhere; }
 .addon-dnd-character .character-panel > :is(p,details) { margin-block:.5rem; }
 .addon-dnd-character .character-panel > .character-panel { padding:.75rem; }
 .addon-dnd-character .dnd-spell-row { grid-template-columns:minmax(10rem,1fr) auto auto; align-items:center; }
@@ -284,7 +284,7 @@
   .addon-dnd-character .dse-cols { gap:1rem; }
   .addon-dnd-character .dse-bp-split { grid-template-columns:1fr; }
   .addon-dnd-character .dnd-spell-row { grid-template-columns:1fr; }
-  .addon-dnd-character .character-build .character-stats { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .addon-dnd-character .character-build .character-stats { grid-template-columns:repeat(auto-fit,minmax(min(100%,7rem),1fr)); }
   .addon-dnd-character .dse-builder-summary { gap:.35rem; }
   .addon-dnd-character .dse-builder-summary .codex-tile { padding:.4rem; flex:1; min-width:0; }
   .addon-dnd-character .dse-builder-summary .dse-stat-label { font-size:.65rem; }
@@ -312,9 +312,9 @@
 .character-foundation { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; }
 .character-foundation > h3, .character-foundation > .character-stats, .character-foundation > .dnd-builder-progress { grid-column:1/-1; }
 .character-stepper { display:flex; min-width:0; align-items:stretch; }
-.character-stepper input { width:100%; text-align:center; font-size:1.25rem; appearance:textfield!important; border-radius:4px 0 0 4px; }
+.character-stepper input { flex:1 1 0; width:0; min-width:0; text-align:center; font-size:1.25rem; appearance:textfield!important; border-radius:4px 0 0 4px; }
 .character-stepper input::-webkit-inner-spin-button { appearance:none; }
-.character-stepper-arrows { display:grid; }
+.character-stepper-arrows { display:grid; flex:0 0 auto; }
 .character-stepper-arrows button { min-height:1.5rem; padding:0 .65rem; border-radius:0; line-height:1; background:var(--bg-raised); border:1px solid var(--border-subtle); }
 .character-stepper-arrows button:disabled { opacity:.35; }
 .character-field > label { display:block; margin-bottom:.3rem; }
@@ -362,7 +362,7 @@
 .addon-dnd-character .dse-layout-compact .dse-vitals { gap:.35rem; }
 .addon-dnd-character .dse-layout-compact .dse-vitals .codex-tile { padding:.4rem; }
 @container builder (max-width:38rem) {
- .addon-dnd-character .character-build .character-stats { grid-template-columns:repeat(3,minmax(0,1fr)); }
+ .addon-dnd-character .character-build .character-stats { grid-template-columns:repeat(auto-fit,minmax(min(100%,7rem),1fr)); }
  .character-foundation { grid-template-columns:1fr; }
 }
 @container sheet-workspace (max-width:46rem) {

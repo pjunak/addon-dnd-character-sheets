@@ -413,7 +413,13 @@ export const catalogs = {
         "Choose {0} spellbook spells": "Choose {0} spellbook spells",
         "Choose spells: {0}": "Choose spells: {0}",
         "Choose casting ability: {0}": "Choose casting ability: {0}",
-        "Granted spells · choose {0}": "Granted spells · choose {0}"
+        "Granted spells · choose {0}": "Granted spells · choose {0}",
+        "{0} · {1} · {2} level {3}": "{0} · {1} · {2} level {3}",
+        "Assign saved feat choices": "Assign saved feat choices",
+        "Granting source": "Granting source",
+        "Discard saved choices": "Discard saved choices",
+        "{0} · {1}": "{0} · {1}",
+        "{0} · {1} level {2}": "{0} · {1} level {2}"
     },
     "cs": {
         "Background": "Zázemí",
@@ -828,6 +834,12 @@ export const catalogs = {
         "Choose {0} spellbook spells": "Vybrat kouzla do knihy kouzel: {0}",
         "Choose spells: {0}": "Vybrat kouzla: {0}",
         "Choose casting ability: {0}": "Vybrat sesílací vlastnost: {0}",
-        "Granted spells · choose {0}": "Udělená kouzla · vybrat {0}"
+        "Granted spells · choose {0}": "Udělená kouzla · vybrat {0}",
+        "{0} · {1} · {2} level {3}": "{0} · {1} · {2}, úroveň {3}",
+        "Assign saved feat choices": "Přiřadit uložené volby odbornosti",
+        "Granting source": "Zdroj volby",
+        "Discard saved choices": "Zahodit uložené volby",
+        "{0} · {1}": "{0} · {1}",
+        "{0} · {1} level {2}": "{0} · {1}, úroveň {2}"
     }
 };
