@@ -31,6 +31,7 @@ export interface AddonContext {
     }): Promise<ServiceHandle>;
   };
   readonly ui: {
+    enhance(root: HTMLElement): { refresh(): void; dispose(): void };
     bind(contributionId: string, binding: { readonly kind: "element"; readonly tag: string }): { dispose(): void };
   };
 }

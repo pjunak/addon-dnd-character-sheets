@@ -5,7 +5,7 @@ import { playActions } from "./character-play.js";
 import { abilityRail, backpack, combatDetails, equipmentSlot, preferredLayout, recordName, savedRule, vitals, type EquipmentSlot, type Layout, type SheetView } from "./character-sheet.js";
 import { equipmentPicker } from "./character-equipment.js";
 import { builderShell, type BuilderNavigation } from "./character-builder-nav.js";
-import type { ContributionContext } from "./sdk.js";
+import type { AddonContext, ContributionContext } from "./sdk.js";
 import type { Grant, Inputs, Request, Response, Result, State } from "./character-model.js";
 import { CharacterClient, blank, exportCharacter, mergeCharacter, newId, object, parseCharacter, rows, strings, type CatalogRecord } from "./character-client.js";
 import { buildView, type BuildView } from "./character-build.js";
@@ -13,10 +13,11 @@ import { printCharacter } from "./character-projection.js";
 import { button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
 
 type Tab = "sheet" | "combat" | "spells" | "builder" | "tools";
-export function defineCharacterElement(generation: string, client: CharacterClient): string {
+export function defineCharacterElement(generation: string, client: CharacterClient, enhance: AddonContext["ui"]["enhance"]): string {
   const tag = `dnd-character-${generation}`;
   if (customElements.get(tag)) return tag;
   class CharacterElement extends HTMLElement {
+    #controls: ReturnType<AddonContext["ui"]["enhance"]> | undefined;
     #context: ContributionContext | undefined; #response: Response | undefined; #input: Inputs = blank(); #evaluation: Result | undefined;
     #baseRevision = 0; #dirty = false; #busy = false; #tab: Tab = "sheet"; #message = ""; #epoch = 0;
     #catalogs = new Map<string, CatalogRecord[]>(); #dialog: HTMLDialogElement | undefined; #timer: ReturnType<typeof setTimeout> | undefined;
@@ -29,8 +30,8 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     #unsubscribe: (() => void) | undefined;
     #refreshTimer: ReturnType<typeof setTimeout> | undefined;
     set codexContribution(value: ContributionContext) { const previous = this.#context; this.#context = value; if (this.isConnected && previous?.host.key !== value.host.key) { this.#epoch++; this.#saving = undefined; this.#changeVersion++; this.#busy = false; this.#response = undefined; this.#evaluation = undefined; this.#catalogs.clear(); this.#dialog?.close(); clearTimeout(this.#timer); void this.#load(); } else this.#render(); }
-    connectedCallback(): void { this.classList.add("addon-dnd-character", "addon-dnd-sheets"); this.#busy = false; this.#unsubscribe = client.subscribe(() => { clearTimeout(this.#refreshTimer); this.#refreshTimer = setTimeout(() => { void this.#refreshSaved(); }, 250); }); void this.#load(); }
-    disconnectedCallback(): void { this.#epoch++; this.#saving = undefined; this.#changeVersion++; this.#unsubscribe?.(); clearTimeout(this.#refreshTimer); clearTimeout(this.#timer); this.#dialog?.close(); this.#context?.edits.set({ dirty: false, saving: false }); }
+    connectedCallback(): void { this.#controls = enhance(this); this.classList.add("addon-dnd-character", "addon-dnd-sheets"); this.#busy = false; this.#unsubscribe = client.subscribe(() => { clearTimeout(this.#refreshTimer); this.#refreshTimer = setTimeout(() => { void this.#refreshSaved(); }, 250); }); void this.#load(); }
+    disconnectedCallback(): void { this.#controls?.dispose(); this.#controls = undefined; this.#epoch++; this.#saving = undefined; this.#changeVersion++; this.#unsubscribe?.(); clearTimeout(this.#refreshTimer); clearTimeout(this.#timer); this.#dialog?.close(); this.#context?.edits.set({ dirty: false, saving: false }); }
     get #key(): string { return this.#context?.host.key ?? ""; }
     get #editable(): boolean { return this.#context?.host.canEdit === true && !this.#busy; }
     get #name(): string { return String(object(this.#context?.host.value)["name"] ?? "Character"); }
@@ -81,7 +82,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       this.#dirty = true; this.#changeVersion++; this.#blocked = false; this.#message = "Saving…"; this.#publish(); this.#status();
       clearTimeout(this.#timer); this.#timer = setTimeout(() => { void this.#flush(); }, 250);
     };
-    #status(): void { const node = this.querySelector<HTMLElement>("[data-character-status]"); if (node?.firstElementChild) node.firstElementChild.textContent = this.#t(this.#message); }
+    #status(): void { const node = this.querySelector<HTMLElement>("[data-character-status]"); if (node?.firstElementChild) { node.firstElementChild.textContent = this.#t(this.#message); node.dataset["uiState"] = this.#blocked ? "error" : this.#dirty ? "loading" : "success"; } }
     #accept(response: Response): void {
       this.#response = { ...this.#response, ...response }; this.#baseRevision = response.revision;
       if (response.evaluation) this.#evaluation = response.evaluation;
@@ -134,6 +135,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     }
     #view(): BuildView { return { locale: this.#context?.host.locale ?? "en", input: this.#input, evaluation: this.#evaluation, policy: this.#response?.policy ?? {}, catalogs: this.#catalogs, changed: this.#changed, navigate: tab => { this.#builderNav.tab = tab; }, refresh: () => this.#render() }; }
     #render(): void {
+      this.lang = this.#context?.host.locale ?? "en";
       if (!this.isConnected || !this.#context) return;
       const dialog = this.#dialog?.open ? this.#dialog : undefined;
       const focused = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
@@ -150,7 +152,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       const options = ["sheet", "combat", "spells", "builder", "tools"].map(id => ({ id, label: this.#t(({ sheet: "Sheet", combat: "Combat", spells: "Spells", builder: "Builder", tools: "Tools" } as Record<string,string>)[id]!) }));
       const nav = tabStrip(this.#t("Character views"), options, this.#tab, id => { this.#tab = id as Tab; this.#render(); }, "dnd", "vertical");
       nav.classList.add("dnd-sheet-tabs");
-      const status = styled("div", "dnd-save-status", el("span", this.#t(this.#message))); status.dataset["characterStatus"] = ""; status.setAttribute("role", "status");
+      const status = styled("div", "dnd-save-status", el("span", this.#t(this.#message))); status.dataset["characterStatus"] = ""; status.dataset["uiState"] = this.#blocked ? "error" : this.#dirty ? "loading" : "success"; status.setAttribute("role", "status");
       if (this.#blocked && this.#dirty) status.append(button(this.#t("Retry"), () => { this.#blocked = false; return this.#flush(); }));
       const content = styled("div", "dnd-sheet-panel"); content.id = "dnd-panel-" + this.#tab; content.setAttribute("role", "tabpanel"); content.setAttribute("aria-labelledby", "dnd-tab-" + this.#tab);
       if (this.#tab === "builder") content.append(this.#builder());
@@ -299,7 +301,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       });
     }
     #open(title: string, content: Node[]): void {
-      this.#dialog?.close(); this.#dialog?.remove(); const dialog: HTMLDialogElement = el("dialog", el("h2", title), ...content, button(this.#t("Close"), () => dialog.close())); dialog.className = "character-dialog"; const id = `character-dialog-${newId()}`; dialog.querySelector("h2")!.id = id; dialog.setAttribute("aria-labelledby", id);
+      this.#dialog?.close(); this.#dialog?.remove(); const dialog: HTMLDialogElement = el("dialog", el("h2", title), ...content, button(this.#t("Close"), () => dialog.close())); dialog.className = "character-dialog"; dialog.dataset["uiDialog"] = ""; const id = `character-dialog-${newId()}`; dialog.querySelector("h2")!.id = id; dialog.setAttribute("aria-labelledby", id);
       const trigger = document.activeElement; dialog.addEventListener("close", () => { if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus(); }); this.#dialog = dialog; this.append(dialog); dialog.showModal(); this.#syncBusyButtons();
     }
     #import(): void {

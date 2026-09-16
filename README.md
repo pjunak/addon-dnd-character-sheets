@@ -6,6 +6,11 @@ character. Authorized editors can change inventory, equipment, currency, HP,
 resources and spells directly in their tabs. Character notes belong to the core
 profile; the sheet has no Notes tab or notes section in print.
 
+Common fields, searchable choices, actions, tabs and modal focus use the host's
+required `ui.controls.v1` [shared UI contract](../ttrpg-codex/docs/rewrite/UI_FOUNDATIONS.md).
+The host supplies interaction and theme tokens; this package retains build/play
+semantics and automatic saving.
+
 Valid changes save automatically. Build completion is separate from validity:
 an unfinished character is saved as it is built, while rules-dependent play
 requires outstanding choices to be completed. There are no device drafts,

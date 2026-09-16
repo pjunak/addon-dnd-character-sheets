@@ -22,6 +22,8 @@ export function field(label, control, help) {
     title.htmlFor = id;
     const wrapper = el("div", title, control);
     wrapper.className = "character-field";
+    wrapper.dataset["uiField"] = "";
+    wrapper.dataset["uiKey"] = label;
     if (help) {
         const hint = el("small", help);
         hint.id = `${id}-hint`;
@@ -118,7 +120,8 @@ export function tabStrip(name, options, active, change, prefix, orientation = "h
     nav.setAttribute("role", "tablist");
     nav.setAttribute("aria-label", name);
     nav.setAttribute("aria-orientation", orientation);
-    options.forEach((option, index) => {
+    nav.dataset["uiTabs"] = "";
+    options.forEach((option) => {
         const selected = option.id === active, item = button(option.label, () => change(option.id));
         item.className = `codex-tab${selected ? " is-active" : ""}`;
         item.id = `${prefix}-tab-${option.id}`;
@@ -126,15 +129,6 @@ export function tabStrip(name, options, active, change, prefix, orientation = "h
         item.setAttribute("aria-selected", String(selected));
         item.setAttribute("aria-controls", `${prefix}-panel-${option.id}`);
         item.tabIndex = selected ? 0 : -1;
-        item.addEventListener("keydown", event => {
-            const next = event.key === "Home" ? 0 : event.key === "End" ? options.length - 1 : event.key === (orientation === "vertical" ? "ArrowDown" : "ArrowRight") ? (index + 1) % options.length : event.key === (orientation === "vertical" ? "ArrowUp" : "ArrowLeft") ? (index + options.length - 1) % options.length : -1;
-            if (next < 0)
-                return;
-            event.preventDefault();
-            const id = options[next].id;
-            change(id);
-            document.getElementById(`${prefix}-tab-${id}`)?.focus();
-        });
         nav.append(item);
     });
     return nav;
@@ -162,90 +156,17 @@ export function stepper(value, change, min, max) {
     sync();
     return root;
 }
-// The text field filters options; only selecting an offered option changes data.
+// The host owns combobox interaction; the native select owns the selected value.
 export function combo(value, source, change, t = translator("en")) {
-    const root = styled("div", "character-combo"), input = el("input"), toggle = button("▾", () => show(""));
-    const menu = styled("div", "character-combo-menu"), list = styled("div", "character-combo-options"), hint = styled("div", "character-option-hint");
     const options = () => typeof source === "function" ? source() : source;
-    let selected = value, active = -1, shown = [];
-    const id = `options-${newIdForControl()}`;
-    list.id = id;
-    list.setAttribute("role", "listbox");
-    menu.hidden = true;
-    input.setAttribute("role", "combobox");
-    input.setAttribute("aria-autocomplete", "list");
-    input.setAttribute("aria-expanded", "false");
-    input.setAttribute("aria-controls", id);
-    input.autocomplete = "off";
-    input.placeholder = t("Choose…");
-    toggle.setAttribute("aria-label", t("Show options"));
-    toggle.tabIndex = -1;
-    hint.setAttribute("role", "tooltip");
-    hint.id = id + "-hint";
-    hint.hidden = true;
-    const label = () => options().find(option => option.id === selected)?.label ?? selected;
-    const close = () => { menu.hidden = true; input.setAttribute("aria-expanded", "false"); input.removeAttribute("aria-activedescendant"); input.value = label(); };
-    const choose = (option) => { if (option.disabled)
-        return; selected = option.id; close(); change(selected); input.focus(); };
-    const highlight = (index) => {
-        active = index;
-        [...list.children].forEach((row, at) => { row.classList.toggle("is-active", at === active); });
-        const option = shown[active], row = list.children[active];
-        if (option && row) {
-            input.setAttribute("aria-activedescendant", row.id);
-            row.scrollIntoView({ block: "nearest" });
-            hint.textContent = option.description ?? "";
-            hint.hidden = !option.description;
-        }
-    };
-    const show = (query) => {
-        shown = options().filter(option => option.label.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
-        list.replaceChildren();
-        hint.hidden = true;
-        active = -1;
-        shown.forEach((option, index) => {
-            const row = el("div", option.label);
-            row.id = id + "-" + index;
-            row.setAttribute("role", "option");
-            row.setAttribute("aria-selected", String(option.id === selected));
-            row.setAttribute("aria-disabled", String(option.disabled ?? false));
-            row.addEventListener("pointerdown", event => event.preventDefault());
-            row.addEventListener("click", () => choose(option));
-            row.addEventListener("pointerenter", () => highlight(index));
-            if (option.description)
-                row.setAttribute("aria-describedby", hint.id);
-            list.append(row);
+    const root = styled("div", "character-combo"), control = select(value, options(), change, t);
+    control.dataset["ui"] = "combobox";
+    root.append(control);
+    if (typeof source === "function")
+        root.addEventListener("focusin", () => {
+            const selected = control.value, updated = select(selected, options(), () => undefined, t);
+            control.replaceChildren(...updated.children);
+            control.value = selected;
         });
-        if (!shown.length)
-            list.append(el("p", t("No available options")));
-        menu.hidden = false;
-        input.setAttribute("aria-expanded", "true");
-    };
-    input.value = label();
-    input.addEventListener("input", () => show(input.value));
-    input.addEventListener("click", () => { show(""); input.select(); });
-    input.addEventListener("keydown", event => {
-        if (event.key === "Escape") {
-            close();
-            event.stopPropagation();
-        }
-        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-            event.preventDefault();
-            if (menu.hidden)
-                show("");
-            highlight(Math.max(0, Math.min(shown.length - 1, active + (event.key === "ArrowDown" ? 1 : -1))));
-        }
-        if (event.key === "Enter" && !menu.hidden) {
-            event.preventDefault();
-            const option = shown[active];
-            if (option)
-                choose(option);
-        }
-    });
-    root.addEventListener("focusout", event => { if (!(event.relatedTarget instanceof Node) || !root.contains(event.relatedTarget))
-        close(); });
-    menu.append(list, hint);
-    root.append(input, toggle, menu);
     return root;
 }
-function newIdForControl() { return crypto.randomUUID(); }

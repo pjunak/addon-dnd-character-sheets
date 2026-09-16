@@ -9,11 +9,12 @@ import { CharacterClient, blank, exportCharacter, mergeCharacter, newId, object,
 import { buildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
 import { button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
-export function defineCharacterElement(generation, client) {
+export function defineCharacterElement(generation, client, enhance) {
     const tag = `dnd-character-${generation}`;
     if (customElements.get(tag))
         return tag;
     class CharacterElement extends HTMLElement {
+        #controls;
         #context;
         #response;
         #input = blank();
@@ -49,8 +50,8 @@ export function defineCharacterElement(generation, client) {
         }
         else
             this.#render(); }
-        connectedCallback() { this.classList.add("addon-dnd-character", "addon-dnd-sheets"); this.#busy = false; this.#unsubscribe = client.subscribe(() => { clearTimeout(this.#refreshTimer); this.#refreshTimer = setTimeout(() => { void this.#refreshSaved(); }, 250); }); void this.#load(); }
-        disconnectedCallback() { this.#epoch++; this.#saving = undefined; this.#changeVersion++; this.#unsubscribe?.(); clearTimeout(this.#refreshTimer); clearTimeout(this.#timer); this.#dialog?.close(); this.#context?.edits.set({ dirty: false, saving: false }); }
+        connectedCallback() { this.#controls = enhance(this); this.classList.add("addon-dnd-character", "addon-dnd-sheets"); this.#busy = false; this.#unsubscribe = client.subscribe(() => { clearTimeout(this.#refreshTimer); this.#refreshTimer = setTimeout(() => { void this.#refreshSaved(); }, 250); }); void this.#load(); }
+        disconnectedCallback() { this.#controls?.dispose(); this.#controls = undefined; this.#epoch++; this.#saving = undefined; this.#changeVersion++; this.#unsubscribe?.(); clearTimeout(this.#refreshTimer); clearTimeout(this.#timer); this.#dialog?.close(); this.#context?.edits.set({ dirty: false, saving: false }); }
         get #key() { return this.#context?.host.key ?? ""; }
         get #editable() { return this.#context?.host.canEdit === true && !this.#busy; }
         get #name() { return String(object(this.#context?.host.value)["name"] ?? "Character"); }
@@ -153,8 +154,10 @@ export function defineCharacterElement(generation, client) {
             clearTimeout(this.#timer);
             this.#timer = setTimeout(() => { void this.#flush(); }, 250);
         };
-        #status() { const node = this.querySelector("[data-character-status]"); if (node?.firstElementChild)
-            node.firstElementChild.textContent = this.#t(this.#message); }
+        #status() { const node = this.querySelector("[data-character-status]"); if (node?.firstElementChild) {
+            node.firstElementChild.textContent = this.#t(this.#message);
+            node.dataset["uiState"] = this.#blocked ? "error" : this.#dirty ? "loading" : "success";
+        } }
         #accept(response) {
             this.#response = { ...this.#response, ...response };
             this.#baseRevision = response.revision;
@@ -250,6 +253,7 @@ export function defineCharacterElement(generation, client) {
         }
         #view() { return { locale: this.#context?.host.locale ?? "en", input: this.#input, evaluation: this.#evaluation, policy: this.#response?.policy ?? {}, catalogs: this.#catalogs, changed: this.#changed, navigate: tab => { this.#builderNav.tab = tab; }, refresh: () => this.#render() }; }
         #render() {
+            this.lang = this.#context?.host.locale ?? "en";
             if (!this.isConnected || !this.#context)
                 return;
             const dialog = this.#dialog?.open ? this.#dialog : undefined;
@@ -275,6 +279,7 @@ export function defineCharacterElement(generation, client) {
             nav.classList.add("dnd-sheet-tabs");
             const status = styled("div", "dnd-save-status", el("span", this.#t(this.#message)));
             status.dataset["characterStatus"] = "";
+            status.dataset["uiState"] = this.#blocked ? "error" : this.#dirty ? "loading" : "success";
             status.setAttribute("role", "status");
             if (this.#blocked && this.#dirty)
                 status.append(button(this.#t("Retry"), () => { this.#blocked = false; return this.#flush(); }));
@@ -518,6 +523,7 @@ export function defineCharacterElement(generation, client) {
             this.#dialog?.remove();
             const dialog = el("dialog", el("h2", title), ...content, button(this.#t("Close"), () => dialog.close()));
             dialog.className = "character-dialog";
+            dialog.dataset["uiDialog"] = "";
             const id = `character-dialog-${newId()}`;
             dialog.querySelector("h2").id = id;
             dialog.setAttribute("aria-labelledby", id);
