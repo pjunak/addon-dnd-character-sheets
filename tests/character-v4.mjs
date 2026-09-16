@@ -40,3 +40,15 @@ test('autosave rebases disjoint fields and rejects overlapping changes', () => {
  const same=mergeCharacter(base,local,local);assert.deepEqual(same,local);
  local.play.inventory=[{id:'local'}];remote.notes=base.notes;remote.play.inventory=[{id:'remote'}];assert.equal(mergeCharacter(base,local,remote),undefined);
 });
+
+test('accepted choice withdrawals preserve newer edits without restoring retired selections', async () => {
+ const { reconcileCharacterChoices } = await import('../web/character-client.js');
+ const old = { id: 'old-origin', slot: 0, value: 'former-choice' }, newer = { id: 'new-origin', slot: 0, value: 'new-choice' };
+ const sent = [old], current = [old, newer], saved = [];
+ const before = structuredClone({ sent, current, saved });
+ const result = reconcileCharacterChoices(sent, current, saved);
+ assert.deepEqual(result, [newer]); result[0].value = 'Detached';
+ assert.deepEqual({ sent, current, saved }, before);
+ assert.deepEqual(reconcileCharacterChoices(sent, [{ ...old, value: 'deliberate-replacement' }], saved), [{ ...old, value: 'deliberate-replacement' }]);
+ assert.deepEqual(reconcileCharacterChoices(sent, [], sent), [], 'a later user removal must remain removed');
+});

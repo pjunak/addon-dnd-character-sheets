@@ -5,7 +5,7 @@ import { playActions } from "./character-play.js";
 import { abilityRail, backpack, combatDetails, equipmentSlot, preferredLayout, recordName, savedRule, vitals } from "./character-sheet.js";
 import { equipmentPicker } from "./character-equipment.js";
 import { builderShell } from "./character-builder-nav.js";
-import { CharacterClient, blank, exportCharacter, mergeCharacter, newId, object, parseCharacter, rows, strings } from "./character-client.js";
+import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileCharacterChoices, newId, object, parseCharacter, rows, strings } from "./character-client.js";
 import { buildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
 import { button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
@@ -29,6 +29,8 @@ export function defineCharacterElement(generation, client, enhance) {
         #dialog;
         #timer;
         #saving;
+        #attempt;
+        #saveIssues = [];
         #changeVersion = 0;
         #blocked = false;
         #layout = "compact";
@@ -39,6 +41,7 @@ export function defineCharacterElement(generation, client, enhance) {
         set codexContribution(value) { const previous = this.#context; this.#context = value; if (this.isConnected && previous?.host.key !== value.host.key) {
             this.#epoch++;
             this.#saving = undefined;
+            this.#attempt = undefined;
             this.#changeVersion++;
             this.#busy = false;
             this.#response = undefined;
@@ -51,7 +54,7 @@ export function defineCharacterElement(generation, client, enhance) {
         else
             this.#render(); }
         connectedCallback() { this.#controls = enhance(this); this.classList.add("addon-dnd-character", "addon-dnd-sheets"); this.#busy = false; this.#unsubscribe = client.subscribe(() => { clearTimeout(this.#refreshTimer); this.#refreshTimer = setTimeout(() => { void this.#refreshSaved(); }, 250); }); void this.#load(); }
-        disconnectedCallback() { this.#controls?.dispose(); this.#controls = undefined; this.#epoch++; this.#saving = undefined; this.#changeVersion++; this.#unsubscribe?.(); clearTimeout(this.#refreshTimer); clearTimeout(this.#timer); this.#dialog?.close(); this.#context?.edits.set({ dirty: false, saving: false }); }
+        disconnectedCallback() { this.#controls?.dispose(); this.#controls = undefined; this.#epoch++; this.#saving = undefined; this.#attempt = undefined; this.#changeVersion++; this.#unsubscribe?.(); clearTimeout(this.#refreshTimer); clearTimeout(this.#timer); this.#dialog?.close(); this.#context?.edits.set({ dirty: false, saving: false }); }
         get #key() { return this.#context?.host.key ?? ""; }
         get #editable() { return this.#context?.host.canEdit === true && !this.#busy; }
         get #name() { return String(object(this.#context?.host.value)["name"] ?? "Character"); }
@@ -114,6 +117,8 @@ export function defineCharacterElement(generation, client, enhance) {
                 this.#input = structuredClone(response.state?.inputs ?? blank());
                 this.#baseRevision = response.revision;
                 this.#dirty = false;
+                this.#attempt = undefined;
+                this.#saveIssues = [];
                 this.#message = response.message;
                 this.#layout = preferredLayout(localStorage, response.actorId, this.#key);
                 this.#blocked = false;
@@ -131,13 +136,13 @@ export function defineCharacterElement(generation, client, enhance) {
             });
         }
         #publish() { this.#context?.edits.set({ dirty: this.#dirty, saving: this.#busy || !!this.#saving }); }
-        async #refreshSaved() {
+        async #refreshSaved(force = false) {
             if (this.#busy || this.#saving || this.#dirty || !this.#response)
                 return;
             const version = this.#changeVersion;
             try {
                 const response = await this.#call("load", { key: this.#key });
-                if (version !== this.#changeVersion || this.#dirty || response.revision === this.#response.revision && response.status === this.#response.status && response.rulesChanged === this.#response.rulesChanged)
+                if (version !== this.#changeVersion || this.#dirty || this.#busy || this.#saving || !force && response.revision === this.#response.revision && response.status === this.#response.status && response.rulesChanged === this.#response.rulesChanged)
                     return;
                 this.#accept(response);
                 this.#render();
@@ -148,16 +153,33 @@ export function defineCharacterElement(generation, client, enhance) {
             this.#dirty = true;
             this.#changeVersion++;
             this.#blocked = false;
+            this.#saveIssues = [];
             this.#message = "Saving…";
             this.#publish();
             this.#status();
             clearTimeout(this.#timer);
             this.#timer = setTimeout(() => { void this.#flush(); }, 250);
         };
-        #status() { const node = this.querySelector("[data-character-status]"); if (node?.firstElementChild) {
-            node.firstElementChild.textContent = this.#t(this.#message);
+        #status() { const node = this.querySelector("[data-character-status]"); if (node)
+            this.#saveFeedback(node); }
+        #saveFeedback(node) {
+            node.replaceChildren(el("span", this.#t(this.#message)));
             node.dataset["uiState"] = this.#blocked ? "error" : this.#dirty ? "loading" : "success";
-        } }
+            if (this.#blocked && this.#dirty) {
+                node.append(el("p", this.#t("Your changes are still on this page and have not been confirmed saved.")));
+                if (this.#saveIssues.length)
+                    node.append(el("ul", ...this.#saveIssues.map(message => el("li", this.#t(message)))));
+                node.append(button(this.#t("Retry"), () => { this.#blocked = false; return this.#flush(); }), button(this.#t("Reload saved character"), () => this.#reloadSaved()));
+            }
+        }
+        async #reloadSaved() {
+            if (this.#busy || this.#saving)
+                return;
+            if (this.#dirty && !confirm(this.#t("Discard the unsaved character changes and reload the saved character?")))
+                return;
+            clearTimeout(this.#timer);
+            await this.#load();
+        }
         #accept(response) {
             this.#response = { ...this.#response, ...response };
             this.#baseRevision = response.revision;
@@ -165,6 +187,9 @@ export function defineCharacterElement(generation, client, enhance) {
                 this.#evaluation = response.evaluation;
             this.#input = structuredClone(response.state?.inputs ?? blank());
             this.#dirty = false;
+            this.#blocked = false;
+            this.#saveIssues = [];
+            this.#attempt = undefined;
             this.#message = response.message;
             this.#publish();
         }
@@ -173,11 +198,18 @@ export function defineCharacterElement(generation, client, enhance) {
                 return this.#saving;
             if (!this.#dirty || this.#blocked || !this.isConnected)
                 return;
+            this.#message = "Saving…";
+            this.#saveIssues = [];
+            this.#status();
             const epoch = this.#epoch;
             const run = async () => {
                 while (this.#dirty && !this.#blocked && this.isConnected && epoch === this.#epoch) {
-                    const version = this.#changeVersion, inputs = structuredClone(this.#input), base = this.#response?.state?.inputs ?? blank();
-                    const response = await this.#call("save", { ...this.#base("build"), inputs });
+                    // Keep the exact request until a response establishes its outcome, even
+                    // when newer input arrives while an earlier reply is lost.
+                    const attempt = this.#attempt ??= { request: { ...this.#base("build"), inputs: structuredClone(this.#input) }, base: structuredClone(this.#response?.state?.inputs ?? blank()), version: this.#changeVersion };
+                    const { version, base, request } = attempt, inputs = request.inputs;
+                    const response = await this.#call("save", request);
+                    this.#attempt = undefined;
                     if (response.status === "conflict" && response.state) {
                         const merged = mergeCharacter(base, this.#input, response.state.inputs);
                         if (merged) {
@@ -197,22 +229,23 @@ export function defineCharacterElement(generation, client, enhance) {
                     if (response.status !== "ready" || !response.state) {
                         this.#blocked = true;
                         this.#message = response.message;
-                        if (response.status === "invalid" && version === this.#changeVersion) {
-                            this.#input = structuredClone(this.#response?.state?.inputs ?? blank());
-                            this.#dirty = false;
+                        if (response.status === "invalid" && version !== this.#changeVersion) {
+                            this.#blocked = false;
+                            continue;
                         }
+                        this.#saveIssues = response.status === "invalid" ? rows(response.evaluation?.guidance["saveIssues"] ?? response.evaluation?.issues).filter(issue => issue["severity"] === "blocker").map(issue => String(issue["message"])) : [];
                         this.#render();
                         break;
                     }
                     this.#response = { ...this.#response, ...response };
                     this.#baseRevision = response.revision;
+                    this.#evaluation = response.evaluation;
                     // Incorporate server corrections without replacing objects bound to active fields.
                     if (this.#input.play.asOf === inputs.play.asOf)
                         this.#input.play.asOf = response.state.inputs.play.asOf;
                     if (this.#input.play.hp === inputs.play.hp)
                         this.#input.play.hp = response.state.inputs.play.hp;
-                    if (JSON.stringify(this.#input.build.choices) === JSON.stringify(inputs.build.choices))
-                        this.#input.build.choices = structuredClone(response.state.inputs.build.choices);
+                    this.#input.build.choices = reconcileCharacterChoices(inputs.build.choices, this.#input.build.choices, response.state.inputs.build.choices);
                     if (version === this.#changeVersion) {
                         this.#dirty = false;
                         this.#message = "Saved";
@@ -237,6 +270,8 @@ export function defineCharacterElement(generation, client, enhance) {
             }).finally(() => { if (epoch === this.#epoch) {
                 this.#saving = undefined;
                 this.#publish();
+                if (!this.#dirty && !this.#evaluation)
+                    void this.#refreshSaved(true);
             } });
             this.#publish();
             return this.#saving;
@@ -259,6 +294,7 @@ export function defineCharacterElement(generation, client, enhance) {
             const dialog = this.#dialog?.open ? this.#dialog : undefined;
             const focused = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
             const focusKey = focused?.dataset["focusKey"], focusId = focused?.id;
+            const selection = focused instanceof HTMLTextAreaElement || focused instanceof HTMLInputElement ? { start: focused.selectionStart, end: focused.selectionEnd } : undefined;
             const root = styled("section", "dnd-sheet-shell dse-layout-" + this.#layout);
             this.dataset["layout"] = this.#layout;
             if (!this.#response) {
@@ -277,12 +313,10 @@ export function defineCharacterElement(generation, client, enhance) {
             const options = ["sheet", "combat", "spells", "builder", "tools"].map(id => ({ id, label: this.#t({ sheet: "Sheet", combat: "Combat", spells: "Spells", builder: "Builder", tools: "Tools" }[id]) }));
             const nav = tabStrip(this.#t("Character views"), options, this.#tab, id => { this.#tab = id; this.#render(); }, "dnd", "vertical");
             nav.classList.add("dnd-sheet-tabs");
-            const status = styled("div", "dnd-save-status", el("span", this.#t(this.#message)));
+            const status = styled("div", "dnd-save-status");
             status.dataset["characterStatus"] = "";
-            status.dataset["uiState"] = this.#blocked ? "error" : this.#dirty ? "loading" : "success";
             status.setAttribute("role", "status");
-            if (this.#blocked && this.#dirty)
-                status.append(button(this.#t("Retry"), () => { this.#blocked = false; return this.#flush(); }));
+            this.#saveFeedback(status);
             const content = styled("div", "dnd-sheet-panel");
             content.id = "dnd-panel-" + this.#tab;
             content.setAttribute("role", "tabpanel");
@@ -312,10 +346,13 @@ export function defineCharacterElement(generation, client, enhance) {
                 for (const control of field.querySelectorAll("input,select,textarea,button"))
                     control.dataset["focusKey"] = key + "/" + (control.getAttribute("aria-label") ?? control.tagName);
             }
-            if (focusKey)
-                root.querySelector('[data-focus-key="' + CSS.escape(focusKey) + '"]')?.focus({ preventScroll: true });
-            else if (focusId)
-                root.querySelector("#" + CSS.escape(focusId))?.focus({ preventScroll: true });
+            const restore = focusKey ? root.querySelector('[data-focus-key="' + CSS.escape(focusKey) + '"]') : focusId ? root.querySelector("#" + CSS.escape(focusId)) : undefined;
+            for (let parent = restore?.parentElement; parent && parent !== root; parent = parent.parentElement)
+                if (parent instanceof HTMLDetailsElement)
+                    parent.open = true;
+            restore?.focus({ preventScroll: true });
+            if (selection?.start !== null && selection?.start !== undefined && selection.end !== null && (restore instanceof HTMLTextAreaElement || restore instanceof HTMLInputElement))
+                restore.setSelectionRange(selection.start, selection.end);
         }
         #sheetView() {
             return { locale: this.#context?.host.locale ?? "en", layout: this.#layout, input: this.#input, projection: this.#response?.state?.projection, catalogs: this.#catalogs,
@@ -421,7 +458,7 @@ export function defineCharacterElement(generation, client, enhance) {
             }, this.#t)));
             if (this.#response?.state)
                 tools.append(button(this.#t("Export character"), () => download(this.#key + ".character.json", exportCharacter(this.#response.state))), button(this.#t("Print / PDF"), () => this.#print(this.#response.state, this.#response.revision)));
-            tools.append(button(this.#t("Import character"), () => this.#import(), !this.#editable), button(this.#t("Reload character"), () => this.#load(), this.#busy || !!this.#saving));
+            tools.append(button(this.#t("Import character"), () => this.#import(), !this.#editable), button(this.#t("Reload character"), () => this.#reloadSaved(), this.#busy || !!this.#saving));
             const provider = panel(this.#t("Rules"), el("p", this.#t(this.#response?.status === "unavailable" ? "Compatible rules are unavailable. Saved values and notes remain accessible." : this.#response?.rulesChanged ? "The rules changed. Adopt them to continue editing." : "Rules are connected.")));
             if (this.#response?.rulesChanged)
                 provider.append(button(this.#t("Adopt current rules"), () => this.#perform({ ...this.#base("adopt-rules"), inputs: structuredClone(this.#input), adoptRules: true }), !this.#editable));

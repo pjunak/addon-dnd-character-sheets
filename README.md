@@ -31,7 +31,9 @@ character only. Changed installed rules require explicit adoption. Without
 compatible rules, saved values, export and printing remain usable.
 
 The sheet is limited to 1,120 px and has no duplicate character heading. Compact
-uses tighter ability cards and places currency directly below inventory.
+uses tighter ability cards and places currency directly below inventory. When
+enlarged text leaves too little room beside navigation, the rail stacks above
+the sheet and keeps its vertical keyboard behavior.
 
 The host owns the core profile, portrait and relationships. The native worker
 provides `dnd5e.character` 2.0.0 and is the only writer of the `dnd-sheets`
@@ -39,9 +41,11 @@ schema-4 extension. Its `workerOnly` declaration preserves authorization without
 retaining character snapshots. Install the compatible updated host before this
 package. Existing schema-4 characters keep their inputs and saved projection.
 
-Autosave serializes requests and rebases disjoint concurrent edits. Conflicting
-edits and failed requests remain visible in the open page; pending input is not
-stored in browser storage. The host's pending-edit guard protects navigation.
+Autosave serializes requests and rebases disjoint concurrent edits. Rejected
+edits stay on the page with a reason; Retry confirms an uncertain save before
+sending newer changes. Reload asks before discarding pending edits. The host's
+pending-edit guard protects navigation, but input is not stored in browser
+storage and closing the page can lose unsaved changes.
 DM grants remain authenticated; amending or removing a grant changes its current
 entry. Ordered levels and mechanics-required spell acquisitions are character
 facts rather than a log of edits.

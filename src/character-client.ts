@@ -73,3 +73,17 @@ export function mergeCharacter(base: Inputs, local: Inputs, remote: Inputs): Inp
  const result = merge(base,local,remote) as Inputs;
  return conflict ? undefined : result;
 }
+
+// Apply accepted choice withdrawals without resurrecting them when another
+// choice changed during the save. Later authored replacements/removals win.
+export function reconcileCharacterChoices(sent: Inputs["build"]["choices"], current: Inputs["build"]["choices"], saved: Inputs["build"]["choices"]): Inputs["build"]["choices"] {
+ const key = (choice: Inputs["build"]["choices"][number]): string => JSON.stringify([choice.id, choice.slot]);
+ const before = new Map(sent.map(choice => [key(choice), choice])), accepted = new Map(saved.map(choice => [key(choice), choice]));
+ const result = current.flatMap(choice => {
+  if (JSON.stringify(choice) !== JSON.stringify(before.get(key(choice)))) return [choice];
+  const corrected = accepted.get(key(choice)); return corrected ? [corrected] : [];
+ });
+ const currentKeys = new Set(current.map(key));
+ for (const choice of saved) if (!before.has(key(choice)) && !currentKeys.has(key(choice))) result.push(choice);
+ return structuredClone(result);
+}

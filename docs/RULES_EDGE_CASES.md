@@ -18,8 +18,10 @@ Optimistic revision numbers and the last operation ID protect concurrency and
 lost-response retries; they are not a browsable history. Normal host transaction
 bookkeeping remains part of database integrity.
 
-The engine's `guidance.canSave` permits legal incomplete builds. `ready` still
-requires all choices and mechanical bounds to pass before play commands run.
+The engine's `guidance.canSave` permits legal incomplete builds. Its additive
+`guidance.saveIssues` lists actual save blockers separately from unfinished
+required choices. `ready` still requires all choices and mechanical bounds to
+pass before play commands run.
 Point buy, granted budgets, source choices and class prerequisites come from the
 engine. UI controls prevent overspending and duplicate selections; server
 validation also protects against stale or forged requests.
@@ -32,8 +34,24 @@ removes its current entry, without retaining superseded grants.
 
 The browser serializes and coalesces pending edits. Independent concurrent fields
 can rebase automatically; overlapping fields/arrays remain pending with a visible
-conflict. Failed writes do not claim success. Pending input stays in the open
-page, with the host navigation guard, and is not durable until saved.
+conflict. Rejected autosaves keep the input, show the Engine's save blockers and
+retain the active text field/caret. A newer correction continues automatically
+when an older rejected request finishes. Accepted choice withdrawals are merged
+with later edits so withdrawn selections cannot silently return.
+
+An uncertain autosave retains its exact operation ID, expected revision and
+inputs for Retry. Newer edits wait for that request's acknowledgment before a
+new save is sent. The worker recognizes its last accepted operation; if another
+editor has since written, ordinary revision/conflict handling applies instead.
+An acknowledgment without evaluation triggers a read to refresh guidance.
+Reload requires explicit confirmation before discarding pending edits.
+
+Failed or uncertain writes do not claim success. Pending input stays in the open
+page, with the host navigation guard, and is not durable until saved. These retry
+semantics cover the autosave queue; direct play/grant and reviewed-import commands
+have separate command paths. Reducing an inventory quantity to zero explicitly
+moves an equipped item to carried and clears attunement in the same save; the
+Engine independently rejects requests leaving empty equipment active.
 
 ## Rules and transfer
 

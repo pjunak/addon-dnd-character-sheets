@@ -392,5 +392,7 @@
   "Wisdom": "Wisdom",
   "Worn": "Worn",
   "Worn equipment": "Worn equipment",
-  "Current HP": "Current HP"
+  "Current HP": "Current HP",
+  "Your changes are still on this page and have not been confirmed saved.": "Your changes are still on this page and have not been confirmed saved.",
+  "Discard the unsaved character changes and reload the saved character?": "Discard the unsaved character changes and reload the saved character?"
 }

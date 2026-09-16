@@ -42,7 +42,7 @@
 .dnd-builder-class-row { display:grid; grid-template-columns:minmax(10rem,1fr) 5rem auto; gap:var(--space-2); }
 .dnd-builder-choices fieldset { display:flex; flex-wrap:wrap; align-items:end; gap:var(--space-2); border:1px solid var(--border-subtle); border-radius:var(--radius); padding:var(--space-3); min-width:0; }
 .dnd-sheet-computed { overflow:auto; max-height:24rem; white-space:pre-wrap; }
-.dse-cols { display:flex; gap:var(--space-4); align-items:flex-start; flex-wrap:wrap; }
+.dse-cols { display:flex; gap:var(--space-4); align-items:flex-start; flex-wrap:wrap; min-width:0; }
 .dse-cards { display:flex; flex-direction:column; gap:var(--space-3); flex:0 1 17rem; min-width:14rem; }
 .dse-cols-main { display:flex; flex-direction:column; align-self:stretch; flex:1 1 20rem; min-width:0; gap:var(--space-5); }
 .dse-ability { padding:var(--space-2) var(--space-3); }
@@ -322,7 +322,7 @@
 @media(max-width:550px) { .character-foundation { grid-template-columns:1fr; } .character-stepper-arrows button { min-height:1.7rem; padding:0 .8rem; } }
 
 /* Bound the workspace and keep sheet navigation distinct from Builder tabs. */
-.addon-dnd-character { max-width:70rem; padding:0; margin-inline:auto; }
+.addon-dnd-character { max-width:70rem; padding:0; margin-inline:auto; container:character-sheet / inline-size; }
 .addon-dnd-character .dnd-sheet-shell { display:grid; grid-template-columns:7rem minmax(0,1fr); gap:1rem; align-items:start; }
 .addon-dnd-character .dnd-sheet-tabs { position:sticky; top:1rem; display:flex; flex-direction:column; align-items:stretch; gap:.25rem; margin:0; min-height:28rem; height:min(34rem,calc(100dvh - 10rem)); border-bottom:0; border-right:1px solid var(--border-subtle); overflow:visible; }
 .addon-dnd-character .dnd-sheet-tabs .codex-tab { width:100%; min-height:42px; text-align:left; white-space:normal; padding:.55rem .65rem; border:0; border-right:3px solid transparent; border-radius:4px 0 0 4px; }
@@ -368,7 +368,7 @@
  .addon-dnd-character .dse-builder-shell { grid-template-columns:minmax(0,1fr); }
  .addon-dnd-character .dse-build-rail { position:static; }
  .addon-dnd-character .dse-cards { flex-basis:100%; min-width:0; }
- .addon-dnd-character .dse-layout-compact .dse-cards { flex-basis:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .addon-dnd-character .dse-layout-compact .dse-cards { flex-basis:100%; min-width:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
  .addon-dnd-character .dse-cols-main { flex-basis:100%; }
  .addon-dnd-character .dse-layout-compact .dse-cols-main { order:-1; }
  .dse-bp-split { grid-template-columns:1fr; }
@@ -386,5 +386,12 @@
  .addon-dnd-character .dnd-sheet-tabs .codex-tab { padding:.5rem .3rem; font-size:.78rem; }
  .addon-dnd-character .character-build > .character-panel { padding:.6rem; }
  .addon-dnd-character .character-stepper-arrows button { padding-inline:.5rem; }
+}
+/* Keep enlarged text readable when a side rail would leave a narrow column. */
+@container character-sheet (max-width:18rem) {
+ .addon-dnd-character .dnd-sheet-shell { grid-template-columns:minmax(0,1fr); }
+ .addon-dnd-character .dnd-sheet-tabs { position:static; min-height:0; height:auto; border-right:0; border-bottom:1px solid var(--border-subtle); }
+ .addon-dnd-character .dnd-sheet-tabs .codex-tab { border-right:0; border-left:3px solid transparent; }
+ .addon-dnd-character .dnd-sheet-tabs .codex-tab.is-active { border-left-color:var(--accent-gold); }
 }
 .character-combo { display:block; min-width:0; }

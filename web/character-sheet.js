@@ -140,8 +140,11 @@ export function backpack(view) {
             row.dataset["item"] = item.id;
             row.append(styled("span", "dse-item-name", savedRule(view.projection, item.name, undefined, item.reference)));
             if (view.editing) {
-                const quantity = numberInput(item.quantity, value => { item.quantity = value ?? 0; if (item.quantity === 0)
-                    item.attuned = false; view.change(); }, 0);
+                const quantity = numberInput(item.quantity, value => { item.quantity = value ?? 0; if (item.quantity === 0) {
+                    item.attuned = false;
+                    if (item.location === "equipped")
+                        item.location = "carried";
+                } view.change(); }, 0);
                 quantity.className = "dse-number";
                 quantity.setAttribute("aria-label", t("{0} quantity", [item.name]));
                 const eligibility = object(view.equipment[item.id]);

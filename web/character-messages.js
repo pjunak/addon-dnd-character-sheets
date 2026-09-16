@@ -394,7 +394,9 @@ export const catalogs = {
         "Wisdom": "Wisdom",
         "Worn": "Worn",
         "Worn equipment": "Worn equipment",
-        "Current HP": "Current HP"
+        "Current HP": "Current HP",
+        "Your changes are still on this page and have not been confirmed saved.": "Your changes are still on this page and have not been confirmed saved.",
+        "Discard the unsaved character changes and reload the saved character?": "Discard the unsaved character changes and reload the saved character?"
     },
     "cs": {
         "; attuned": "; sladěno",
@@ -790,6 +792,8 @@ export const catalogs = {
         "Wisdom": "Moudrost",
         "Worn": "Nošené",
         "Worn equipment": "Nošené vybavení",
-        "Current HP": "Aktuální životy"
+        "Current HP": "Aktuální životy",
+        "Your changes are still on this page and have not been confirmed saved.": "Vaše změny jsou stále na této stránce a jejich uložení nebylo potvrzeno.",
+        "Discard the unsaved character changes and reload the saved character?": "Zahodit neuložené změny postavy a načíst uloženou postavu?"
     }
 };
