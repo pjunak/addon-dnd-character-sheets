@@ -319,7 +319,7 @@ func TestRetroactiveOriginEditWithdrawsOnlyPreviouslySavedChoices(t *testing.T) 
 	engine.inspect = func(input model.Inputs) []model.Issue {
 		for _, choice := range input.Build.Choices {
 			if choice.ID == "origin-choice" && input.Build.Species != "old-origin" {
-				return []model.Issue{{ID: "unavailable-choice:origin-choice/0", Target: "origin-choice", Severity: "blocker"}}
+				return []model.Issue{{ID: "unavailable-choice:origin-choice#0", Target: "origin-choice", Severity: "blocker"}}
 			}
 		}
 		return nil

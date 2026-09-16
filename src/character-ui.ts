@@ -8,6 +8,7 @@ export function el<K extends keyof HTMLElementTagNameMap>(tag: K, ...children: C
   for (const child of children) if (child !== undefined) node.append(child instanceof Node ? child : String(child));
   return node;
 }
+export function builderTarget(id: string, node: HTMLElement): HTMLElement { node.dataset["builderTarget"] = id; return node; }
 export function button(label: string, action: () => void | Promise<void>, disabled = false): HTMLButtonElement {
   const node = el("button", label); node.type = "button"; node.disabled = disabled; node.addEventListener("click", () => { void action(); }); return node;
 }

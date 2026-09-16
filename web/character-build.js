@@ -1,6 +1,6 @@
-import { translator } from "./character-locale.js";
+import { builderLabel, translator } from "./character-locale.js";
 import { abilities, newId, object, rows, strings } from "./character-client.js";
-import { button, combo, el, field, human, label, panel, refreshSteppers, rule, select, stepper, styled } from "./character-ui.js";
+import { builderTarget, button, combo, el, field, human, label, panel, refreshSteppers, rule, select, stepper, styled } from "./character-ui.js";
 const options = (records) => records.map(record => ({ id: record.id, label: String(record.value["name"] ?? record.id), description: String(record.value["summary"] ?? record.value["text"] ?? "").slice(0, 1200) }));
 export const guidanceOptions = (value) => rows(value).map(row => ({ id: String(row["id"]), label: String(row["label"] ?? row["name"] ?? row["id"]), description: String(row["description"] ?? "") }));
 export function buildView(view, active = "character") {
@@ -83,7 +83,7 @@ export function buildView(view, active = "character") {
             foundation.append(source);
             const selected = records.find(record => record.id === build[kind]);
             if (kind === "species" && selected && rows(selected.value["lineages"]).length)
-                foundation.append(field(t("Lineage"), combo(build.lineage, guidanceOptions(selected.value["lineages"]), value => update(() => { build.lineage = value; }, true), t)));
+                foundation.append(builderTarget("lineage", field(t("Lineage"), combo(build.lineage, guidanceOptions(selected.value["lineages"]), value => update(() => { build.lineage = value; }, true), t))));
         }
         root.append(foundation);
         const choices = panel(t("Granted choices"));
@@ -98,7 +98,7 @@ export function buildView(view, active = "character") {
     const add = (classId) => update(() => { build.levels.push({ id: newId(), classId }); view.navigate?.(classId); }, true);
     if (active === "add-class") {
         const existing = new Set(build.levels.map(level => level.classId)), eligible = available.filter(option => !existing.has(option.id));
-        root.append(field(t("Add class"), combo("", eligible, add, t)));
+        root.append(builderTarget("add-class", field(t("Add class"), combo("", eligible, add, t))));
         if (!eligible.length)
             root.append(el("p", t("No additional classes meet the rules at this level.")));
         return root;
@@ -129,7 +129,8 @@ export function buildView(view, active = "character") {
         classLevel++;
         const row = styled("details", "dse-build-level");
         row.open = true;
-        row.dataset["builderTarget"] = "class-" + index;
+        row.id = "character-level-" + encodeURIComponent(level.id);
+        row.dataset["builderTarget"] = "class:" + level.classId;
         const name = String((view.catalogs.get("class") ?? []).find(record => record.id === level.classId)?.value["name"] ?? level.classId);
         row.append(styled("summary", "dse-build-level-head", el("strong", t("Level {0}", [active === "levels" ? index + 1 : classLevel])), el("span", active === "levels" ? name : t("Character level {0}", [index + 1]))));
         if (active !== "levels") {
@@ -138,7 +139,7 @@ export function buildView(view, active = "character") {
             for (const descriptor of rows(plan["classChoices"]).filter(choice => choice["classId"] === active && Number(object(choice["source"])["level"] ?? choice["level"] ?? 1) === classLevel))
                 row.append(choiceView(descriptor, object(guidance[String(descriptor["id"])]), view));
             if (classLevel === Number(currentClass?.["subclassLevel"]) && rows(currentClass?.["subclasses"]).length)
-                row.append(field(t("Subclass"), combo(build.subclasses[active] ?? "", guidanceOptions(currentClass?.["subclasses"]), value => update(() => { build.subclasses[active] = value; }, true), t)));
+                row.append(builderTarget("subclass:" + active, field(t("Subclass"), combo(build.subclasses[active] ?? "", guidanceOptions(currentClass?.["subclasses"]), value => update(() => { build.subclasses[active] = value; }, true), t))));
             if (index > 0) {
                 row.append(field(t("HP gain"), select(level.hitPoints === undefined ? "fixed" : "rolled", [{ id: "fixed", label: t("Fixed") }, { id: "rolled", label: t("Recorded roll") }], value => update(() => { if (value === "rolled")
                     level.hitPoints = 1;
@@ -159,7 +160,7 @@ export function buildView(view, active = "character") {
     return root;
 }
 function choiceView(descriptor, guidance, view) {
-    const t = translator(view.locale), id = String(descriptor["id"]), kind = String(descriptor["kind"]), root = panel(String(guidance["label"] ?? descriptor["name"] ?? id));
+    const t = translator(view.locale), id = String(descriptor["id"]), kind = String(descriptor["kind"]), root = panel(builderLabel(guidance, view.locale, String(descriptor["name"] ?? id)));
     root.id = `character-choice-${encodeURIComponent(id)}`;
     const current = (slot) => view.input.build.choices.find(choice => choice.id === id && choice.slot === slot)?.value;
     const set = (slot, value) => { view.input.build.choices = view.input.build.choices.filter(choice => choice.id !== id || choice.slot !== slot); if (value !== "")
@@ -190,9 +191,13 @@ function choiceView(descriptor, guidance, view) {
     }
     else {
         const choices = guidanceOptions(guidance["options"]);
-        for (let slot = 0; slot < Number(descriptor["count"] ?? 1); slot++)
-            root.append(field(t("Selection {0}", [slot + 1]), combo(String(current(slot) ?? ""), () => choices.filter(option => !view.input.build.choices.some(choice => choice.id === id && choice.slot !== slot && choice.value === option.id)), value => { set(slot, value); if (kind === "feat")
-                view.refresh(); }, t)));
+        for (let slot = 0; slot < Number(descriptor["count"] ?? 1); slot++) {
+            const selection = field(t("Selection {0}", [slot + 1]), combo(String(current(slot) ?? ""), () => choices.filter(option => !view.input.build.choices.some(choice => choice.id === id && choice.slot !== slot && choice.value === option.id)), value => { set(slot, value); if (kind === "feat")
+                view.refresh(); }, t));
+            if (!choices.some(option => option.id === current(slot)))
+                selection.dataset["builderPending"] = "";
+            root.append(selection);
+        }
     }
     return root;
 }

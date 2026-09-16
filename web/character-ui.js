@@ -7,6 +7,7 @@ export function el(tag, ...children) {
             node.append(child instanceof Node ? child : String(child));
     return node;
 }
+export function builderTarget(id, node) { node.dataset["builderTarget"] = id; return node; }
 export function button(label, action, disabled = false) {
     const node = el("button", label);
     node.type = "button";

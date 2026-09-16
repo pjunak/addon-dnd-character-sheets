@@ -1,4 +1,5 @@
 {
+  "Background": "Background",
   "; attuned": "; attuned",
   "{0} — recorded die result": "{0} — recorded die result",
   "{0} — spent / {1}": "{0} — spent / {1}",
@@ -394,5 +395,21 @@
   "Worn equipment": "Worn equipment",
   "Current HP": "Current HP",
   "Your changes are still on this page and have not been confirmed saved.": "Your changes are still on this page and have not been confirmed saved.",
-  "Discard the unsaved character changes and reload the saved character?": "Discard the unsaved character changes and reload the saved character?"
+  "Discard the unsaved character changes and reload the saved character?": "Discard the unsaved character changes and reload the saved character?",
+  "Next choice: {0}": "Next choice: {0}",
+  "Review choice: {0}": "Review choice: {0}",
+  "Finish base ability scores": "Finish base ability scores",
+  "Choose species": "Choose species",
+  "Choose background": "Choose background",
+  "Choose lineage": "Choose lineage",
+  "Choose first class": "Choose first class",
+  "Review {0} levels": "Review {0} levels",
+  "Choose {0} subclass": "Choose {0} subclass",
+  "{0} level {1} advancement": "{0} level {1} advancement",
+  "Assign origin ability points": "Assign origin ability points",
+  "Choose {0} cantrips": "Choose {0} cantrips",
+  "Choose {0} spellbook spells": "Choose {0} spellbook spells",
+  "Choose spells: {0}": "Choose spells: {0}",
+  "Choose casting ability: {0}": "Choose casting ability: {0}",
+  "Granted spells · choose {0}": "Granted spells · choose {0}"
 }

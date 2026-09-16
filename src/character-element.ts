@@ -4,13 +4,13 @@ import { translator } from "./character-locale.js";
 import { playActions } from "./character-play.js";
 import { abilityRail, backpack, combatDetails, equipmentSlot, preferredLayout, recordName, savedRule, vitals, type EquipmentSlot, type Layout, type SheetView } from "./character-sheet.js";
 import { equipmentPicker } from "./character-equipment.js";
-import { builderShell, type BuilderNavigation } from "./character-builder-nav.js";
+import { builderShell, focusBuilderTarget, type BuilderNavigation } from "./character-builder-nav.js";
 import type { AddonContext, ContributionContext } from "./sdk.js";
 import type { Grant, Inputs, Request, Response, Result, State } from "./character-model.js";
 import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileCharacterChoices, newId, object, parseCharacter, rows, strings, type CatalogRecord } from "./character-client.js";
 import { buildView, type BuildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
-import { button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
+import { builderTarget, button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
 
 type Tab = "sheet" | "combat" | "spells" | "builder" | "tools";
 interface SaveAttempt { request: Omit<Request, "contractVersion"> & { inputs: Inputs }; base: Inputs; version: number }
@@ -157,6 +157,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       this.lang = this.#context?.host.locale ?? "en";
       if (!this.isConnected || !this.#context) return;
       const dialog = this.#dialog?.open ? this.#dialog : undefined;
+      const rail = this.querySelector<HTMLDetailsElement>(".dse-build-rail"); if (rail) this.#builderNav.open = rail.open;
       const focused = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
       const focusKey = focused?.dataset["focusKey"], focusId = focused?.id;
       const selection = focused instanceof HTMLTextAreaElement || focused instanceof HTMLInputElement ? { start: focused.selectionStart, end: focused.selectionEnd } : undefined;
@@ -185,7 +186,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       }
       root.append(nav, styled("div", "dnd-sheet-workspace", status, content));
       for (const child of [...this.children]) if (child !== dialog) child.remove();
-      this.prepend(root); this.#syncBusyButtons();
+      this.prepend(root); this.#syncBusyButtons(); this.#controls?.refresh();
       for (const field of root.querySelectorAll<HTMLElement>(".character-field")) {
         const scope = field.closest<HTMLElement>("[id^=character-choice-], [data-item], [data-builder-target]");
         const key = (scope?.id || scope?.dataset["item"] || scope?.dataset["builderTarget"] || "") + "/" + field.querySelector("label")?.textContent;
@@ -226,9 +227,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       else body.append(buildView(view, this.#builderNav.tab));
       return builderShell(view, this.#builderNav, body, (tab, target = "") => {
         this.#builderNav.tab = tab; this.#builderNav.target = target; this.#render();
-        if (target) { const node = this.querySelector<HTMLElement>('[data-builder-target="' + CSS.escape(target) + '"]') ?? this.querySelector<HTMLElement>("#character-choice-" + CSS.escape(encodeURIComponent(target)));
-          for (let parent = node?.parentElement; parent && parent !== this; parent = parent.parentElement) if (parent instanceof HTMLDetailsElement) parent.open = true;
-          node?.scrollIntoView({ block: "center", behavior: "smooth" }); node?.querySelector<HTMLElement>("input,select,button")?.focus({ preventScroll: true }); }
+        if (target) focusBuilderTarget(this, target);
       });
     }
     #combat(): HTMLElement {
@@ -267,15 +266,15 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     }
     #spellChoices(): HTMLElement {
       const root = panel(this.#t("Spells")), options = this.#evaluation?.spellOptions ?? {}, casting = object(this.#evaluation?.sheet["spellcasting"]), spells = this.#catalogs.get("spell") ?? [];
-      const picks = (title: string, ids: string[], current: string[], set: (ids: string[]) => void, maximum: number): HTMLElement => {
+      const picks = (title: string, ids: string[], current: string[], set: (ids: string[]) => void, maximum: number, target = ""): HTMLElement => {
         const details = el("details", el("summary", this.#t("{0} ({1} selected)", [title, current.length]))), list = el("div"); let query = "";
         const render = (): void => { list.replaceChildren(); const shown = [...new Set([...current, ...ids])].filter(id => `${spells.find(record => record.id === id)?.value["name"] ?? id}`.toLowerCase().includes(query)).slice(0, 100); for (const id of shown) { const record = spells.find(record => record.id === id); list.append(el("div", checkbox(String(record?.value["name"] ?? id), current.includes(id), selected => { if (selected && (current.length >= maximum || !ids.includes(id))) return; current = selected ? [...current, id] : current.filter(item => item !== id); set(current); details.querySelector("summary")!.textContent = this.#t("{0} ({1} selected)", [title, current.length]); this.#changed(); render(); }), rule(this.#t("Details"), { kind: "spell", id }))); const control = list.lastElementChild?.querySelector<HTMLInputElement>("input"); if (control) control.disabled = !current.includes(id) && (current.length >= maximum || !ids.includes(id)); } };
-        details.append(field(this.#t("Filter spells"), textInput("", value => { query = value.toLowerCase(); render(); })), list); render(); return details;
+        details.append(field(this.#t("Filter spells"), textInput("", value => { query = value.toLowerCase(); render(); })), list); render(); return target ? builderTarget(target, details) : details;
       };
       for (const classOptions of rows(options["classes"])) {
         const id = String(classOptions["classId"]), caster = rows(casting["perClass"]).find(row => row["classId"] === id) ?? {}, eligible = strings(classOptions["spellIds"]), zero = eligible.filter(id => Number(spells.find(record => record.id === id)?.value["level"]) === 0), leveled = eligible.filter(id => !zero.includes(id));
-        root.append(picks(this.#t("{0} cantrips · {1} allowed", [this.#t(label(id)), human(caster["cantripsKnown"])]), zero, this.#input.build.spells.cantrips[id] ?? [], value => { this.#input.build.spells.cantrips[id] = value; }, Number(caster["cantripsKnown"])));
-        if (caster["prepares"] === "spellbook") root.append(picks(this.#t("{0} spellbook · {1} gained from levels", [this.#t(label(id)), human(caster["spellbookKnown"])]), leveled, this.#input.build.spells.spellbook[id] ?? [], value => { this.#input.build.spells.spellbook[id] = value; }, Number(caster["spellbookKnown"]) + this.#input.build.spells.acquisitions.filter(row => row.classId === id).length));
+        root.append(picks(this.#t("{0} cantrips · {1} allowed", [this.#t(label(id)), human(caster["cantripsKnown"])]), zero, this.#input.build.spells.cantrips[id] ?? [], value => { this.#input.build.spells.cantrips[id] = value; }, Number(caster["cantripsKnown"]), "cantrips:" + id));
+        if (caster["prepares"] === "spellbook") root.append(picks(this.#t("{0} spellbook · {1} gained from levels", [this.#t(label(id)), human(caster["spellbookKnown"])]), leveled, this.#input.build.spells.spellbook[id] ?? [], value => { this.#input.build.spells.spellbook[id] = value; }, Number(caster["spellbookKnown"]) + this.#input.build.spells.acquisitions.filter(row => row.classId === id).length, "spellbook:" + id));
         if (caster["prepares"] === "spellbook") {
           const order = el("details", el("summary", this.#t("Spellbook acquisition order")), el("p", this.#t("Level-granted spells use slots in this order. Copied spells keep their separate paid acquisition.")));
           const selected = this.#input.build.spells.spellbook[id] ?? [];
@@ -288,8 +287,8 @@ export function defineCharacterElement(generation: string, client: CharacterClie
         }
         root.append(picks(this.#t("{0} prepared spells · {1} allowed", [this.#t(label(id)), human(caster["preparedLimit"])]), caster["prepares"] === "spellbook" ? this.#input.build.spells.spellbook[id] ?? [] : leveled, this.#input.play.preparedSpells[id] ?? [], value => { this.#input.play.preparedSpells[id] = value; }, Number(caster["preparedLimit"])));
       }
-      for (const choice of rows(options["pendingChoices"])) { const key = String(choice["key"]); root.append(picks(`Granted spells · choose ${human(choice["choose"])}`, strings(choice["eligibleSpellIds"]), this.#input.build.spells.grantChoices[key] ?? [], value => { this.#input.build.spells.grantChoices[key] = value; }, Number(choice["choose"]))); }
-      for (const choice of rows(options["castingAbilityChoices"])) { const key = String(choice["key"]); root.append(field(this.#t("Granted spellcasting ability"), select(this.#input.build.spells.castingAbilities[key] ?? "", strings(choice["options"]).map(id => ({ id, label: id })), value => { this.#input.build.spells.castingAbilities[key] = value; this.#changed(); }, this.#t))); }
+      for (const choice of rows(options["pendingChoices"])) { const key = String(choice["key"]); root.append(picks(this.#t("Granted spells · choose {0}", [choice["choose"]]), strings(choice["eligibleSpellIds"]), this.#input.build.spells.grantChoices[key] ?? [], value => { this.#input.build.spells.grantChoices[key] = value; }, Number(choice["choose"]), key)); }
+      for (const choice of rows(options["castingAbilityChoices"])) { const key = String(choice["key"]); root.append(builderTarget(key, field(this.#t("Granted spellcasting ability"), select(this.#input.build.spells.castingAbilities[key] ?? "", strings(choice["options"]).map(id => ({ id, label: id })), value => { this.#input.build.spells.castingAbilities[key] = value; this.#changed(); }, this.#t)))); }
       return root;
     }
     #grants(): HTMLElement {

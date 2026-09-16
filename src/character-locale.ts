@@ -1,5 +1,9 @@
 import { catalogs } from "./character-messages.js";
 
+export function builderLabel(guidance: Record<string, unknown>, locale: string, fallback = ""): string {
+  return translator(locale)(String(guidance["labelKey"] ?? guidance["label"] ?? fallback), Array.isArray(guidance["labelArgs"]) ? guidance["labelArgs"] : []);
+}
+
 export function translator(locale: string): (key: string, values?: readonly unknown[]) => string {
   const catalog: Readonly<Record<string, string>> = locale === "cs" ? catalogs.cs : catalogs.en;
   return (key, values = []) => (catalog[key] ?? key ?? "").replace(/\{(\d+)\}/gu, (_token, index: string) => String(values[Number(index)] ?? ""));

@@ -340,6 +340,7 @@
 .addon-dnd-character .dse-build-step > button { min-height:36px; padding:.4rem; font-size:.8rem; }
 .addon-dnd-character .dse-build-step.is-complete { display:block; }
 .dse-builder-main { container:builder / inline-size; }
+.addon-dnd-character .dse-builder-next { width:100%; min-height:2.75rem; margin-bottom:.6rem; white-space:normal; overflow-wrap:anywhere; text-align:start; }
 .addon-dnd-character .dnd-builder-tabs { flex-wrap:nowrap; gap:.1rem; }
 .addon-dnd-character .dnd-builder-tabs .codex-tab { padding:.45rem .6rem; }
 .addon-dnd-character .character-foundation { gap:.6rem; }

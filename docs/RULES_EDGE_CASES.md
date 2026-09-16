@@ -26,8 +26,12 @@ Point buy, granted budgets, source choices and class prerequisites come from the
 engine. UI controls prevent overspending and duplicate selections; server
 validation also protects against stale or forged requests.
 
-Changing an earlier origin or level removes prior choices that are no longer
-granted or eligible. Newly supplied illegal choices are rejected. Lower maximum
+Changing an earlier origin or level removes only previously saved selections
+that the Engine identifies as unavailable choices, ineligible options or slots
+beyond the new choice count. Stable issue IDs identify the exact slot; valid
+siblings and newly edited replacements survive. Dependent withdrawals settle
+until no more saved selections are removed. Newly supplied illegal choices are
+rejected, and other rule violations remain visible for deliberate repair. Lower maximum
 HP clamps current HP; raising the maximum never heals. Other authored play state
 is preserved unless explicitly changed. Amending/revoking a DM grant replaces or
 removes its current entry, without retaining superseded grants.
@@ -52,6 +56,18 @@ semantics cover the autosave queue; direct play/grant and reviewed-import comman
 have separate command paths. Reducing an inventory quantity to zero explicitly
 moves an equipped item to carried and clears attunement in the same save; the
 Engine independently rejects requests leaving empty equipment active.
+
+## Builder guidance
+
+The Engine owns required decisions, prerequisite checks, counts and repair
+targets. Builder exposes the next required choice even with its progress rail
+collapsed, prioritizes invalid decisions, and translates Engine label templates
+in English and Czech. Authored catalog names remain source text.
+First-class, lineage, subclass, advancement and spell targets open the relevant
+section and focus its first unfinished visible control. Host `ui.controls.v1`
+owns comboboxes and tabs; refresh enhancement before restoring keyboard focus
+so the hidden native value select never receives focus. Reduced-motion settings
+disable animated navigation.
 
 ## Rules and transfer
 

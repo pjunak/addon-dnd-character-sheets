@@ -1,4 +1,5 @@
 {
+  "Background": "Zázemí",
   "; attuned": "; sladěno",
   "{0} — recorded die result": "{0} — zaznamenaný výsledek hodu",
   "{0} — spent / {1}": "{0} — spotřebováno / {1}",
@@ -394,5 +395,21 @@
   "Worn equipment": "Nošené vybavení",
   "Current HP": "Aktuální životy",
   "Your changes are still on this page and have not been confirmed saved.": "Vaše změny jsou stále na této stránce a jejich uložení nebylo potvrzeno.",
-  "Discard the unsaved character changes and reload the saved character?": "Zahodit neuložené změny postavy a načíst uloženou postavu?"
+  "Discard the unsaved character changes and reload the saved character?": "Zahodit neuložené změny postavy a načíst uloženou postavu?",
+  "Next choice: {0}": "Další volba: {0}",
+  "Review choice: {0}": "Zkontrolovat volbu: {0}",
+  "Finish base ability scores": "Dokončit základní hodnoty vlastností",
+  "Choose species": "Vybrat druh",
+  "Choose background": "Vybrat zázemí",
+  "Choose lineage": "Vybrat rodovou linii",
+  "Choose first class": "Vybrat první povolání",
+  "Review {0} levels": "Zkontrolovat úrovně: {0}",
+  "Choose {0} subclass": "Vybrat podtřídu: {0}",
+  "{0} level {1} advancement": "{0}: postup na {1}. úroveň",
+  "Assign origin ability points": "Rozdělit body vlastností původu",
+  "Choose {0} cantrips": "Vybrat triky: {0}",
+  "Choose {0} spellbook spells": "Vybrat kouzla do knihy kouzel: {0}",
+  "Choose spells: {0}": "Vybrat kouzla: {0}",
+  "Choose casting ability: {0}": "Vybrat sesílací vlastnost: {0}",
+  "Granted spells · choose {0}": "Udělená kouzla · vybrat {0}"
 }

@@ -126,11 +126,15 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 	// previously saved selections that the engine now marks as unavailable;
 	// a newly supplied illegal option is still rejected.
 	if request.Operation == "build" && state != nil {
-		for pass := 0; pass < 4; pass++ {
+		// Each pass removes at least one saved selection, so dependent grants
+		// settle without an arbitrary depth limit.
+		for {
 			invalid := map[string]bool{}
 			for _, issue := range evaluation.Evaluation.Issues {
-				if strings.HasPrefix(issue.ID, "unavailable-choice:") || strings.HasPrefix(issue.ID, "invalid-option:") {
-					invalid[issue.Target] = true
+				for _, prefix := range []string{"unavailable-choice:", "invalid-option:", "choice-count:"} {
+					if key, ok := strings.CutPrefix(issue.ID, prefix); ok {
+						invalid[key] = true
+					}
 				}
 			}
 			kept := []model.Choice{}
@@ -139,7 +143,7 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 				for _, old := range state.Inputs.Build.Choices {
 					previous = previous || reflect.DeepEqual(old, choice)
 				}
-				if !invalid[choice.ID] || !previous {
+				if !invalid[fmt.Sprintf("%s#%d", choice.ID, choice.Slot)] || !previous {
 					kept = append(kept, choice)
 				}
 			}

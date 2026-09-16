@@ -4,11 +4,11 @@ import { translator } from "./character-locale.js";
 import { playActions } from "./character-play.js";
 import { abilityRail, backpack, combatDetails, equipmentSlot, preferredLayout, recordName, savedRule, vitals } from "./character-sheet.js";
 import { equipmentPicker } from "./character-equipment.js";
-import { builderShell } from "./character-builder-nav.js";
+import { builderShell, focusBuilderTarget } from "./character-builder-nav.js";
 import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileCharacterChoices, newId, object, parseCharacter, rows, strings } from "./character-client.js";
 import { buildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
-import { button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
+import { builderTarget, button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
 export function defineCharacterElement(generation, client, enhance) {
     const tag = `dnd-character-${generation}`;
     if (customElements.get(tag))
@@ -292,6 +292,9 @@ export function defineCharacterElement(generation, client, enhance) {
             if (!this.isConnected || !this.#context)
                 return;
             const dialog = this.#dialog?.open ? this.#dialog : undefined;
+            const rail = this.querySelector(".dse-build-rail");
+            if (rail)
+                this.#builderNav.open = rail.open;
             const focused = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
             const focusKey = focused?.dataset["focusKey"], focusId = focused?.id;
             const selection = focused instanceof HTMLTextAreaElement || focused instanceof HTMLInputElement ? { start: focused.selectionStart, end: focused.selectionEnd } : undefined;
@@ -340,6 +343,7 @@ export function defineCharacterElement(generation, client, enhance) {
                     child.remove();
             this.prepend(root);
             this.#syncBusyButtons();
+            this.#controls?.refresh();
             for (const field of root.querySelectorAll(".character-field")) {
                 const scope = field.closest("[id^=character-choice-], [data-item], [data-builder-target]");
                 const key = (scope?.id || scope?.dataset["item"] || scope?.dataset["builderTarget"] || "") + "/" + field.querySelector("label")?.textContent;
@@ -403,14 +407,8 @@ export function defineCharacterElement(generation, client, enhance) {
                 this.#builderNav.tab = tab;
                 this.#builderNav.target = target;
                 this.#render();
-                if (target) {
-                    const node = this.querySelector('[data-builder-target="' + CSS.escape(target) + '"]') ?? this.querySelector("#character-choice-" + CSS.escape(encodeURIComponent(target)));
-                    for (let parent = node?.parentElement; parent && parent !== this; parent = parent.parentElement)
-                        if (parent instanceof HTMLDetailsElement)
-                            parent.open = true;
-                    node?.scrollIntoView({ block: "center", behavior: "smooth" });
-                    node?.querySelector("input,select,button")?.focus({ preventScroll: true });
-                }
+                if (target)
+                    focusBuilderTarget(this, target);
             });
         }
         #combat() {
@@ -466,7 +464,7 @@ export function defineCharacterElement(generation, client, enhance) {
         }
         #spellChoices() {
             const root = panel(this.#t("Spells")), options = this.#evaluation?.spellOptions ?? {}, casting = object(this.#evaluation?.sheet["spellcasting"]), spells = this.#catalogs.get("spell") ?? [];
-            const picks = (title, ids, current, set, maximum) => {
+            const picks = (title, ids, current, set, maximum, target = "") => {
                 const details = el("details", el("summary", this.#t("{0} ({1} selected)", [title, current.length]))), list = el("div");
                 let query = "";
                 const render = () => { list.replaceChildren(); const shown = [...new Set([...current, ...ids])].filter(id => `${spells.find(record => record.id === id)?.value["name"] ?? id}`.toLowerCase().includes(query)).slice(0, 100); for (const id of shown) {
@@ -479,13 +477,13 @@ export function defineCharacterElement(generation, client, enhance) {
                 } };
                 details.append(field(this.#t("Filter spells"), textInput("", value => { query = value.toLowerCase(); render(); })), list);
                 render();
-                return details;
+                return target ? builderTarget(target, details) : details;
             };
             for (const classOptions of rows(options["classes"])) {
                 const id = String(classOptions["classId"]), caster = rows(casting["perClass"]).find(row => row["classId"] === id) ?? {}, eligible = strings(classOptions["spellIds"]), zero = eligible.filter(id => Number(spells.find(record => record.id === id)?.value["level"]) === 0), leveled = eligible.filter(id => !zero.includes(id));
-                root.append(picks(this.#t("{0} cantrips · {1} allowed", [this.#t(label(id)), human(caster["cantripsKnown"])]), zero, this.#input.build.spells.cantrips[id] ?? [], value => { this.#input.build.spells.cantrips[id] = value; }, Number(caster["cantripsKnown"])));
+                root.append(picks(this.#t("{0} cantrips · {1} allowed", [this.#t(label(id)), human(caster["cantripsKnown"])]), zero, this.#input.build.spells.cantrips[id] ?? [], value => { this.#input.build.spells.cantrips[id] = value; }, Number(caster["cantripsKnown"]), "cantrips:" + id));
                 if (caster["prepares"] === "spellbook")
-                    root.append(picks(this.#t("{0} spellbook · {1} gained from levels", [this.#t(label(id)), human(caster["spellbookKnown"])]), leveled, this.#input.build.spells.spellbook[id] ?? [], value => { this.#input.build.spells.spellbook[id] = value; }, Number(caster["spellbookKnown"]) + this.#input.build.spells.acquisitions.filter(row => row.classId === id).length));
+                    root.append(picks(this.#t("{0} spellbook · {1} gained from levels", [this.#t(label(id)), human(caster["spellbookKnown"])]), leveled, this.#input.build.spells.spellbook[id] ?? [], value => { this.#input.build.spells.spellbook[id] = value; }, Number(caster["spellbookKnown"]) + this.#input.build.spells.acquisitions.filter(row => row.classId === id).length, "spellbook:" + id));
                 if (caster["prepares"] === "spellbook") {
                     const order = el("details", el("summary", this.#t("Spellbook acquisition order")), el("p", this.#t("Level-granted spells use slots in this order. Copied spells keep their separate paid acquisition.")));
                     const selected = this.#input.build.spells.spellbook[id] ?? [];
@@ -500,11 +498,11 @@ export function defineCharacterElement(generation, client, enhance) {
             }
             for (const choice of rows(options["pendingChoices"])) {
                 const key = String(choice["key"]);
-                root.append(picks(`Granted spells · choose ${human(choice["choose"])}`, strings(choice["eligibleSpellIds"]), this.#input.build.spells.grantChoices[key] ?? [], value => { this.#input.build.spells.grantChoices[key] = value; }, Number(choice["choose"])));
+                root.append(picks(this.#t("Granted spells · choose {0}", [choice["choose"]]), strings(choice["eligibleSpellIds"]), this.#input.build.spells.grantChoices[key] ?? [], value => { this.#input.build.spells.grantChoices[key] = value; }, Number(choice["choose"]), key));
             }
             for (const choice of rows(options["castingAbilityChoices"])) {
                 const key = String(choice["key"]);
-                root.append(field(this.#t("Granted spellcasting ability"), select(this.#input.build.spells.castingAbilities[key] ?? "", strings(choice["options"]).map(id => ({ id, label: id })), value => { this.#input.build.spells.castingAbilities[key] = value; this.#changed(); }, this.#t)));
+                root.append(builderTarget(key, field(this.#t("Granted spellcasting ability"), select(this.#input.build.spells.castingAbilities[key] ?? "", strings(choice["options"]).map(id => ({ id, label: id })), value => { this.#input.build.spells.castingAbilities[key] = value; this.#changed(); }, this.#t))));
             }
             return root;
         }
