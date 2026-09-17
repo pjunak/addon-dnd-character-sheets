@@ -419,7 +419,18 @@ export const catalogs = {
     "Granting source": "Granting source",
     "Discard saved choices": "Discard saved choices",
     "{0} · {1}": "{0} · {1}",
-    "{0} · {1} level {2}": "{0} · {1} level {2}"
+    "{0} · {1} level {2}": "{0} · {1} level {2}",
+    "Increase the quantity before using this item.": "Increase the quantity before using this item.",
+    "This item's rules source is unavailable.": "This item's rules source is unavailable.",
+    "This item needs supported rules or active DM mechanics.": "This item needs supported rules or active DM mechanics.",
+    "This item does not require attunement.": "This item does not require attunement.",
+    "Choose abilities, species, background and a class before attuning items.": "Choose abilities, species, background and a class before attuning items.",
+    "All attunement slots are in use. Unattune an item first.": "All attunement slots are in use. Unattune an item first.",
+    "Another copy of this item is already attuned.": "Another copy of this item is already attuned.",
+    "Meet this item's prerequisite or record a DM ruling.": "Meet this item's prerequisite or record a DM ruling.",
+    "{0} / {1} slots used": "{0} / {1} slots used",
+    "No other items are available for this slot.": "No other items are available for this slot.",
+    "Attune an item": "Attune an item"
   },
   "cs": {
     "Background": "Zázemí",
@@ -840,6 +851,17 @@ export const catalogs = {
     "Granting source": "Zdroj volby",
     "Discard saved choices": "Zahodit uložené volby",
     "{0} · {1}": "{0} · {1}",
-    "{0} · {1} level {2}": "{0} · {1}, úroveň {2}"
+    "{0} · {1} level {2}": "{0} · {1}, úroveň {2}",
+    "Increase the quantity before using this item.": "Před použitím předmětu zvyšte jeho množství.",
+    "This item's rules source is unavailable.": "Zdroj pravidel tohoto předmětu není dostupný.",
+    "This item needs supported rules or active DM mechanics.": "Tento předmět potřebuje podporovaná pravidla nebo aktivní mechaniky od DM.",
+    "This item does not require attunement.": "Tento předmět nevyžaduje sladění.",
+    "Choose abilities, species, background and a class before attuning items.": "Před sladěním předmětů vyberte vlastnosti, druh, zázemí a povolání.",
+    "All attunement slots are in use. Unattune an item first.": "Všechna místa pro sladění jsou obsazená. Nejprve zrušte sladění s některým předmětem.",
+    "Another copy of this item is already attuned.": "S jinou kopií tohoto předmětu už máte sladění.",
+    "Meet this item's prerequisite or record a DM ruling.": "Splňte předpoklad tohoto předmětu nebo zaznamenejte rozhodnutí DM.",
+    "{0} / {1} slots used": "Obsazená místa: {0} / {1}",
+    "No other items are available for this slot.": "Pro toto místo nejsou dostupné další předměty.",
+    "Attune an item": "Sladit se s předmětem"
   }
 } as const;

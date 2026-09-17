@@ -2,7 +2,8 @@ import { grantForm } from "./character-grant.js";
 import { comparisonView } from "./character-comparison.js";
 import { translator } from "./character-locale.js";
 import { playActions } from "./character-play.js";
-import { abilityRail, backpack, combatDetails, equipmentSlot, preferredLayout, recordName, savedRule, vitals } from "./character-sheet.js";
+import { abilityRail, backpack, combatDetails, preferredLayout, recordName, savedRule, vitals } from "./character-sheet.js";
+import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment } from "./character-inventory.js";
 import { equipmentPicker } from "./character-equipment.js";
 import { builderShell, focusBuilderTarget } from "./character-builder-nav.js";
 import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileCharacterChoices, newId, object, parseCharacter, rows, strings } from "./character-client.js";
@@ -363,7 +364,7 @@ export function defineCharacterElement(generation, client, enhance) {
         }
         #sheetView() {
             return { locale: this.#context?.host.locale ?? "en", layout: this.#layout, input: this.#input, projection: this.#response?.state?.projection, catalogs: this.#catalogs,
-                equipment: object(this.#evaluation?.guidance["equipment"]),
+                equipment: this.#response?.rulesChanged || this.#response?.status === "unavailable" ? {} : object(this.#evaluation?.guidance["equipment"]),
                 editing: this.#editable && this.#response?.status !== "unavailable" && !this.#response?.rulesChanged,
                 canPlay: this.#editable && this.#evaluation?.ready === true && !!this.#response?.state && this.#response.status !== "unavailable" && !this.#response.rulesChanged,
                 change: this.#changed, refresh: () => this.#render(), addItem: () => this.#equipment(), fillSlot: slot => this.#slot(slot),
@@ -378,21 +379,33 @@ export function defineCharacterElement(generation, client, enhance) {
                 })]);
         }
         #slot(slot) {
-            const choices = this.#input.play.inventory.filter(item => item.quantity > 0 && object(object(this.#evaluation?.guidance["equipment"])[item.id])[slot === "attuned" ? "canAttune" : "canEquip"] === true && (slot === "attuned" ? !item.attuned : equipmentSlot({ ...item, attuned: false }, this.#catalogs) === slot));
-            this.#open(this.#t("Choose {0}", [this.#t(label(slot))]), [styled("div", "dnd-slot-picker", ...choices.map(item => button(item.name, () => {
-                    if (slot === "attuned")
-                        item.attuned = true;
-                    else {
-                        if (slot === "armor" || slot === "shield")
-                            for (const current of this.#input.play.inventory)
-                                if (current.location === "equipped" && equipmentSlot({ ...current, attuned: false }, this.#catalogs) === slot)
-                                    current.location = "carried";
-                        item.location = "equipped";
+            const view = this.#sheetView(), attuning = slot === "attuned";
+            const choices = this.#input.play.inventory.filter(item => item.quantity > 0 && (attuning
+                ? !item.attuned && object(view.equipment[item.id])["attuneReason"] !== "not-required"
+                : item.location !== "equipped" && equipmentSlot(item, view.equipment, view.projection) === slot));
+            const picker = styled("div", "dnd-slot-picker");
+            for (const item of choices) {
+                const guidance = object(view.equipment[item.id]), allowed = guidance[attuning ? "canAttune" : "canEquip"] === true;
+                const action = button(item.name, () => {
+                    const changed = attuning ? attuneEquipment(item, true, view.equipment) : moveEquipment(this.#input.play.inventory, item.id, "equipped", view.equipment, view.projection);
+                    if (changed) {
+                        this.#changed();
+                        this.#dialog?.close();
+                        this.#render();
                     }
-                    this.#changed();
-                    this.#dialog?.close();
-                    this.#render();
-                }))), ...(!choices.length ? [el("p", this.#t("Add an item to your backpack first."))] : []), button(this.#t("Add item"), () => this.#equipment())]);
+                }, !allowed);
+                const row = styled("div", "dnd-equipment-choice", action), reason = equipmentReason(guidance[attuning ? "attuneReason" : "equipReason"], view.locale);
+                if (!allowed && reason) {
+                    const description = el("p", reason);
+                    description.id = "equipment-reason-" + encodeURIComponent(item.id);
+                    action.setAttribute("aria-describedby", description.id);
+                    row.append(description);
+                }
+                picker.append(row);
+            }
+            this.#open(attuning ? this.#t("Attune an item") : this.#t("Choose {0}", [this.#t(label(slot))]), [picker,
+                ...(!choices.length ? [el("p", this.#t(this.#input.play.inventory.length ? "No other items are available for this slot." : "Add an item to your backpack first."))] : []),
+                button(this.#t("Add item"), () => this.#equipment())], "heading");
         }
         #builder() {
             const body = el("fieldset");
@@ -556,18 +569,23 @@ export function defineCharacterElement(generation, client, enhance) {
                 this.#open(this.#t("Import character"), content);
             });
         }
-        #open(title, content) {
+        #open(title, content, initialFocus = "control") {
             this.#dialog?.close();
             this.#dialog?.remove();
-            const dialog = el("dialog", el("h2", title), ...content, button(this.#t("Close"), () => dialog.close()));
+            const heading = el("h2", title), dialog = el("dialog", heading, ...content, button(this.#t("Close"), () => dialog.close()));
             dialog.className = "character-dialog";
             dialog.dataset["uiDialog"] = "";
-            const id = `character-dialog-${newId()}`;
-            dialog.querySelector("h2").id = id;
-            dialog.setAttribute("aria-labelledby", id);
-            const trigger = document.activeElement;
-            dialog.addEventListener("close", () => { if (trigger instanceof HTMLElement && trigger.isConnected)
-                trigger.focus(); });
+            heading.id = `character-dialog-${newId()}`;
+            dialog.setAttribute("aria-labelledby", heading.id);
+            if (initialFocus === "heading") {
+                heading.tabIndex = -1;
+                heading.setAttribute("autofocus", "");
+            }
+            const trigger = document.activeElement, focusKey = trigger instanceof HTMLElement ? trigger.dataset["focusKey"] : undefined;
+            dialog.addEventListener("close", () => {
+                const target = trigger instanceof HTMLElement && trigger.isConnected ? trigger : focusKey ? this.querySelector('[data-focus-key="' + CSS.escape(focusKey) + '"]') : undefined;
+                target?.focus();
+            });
             this.#dialog = dialog;
             this.append(dialog);
             dialog.showModal();

@@ -417,5 +417,16 @@
   "Granting source": "Granting source",
   "Discard saved choices": "Discard saved choices",
   "{0} · {1}": "{0} · {1}",
-  "{0} · {1} level {2}": "{0} · {1} level {2}"
+  "{0} · {1} level {2}": "{0} · {1} level {2}",
+  "Increase the quantity before using this item.": "Increase the quantity before using this item.",
+  "This item's rules source is unavailable.": "This item's rules source is unavailable.",
+  "This item needs supported rules or active DM mechanics.": "This item needs supported rules or active DM mechanics.",
+  "This item does not require attunement.": "This item does not require attunement.",
+  "Choose abilities, species, background and a class before attuning items.": "Choose abilities, species, background and a class before attuning items.",
+  "All attunement slots are in use. Unattune an item first.": "All attunement slots are in use. Unattune an item first.",
+  "Another copy of this item is already attuned.": "Another copy of this item is already attuned.",
+  "Meet this item's prerequisite or record a DM ruling.": "Meet this item's prerequisite or record a DM ruling.",
+  "{0} / {1} slots used": "{0} / {1} slots used",
+  "No other items are available for this slot.": "No other items are available for this slot.",
+  "Attune an item": "Attune an item"
 }

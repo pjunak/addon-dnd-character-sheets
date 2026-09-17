@@ -80,6 +80,32 @@ or explicitly discard them. They never populate every repeat or get silently
 withdrawn as unavailable. Removing one acquisition preserves other acquisitions'
 IDs, exact slots and authored play state.
 
+## Equipment and attunement
+
+Backpack moves and the worn-slot picker share one inventory transition.
+Equipping armor or a shield replaces only an item currently equipped in that
+Engine-declared slot. Stored/carried spares, item identity, attunement, notes
+and acquisition details survive. Other worn items coexist. Unequipping does
+not implicitly unattune; quantity-zero cleanup retains its existing behavior.
+
+The Engine supplies action eligibility, physical slots and stable rejection
+codes. Both layouts show translated reasons, and the attunement picker includes
+blocked candidates with descriptions instead of suggesting an empty backpack.
+The capacity count comes from the saved projection. Custom item mechanics
+still require an authenticated active DM grant; the UI never infers authority.
+
+New projections retain slot facts for provider-free display. Older projections
+fall back only to their saved `armorType` evidence, never a replacement live
+catalog or a special item ID. Unavailable/changed rules keep mechanical editing
+disabled until the existing recovery/adoption flow completes.
+
+Inventory controls use stable per-item focus keys. The shared dialog helper
+can initially focus its heading so long equipment explanations remain visible;
+closing/choosing restores focus to the refreshed slot trigger. The dialog
+continues to use the host's borrowed control styling and keyboard containment.
+Both sheet layouts allow enlarged translated skill labels to wrap without
+pushing totals off-screen; the backpack heading wraps around its Add item action.
+
 ## Rules and transfer
 
 Without a compatible provider, saved projections and explanations render as

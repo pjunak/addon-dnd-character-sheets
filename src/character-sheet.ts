@@ -1,11 +1,11 @@
-import type { Inputs, Item, Projection, Reference } from "./character-model.js";
+import type { Inputs, Projection, Reference } from "./character-model.js";
+import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment, type EquipmentSlot } from "./character-inventory.js";
 import type { CatalogRecord } from "./character-client.js";
 import { abilities, object, rows } from "./character-client.js";
 import { translator } from "./character-locale.js";
 import { button, el, field, human, label, numberInput, panel, rule, select, signed, styled, textInput } from "./character-ui.js";
 
 export type Layout = "compact" | "classic";
-export type EquipmentSlot = "armor" | "shield" | "worn" | "attuned";
 export interface SheetView {
   locale: string; layout: Layout; input: Inputs; projection: Projection | undefined; catalogs: Map<string, CatalogRecord[]>;
   editing: boolean; canPlay: boolean; equipment: Record<string, unknown>;
@@ -30,12 +30,6 @@ export function savedRule(projection: Projection | undefined, name: string, path
 }
 export function recordName(view: Pick<SheetView, "catalogs" | "projection">, kind: string, id: string): string {
   return String(view.catalogs.get(kind)?.find(record => record.id === id)?.value["name"] ?? view.projection?.evidence.find(source => source.reference.kind === kind && source.reference.id === id)?.name ?? id);
-}
-export function equipmentSlot(item: Item, catalogs: Map<string, CatalogRecord[]>): EquipmentSlot {
-  if (item.attuned) return "attuned";
-  const value = item.reference ? catalogs.get(item.reference.kind)?.find(record => record.id === item.reference!.id)?.value : undefined;
-  if (item.reference?.kind === "armor") return value?.["category"] === "shield" || value?.["type"] === "shield" || item.reference.id === "shield" ? "shield" : "armor";
-  return "worn";
 }
 export function abilityRail(view: SheetView): HTMLElement {
   const t = translator(view.locale), sheet = view.projection?.sheet ?? {}, rail = styled("div", "dse-cards");
@@ -88,13 +82,16 @@ export function vitals(view: SheetView): HTMLElement {
   const worn = styled("div", "dse-worn", styled("span", "dse-stat-label", t("Worn equipment")));
   for (const slot of ["armor", "shield", "worn", "attuned"] as const) {
     const group = styled("div", "dse-worn-group", styled("span", "dse-stat-label", t(label(slot))));
-    const items = view.input.play.inventory.filter(item => item.quantity > 0 && (slot === "attuned" ? item.attuned : item.location === "equipped" && equipmentSlot({ ...item, attuned: false }, view.catalogs) === slot));
+    group.dataset["equipmentSlot"] = slot;
+    const attunement = object(sheet["attunement"]);
+    if (slot === "attuned" && typeof attunement["limit"] === "number") group.append(styled("span", "dse-attunement-capacity", t("{0} / {1} slots used", [Number(attunement["count"]), attunement["limit"]])));
+    const items = view.input.play.inventory.filter(item => item.quantity > 0 && (slot === "attuned" ? item.attuned : item.location === "equipped" && equipmentSlot(item, view.equipment, view.projection) === slot));
     for (const item of items) {
       const token = styled("span", "dse-equipment-slot", savedRule(view.projection, item.name, undefined, item.reference));
-      if (view.editing) { const remove = button("×", () => { if (slot === "attuned") item.attuned = false; else item.location = "carried"; view.change(); view.refresh(); }); remove.setAttribute("aria-label", t("Remove {0}", [item.name])); token.append(remove); }
+      if (view.editing) { const remove = button("×", () => { if (slot === "attuned") attuneEquipment(item, false, view.equipment); else moveEquipment(view.input.play.inventory, item.id, "carried", view.equipment, view.projection); view.change(); view.refresh(); }); remove.setAttribute("aria-label", t("Remove {0}", [item.name])); token.append(remove); }
       group.append(token);
     }
-    if (view.editing) group.append(button("+ " + t(label(slot)), () => view.fillSlot(slot)));
+    if (view.editing) { const add = button("+ " + t(label(slot)), () => view.fillSlot(slot)); add.dataset["focusKey"] = "equipment-slot/" + slot; group.append(add); }
     else if (!items.length) group.append(styled("span", "dse-empty", "—"));
     worn.append(group);
   }
@@ -114,13 +111,19 @@ export function backpack(view: SheetView): HTMLElement {
       if (view.editing) {
         const quantity = numberInput(item.quantity, value => { item.quantity = value ?? 0; if (item.quantity === 0) { item.attuned = false; if (item.location === "equipped") item.location = "carried"; } view.change(); }, 0); quantity.className = "dse-number"; quantity.setAttribute("aria-label", t("{0} quantity", [item.name]));
         const eligibility = object(view.equipment[item.id]);
-        const attune = button(item.attuned ? "★" : "☆", () => { item.attuned = !item.attuned; view.change(); view.refresh(); }, !item.attuned && eligibility["canAttune"] !== true); attune.setAttribute("aria-label", t("Attune {0}", [item.name])); attune.setAttribute("aria-pressed", String(item.attuned));
-        const move = select(item.location, ["equipped", "carried", "stored"].map(id => ({ id, label: t(label(id)), disabled: id === "equipped" && eligibility["canEquip"] !== true })), value => { if (value) { if (value === "equipped" && ["armor","shield"].includes(String(eligibility["slot"]))) for (const current of view.input.play.inventory) if (current.id !== item.id && object(view.equipment[current.id])["slot"] === eligibility["slot"]) current.location = "carried"; item.location = value; view.change(); view.refresh(); } }, t); move.className = "dse-item-location"; move.setAttribute("aria-label", t("Move {0}", [item.name]));
+        const attune = button(item.attuned ? "★" : "☆", () => { if (attuneEquipment(item, !item.attuned, view.equipment)) { view.change(); view.refresh(); } }, !item.attuned && eligibility["canAttune"] !== true); attune.setAttribute("aria-label", t("Attune {0}", [item.name])); attune.setAttribute("aria-pressed", String(item.attuned));
+        const reason = equipmentReason(eligibility["attuneReason"], view.locale);
+        if (reason) { attune.title = reason; attune.setAttribute("aria-description", reason); }
+        const move = select(item.location, ["equipped", "carried", "stored"].map(id => ({ id, label: t(label(id)), disabled: id === "equipped" && eligibility["canEquip"] !== true })), value => { if (value && moveEquipment(view.input.play.inventory, item.id, value, view.equipment, view.projection)) { view.change(); view.refresh(); } }, t); move.className = "dse-item-location"; move.setAttribute("aria-label", t("Move {0}", [item.name]));
         const remove = button("×", () => { view.input.play.inventory = view.input.play.inventory.filter(row => row.id !== item.id); view.change(); view.refresh(); }); remove.setAttribute("aria-label", t("Remove {0}", [item.name]));
+        for (const [action, control] of Object.entries({ quantity, attune, move, remove })) control.dataset["focusKey"] = "inventory/" + item.id + "/" + action;
         row.append(quantity, attune, move, remove);
         const details = styled("details", "dse-item-notes", el("summary", t("Details")));
         details.append(field(t("Name"), textInput(item.name, value => { item.name = value; view.change(); })), field(t("Acquired from"), textInput(item.acquisition, value => { item.acquisition = value; view.change(); })), field(t("Notes"), textInput(item.notes, value => { item.notes = value; view.change(); }, true)),
           field(t("Scroll spell (optional)"), select(item.spellId ?? "", (view.catalogs.get("spell") ?? []).map(row => ({ id: row.id, label: String(row.value["name"] ?? row.id) })), value => { if (value) item.spellId = value; else delete item.spellId; view.change(); }, t)));
+        if (reason) details.append(el("p", t("Attunement") + ": " + reason));
+        const equipReason = equipmentReason(eligibility["equipReason"], view.locale);
+        if (equipReason && equipReason !== reason) details.append(el("p", t("Equipment") + ": " + equipReason));
         row.append(details);
       } else { row.append(el("span", "× " + item.quantity + (item.attuned ? " ★" : ""))); if (item.notes) row.append(styled("details", "dse-item-notes", el("summary", t("Notes")), el("p", item.notes))); }
       group.append(row);
