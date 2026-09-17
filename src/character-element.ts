@@ -185,12 +185,15 @@ export function defineCharacterElement(generation: string, client: CharacterClie
         content.append(styled("div", "dse-cols", abilityRail(view), main));
       }
       root.append(nav, styled("div", "dnd-sheet-workspace", status, content));
+      for (const field of root.querySelectorAll<HTMLElement>(".character-field")) {
+        const scope = field.closest<HTMLElement>("[id^=character-choice-], [data-item], [data-builder-target]");
+        // The shared controls restore focus during refresh, before local caret restoration.
+        field.dataset["uiKey"] = (scope?.id || scope?.dataset["item"] || scope?.dataset["builderTarget"] || "") + "/" + field.querySelector("label")?.textContent;
+      }
       for (const child of [...this.children]) if (child !== dialog) child.remove();
       this.prepend(root); this.#syncBusyButtons(); this.#controls?.refresh();
       for (const field of root.querySelectorAll<HTMLElement>(".character-field")) {
-        const scope = field.closest<HTMLElement>("[id^=character-choice-], [data-item], [data-builder-target]");
-        const key = (scope?.id || scope?.dataset["item"] || scope?.dataset["builderTarget"] || "") + "/" + field.querySelector("label")?.textContent;
-        for (const control of field.querySelectorAll<HTMLElement>("input,select,textarea,button")) control.dataset["focusKey"] = key + "/" + (control.getAttribute("aria-label") ?? control.tagName);
+        for (const control of field.querySelectorAll<HTMLElement>("input,select,textarea,button")) control.dataset["focusKey"] = field.dataset["uiKey"] + "/" + (control.getAttribute("aria-label") ?? control.tagName);
       }
       const restore = focusKey ? root.querySelector<HTMLElement>('[data-focus-key="' + CSS.escape(focusKey) + '"]') : focusId ? root.querySelector<HTMLElement>("#" + CSS.escape(focusId)) : undefined;
       for (let parent = restore?.parentElement; parent && parent !== root; parent = parent.parentElement) if (parent instanceof HTMLDetailsElement) parent.open = true;

@@ -338,6 +338,11 @@ export function defineCharacterElement(generation, client, enhance) {
                 content.append(styled("div", "dse-cols", abilityRail(view), main));
             }
             root.append(nav, styled("div", "dnd-sheet-workspace", status, content));
+            for (const field of root.querySelectorAll(".character-field")) {
+                const scope = field.closest("[id^=character-choice-], [data-item], [data-builder-target]");
+                // The shared controls restore focus during refresh, before local caret restoration.
+                field.dataset["uiKey"] = (scope?.id || scope?.dataset["item"] || scope?.dataset["builderTarget"] || "") + "/" + field.querySelector("label")?.textContent;
+            }
             for (const child of [...this.children])
                 if (child !== dialog)
                     child.remove();
@@ -345,10 +350,8 @@ export function defineCharacterElement(generation, client, enhance) {
             this.#syncBusyButtons();
             this.#controls?.refresh();
             for (const field of root.querySelectorAll(".character-field")) {
-                const scope = field.closest("[id^=character-choice-], [data-item], [data-builder-target]");
-                const key = (scope?.id || scope?.dataset["item"] || scope?.dataset["builderTarget"] || "") + "/" + field.querySelector("label")?.textContent;
                 for (const control of field.querySelectorAll("input,select,textarea,button"))
-                    control.dataset["focusKey"] = key + "/" + (control.getAttribute("aria-label") ?? control.tagName);
+                    control.dataset["focusKey"] = field.dataset["uiKey"] + "/" + (control.getAttribute("aria-label") ?? control.tagName);
             }
             const restore = focusKey ? root.querySelector('[data-focus-key="' + CSS.escape(focusKey) + '"]') : focusId ? root.querySelector("#" + CSS.escape(focusId)) : undefined;
             for (let parent = restore?.parentElement; parent && parent !== root; parent = parent.parentElement)

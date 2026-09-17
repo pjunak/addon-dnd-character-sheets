@@ -66,8 +66,10 @@ in English and Czech. Authored catalog names remain source text.
 First-class, lineage, subclass, advancement and spell targets open the relevant
 section and focus its first unfinished visible control. Host `ui.controls.v1`
 owns comboboxes and tabs; refresh enhancement before restoring keyboard focus
-so the hidden native value select never receives focus. Reduced-motion settings
-disable animated navigation.
+so the hidden native value select never receives focus. Before enhancement,
+field keys include the owning choice, item or Builder target. Repeated labels
+such as Selection 1 must not move focus to another acquisition after autosave.
+Reduced-motion settings disable animated navigation.
 
 Repeatable feat choices carry Engine-owned acquisition IDs and source labels.
 The shared Builder controls render each set independently. A single historical
