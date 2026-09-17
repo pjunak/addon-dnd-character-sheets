@@ -223,7 +223,7 @@
 .character-dialog{width:min(60rem,calc(100vw - 1.5rem));max-height:calc(100dvh - 2rem);overflow:auto;overscroll-behavior:contain;border:1px solid var(--border-subtle,#777);border-radius:10px;padding:1.5rem;background:var(--bg-base,#fff);color:var(--text-parchment,#222)}
 .character-dialog::backdrop{background:#0008}.character-dialog>button{margin:.5rem}.character-dialog details{margin-block:.7rem}.character-dialog summary{cursor:pointer;min-height:32px}.character-dialog label:has(input[type=checkbox]){display:flex;align-items:center;gap:.5rem;margin:.7rem 0}
 .character-dialog pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:30rem;overflow:auto}
-@media(max-width:1050px){.character-columns{grid-template-columns:1fr}}@media(max-width:550px){.character-panel{padding:.7rem}.character-dialog{padding:1rem}.character-toolbar>button{flex:1}}
+@media(max-width:1050px){.character-columns{grid-template-columns:1fr}}@media(max-width:550px){.character-panel{padding:.7rem}.character-dialog{padding:1rem}.character-toolbar>button{flex:1 1 auto}}
 
 /* Keep the restored presentation dense; the coordinator's review panels are secondary. */
 .addon-dnd-character { --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --radius:.4rem; --radius-lg:.6rem; --text-sm:.875rem; --text-2xl:1.75rem; padding:1rem; }

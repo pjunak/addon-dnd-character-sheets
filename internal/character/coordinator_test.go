@@ -206,6 +206,41 @@ func TestReviewRejectsConcurrentAndRulesChangesAndMissingProviders(t *testing.T)
 		t.Fatal("missing provider did not preserve read-only state")
 	}
 }
+func TestSaveAdoptsChangedRulesWithPendingInputAndClearsRecovery(t *testing.T) {
+	c, data, engine, meta := fixture(t)
+	input := model.Blank()
+	created, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "initial-character", Summary: "Create", Inputs: &input})
+	if err != nil || created.Status != "ready" {
+		t.Fatalf("create: %+v %v", created, err)
+	}
+	input.Notes = "Pending authored input"
+	engine.generation = "engine-two"
+	request := Request{Operation: "build", OperationID: "pending-character", ExpectedRevision: created.Revision, Summary: "Pending input", Inputs: &input}
+	blocked, err := invoke(t, c, meta, "save", request)
+	if err != nil || blocked.Status != "rules-changed" || !blocked.RulesChanged || data.writes != 1 || data.state.Inputs.Notes != "" {
+		t.Fatalf("changed rules did not block autosave: %+v %v", blocked, err)
+	}
+	request.Operation = "adopt-rules"
+	request.OperationID = "adopt-current-rules"
+	request.AdoptRules = true
+	saved, err := invoke(t, c, meta, "save", request)
+	if err != nil || saved.Status != "ready" || saved.RulesChanged || saved.Revision != created.Revision+1 {
+		t.Fatalf("adoption did not clear recovery: %+v %v", saved, err)
+	}
+	if saved.State.Inputs.Notes != input.Notes || saved.State.Rules.EngineGeneration != engine.generation || data.writes != 2 {
+		t.Fatalf("adoption lost input or rules identity: %+v", saved)
+	}
+	retried, err := invoke(t, c, meta, "save", request)
+	if err != nil || retried.Revision != saved.Revision || retried.RulesChanged || data.writes != 2 {
+		t.Fatalf("adoption retry wrote twice: %+v %v", retried, err)
+	}
+	request.OperationID = "stale-adoption-request"
+	conflict, err := invoke(t, c, meta, "save", request)
+	if err != nil || conflict.Status != "conflict" || data.writes != 2 {
+		t.Fatalf("adoption bypassed the opening revision: %+v %v", conflict, err)
+	}
+}
+
 func TestHiddenCoreAndUnknownFieldsRejected(t *testing.T) {
 	c, data, _, meta := fixture(t)
 	data.forbidden = true

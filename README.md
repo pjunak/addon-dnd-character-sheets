@@ -27,8 +27,11 @@ duplicate granted selections are excluded.
 
 **Tools** owns export, reviewed replacement import, printing, layout and rules
 status. Transfers use `dnd-character.v1` / schema 4.0.0 and contain the current
-character only. Changed installed rules require explicit adoption. Without
-compatible rules, saved values, export and printing remain usable.
+character only. Changed installed rules require explicit adoption. If an
+autosave discovers changed rules, **Review changed rules** opens Tools; explicit
+adoption can save the pending edits together with the new rules. Conflicts and
+uncertain requests retain their recovery guards. Without compatible rules,
+saved values, export and printing remain usable.
 
 The sheet is limited to 1,120 px and has no duplicate character heading. Compact
 uses tighter ability cards and places currency directly below inventory. When

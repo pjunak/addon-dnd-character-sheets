@@ -123,6 +123,25 @@ stored; mechanical changes stay disabled. The versioned notes service remains
 compatible for existing clients, but the sheet offers no character notes editor.
 Loading never adopts changed rules. Tools provides explicit adoption.
 
+If an autosave discovers changed rules, its rejected response updates the rules
+status without replacing pending input or advancing the opening revision.
+**Review changed rules** moves keyboard focus to Tools. With pending input, the
+action is **Adopt rules and save pending changes**, with an explanation that the
+same action saves those edits. Merely reviewing the rules writes nothing.
+Adoption submits the current pending input directly; retrying the rejected old-
+rules autosave first cannot succeed. An uncertain earlier request must still be
+resolved before adoption. Existing revision, grant authority and Engine validation
+remain mandatory, and adoption commands never rebase over another editor.
+
+A successful adoption clears the changed-rules flag in the authoritative save
+response, so the sheet can resume editing without an event-stream refresh.
+A lost acknowledgment retains the exact adoption request for Retry and cannot
+write a second revision. This recovery applies to the mounted generation; a
+forced provider/package replacement has a separate lifetime boundary and remains
+tracked in the suite backlog. No input is persisted as a device draft.
+Tools actions wrap at their natural label widths on phones, including enlarged
+Czech text, instead of forcing every button into the same narrow row.
+
 Imports validate a closed current envelope, recalculate mechanics and preview
 replacement before confirmation. Imported DM grants need the current DM's
 authorization; imported mechanical acquisition/roll claims retain external origin.

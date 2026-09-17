@@ -434,5 +434,8 @@
   "Meet this item's prerequisite or record a DM ruling.": "Meet this item's prerequisite or record a DM ruling.",
   "{0} / {1} slots used": "{0} / {1} slots used",
   "No other items are available for this slot.": "No other items are available for this slot.",
-  "Attune an item": "Attune an item"
+  "Attune an item": "Attune an item",
+  "Review changed rules": "Review changed rules",
+  "Adopting rules will also save your pending changes.": "Adopting rules will also save your pending changes.",
+  "Adopt rules and save pending changes": "Adopt rules and save pending changes"
 }

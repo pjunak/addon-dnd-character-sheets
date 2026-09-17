@@ -441,6 +441,7 @@ func (c *Coordinator) persist(ctx context.Context, meta *workerrpc.Meta, key str
 	}
 	response.Revision = receipt.Results[0].AfterRevision
 	response.State = &state
+	response.RulesChanged = false
 	response.Message = "Saved"
 	return response, nil
 }

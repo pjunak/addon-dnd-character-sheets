@@ -436,7 +436,10 @@ export const catalogs = {
     "Meet this item's prerequisite or record a DM ruling.": "Meet this item's prerequisite or record a DM ruling.",
     "{0} / {1} slots used": "{0} / {1} slots used",
     "No other items are available for this slot.": "No other items are available for this slot.",
-    "Attune an item": "Attune an item"
+    "Attune an item": "Attune an item",
+    "Review changed rules": "Review changed rules",
+    "Adopting rules will also save your pending changes.": "Adopting rules will also save your pending changes.",
+    "Adopt rules and save pending changes": "Adopt rules and save pending changes"
   },
   "cs": {
     "The action's outcome could not be confirmed.": "Výsledek akce se nepodařilo potvrdit.",
@@ -874,6 +877,9 @@ export const catalogs = {
     "Meet this item's prerequisite or record a DM ruling.": "Splňte předpoklad tohoto předmětu nebo zaznamenejte rozhodnutí DM.",
     "{0} / {1} slots used": "Obsazená místa: {0} / {1}",
     "No other items are available for this slot.": "Pro toto místo nejsou dostupné další předměty.",
-    "Attune an item": "Sladit se s předmětem"
+    "Attune an item": "Sladit se s předmětem",
+    "Review changed rules": "Zkontrolovat změněná pravidla",
+    "Adopting rules will also save your pending changes.": "Přijetím pravidel se uloží také vaše čekající změny.",
+    "Adopt rules and save pending changes": "Přijmout pravidla a uložit čekající změny"
   }
 } as const;

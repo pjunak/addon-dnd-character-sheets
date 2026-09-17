@@ -186,7 +186,15 @@ export function defineCharacterElement(generation, client, enhance) {
                 node.append(el("p", this.#t("Your changes are still on this page and have not been confirmed saved.")));
                 if (this.#saveIssues.length)
                     node.append(el("ul", ...this.#saveIssues.map(message => el("li", this.#t(message)))));
-                node.append(button(this.#t("Retry"), () => { this.#blocked = false; return this.#flush(); }), button(this.#t("Reload saved character"), () => this.#reloadSaved()));
+                if (this.#response?.rulesChanged && !this.#attempt)
+                    node.append(button(this.#t("Review changed rules"), () => {
+                        this.#tab = "tools";
+                        this.#render();
+                        this.querySelector('[data-focus-key="adopt-rules"]')?.focus();
+                    }));
+                else
+                    node.append(button(this.#t("Retry"), () => { this.#blocked = false; return this.#flush(); }));
+                node.append(button(this.#t("Reload saved character"), () => this.#reloadSaved()));
             }
         }
         async #reloadSaved() {
@@ -245,6 +253,7 @@ export function defineCharacterElement(generation, client, enhance) {
                     if (response.evaluation)
                         this.#evaluation = response.evaluation;
                     if (response.status !== "ready" || !response.state) {
+                        this.#response = { ...this.#response, ...response };
                         this.#blocked = true;
                         this.#message = response.message;
                         if (response.status === "invalid" && version !== this.#changeVersion) {
@@ -494,8 +503,13 @@ export function defineCharacterElement(generation, client, enhance) {
                 tools.append(button(this.#t("Export character"), () => download(this.#key + ".character.json", exportCharacter(this.#response.state))), button(this.#t("Print / PDF"), () => this.#print(this.#response.state, this.#response.revision)));
             tools.append(button(this.#t("Import character"), () => this.#import(), !this.#editable), button(this.#t("Reload character"), () => this.#reloadSaved(), this.#busy || !!this.#saving));
             const provider = panel(this.#t("Rules"), el("p", this.#t(this.#response?.status === "unavailable" ? "Compatible rules are unavailable. Saved values and notes remain accessible." : this.#response?.rulesChanged ? "The rules changed. Adopt them to continue editing." : "Rules are connected.")));
-            if (this.#response?.rulesChanged)
-                provider.append(button(this.#t("Adopt current rules"), () => this.#perform({ ...this.#base("adopt-rules"), inputs: structuredClone(this.#input), adoptRules: true }), !this.#editable));
+            if (this.#response?.rulesChanged) {
+                if (this.#dirty)
+                    provider.append(el("p", this.#t("Adopting rules will also save your pending changes.")));
+                const adopt = button(this.#t(this.#dirty ? "Adopt rules and save pending changes" : "Adopt current rules"), () => this.#perform({ ...this.#base("adopt-rules"), inputs: structuredClone(this.#input), adoptRules: true }), !this.#editable || !!this.#attempt);
+                adopt.dataset["focusKey"] = "adopt-rules";
+                provider.append(adopt);
+            }
             return el("div", tools, provider);
         }
         #spellChoices() {
@@ -563,9 +577,17 @@ export function defineCharacterElement(generation, client, enhance) {
             const epoch = this.#epoch;
             if (!this.#editable)
                 return;
-            await this.#flush();
-            if (this.#dirty || !this.#editable || epoch !== this.#epoch || request.key !== this.#key)
+            await this.#saving;
+            if (!this.#editable || epoch !== this.#epoch || request.key !== this.#key)
                 return;
+            // Explicit adoption saves the preserved input with new rules. A rejected
+            // autosave cannot precede it, and an uncertain request must be resolved first.
+            const adoptingRules = request.operation === "adopt-rules" && request.adoptRules === true && this.#response?.rulesChanged === true;
+            if (!adoptingRules)
+                await this.#flush();
+            if (this.#dirty && !adoptingRules || this.#attempt || !this.#editable || epoch !== this.#epoch || request.key !== this.#key)
+                return;
+            clearTimeout(this.#timer);
             request.expectedRevision = this.#baseRevision;
             if (request.inputs && request.operation !== "import")
                 request.inputs = structuredClone(this.#input);
