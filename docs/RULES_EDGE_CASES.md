@@ -50,10 +50,20 @@ editor has since written, ordinary revision/conflict handling applies instead.
 An acknowledgment without evaluation triggers a read to refresh guidance.
 Reload requires explicit confirmation before discarding pending edits.
 
+Direct play, grant/amend/revoke and rules-adoption commands also retain their
+exact request after an uncertain response. Reviewed imports retain the approved
+token, operation ID and expected revision; Retry never makes a new preview or
+bypasses review. Further mutations and background refresh pause until the outcome
+is resolved, and the host navigation guard remains active. A conflicting or
+rejected response requires checking saved state before deciding what to do next;
+commands never rebase automatically onto another editor's changes. An explicit
+check ends the retry only after a successful load, without undoing a saved action.
+Lost acknowledgments can be recognized across worker restarts from the last
+accepted operation; older requests cannot overwrite a later revision.
+
 Failed or uncertain writes do not claim success. Pending input stays in the open
-page, with the host navigation guard, and is not durable until saved. These retry
-semantics cover the autosave queue; direct play/grant and reviewed-import commands
-have separate command paths. Reducing an inventory quantity to zero explicitly
+page, with the host navigation guard, and is not durable until saved. Recovery
+controls use the shared host UI and English/Czech messages. Reducing an inventory quantity to zero explicitly
 moves an equipped item to carried and clears attunement in the same save; the
 Engine independently rejects requests leaving empty equipment active.
 

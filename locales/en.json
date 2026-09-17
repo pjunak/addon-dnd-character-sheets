@@ -1,4 +1,10 @@
 {
+  "The action's outcome could not be confirmed.": "The action's outcome could not be confirmed.",
+  "The action may already be saved. Further changes are paused until its outcome is resolved.": "The action may already be saved. Further changes are paused until its outcome is resolved.",
+  "Retry sends the same action safely. Checking the saved character ends this retry and does not undo any saved action.": "Retry sends the same action safely. Checking the saved character ends this retry and does not undo any saved action.",
+  "Check the saved character before deciding whether to repeat the action.": "Check the saved character before deciding whether to repeat the action.",
+  "Check saved character": "Check saved character",
+  "Check the saved character and end this retry? Any action already saved will remain. Review the result before repeating it.": "Check the saved character and end this retry? Any action already saved will remain. Review the result before repeating it.",
   "Background": "Background",
   "; attuned": "; attuned",
   "{0} — recorded die result": "{0} — recorded die result",
