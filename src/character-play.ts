@@ -1,7 +1,8 @@
+import { markSpellRow, spellFilters, spellSourceLabel } from "./character-spells.js";
 import type { Inputs, Result } from "./character-model.js";
 import { translator } from "./character-locale.js";
 import { newId, object, rows, strings, type CatalogRecord } from "./character-client.js";
-import { button, el, field, human, label, numberInput, panel, rule, select, styled, textInput } from "./character-ui.js";
+import { button, el, field, human, label, numberInput, panel, rule, select, styled } from "./character-ui.js";
 
 // Options and costs are engine results. This view only gathers command inputs.
 export function playActions(input: Inputs, evaluation: Result, catalog: CatalogRecord[], act: (change: Record<string, unknown>, summary: string) => Promise<void>, locale = "en", section: "spells" | "recovery" = "spells"): HTMLElement {
@@ -14,10 +15,10 @@ export function playActions(input: Inputs, evaluation: Result, catalog: CatalogR
     root.append(field(t("{0} — recorded die result", [human(resource["name"])]), numberInput(undefined, value => { result = value; }, 1)), button(t("Spend recorded hit die"), async () => { if (result !== undefined) await act({ operation: "spend-hit-die", key, result, rollId: newId() }, `Spend ${human(resource["die"])}: recorded ${result}`); }));
   }
   if (section === "recovery") return root;
-  const search = textInput("", () => filter()), level = select("", [{id:"0",label:t("Cantrips")}, ...Array.from({length:9}, (_, i) => ({id:String(i+1),label:t("Level {0}",[i+1])}))], () => filter(), t);
-  const filter = (): void => { for (const row of root.querySelectorAll<HTMLElement>("[data-spell-name]")) row.hidden = !(row.dataset["spellName"]!.includes(search.value.toLocaleLowerCase()) && (!level.value || row.dataset["spellLevel"] === level.value)); };
-  root.append(styled("div", "dnd-workflow-controls", field(t("Filter spells"), search), field(t("Spell level"), level)));
-  const spellRow = (ref: string): HTMLElement => { const row = styled("div", "dnd-spell-row", rule(spellName(ref), {kind:"spell", id:ref})); row.dataset["spellName"] = spellName(ref).toLocaleLowerCase(); row.dataset["spellLevel"] = String(catalog.find(record => record.id === ref)?.value["level"] ?? ""); return row; };
+  const filters = spellFilters("play-spells",locale,()=>filter());
+  const filter = (): void => { let shown=0; for (const row of root.querySelectorAll<HTMLElement>("[data-spell-name]")) { row.hidden=!filters.matches(row.dataset["spellName"]!,row.dataset["spellLevel"]); if(!row.hidden)shown++; } filters.report(shown); };
+  root.append(filters.controls);
+  const spellRow = (ref: string): HTMLElement => markSpellRow(styled("div", "dnd-spell-row", rule(spellName(ref), {kind:"spell", id:ref})),ref,catalog);
   for (const caster of rows(evaluation.spellOptions["classes"])) {
     const classId = String(caster["classId"]), group = panel(t("{0} spells", [label(classId)]));
     for (const [ref, rawSlots] of Object.entries(object(caster["castSlots"]))) {
@@ -40,9 +41,10 @@ export function playActions(input: Inputs, evaluation: Result, catalog: CatalogR
   }
   for (const grant of rows(evaluation.spellOptions["granted"])) {
     const ref = String(grant["ref"]), key = String(grant["key"]), slots = strings(grant["slots"]); let slot = slots[0] ?? "";
-    const row = el("div", rule(spellName(ref), { kind: "spell", id: ref }));
+    const row = spellRow(ref); row.dataset["spellGrant"]=key;
+    row.append(el("span",spellSourceLabel(grant["source"],locale)),el("span",human(grant["castingAbility"])));
     if (slots.length) row.append(field(t("Granted cast resource"), select(slot, slots.map(id => ({ id, label: slotName(id) })), value => { slot = value; }, t)));
     row.append(button(t("Cast granted spell"), () => act({ operation: "cast-granted-spell", key, slot }, `Cast granted ${spellName(ref)}`))); root.append(row);
   }
-  return root;
+  filter(); return root;
 }

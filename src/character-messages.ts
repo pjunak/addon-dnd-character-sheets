@@ -564,7 +564,18 @@ export const catalogs = {
     "Resolve the spent resource against its current capacity: {0}": "Resolve the spent resource against its current capacity: {0}",
     "This prerequisite needs recorded DM adjudication: {0}": "This prerequisite needs recorded DM adjudication: {0}",
     "DM given: {0} waives this requirement.": "DM given: {0} waives this requirement.",
-    "Attuned to more than {0} magic items (limit {1})": "Attuned to more than {0} magic items (limit {1})"
+    "Attuned to more than {0} magic items (limit {1})": "Attuned to more than {0} magic items (limit {1})",
+    "All spell levels": "All spell levels",
+    "{0} spells shown": "{0} spells shown",
+    "No matching spells.": "No matching spells.",
+    "Assign saved spell state": "Assign saved spell state",
+    "Discard saved spell state": "Discard saved spell state",
+    "Versatile damage": "Versatile damage",
+    "Mastery": "Mastery",
+    "Active": "Active",
+    "Inactive": "Inactive",
+    "Spell list": "Spell list",
+    "Granted spells": "Granted spells"
   },
   "cs": {
     "The action's outcome could not be confirmed.": "Výsledek akce se nepodařilo potvrdit.",
@@ -1130,6 +1141,17 @@ export const catalogs = {
     "Resolve the spent resource against its current capacity: {0}": "Upravte spotřebu zdroje podle jeho současné kapacity: {0}",
     "This prerequisite needs recorded DM adjudication: {0}": "Tento předpoklad vyžaduje zaznamenané rozhodnutí PJ: {0}",
     "DM given: {0} waives this requirement.": "Udělení PJ: {0} uděluje výjimku z tohoto požadavku.",
-    "Attuned to more than {0} magic items (limit {1})": "Sladěno s více než {0} kouzelnými předměty (limit {1})"
+    "Attuned to more than {0} magic items (limit {1})": "Sladěno s více než {0} kouzelnými předměty (limit {1})",
+    "All spell levels": "Všechny úrovně kouzel",
+    "{0} spells shown": "Zobrazeno kouzel: {0}",
+    "No matching spells.": "Žádná odpovídající kouzla.",
+    "Assign saved spell state": "Přiřadit uložený stav kouzel",
+    "Discard saved spell state": "Zahodit uložený stav kouzel",
+    "Versatile damage": "Zranění při držení oběma rukama",
+    "Mastery": "Mistrovství",
+    "Active": "Aktivní",
+    "Inactive": "Neaktivní",
+    "Spell list": "Seznam kouzel",
+    "Granted spells": "Udělená kouzla"
   }
 } as const;

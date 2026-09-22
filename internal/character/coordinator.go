@@ -148,7 +148,8 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 					kept = append(kept, choice)
 				}
 			}
-			if len(kept) == len(input.Build.Choices) {
+			repairedGrants := repairGrantSelections(&input, state.Inputs, evaluation.Evaluation)
+			if len(kept) == len(input.Build.Choices) && !repairedGrants {
 				break
 			}
 			input.Build.Choices = kept

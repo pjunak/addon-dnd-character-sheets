@@ -215,3 +215,11 @@ a character Notes tab, editor, or printed notes section. Existing schema-4 notes
 and the versioned service remain compatible for saved data and transfer; this UI
 change does not erase existing character content. Item-specific notes remain
 part of inventory.
+
+## Spell ownership, filtering and saved Combat details
+
+Builder and play share one name/level filter with a live result count and explicit empty state. Class spells, rituals and granted spells participate; filtering does not edit selections. Grant labels include their acquisition, and host-enhanced controls keep stable field keys. Both locales and layouts use the same component.
+
+Spell choices, casting abilities, activations and counters follow Engine acquisition keys. Unassigned older state has an explicit source picker or discard action in Builder. Ambiguous aliases never fan out. After a structural edit, the coordinator withdraws only Engine-rejected selections already present in the saved snapshot; it preserves valid sibling spells and counters, rejects newly invalid input, and does not reset an available counter. A save response applies corrections without resurrecting removed choices or overwriting subsequent edits.
+
+Combat displays saved damage type, versatile damage, mastery availability, sense units and conditional explanation terms. Saved details and print remain independent of a live rules provider. The browser performs no edition arithmetic.

@@ -3,13 +3,14 @@ import { comparisonView } from "./character-comparison.js";
 import { translator } from "./character-locale.js";
 import { feedbackMessage } from "./character-feedback.js";
 import { playActions } from "./character-play.js";
-import { abilityRail, backpack, combatDetails, preferredLayout, recordName, savedRule, vitals, type Layout, type SheetView } from "./character-sheet.js";
+import { abilityRail, backpack, combatDetails, preferredLayout, vitals, type Layout, type SheetView } from "./character-sheet.js";
 import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment, type EquipmentSlot } from "./character-inventory.js";
 import { equipmentPicker } from "./character-equipment.js";
 import { builderShell, focusBuilderTarget, type BuilderNavigation } from "./character-builder-nav.js";
 import type { AddonContext, ContributionContext } from "./sdk.js";
 import type { Grant, Inputs, Request, Response, Result, State } from "./character-model.js";
-import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileCharacterChoices, newId, object, parseCharacter, rows, strings, type CatalogRecord } from "./character-client.js";
+import { spellFilters, spellSourceLabel, unassignedSpellState, savedSpellBook } from "./character-spells.js";
+import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileCharacterChoices, reconcileCharacterMap, newId, object, parseCharacter, rows, strings, type CatalogRecord } from "./character-client.js";
 import { buildView, type BuildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
 import { builderTarget, button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
@@ -184,6 +185,10 @@ export function defineCharacterElement(generation: string, client: CharacterClie
           if (this.#input.play.asOf === inputs.play.asOf) this.#input.play.asOf = response.state.inputs.play.asOf;
           if (this.#input.play.hp === inputs.play.hp) this.#input.play.hp = response.state.inputs.play.hp;
           this.#input.build.choices = reconcileCharacterChoices(inputs.build.choices, this.#input.build.choices, response.state.inputs.build.choices);
+          reconcileCharacterMap(inputs.build.spells.grantChoices,this.#input.build.spells.grantChoices,response.state.inputs.build.spells.grantChoices);
+          reconcileCharacterMap(inputs.build.spells.castingAbilities,this.#input.build.spells.castingAbilities,response.state.inputs.build.spells.castingAbilities);
+          reconcileCharacterMap(inputs.play.resourceUses,this.#input.play.resourceUses,response.state.inputs.play.resourceUses);
+          reconcileCharacterMap(inputs.play.activeFeatures,this.#input.play.activeFeatures,response.state.inputs.play.activeFeatures);
           if (version === this.#changeVersion) {
             this.#dirty = false; this.#message = "Saved";
             const focused = document.activeElement;
@@ -240,7 +245,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       for (const field of root.querySelectorAll<HTMLElement>(".character-field")) {
         const scope = field.closest<HTMLElement>("[id^=character-choice-], [data-item], [data-builder-target]");
         // The shared controls restore focus during refresh, before local caret restoration.
-        field.dataset["uiKey"] = (scope?.id || scope?.dataset["item"] || scope?.dataset["builderTarget"] || "") + "/" + field.querySelector("label")?.textContent;
+        if (field.dataset["uiKey"] === field.querySelector("label")?.textContent) field.dataset["uiKey"] = (scope?.id || scope?.dataset["item"] || scope?.dataset["builderTarget"] || "") + "/" + field.querySelector("label")?.textContent;
       }
       for (const child of [...this.children]) if (child !== dialog) child.remove();
       this.prepend(root); this.#syncBusyButtons(); this.#controls?.refresh(); this.#publish();
@@ -318,9 +323,8 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       const controls = el("fieldset"); controls.disabled = !view.canPlay;
       if (this.#evaluation) controls.append(playActions(this.#input, this.#evaluation, this.#catalogs.get("spell") ?? [], view.act, view.locale, "spells"));
       else {
-        for (const [title, groups] of [["Cantrips", this.#input.build.spells.cantrips], ["Spellbook", this.#input.build.spells.spellbook], ["Prepared spells", this.#input.play.preparedSpells]] as const) {
-          for (const [classId, ids] of Object.entries(groups)) controls.append(panel(this.#t(title) + " · " + recordName(view, "class", classId), ...ids.map(id => savedRule(view.projection, recordName(view, "spell", id), undefined, {kind:"spell", id}))));
-        }
+        controls.disabled=false;
+        controls.append(savedSpellBook(this.#input,view.projection,view.locale));
       }
       const choices = el("details", el("summary", this.#t("Manage spells"))), fields = el("fieldset"); fields.disabled = !this.#editable || this.#response?.status === "unavailable" || !!this.#response?.rulesChanged;
       fields.append(this.#spellChoices()); choices.append(fields);
@@ -343,10 +347,12 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     }
     #spellChoices(): HTMLElement {
       const root = panel(this.#t("Spells")), options = this.#evaluation?.spellOptions ?? {}, casting = object(this.#evaluation?.sheet["spellcasting"]), spells = this.#catalogs.get("spell") ?? [];
+      root.append(...unassignedSpellState(this.#input,this.#evaluation,()=>{this.#changed();this.#render();void this.#evaluate(true);},this.#context?.host.locale ?? "en"));
       const picks = (title: string, ids: string[], current: string[], set: (ids: string[]) => void, maximum: number, target = ""): HTMLElement => {
-        const details = el("details", el("summary", this.#t("{0} ({1} selected)", [title, current.length]))), list = el("div"); let query = "";
-        const render = (): void => { list.replaceChildren(); const shown = [...new Set([...current, ...ids])].filter(id => `${spells.find(record => record.id === id)?.value["name"] ?? id}`.toLowerCase().includes(query)).slice(0, 100); for (const id of shown) { const record = spells.find(record => record.id === id); list.append(el("div", checkbox(String(record?.value["name"] ?? id), current.includes(id), selected => { if (selected && (current.length >= maximum || !ids.includes(id))) return; current = selected ? [...current, id] : current.filter(item => item !== id); set(current); details.querySelector("summary")!.textContent = this.#t("{0} ({1} selected)", [title, current.length]); this.#changed(); render(); }), rule(this.#t("Details"), { kind: "spell", id }))); const control = list.lastElementChild?.querySelector<HTMLInputElement>("input"); if (control) control.disabled = !current.includes(id) && (current.length >= maximum || !ids.includes(id)); } };
-        details.append(field(this.#t("Filter spells"), textInput("", value => { query = value.toLowerCase(); render(); })), list); render(); return target ? builderTarget(target, details) : details;
+        const details = el("details", el("summary", this.#t("{0} ({1} selected)", [title, current.length]))), list = el("fieldset", el("legend",title));
+        const filters=spellFilters(target || title,this.#context?.host.locale ?? "en",()=>render());
+        const render = (): void => { list.replaceChildren(el("legend",title)); const shown = [...new Set([...current, ...ids])].filter(id => { const record=spells.find(record=>record.id===id); return filters.matches(String(record?.value["name"] ?? id),record?.value["level"]); }); filters.report(shown.length); for (const id of shown) { const record = spells.find(record => record.id === id); list.append(el("div", checkbox(String(record?.value["name"] ?? id), current.includes(id), selected => { if (selected && (current.length >= maximum || !ids.includes(id))) return; current = selected ? [...current, id] : current.filter(item => item !== id); set(current); details.querySelector("summary")!.textContent = this.#t("{0} ({1} selected)", [title, current.length]); this.#changed(); render(); }), rule(this.#t("Details"), { kind: "spell", id }))); const control = list.lastElementChild?.querySelector<HTMLInputElement>("input"); if (control) { control.dataset["uiKey"]=(target||title)+":spell:"+id; control.disabled = !current.includes(id) && (current.length >= maximum || !ids.includes(id)); } } };
+        details.append(filters.controls, list); render(); return target ? builderTarget(target, details) : details;
       };
       for (const classOptions of rows(options["classes"])) {
         const id = String(classOptions["classId"]), caster = rows(casting["perClass"]).find(row => row["classId"] === id) ?? {}, eligible = strings(classOptions["spellIds"]), zero = eligible.filter(id => Number(spells.find(record => record.id === id)?.value["level"]) === 0), leveled = eligible.filter(id => !zero.includes(id));
@@ -362,10 +368,10 @@ export function defineCharacterElement(generation: string, client: CharacterClie
           }
           root.append(order);
         }
-        root.append(picks(this.#t("{0} prepared spells · {1} allowed", [this.#t(label(id)), human(caster["preparedLimit"])]), caster["prepares"] === "spellbook" ? this.#input.build.spells.spellbook[id] ?? [] : leveled, this.#input.play.preparedSpells[id] ?? [], value => { this.#input.play.preparedSpells[id] = value; }, Number(caster["preparedLimit"])));
+        root.append(picks(this.#t("{0} prepared spells · {1} allowed", [this.#t(label(id)), human(caster["preparedLimit"])]), caster["prepares"] === "spellbook" ? this.#input.build.spells.spellbook[id] ?? [] : leveled, this.#input.play.preparedSpells[id] ?? [], value => { this.#input.play.preparedSpells[id] = value; }, Number(caster["preparedLimit"]), "prepared:"+id));
       }
-      for (const choice of rows(options["pendingChoices"])) { const key = String(choice["key"]); root.append(picks(this.#t("Granted spells · choose {0}", [choice["choose"]]), strings(choice["eligibleSpellIds"]), this.#input.build.spells.grantChoices[key] ?? [], value => { this.#input.build.spells.grantChoices[key] = value; }, Number(choice["choose"]), key)); }
-      for (const choice of rows(options["castingAbilityChoices"])) { const key = String(choice["key"]); root.append(builderTarget(key, field(this.#t("Granted spellcasting ability"), select(this.#input.build.spells.castingAbilities[key] ?? "", strings(choice["options"]).map(id => ({ id, label: id })), value => { this.#input.build.spells.castingAbilities[key] = value; this.#changed(); }, this.#t)))); }
+      for (const choice of rows(options["pendingChoices"])) { const key = String(choice["key"]); root.append(picks(spellSourceLabel(choice["source"],this.#context?.host.locale)+" · "+this.#t("Granted spells · choose {0}", [choice["choose"]]), strings(choice["eligibleSpellIds"]), this.#input.build.spells.grantChoices[key] ?? [], value => { this.#input.build.spells.grantChoices[key] = value; }, Number(choice["choose"]), key)); }
+      for (const choice of rows(options["castingAbilityChoices"])) { const key = String(choice["key"]); root.append(builderTarget(key, field(spellSourceLabel(choice["source"],this.#context?.host.locale)+" · "+this.#t("Granted spellcasting ability"), select(this.#input.build.spells.castingAbilities[key] ?? "", strings(choice["options"]).map(id => ({ id, label: id })), value => { this.#input.build.spells.castingAbilities[key] = value; this.#changed(); }, this.#t)))); }
       return root;
     }
     #grants(): HTMLElement {

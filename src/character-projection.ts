@@ -1,3 +1,5 @@
+import { grantedSpellsRead } from "./character-spells.js";
+import { senseDetails } from "./character-sheet.js";
 import type { Projection, State } from "./character-model.js";
 import { translator } from "./character-locale.js";
 import { abilities, object, rows } from "./character-client.js";
@@ -26,9 +28,7 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
     for (const [key, value] of Object.entries(object(sheet[group]))) { list.append(el("dt", savedRule(t(label(key)), group === "skills" ? { kind: "skill", id: key } : undefined, projection.explanations[`${group}.${key}.total`])), el("dd", human(object(value)["total"]))); }
     root.append(panel(t(label(group)), list));
   }
-  const senses = el("dl"); senses.className = "character-values";
-  for (const [key, value] of Object.entries(object(sheet["senses"]))) { const explanation = projection.explanations[`senses.${key}`]; senses.append(el("dt", savedRule(t(label(key)), undefined, explanation)), el("dd", t("{0} {1}", [human(value), explanation?.unit ?? ""]))); }
-  root.append(panel(t("Senses"), senses.children.length ? senses : el("p", t("No additional senses."))));
+  root.append(senseDetails(projection,locale));
   for (const group of ["weapons", "spellcasting", "resources", "features"]) {
     const list = el("div");
     const prefix = group === "spellcasting" ? "spellcasting.perClass" : group;
@@ -41,11 +41,12 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
       const evidence = projection.evidence.find(entry => reference && entry.reference.kind === reference.kind && entry.reference.id === reference.id);
       if (evidence?.summary && group === "features") details.append(el("p", evidence.summary));
       const values = el("dl");
-      for (const [key, value] of Object.entries(row)) { if (["id", "name", "key", "kind", "classId", "source", "ref", "text", "description"].includes(key)) continue; const path = group === "resources" ? `resources.${String(row["key"])}.${key}` : `${prefix}.${index}.${key}`; values.append(el("dt", savedRule(t(label(key)), undefined, projection.explanations[path])), el("dd", key === "recharge" ? rows(value).map(entry=>t("{0} rest: {1}", [t(label(String(entry["on"]))), entry["amount"] === "full" ? t("all uses") : human(entry["amount"])])).join("; ") : human(value))); }
+      for (const [key, value] of Object.entries(row)) { if (["id", "name", "key", "kind", "classId", "source", "ref", "text", "description", "legacyKey", "resourceKey"].includes(key)) continue; const path = group === "resources" ? `resources.${String(row["key"])}.${key}` : `${prefix}.${index}.${key}`; values.append(el("dt", savedRule(t(label(key)), undefined, projection.explanations[path])), el("dd", key === "recharge" ? rows(value).map(entry=>t("{0} rest: {1}", [t(label(String(entry["on"]))), entry["amount"] === "full" ? t("all uses") : human(entry["amount"])])).join("; ") : human(value))); }
       details.append(values); list.append(details);
     });
     if (list.children.length) root.append(panel(t(label(group)), list));
   }
+  const granted=grantedSpellsRead(projection,locale); if(granted)root.append(granted);
   for (const group of ["languages", "resistances", "damageImmunities", "conditionImmunities", "traits"]) {
     if (human(sheet[group]) && sheet[group] !== undefined && (!Array.isArray(sheet[group]) || (sheet[group] as unknown[]).length > 0)) root.append(panel(t(label(group)), el("p", human(sheet[group]))));
   }

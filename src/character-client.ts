@@ -87,3 +87,15 @@ export function reconcileCharacterChoices(sent: Inputs["build"]["choices"], curr
  for (const choice of saved) if (!before.has(key(choice)) && !currentKeys.has(key(choice))) result.push(choice);
  return structuredClone(result);
 }
+
+export function reconcileCharacterMap<T>(sent: Record<string,T>, current: Record<string,T>, saved: Record<string,T>): void {
+ const equal=(a:unknown,b:unknown):boolean=>JSON.stringify(a)===JSON.stringify(b);
+ const unchanged=equal(sent,current), hasNewKeys=Object.keys(saved).some(key=>!Object.hasOwn(sent,key));
+ for(const key of Object.keys(current)) {
+  if(!Object.hasOwn(sent,key)||!equal(current[key],sent[key]))continue;
+  if(Object.hasOwn(saved,key))current[key]=structuredClone(saved[key]!);else if(unchanged||!hasNewKeys)delete current[key];
+ }
+ // An alias migration creates a new key. If another edit arrived meanwhile,
+ // leave that addition to the next server evaluation instead of copying stale state.
+ if(unchanged)for(const key of Object.keys(saved))if(!Object.hasOwn(sent,key)&&!Object.hasOwn(current,key))current[key]=structuredClone(saved[key]!);
+}

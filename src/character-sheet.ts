@@ -1,3 +1,4 @@
+import { spellSourceLabel } from "./character-spells.js";
 import type { Inputs, Projection, Reference } from "./character-model.js";
 import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment, type EquipmentSlot } from "./character-inventory.js";
 import type { CatalogRecord } from "./character-client.js";
@@ -145,18 +146,38 @@ export function backpack(view: SheetView): HTMLElement {
 export function combatDetails(view: SheetView): HTMLElement {
   const t = translator(view.locale), sheet = view.projection?.sheet ?? {}, root = styled("div", "dse-combat");
   const attacks = panel(t("Attacks")); attacks.className = "dse-section";
-  rows(sheet["weapons"]).forEach((weapon, index) => attacks.append(styled("div", "dse-attack", savedRule(view.projection, String(weapon["name"] ?? weapon["ref"]), undefined, { kind: "weapon", id: String(weapon["ref"]) }), el("strong", savedRule(view.projection, signed(weapon["attackBonus"]), "weapons." + index + ".attackBonus")), el("span", human(weapon["damage"])))));
+  rows(sheet["weapons"]).forEach((weapon,index)=>{
+    const path="weapons."+index, reference={kind:"weapon",id:String(weapon["ref"])};
+    const row=styled("div","dse-attack",savedRule(view.projection,String(weapon["name"]??weapon["ref"]),undefined,reference),
+      el("strong",savedRule(view.projection,signed(weapon["attackBonus"]),path+".attackBonus")),
+      el("span",savedRule(view.projection,human(weapon["damage"])+" "+t(label(String(weapon["damageType"]??""))),path+".damage")));
+    if(weapon["versatileDamage"])row.append(el("span",t("Versatile damage")+": ",savedRule(view.projection,human(weapon["versatileDamage"]),path+".versatileDamage")));
+    if(weapon["mastery"])row.append(el("span",t("Mastery")+": ",savedRule(view.projection,t(label(String(weapon["mastery"]))),undefined,reference)," · ",t(weapon["masteryActive"] ? "Active" : "Inactive")));
+    attacks.append(row);
+  });
   if (attacks.children.length === 1) attacks.append(styled("p", "dse-empty", t("No attacks yet.")));
   const resources = panel(t("Resources")); resources.className = "dse-section";
   for (const resource of rows(sheet["resources"])) {
     const key = String(resource["key"]), name = String(resource["name"] ?? key);
     const row = styled("div", "dse-resource", el("span", savedRule(view.projection, name, "resources." + key + ".remaining")), el("strong", human(resource["remaining"]) + " / " + human(resource["max"])));
+    if (object(resource["source"])["acquisition"]) row.append(el("small",spellSourceLabel(resource["source"],view.locale)));
     if (view.editing) { const spent = numberInput(view.input.play.resourceUses[key] ?? 0, value => { view.input.play.resourceUses[key] = value ?? 0; view.change(); }, 0, Number(resource["max"])); spent.setAttribute("aria-label", t("{0} — spent / {1}", [name, resource["max"]])); row.append(spent); }
     resources.append(row);
   }
   for (const activation of rows(sheet["activations"])) { const key = String(activation["key"]), name = String(activation["name"]); resources.append(button(t("{0} {1}", [t(view.input.play.activeFeatures[key] ? "End" : "Activate"), name]), () => view.act({ operation: "toggle-feature", key, enabled: !view.input.play.activeFeatures[key] }, name), !view.canPlay)); }
   const traits = panel(t("Features and traits")); traits.className = "dse-section";
   for (const feature of rows(sheet["features"])) { const id = String(feature["id"]); traits.append(el("details", el("summary", savedRule(view.projection, String(feature["name"] ?? id), undefined, { kind: "feature", id })), el("p", view.projection?.evidence.find(row => row.reference.id === id)?.summary ?? ""))); }
-  for (const key of ["languages", "resistances", "damageImmunities", "conditionImmunities", "senses", "proficiencies"]) if (sheet[key] !== undefined) traits.append(el("p", el("strong", t(label(key)) + ": "), human(sheet[key])));
-  root.append(attacks, resources, traits); return root;
+  for (const key of ["languages", "resistances", "damageImmunities", "conditionImmunities", "proficiencies"]) if (sheet[key] !== undefined) traits.append(el("p", el("strong", t(label(key)) + ": "), human(sheet[key])));
+  root.append(attacks, resources, senseDetails(view.projection,view.locale), traits); return root;
+}
+
+export function senseDetails(projection: Projection | undefined, locale: string): HTMLElement {
+  const t=translator(locale), senses=panel(t("Senses"));
+  for(const [key,value] of Object.entries(object(projection?.sheet["senses"]))) {
+    const path="senses."+key, explanation=projection?.explanations[path];
+    senses.append(el("p",savedRule(projection,t(label(key)),path),": ",human(value)," ",explanation?.unit??""));
+    for(const term of explanation?.terms??[]) if(term.status) senses.append(el("p",term.label," · ",t(term.status==="applied"?"Active":"Inactive")));
+  }
+  if(senses.children.length===1)senses.append(el("p",t("No additional senses.")));
+  return senses;
 }
