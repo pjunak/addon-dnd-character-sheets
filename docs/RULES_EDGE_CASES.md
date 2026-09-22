@@ -81,6 +81,9 @@ literal placeholders. Unknown or changed wording remains intact as plain text,
 so a new provider diagnostic cannot lose its specific reason or be mistaken for
 a successful save. This applies to load failures, rejected autosaves, commands
 and reviews through the existing shared controls; saved projections are unchanged.
+When evaluation reports unavailable rules, loading uses the saved projection and
+skips live catalog requests. A secondary catalog failure cannot overwrite the
+worker's specific explanation.
 
 An Engine blocker targeting pending HP keeps that numeric field available for
 correction under the existing edit/rules permissions. Its stable shared focus

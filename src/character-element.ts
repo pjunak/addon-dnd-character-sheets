@@ -87,6 +87,8 @@ export function defineCharacterElement(generation: string, client: CharacterClie
           this.#message = "The character reconnected. Your pending changes are still on this page. Review them before retrying.";
         }
         this.#pending = undefined;
+        // Unavailable rules leave the saved projection authoritative; catalog failures must not replace that explanation.
+        if (response.status === "unavailable") { this.#catalogs.clear(); return; }
         const kinds = ["class", "species", "background", "subclass", "feat", "armor", "weapon", "magic-item", "gear", "spell"];
         this.#render();
         const results = await Promise.allSettled(kinds.map(kind => this.#runtime.client.catalog(kind)));
