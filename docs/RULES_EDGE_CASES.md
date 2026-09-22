@@ -67,6 +67,26 @@ controls use the shared host UI and English/Czech messages. Reducing an inventor
 moves an equipped item to carried and clears attunement in the same save; the
 Engine independently rejects requests leaving empty equipment active.
 
+## Service feedback
+
+The shared save/recovery status translates known coordinator responses and
+Engine blockers into the browser's English/Czech language. Numeric limits and
+counts come from the returned message; presentation never calculates a rule or
+changes the pending input, save outcome, revision or retry request.
+
+The current service contract returns readable strings. `character-feedback.ts`
+recognizes exact catalog entries and a bounded set of complete message templates.
+It preserves captured IDs, grant names and source wording verbatim, including
+literal placeholders. Unknown or changed wording remains intact as plain text,
+so a new provider diagnostic cannot lose its specific reason or be mistaken for
+a successful save. This applies to load failures, rejected autosaves, commands
+and reviews through the existing shared controls; saved projections are unchanged.
+
+An Engine blocker targeting pending HP keeps that numeric field available for
+correction under the existing edit/rules permissions. Its stable shared focus
+identity survives rejected and accepted saves in both layouts. Other play
+commands remain disabled until the Engine reports a ready character.
+
 ## Browser graph replacement
 
 On hosts offering the optional record edit handoff, pending character inputs,

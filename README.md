@@ -53,8 +53,9 @@ DM grants remain authenticated; amending or removing a grant changes its current
 entry. Ordered levels and mechanics-required spell acquisitions are character
 facts rather than a log of edits.
 
-English and Czech catalogs cover controls; source prose and authored notes keep
-their original language. See [save semantics](docs/RULES_EDGE_CASES.md), the
+English and Czech catalogs cover controls and known save/recovery explanations.
+Source prose, authored values and unknown provider diagnostics keep their original
+wording. See [save semantics](docs/RULES_EDGE_CASES.md), the
 engine's [public contract](../addon-dnd-engine/contract/README.md), and the
 [character workflow](../ttrpg-codex/docs/rewrite/CHARACTER_BUILD_HISTORY.md).
 

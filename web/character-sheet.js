@@ -77,10 +77,13 @@ export function vitals(view) {
         input.select();
     };
     const current = numberInput(view.input.play.hp, value => { view.input.play.hp = value ?? 0; view.change(); }, 0, Number(derived["maxHp"] ?? 0));
-    current.disabled = !view.canPlay;
+    current.disabled = !view.canEditHP;
+    current.dataset["focusKey"] = "vitals/current-hp";
     current.className = "dse-hp-current dse-number";
     current.setAttribute("aria-label", t("Current HP"));
-    hp.append(styled("div", "dse-counter", current, el("span", "/"), savedRule(view.projection, human(derived["maxHp"]), "derived.maxHp")));
+    const counter = styled("div", "dse-counter", current, el("span", "/"), savedRule(view.projection, human(derived["maxHp"]), "derived.maxHp"));
+    counter.dataset["uiKey"] = "vitals/current-hp";
+    hp.append(counter);
     hp.append(styled("span", "dse-temp", t("Temporary HP {0}", [view.input.play.temporaryHp])));
     const actions = styled("div", "dnd-workflow-controls");
     actions.append(button(t("Damage"), () => adjust("damage", t("Damage"), 1), !view.canPlay), button(t("Heal"), () => adjust("heal", t("Heal"), 1), !view.canPlay), button(t("Temporary HP"), () => adjust("set-temporary-hp", t("Set temporary hp"), view.input.play.temporaryHp), !view.canPlay));

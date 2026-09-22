@@ -1,6 +1,7 @@
 import { grantForm } from "./character-grant.js";
 import { comparisonView } from "./character-comparison.js";
 import { translator } from "./character-locale.js";
+import { feedbackMessage } from "./character-feedback.js";
 import { playActions } from "./character-play.js";
 import { abilityRail, backpack, combatDetails, preferredLayout, recordName, savedRule, vitals, type Layout, type SheetView } from "./character-sheet.js";
 import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment, type EquipmentSlot } from "./character-inventory.js";
@@ -40,6 +41,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     #layout: Layout = "compact";
     #builderNav: BuilderNavigation = { tab: "character", target: "", open: true };
     #t = (key: string, values?: readonly unknown[]): string => translator(this.#context?.host.locale ?? "en")(key, values);
+    #feedback = (message: string): string => feedbackMessage(message, this.#context?.host.locale ?? "en");
     #unsubscribe: (() => void) | undefined;
     #refreshTimer: ReturnType<typeof setTimeout> | undefined;
     set codexContribution(value: ContributionContext) { const previous = this.#context; this.#context = value; if (this.isConnected && previous?.host.key !== value.host.key) { this.#epoch++; this.#pending = undefined; this.#saving = undefined; this.#attempt = undefined; this.#command = undefined; this.#changeVersion++; this.#busy = false; this.#response = undefined; this.#evaluation = undefined; this.#catalogs.clear(); this.#dialog?.close(); clearTimeout(this.#timer); void this.#load(); } else this.#render(); }
@@ -121,7 +123,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     };
     #status(): void { const node = this.querySelector<HTMLElement>("[data-character-status]"); if (node) this.#saveFeedback(node); }
     #saveFeedback(node: HTMLElement): void {
-      node.replaceChildren(el("span", this.#t(this.#message))); node.dataset["uiState"] = this.#command ? (this.#busy ? "loading" : "error") : this.#blocked ? "error" : this.#dirty ? "loading" : "success";
+      node.replaceChildren(el("span", this.#feedback(this.#message))); node.dataset["uiState"] = this.#command ? (this.#busy ? "loading" : "error") : this.#blocked ? "error" : this.#dirty ? "loading" : "success";
       if (this.#command && !this.#busy) {
         node.append(el("p", this.#t("The action may already be saved. Further changes are paused until its outcome is resolved.")));
         if (this.#command.request.grant) node.append(el("p", this.#command.request.grant.name + " · " + this.#command.request.grant.reason));
@@ -130,7 +132,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
           button(this.#t("Check saved character"), () => this.#reloadSaved()));
       } else if (this.#blocked && this.#dirty) {
         node.append(el("p", this.#t("Your changes are still on this page and have not been confirmed saved.")));
-        if (this.#saveIssues.length) node.append(el("ul", ...this.#saveIssues.map(message => el("li", this.#t(message)))));
+        if (this.#saveIssues.length) node.append(el("ul", ...this.#saveIssues.map(message => el("li", this.#feedback(message)))));
         if (this.#response?.rulesChanged && !this.#attempt) node.append(button(this.#t("Review changed rules"), () => {
           this.#tab = "tools"; this.#render(); this.querySelector<HTMLElement>('[data-focus-key="adopt-rules"]')?.focus();
         }));
@@ -212,7 +214,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       const root = styled("section", "dnd-sheet-shell dse-layout-" + this.#layout);
       this.dataset["layout"] = this.#layout;
       if (!this.#response) {
-        const status = el("p", this.#t(this.#message || "Loading character…")); status.setAttribute("role", "status");
+        const status = el("p", this.#feedback(this.#message || "Loading character…")); status.setAttribute("role", "status");
         root.append(status); if (!this.#busy) root.append(button(this.#t("Reload saved character"), () => this.#load()));
         for (const child of [...this.children]) if (child !== dialog) child.remove();
         this.prepend(root); return;
@@ -249,10 +251,13 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       if (selection?.start !== null && selection?.start !== undefined && selection.end !== null && (restore instanceof HTMLTextAreaElement || restore instanceof HTMLInputElement)) restore.setSelectionRange(selection.start, selection.end);
     }
     #sheetView(): SheetView {
+      const editing = this.#editable && this.#response?.status !== "unavailable" && !this.#response?.rulesChanged;
+      const canPlay = editing && this.#evaluation?.ready === true && !!this.#response?.state;
       return { locale: this.#context?.host.locale ?? "en", layout: this.#layout, input: this.#input, projection: this.#response?.state?.projection, catalogs: this.#catalogs,
         equipment: this.#response?.rulesChanged || this.#response?.status === "unavailable" ? {} : object(this.#evaluation?.guidance["equipment"]),
-        editing: this.#editable && this.#response?.status !== "unavailable" && !this.#response?.rulesChanged,
-        canPlay: this.#editable && this.#evaluation?.ready === true && !!this.#response?.state && this.#response.status !== "unavailable" && !this.#response.rulesChanged,
+        editing, canPlay,
+        // A rejected HP value must remain correctable while other play actions are blocked.
+        canEditHP: editing && !!this.#response?.state && (canPlay || this.#dirty && rows(this.#evaluation?.guidance["saveIssues"]).some(issue => issue["target"] === "hp")),
         change: this.#changed, refresh: () => this.#render(), addItem: () => this.#equipment(), fillSlot: slot => this.#slot(slot),
         act: (change, summary) => this.#perform({ ...this.#base("play"), change, summary }) };
     }
