@@ -10,11 +10,22 @@ import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileChara
 import { buildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
 import { builderTarget, button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
+import { readCharacterPending } from "./character-pending.js";
+const runtimes = new Map();
 export function defineCharacterElement(generation, client, enhance) {
+    const runtime = { client, enhance };
+    runtimes.set(generation, runtime);
+    client.signal.addEventListener("abort", () => { if (runtimes.get(generation) === runtime)
+        runtimes.delete(generation); }, { once: true });
     const tag = `dnd-character-${generation}`;
     if (customElements.get(tag))
         return tag;
     class CharacterElement extends HTMLElement {
+        // A cached custom-element definition outlives an SDK activation. Each new
+        // instance takes the current runtime; old instances keep their expired one.
+        #runtime = runtimes.get(generation);
+        #pending;
+        #baseInputs = blank();
         #controls;
         #context;
         #response;
@@ -42,6 +53,7 @@ export function defineCharacterElement(generation, client, enhance) {
         #refreshTimer;
         set codexContribution(value) { const previous = this.#context; this.#context = value; if (this.isConnected && previous?.host.key !== value.host.key) {
             this.#epoch++;
+            this.#pending = undefined;
             this.#saving = undefined;
             this.#attempt = undefined;
             this.#command = undefined;
@@ -56,14 +68,14 @@ export function defineCharacterElement(generation, client, enhance) {
         }
         else
             this.#render(); }
-        connectedCallback() { this.#controls = enhance(this); this.classList.add("addon-dnd-character", "addon-dnd-sheets"); this.#busy = false; this.#unsubscribe = client.subscribe(() => { clearTimeout(this.#refreshTimer); this.#refreshTimer = setTimeout(() => { void this.#refreshSaved(); }, 250); }); void this.#load(); }
+        connectedCallback() { this.#controls = this.#runtime.enhance(this); this.#pending = this.#context?.edits.handoff?.take(); this.classList.add("addon-dnd-character", "addon-dnd-sheets"); this.#busy = false; this.#unsubscribe = this.#runtime.client.subscribe(() => { clearTimeout(this.#refreshTimer); this.#refreshTimer = setTimeout(() => { void this.#refreshSaved(); }, 250); }); void this.#load(); }
         disconnectedCallback() { this.#controls?.dispose(); this.#controls = undefined; this.#epoch++; this.#saving = undefined; this.#attempt = undefined; this.#command = undefined; this.#changeVersion++; this.#unsubscribe?.(); clearTimeout(this.#refreshTimer); clearTimeout(this.#timer); this.#dialog?.close(); this.#context?.edits.set({ dirty: false, saving: false }); }
         get #key() { return this.#context?.host.key ?? ""; }
         get #editable() { return this.#context?.host.canEdit === true && !this.#busy && !this.#command; }
         get #name() { return String(object(this.#context?.host.value)["name"] ?? "Character"); }
         #base(operation) { return { key: this.#key, expectedRevision: this.#baseRevision, operation, operationId: newId(), summary: `Update character ${this.#t(label(operation)).toLowerCase()}` }; }
         async #call(method, request) {
-            const epoch = this.#epoch, response = await client.call(method, request);
+            const epoch = this.#epoch, response = await this.#runtime.client.call(method, request);
             if (epoch !== this.#epoch || !this.isConnected)
                 throw new Error("The character view changed before the request completed.");
             return response;
@@ -83,7 +95,7 @@ export function defineCharacterElement(generation, client, enhance) {
                 await action();
             }
             catch (error) {
-                if (epoch === this.#epoch && !client.signal.aborted && this.isConnected)
+                if (epoch === this.#epoch && !this.#runtime.client.signal.aborted && this.isConnected)
                     this.#message = error instanceof Error ? error.message : "The character request failed. Your edit has not been saved.";
             }
             finally {
@@ -112,17 +124,20 @@ export function defineCharacterElement(generation, client, enhance) {
             if (!this.#key)
                 return;
             const epoch = ++this.#epoch;
+            let recovered = false;
             await this.#guard(async () => {
                 const response = await this.#call("load", { key: this.#key });
                 if (epoch !== this.#epoch || !this.isConnected)
                     return;
                 if (response.status !== "ready" && response.status !== "unavailable")
                     throw new Error(response.message);
+                const pending = this.#pending === undefined ? undefined : readCharacterPending(this.#pending);
                 this.#command = undefined;
                 this.#response = response;
                 this.#evaluation = response.evaluation;
                 this.#input = structuredClone(response.state?.inputs ?? blank());
                 this.#baseRevision = response.revision;
+                this.#baseInputs = structuredClone(this.#input);
                 this.#dirty = false;
                 this.#attempt = undefined;
                 this.#saveIssues = [];
@@ -131,18 +146,46 @@ export function defineCharacterElement(generation, client, enhance) {
                 this.#blocked = false;
                 if (!response.state)
                     this.#tab = "builder";
+                if (pending && pending.key === this.#key && pending.actorId === response.actorId && pending.role === response.role) {
+                    recovered = true;
+                    this.#input = pending.inputs;
+                    this.#baseInputs = pending.base;
+                    this.#baseRevision = pending.revision;
+                    this.#dirty = pending.dirty;
+                    this.#changeVersion = pending.changeVersion;
+                    this.#attempt = pending.attempt;
+                    this.#command = pending.command;
+                    this.#tab = pending.tab;
+                    this.#builderNav = pending.builder;
+                    this.#blocked = this.#dirty;
+                    this.#evaluation = undefined;
+                    this.#message = "The character reconnected. Your pending changes are still on this page. Review them before retrying.";
+                }
+                this.#pending = undefined;
                 const kinds = ["class", "species", "background", "subclass", "feat", "armor", "weapon", "magic-item", "gear", "spell"];
                 this.#render();
-                const results = await Promise.allSettled(kinds.map(kind => client.catalog(kind)));
+                const results = await Promise.allSettled(kinds.map(kind => this.#runtime.client.catalog(kind)));
                 if (epoch !== this.#epoch || !this.isConnected)
                     return;
                 results.forEach((result, index) => { if (result.status === "fulfilled")
                     this.#catalogs.set(kinds[index], result.value); });
-                if (results.some(result => result.status === "rejected"))
+                if (results.some(result => result.status === "rejected") && !recovered)
                     this.#message = "Some source catalogs could not be loaded. The saved character remains available; reload to retry.";
             });
+            if (recovered && epoch === this.#epoch && this.isConnected)
+                this.querySelector("[data-character-status]")?.focus();
         }
-        #publish() { this.#context?.edits.set({ dirty: this.#dirty || !!this.#command, saving: this.#busy || !!this.#saving }); }
+        #publish() {
+            const edits = this.#context?.edits;
+            edits?.set({ dirty: this.#dirty || !!this.#command || this.#pending !== undefined, saving: this.#busy || !!this.#saving });
+            const pending = this.#response && (this.#dirty || this.#command) ? {
+                version: "character-pending.v1", key: this.#key, actorId: this.#response.actorId, role: this.#response.role,
+                inputs: this.#input, base: this.#baseInputs, revision: this.#baseRevision, dirty: this.#dirty,
+                changeVersion: this.#changeVersion, tab: this.#tab, builder: this.#builderNav,
+                ...(this.#attempt ? { attempt: this.#attempt } : {}), ...(this.#command ? { command: this.#command } : {}),
+            } : undefined;
+            edits?.handoff?.checkpoint(this.#pending ?? pending);
+        }
         async #refreshSaved(force = false) {
             if (this.#busy || this.#saving || this.#dirty || this.#command || !this.#response)
                 return;
@@ -212,6 +255,7 @@ export function defineCharacterElement(generation, client, enhance) {
             this.#baseRevision = response.revision;
             this.#evaluation = response.evaluation;
             this.#input = structuredClone(response.state?.inputs ?? blank());
+            this.#baseInputs = structuredClone(this.#input);
             this.#dirty = false;
             this.#blocked = false;
             this.#saveIssues = [];
@@ -232,8 +276,9 @@ export function defineCharacterElement(generation, client, enhance) {
                 while (this.#dirty && !this.#blocked && this.isConnected && epoch === this.#epoch) {
                     // Keep the exact request until a response establishes its outcome, even
                     // when newer input arrives while an earlier reply is lost.
-                    const attempt = this.#attempt ??= { request: { ...this.#base("build"), inputs: structuredClone(this.#input) }, base: structuredClone(this.#response?.state?.inputs ?? blank()), version: this.#changeVersion };
+                    const attempt = this.#attempt ??= { request: { ...this.#base("build"), inputs: structuredClone(this.#input) }, base: structuredClone(this.#baseInputs), version: this.#changeVersion };
                     const { version, base, request } = attempt, inputs = request.inputs;
+                    this.#publish();
                     const response = await this.#call("save", request);
                     this.#attempt = undefined;
                     if (response.status === "conflict" && response.state) {
@@ -241,6 +286,7 @@ export function defineCharacterElement(generation, client, enhance) {
                         if (merged) {
                             this.#response = { ...this.#response, ...response };
                             this.#baseRevision = response.revision;
+                            this.#baseInputs = structuredClone(response.state.inputs);
                             this.#input = merged;
                             this.#render();
                             continue;
@@ -266,6 +312,7 @@ export function defineCharacterElement(generation, client, enhance) {
                     }
                     this.#response = { ...this.#response, ...response };
                     this.#baseRevision = response.revision;
+                    this.#baseInputs = structuredClone(response.state.inputs);
                     this.#evaluation = response.evaluation;
                     // Incorporate server corrections without replacing objects bound to active fields.
                     if (this.#input.play.asOf === inputs.play.asOf)
@@ -347,6 +394,7 @@ export function defineCharacterElement(generation, client, enhance) {
             nav.classList.add("dnd-sheet-tabs");
             const status = styled("div", "dnd-save-status");
             status.dataset["characterStatus"] = "";
+            status.dataset["focusKey"] = "save-status";
             status.setAttribute("role", "status");
             status.tabIndex = -1;
             this.#saveFeedback(status);
@@ -379,6 +427,7 @@ export function defineCharacterElement(generation, client, enhance) {
             this.prepend(root);
             this.#syncBusyButtons();
             this.#controls?.refresh();
+            this.#publish();
             for (const field of root.querySelectorAll(".character-field")) {
                 for (const control of field.querySelectorAll("input,select,textarea,button"))
                     control.dataset["focusKey"] = field.dataset["uiKey"] + "/" + (control.getAttribute("aria-label") ?? control.tagName);
@@ -635,10 +684,13 @@ export function defineCharacterElement(generation, client, enhance) {
                         this.#message = response.message;
                     }
                 }
-                catch {
+                catch (error) {
                     if (epoch === this.#epoch && this.isConnected) {
-                        attempt.retry = true;
-                        this.#message = "The action's outcome could not be confirmed.";
+                        const expiredReview = attempt.method === "commit" && object(error)["status"] === 409 && object(error)["code"] === "CONFLICT";
+                        attempt.retry = !expiredReview;
+                        this.#message = expiredReview
+                            ? "This review is no longer valid. Check the saved character before reviewing another import."
+                            : "The action's outcome could not be confirmed.";
                     }
                 }
             });

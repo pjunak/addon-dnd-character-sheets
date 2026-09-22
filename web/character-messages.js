@@ -439,7 +439,10 @@ export const catalogs = {
         "Attune an item": "Attune an item",
         "Review changed rules": "Review changed rules",
         "Adopting rules will also save your pending changes.": "Adopting rules will also save your pending changes.",
-        "Adopt rules and save pending changes": "Adopt rules and save pending changes"
+        "Adopt rules and save pending changes": "Adopt rules and save pending changes",
+        "The character reconnected. Your pending changes are still on this page. Review them before retrying.": "The character reconnected. Your pending changes are still on this page. Review them before retrying.",
+        "Pending changes could not be restored by this version. Keep this page open and retry with a compatible add-on.": "Pending changes could not be restored by this version. Keep this page open and retry with a compatible add-on.",
+        "This review is no longer valid. Check the saved character before reviewing another import.": "This review is no longer valid. Check the saved character before reviewing another import."
     },
     "cs": {
         "The action's outcome could not be confirmed.": "Výsledek akce se nepodařilo potvrdit.",
@@ -880,6 +883,9 @@ export const catalogs = {
         "Attune an item": "Sladit se s předmětem",
         "Review changed rules": "Zkontrolovat změněná pravidla",
         "Adopting rules will also save your pending changes.": "Přijetím pravidel se uloží také vaše čekající změny.",
-        "Adopt rules and save pending changes": "Přijmout pravidla a uložit čekající změny"
+        "Adopt rules and save pending changes": "Přijmout pravidla a uložit čekající změny",
+        "The character reconnected. Your pending changes are still on this page. Review them before retrying.": "Deník postavy se znovu připojil. Čekající změny zůstaly na této stránce. Před dalším pokusem je zkontrolujte.",
+        "Pending changes could not be restored by this version. Keep this page open and retry with a compatible add-on.": "Tato verze nedokázala obnovit čekající změny. Ponechte stránku otevřenou a zkuste kompatibilní verzi doplňku.",
+        "This review is no longer valid. Check the saved character before reviewing another import.": "Tato kontrola už není platná. Než zkontrolujete nový import, načtěte uloženou postavu."
     }
 };

@@ -437,5 +437,8 @@
   "Attune an item": "Attune an item",
   "Review changed rules": "Review changed rules",
   "Adopting rules will also save your pending changes.": "Adopting rules will also save your pending changes.",
-  "Adopt rules and save pending changes": "Adopt rules and save pending changes"
+  "Adopt rules and save pending changes": "Adopt rules and save pending changes",
+  "The character reconnected. Your pending changes are still on this page. Review them before retrying.": "The character reconnected. Your pending changes are still on this page. Review them before retrying.",
+  "Pending changes could not be restored by this version. Keep this page open and retry with a compatible add-on.": "Pending changes could not be restored by this version. Keep this page open and retry with a compatible add-on.",
+  "This review is no longer valid. Check the saved character before reviewing another import.": "This review is no longer valid. Check the saved character before reviewing another import."
 }

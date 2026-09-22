@@ -67,6 +67,32 @@ controls use the shared host UI and English/Czech messages. Reducing an inventor
 moves an equipped item to carried and clears attunement in the same save; the
 Engine independently rejects requests leaving empty equipment active.
 
+## Browser graph replacement
+
+On hosts offering the optional record edit handoff, pending character inputs,
+their original saved base/revision, queued edit version and exact uncertain
+save/command requests survive an SSE-driven rules-policy change, provider reload
+or reviewed package replacement. The copy exists only in host-owned page memory.
+No device drafts or historical versions are created.
+
+Every replacement instance uses the current activation's services, including
+when its immutable custom-element tag is unchanged. It loads current saved state
+and verifies the actor/role before restoring pending input. A failed read retains
+the guard and copy for retry. Recovery focuses its translated status and pauses
+automatic saving; reviewing/adopting rules or retrying an uncertain request stays
+explicit. Independent field rebases use the original saved inputs, never the
+freshly loaded state as a false merge base. Overlapping edits remain conflicts.
+
+A reviewed import retains its exact approved token and operation ID. The worker
+can acknowledge an already committed import after restart. A definitively expired
+review ends Retry and asks for a saved-state check before a new review; it never
+creates or approves a replacement preview automatically.
+
+Leaving the record, authority changes, disabling the add-on or closing/reloading
+the page clears the transient handoff. Unsubmitted dialog fields and import text
+that has not reached approved commit are not character input checkpoints.
+Older hosts without this optional handle retain ordinary in-place save recovery.
+
 ## Builder guidance
 
 The Engine owns required decisions, prerequisite checks, counts and repair
