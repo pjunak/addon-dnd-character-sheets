@@ -5,6 +5,8 @@ import { feedbackMessage } from '../web/character-feedback.js';
 test('save, review and provider failures retain their specific explanation in Czech', () => {
   for (const [source, expected] of [
     ['This change is outside the character rules.', 'Tato změna neodpovídá pravidlům postavy.'],
+    ['No distinct options remain for another acquisition of this feat.', 'Pro další získání této odbornosti už nezbývá žádná odlišná možnost.'],
+    ["This feat's repeatability rule is unsupported.", 'Pravidlo opakovaného získání této odbornosti není podporováno.'],
     ['Currency must use supported coins and non-negative amounts.', 'Použijte podporované mince a nezáporné částky.'],
     ['The prerequisite is not met.', 'Předpoklad není splněn.'],
     ['The selected option is not eligible for this choice.', 'Vybraná možnost není pro tuto volbu povolená.'],

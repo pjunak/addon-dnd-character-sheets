@@ -534,6 +534,8 @@
   "The granted feat is unavailable.": "Udělená odbornost není dostupná.",
   "Record a roll for each ability.": "Zaznamenejte hod pro každou vlastnost.",
   "This feat cannot be acquired more than once.": "Tuto odbornost nelze získat vícekrát.",
+  "No distinct options remain for another acquisition of this feat.": "Pro další získání této odbornosti už nezbývá žádná odlišná možnost.",
+  "This feat's repeatability rule is unsupported.": "Pravidlo opakovaného získání této odbornosti není podporováno.",
   "The prerequisite is not met.": "Předpoklad není splněn.",
   "Unsupported DM effect mode.": "Nepodporovaný režim účinku PJ.",
   "DM effect minimum exceeds maximum.": "Minimum účinku PJ překračuje maximum.",
