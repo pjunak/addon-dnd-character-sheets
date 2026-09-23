@@ -67,6 +67,30 @@ controls use the shared host UI and English/Czech messages. Reducing an inventor
 moves an equipped item to carried and clears attunement in the same save; the
 Engine independently rejects requests leaving empty equipment active.
 
+## DM grant amendments
+
+Grant proposals are detached from both the saved snapshot and supplied inputs.
+An amendment retains its acquisition ID and list position; actor, reason and time
+record the new authorization. Moving or removing the item binding clears only
+links owned by that grant. Revocation also removes those links without changing
+item quantities, locations, notes or other grants. Rejected or unavailable
+amendments return the unchanged saved snapshot and never write a revision.
+
+Create and amend share the same form. Effect rows retain their controls and
+stable field identities as other rows change. Adding a row focuses its target;
+removing one focuses the next row, previous row, or Add effect. Each group has
+a wrapping heading with its full effect name, including on enlarged phone
+layouts. Required fields use native form validation and keep incomplete input
+in the dialog. Feat and item searches borrow host ui.controls.v1 comboboxes;
+the Engine still owns mechanical validity.
+
+Installed acceptance combines two separate Magic Initiate acquisitions and spent
+free casts with effect changes, item rebinding, provider restart, explicit source
+policy adoption and revocation. Each surviving acquisition keeps its choices,
+casting ability and spent uses. A provider restart alone retains rules identity;
+a policy change requires explicit adoption. Broader incompatible-provider/schema
+transitions and human assistive-technology acceptance remain in the host backlog.
+
 ## Service feedback
 
 The shared save/recovery status translates known coordinator responses and

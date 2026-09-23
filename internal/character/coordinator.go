@@ -234,7 +234,11 @@ func (c *Coordinator) load(ctx context.Context, meta *workerrpc.Meta, key string
 
 func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Request, base *State, input model.Inputs) (model.Inputs, error) {
 	// Clone before stamping provenance so no caller-owned value is changed.
-	_ = json.Unmarshal(raw(input), &input)
+	input = cloneInputs(input)
+	if r.Inputs != nil {
+		proposed := cloneInputs(*r.Inputs)
+		r.Inputs = &proposed
+	}
 	switch r.Operation {
 	case "notes":
 		if r.Inputs != nil {
@@ -268,12 +272,13 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 		grant.ActorID = meta.Actor.ID
 		grant.GrantedAt = c.now().UTC().Format(time.RFC3339)
 		grant.Active = true
+		amendIndex := -1
 		if r.Operation == "amend-grant" {
 			found := false
 			for index := range input.Grants {
 				if input.Grants[index].ID == r.GrantID && input.Grants[index].Active {
 					grant.ID = r.GrantID
-					input.Grants = append(input.Grants[:index], input.Grants[index+1:]...)
+					amendIndex = index
 					found = true
 					break
 				}
@@ -285,19 +290,17 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 		if strings.TrimSpace(grant.Reason) == "" {
 			return input, failure(workerrpc.KindInvalidRequest, "Explain why this DM grant was given.")
 		}
-		for _, existing := range input.Grants {
-			if existing.ID == grant.ID {
+		for index, existing := range input.Grants {
+			if existing.ID == grant.ID && index != amendIndex {
 				return input, failure(workerrpc.KindConflict, "This grant already exists.")
 			}
 		}
-		input.Grants = append(input.Grants, grant)
-		if grant.ItemID != "" {
-			for index := range input.Play.Inventory {
-				if input.Play.Inventory[index].ID == grant.ItemID {
-					input.Play.Inventory[index].GrantID = grant.ID
-				}
-			}
+		if amendIndex >= 0 {
+			input.Grants[amendIndex] = grant
+		} else {
+			input.Grants = append(input.Grants, grant)
 		}
+		linkGrantItem(&input, grant.ID, grant.ItemID)
 	case "revoke-grant":
 		if meta.Actor.Role != "dm" {
 			return input, failure(workerrpc.KindUnauthorized, "Only a DM can revoke a grant.")
@@ -313,6 +316,7 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 		if !found {
 			return input, failure(workerrpc.KindNotFound, "This grant was not found.")
 		}
+		linkGrantItem(&input, r.GrantID, "")
 	case "import":
 		imported, err := c.importedInputs(meta, r)
 		if err != nil {
@@ -342,6 +346,27 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 	}
 	return input, nil
 }
+
+// Decode into a fresh value: unmarshalling over existing slices and maps can
+// overwrite the saved state needed for authorization and withdrawal repair.
+func cloneInputs(input model.Inputs) model.Inputs {
+	var detached model.Inputs
+	_ = json.Unmarshal(raw(input), &detached)
+	return detached
+}
+
+func linkGrantItem(input *model.Inputs, grantID, itemID string) {
+	for index := range input.Play.Inventory {
+		item := &input.Play.Inventory[index]
+		if item.GrantID == grantID {
+			item.GrantID = ""
+		}
+		if itemID != "" && item.ID == itemID {
+			item.GrantID = grantID
+		}
+	}
+}
+
 func (c *Coordinator) evaluate(ctx context.Context, meta *workerrpc.Meta, input model.Inputs, change map[string]any) (evaluated, RulesContext, error) {
 	method := "evaluate-character"
 	params := map[string]any{"contractVersion": model.ContractVersion, "inputs": input}
