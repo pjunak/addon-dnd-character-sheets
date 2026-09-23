@@ -194,6 +194,11 @@ Czech text, instead of forcing every button into the same narrow row.
 Imports validate a closed current envelope, recalculate mechanics and preview
 replacement before confirmation. Imported DM grants need the current DM's
 authorization; imported mechanical acquisition/roll claims retain external origin.
+The coordinator rejects empty or duplicate grant identities, assigns fresh IDs
+and current DM provenance, and uses the Engine's identity helper to remap all
+acquisition-owned references together. Choices, spell selections, casting
+abilities, spent uses, activations and item links survive reauthorization without
+mutating the supplied export. Ambiguous remappings fail before review or save.
 Preview tokens bind actor, role, generation, character, expected revision,
 operation and exact candidate, and expire after 15 minutes. Commit rechecks rules
 and expiry. A stale token cannot apply a different candidate.
@@ -201,6 +206,16 @@ and expiry. A stale token cannot apply a different candidate.
 Requests are bounded to 190 KB, stored characters to 250 KB, transfer envelopes
 to 1 MB and imported inputs to 180 KB. File and paste share validation. Export
 and print use the current saved state and are available only in Tools.
+File parsing, size and missing-DM-authorization errors appear inside the import
+dialog, receive focus and retain the entered input. This browser explanation
+does not replace server authorization. The replacement review initially focuses
+its heading; closing either dialog restores the current Import action even
+after a render. Both reuse the shared dialog, feedback and focus conventions.
+
+Default print includes saved origin and class/level identity plus every stored
+currency denomination. Equipment and spell toggles do not hide currency or
+identity. Labels use saved source evidence and class levels use the saved Engine
+projection; printing never requires a provider, recalculates or writes a revision.
 
 The host must support worker-only extensions before this ZIP is activated.
 Changing retention preserves the existing worker-authority schema identity.

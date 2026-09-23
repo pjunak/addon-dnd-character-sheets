@@ -80,6 +80,7 @@ export function projectionView(projection, locale = "en") {
 }
 export function printCharacter(state, _revision, name, options, locale = "en") {
     const t = translator(locale);
+    const recordName = (kind, id) => state.projection.evidence.find(source => source.reference.kind === kind && source.reference.id === id)?.name ?? id;
     const view = window.open("about:blank", "_blank", "popup,width=1000,height=850");
     if (!view)
         throw new Error("Allow the print window, then try again.");
@@ -89,14 +90,24 @@ export function printCharacter(state, _revision, name, options, locale = "en") {
     style.textContent = "body{font:12pt system-ui;max-width:1000px;margin:2rem;color:#111;overflow-wrap:anywhere}h1,h2,h3,summary{break-after:avoid}section,details{margin-block:1rem}details,tr,dl{break-inside:avoid}p{white-space:pre-wrap;orphans:3;widows:3}small{display:block;margin-top:.25rem}dl{display:grid;grid-template-columns:1fr 2fr;gap:.35rem}dd{margin:0} .character-stats{display:flex;gap:1rem;flex-wrap:wrap}.character-stats>div{min-width:6rem}strong{display:block}button{display:none}@page{margin:15mm}@media print{body{margin:0;font-size:10pt}}";
     view.document.head.append(style);
     const root = el("main", el("h1", name), el("p", t("Calculated with engine {0}. This print preserves the saved rules revision.", [state.rules.engineVersion])));
+    const origin = [["species", state.inputs.build.species], ["lineage", state.inputs.build.lineage], ["background", state.inputs.build.background]];
+    root.append(el("p", origin.filter(([, id]) => id).map(([kind, id]) => recordName(kind, id)).join(" · ")));
+    for (const current of rows(state.projection.sheet["classes"]))
+        root.append(el("p", t("Level {0}: {1}", [current["level"], recordName("class", String(current["classId"]))])));
     const projection = structuredClone(state.projection);
     if (!options.spells)
         delete projection.sheet["spellcasting"];
     root.append(panel(t("Hit points"), el("p", t("Current: {0} / {1}. Temporary: {2}.", [state.inputs.play.hp, human(object(projection.sheet["derived"])["maxHp"]), state.inputs.play.temporaryHp]))));
+    const currency = Object.entries(state.inputs.play.currency);
+    if (currency.length) {
+        const values = el("dl");
+        for (const [coin, amount] of currency)
+            values.append(el("dt", coin.toUpperCase()), el("dd", amount));
+        root.append(panel(t("Currency"), values));
+    }
     root.append(projectionView(projection, locale));
     if (options.equipment && state.inputs.play.inventory.some(item => item.quantity > 0))
         root.append(panel(t("Equipment"), ...state.inputs.play.inventory.filter(item => item.quantity > 0).map(item => el("p", t("{0} × {1}; {2}{3}. {4}", [item.quantity, item.name, t(label(item.location)), item.attuned ? t("; attuned") : "", item.notes])))));
-    const recordName = (kind, id) => state.projection.evidence.find(source => source.reference.kind === kind && source.reference.id === id)?.name ?? id;
     if (options.spells) {
         const sections = [["Cantrips", state.inputs.build.spells.cantrips], ["Spellbook", state.inputs.build.spells.spellbook], ["Prepared spells", state.inputs.play.preparedSpells]];
         for (const [title, groups] of sections) {

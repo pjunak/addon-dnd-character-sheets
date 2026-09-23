@@ -9,8 +9,10 @@ export function el<K extends keyof HTMLElementTagNameMap>(tag: K, ...children: C
   return node;
 }
 export function builderTarget(id: string, node: HTMLElement): HTMLElement { node.dataset["builderTarget"] = id; return node; }
-export function button(label: string, action: () => void | Promise<void>, disabled = false): HTMLButtonElement {
-  const node = el("button", label); node.type = "button"; node.disabled = disabled; node.addEventListener("click", () => { void action(); }); return node;
+export function button(label: string, action: () => void | Promise<void>, disabled = false, focusKey = ""): HTMLButtonElement {
+  const node = el("button", label); node.type = "button"; node.disabled = disabled;
+  if (focusKey) node.dataset["focusKey"] = focusKey;
+  node.addEventListener("click", () => { void action(); }); return node;
 }
 export function field(label: string, control: HTMLElement, help?: string): HTMLElement {
   const id = `character-control-${crypto.randomUUID()}`; const target = control.matches("input,select,textarea,button") ? control : control.querySelector<HTMLElement>("input,select,textarea,button") ?? control; target.id = id;

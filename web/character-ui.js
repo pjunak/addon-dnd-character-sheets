@@ -8,10 +8,12 @@ export function el(tag, ...children) {
     return node;
 }
 export function builderTarget(id, node) { node.dataset["builderTarget"] = id; return node; }
-export function button(label, action, disabled = false) {
+export function button(label, action, disabled = false, focusKey = "") {
     const node = el("button", label);
     node.type = "button";
     node.disabled = disabled;
+    if (focusKey)
+        node.dataset["focusKey"] = focusKey;
     node.addEventListener("click", () => { void action(); });
     return node;
 }

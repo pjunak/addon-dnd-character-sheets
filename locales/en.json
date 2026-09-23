@@ -1,4 +1,5 @@
 {
+  "Currency": "Currency",
   "The action's outcome could not be confirmed.": "The action's outcome could not be confirmed.",
   "The action may already be saved. Further changes are paused until its outcome is resolved.": "The action may already be saved. Further changes are paused until its outcome is resolved.",
   "Retry sends the same action safely. Checking the saved character ends this retry and does not undo any saved action.": "Retry sends the same action safely. Checking the saved character ends this retry and does not undo any saved action.",

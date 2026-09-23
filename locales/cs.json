@@ -1,4 +1,5 @@
 {
+  "Currency": "Měna",
   "The action's outcome could not be confirmed.": "Výsledek akce se nepodařilo potvrdit.",
   "The action may already be saved. Further changes are paused until its outcome is resolved.": "Akce už může být uložená. Další změny jsou pozastavené, dokud se její výsledek nevyjasní.",
   "Retry sends the same action safely. Checking the saved character ends this retry and does not undo any saved action.": "Opakování bezpečně odešle stejnou akci. Kontrola uložené postavy ukončí toto opakování a nevrátí zpět žádnou uloženou akci.",

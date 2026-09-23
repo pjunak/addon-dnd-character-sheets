@@ -563,8 +563,8 @@ export function defineCharacterElement(generation, client, enhance) {
                 this.#render();
             }, this.#t)));
             if (this.#response?.state)
-                tools.append(button(this.#t("Export character"), () => download(this.#key + ".character.json", exportCharacter(this.#response.state))), button(this.#t("Print / PDF"), () => this.#print(this.#response.state, this.#response.revision)));
-            tools.append(button(this.#t("Import character"), () => this.#import(), !this.#editable), button(this.#t("Reload character"), () => this.#reloadSaved(), this.#busy || !!this.#saving));
+                tools.append(button(this.#t("Export character"), () => download(this.#key + ".character.json", exportCharacter(this.#response.state)), false, "export-character"), button(this.#t("Print / PDF"), () => this.#print(this.#response.state, this.#response.revision), false, "print-character"));
+            tools.append(button(this.#t("Import character"), () => this.#import(), !this.#editable, "import-character"), button(this.#t("Reload character"), () => this.#reloadSaved(), this.#busy || !!this.#saving, "reload-character"));
             const provider = panel(this.#t("Rules"), el("p", this.#t(this.#response?.status === "unavailable" ? "Compatible rules are unavailable. Saved values and notes remain accessible." : this.#response?.rulesChanged ? "The rules changed. Adopt them to continue editing." : "Rules are connected.")));
             if (this.#response?.rulesChanged) {
                 if (this.#dirty)
@@ -678,7 +678,7 @@ export function defineCharacterElement(generation, client, enhance) {
                         this.#dialog?.close();
                         await this.#sendCommand();
                     }));
-                this.#open(this.#t("Import character"), content);
+                this.#open(this.#t("Import character"), content, "heading", "import-character");
             });
         }
         async #sendCommand() {
@@ -723,7 +723,7 @@ export function defineCharacterElement(generation, client, enhance) {
                 }
             }
         }
-        #open(title, content, initialFocus = "control") {
+        #open(title, content, initialFocus = "control", returnFocusKey) {
             this.#dialog?.close();
             this.#dialog?.remove();
             const heading = el("h2", title), dialog = el("dialog", heading, ...content, button(this.#t("Close"), () => dialog.close()));
@@ -735,9 +735,11 @@ export function defineCharacterElement(generation, client, enhance) {
                 heading.tabIndex = -1;
                 heading.setAttribute("autofocus", "");
             }
-            const trigger = document.activeElement, focusKey = trigger instanceof HTMLElement ? trigger.dataset["focusKey"] : undefined;
+            const trigger = document.activeElement, focusKey = returnFocusKey ?? (trigger instanceof HTMLElement ? trigger.dataset["focusKey"] : undefined);
             dialog.addEventListener("close", () => {
-                const target = trigger instanceof HTMLElement && trigger.isConnected ? trigger : focusKey ? this.querySelector('[data-focus-key="' + CSS.escape(focusKey) + '"]') : undefined;
+                if (this.#dialog?.open && this.#dialog !== dialog)
+                    return;
+                const target = focusKey ? this.querySelector('[data-focus-key="' + CSS.escape(focusKey) + '"]') : trigger instanceof HTMLElement && trigger.isConnected ? trigger : undefined;
                 restoreControlFocus(target);
             });
             this.#dialog = dialog;
@@ -750,6 +752,14 @@ export function defineCharacterElement(generation, client, enhance) {
             const area = textInput(body, value => { body = value; }, true), file = el("input");
             file.type = "file";
             file.accept = ".json,application/json";
+            const notice = el("p");
+            notice.hidden = true;
+            notice.tabIndex = -1;
+            notice.dataset["uiState"] = "error";
+            notice.setAttribute("role", "alert");
+            const clearError = () => { notice.hidden = true; notice.textContent = ""; };
+            const showError = (error) => { notice.textContent = this.#feedback(error instanceof Error ? error.message : "Invalid character file."); notice.hidden = false; notice.focus(); };
+            area.addEventListener("input", clearError);
             area.maxLength = 1000000;
             area.spellcheck = false;
             area.autocapitalize = "off";
@@ -766,30 +776,45 @@ export function defineCharacterElement(generation, client, enhance) {
                 const start = area.selectionStart ?? 0, end = area.selectionEnd ?? start;
                 const next = area.value.slice(0, start) + text + area.value.slice(end);
                 if (new TextEncoder().encode(next).length > 1000000) {
-                    this.#message = "This character file exceeds the import limit.";
-                    this.#status();
+                    showError(new Error("This character file exceeds the import limit."));
                     return;
                 }
                 // Native multiline insertion can stall Chromium on large JSON archives.
                 // One value update preserves selection semantics without partial input.
                 area.value = next;
                 body = next;
+                clearError();
                 area.setSelectionRange(start + text.length, start + text.length);
             });
-            file.addEventListener("change", () => { const selected = file.files?.[0]; if (selected)
-                void this.#guard(async () => { if (selected.size > 1000000)
-                    throw new Error("This character file exceeds the import limit."); body = await selected.text(); area.value = body; }); });
-            this.#open(this.#t("Import character"), [field(this.#t("Choose a file"), file), field(this.#t("Or paste the export"), area), ...(this.#response?.role === "dm" ? [checkbox(this.#t("Authorize imported DM grants as the current DM"), false, value => { authorize = value; })] : []), button(this.#t("Review import"), async () => {
+            file.addEventListener("change", () => {
+                const selected = file.files?.[0];
+                if (selected)
+                    void this.#guard(async () => {
+                        try {
+                            if (selected.size > 1000000)
+                                throw new Error("This character file exceeds the import limit.");
+                            body = await selected.text();
+                            area.value = body;
+                            clearError();
+                        }
+                        catch (error) {
+                            showError(error);
+                        }
+                    });
+            });
+            this.#open(this.#t("Import character"), [field(this.#t("Choose a file"), file), field(this.#t("Or paste the export"), area), ...(this.#response?.role === "dm" ? [checkbox(this.#t("Authorize imported DM grants as the current DM"), false, value => { authorize = value; clearError(); })] : []), notice, button(this.#t("Review import"), async () => {
                     try {
+                        clearError();
                         const inputs = parseCharacter(body);
+                        if (inputs.grants.length && (this.#response?.role !== "dm" || !authorize))
+                            throw new Error("Imported DM grants must be reviewed and authorized by the current DM.");
                         this.#dialog?.close();
                         await this.#perform({ ...this.#base("import"), inputs, reauthorizeGrants: authorize });
                     }
                     catch (error) {
-                        this.#message = error instanceof Error ? error.message : "Invalid character file.";
-                        this.#status();
+                        showError(error);
                     }
-                })]);
+                })], "control", "import-character");
         }
         #print(state, revision) {
             const options = { spells: true, equipment: true, provenance: false };

@@ -314,40 +314,11 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 			return input, failure(workerrpc.KindNotFound, "This grant was not found.")
 		}
 	case "import":
-		if r.Inputs == nil {
-			return input, failure(workerrpc.KindInvalidRequest, "Import requires current-format character inputs.")
+		imported, err := c.importedInputs(meta, r)
+		if err != nil {
+			return input, err
 		}
-		input = *r.Inputs
-		for index := range input.Build.Rolls {
-			input.Build.Rolls[index].Origin = "import"
-		}
-		for index := range input.Play.Rolls {
-			input.Play.Rolls[index].Origin = "import"
-		}
-		for index := range input.Build.Spells.Acquisitions {
-			input.Build.Spells.Acquisitions[index].Origin = "import"
-		}
-		for index := range input.Build.Spells.Swaps {
-			input.Build.Spells.Swaps[index].Origin = "import"
-		}
-		if len(input.Grants) > 0 {
-			if meta.Actor.Role != "dm" || !r.ReauthorizeGrants {
-				return input, failure(workerrpc.KindUnauthorized, "Imported DM grants must be reviewed and authorized by the current DM.")
-			}
-			grantIDs := map[string]string{}
-			for i := range input.Grants {
-				oldID := input.Grants[i].ID
-				input.Grants[i].ID = fmt.Sprintf("grant-%s-%d", r.OperationID, i)
-				grantIDs[oldID] = input.Grants[i].ID
-				input.Grants[i].ActorID = meta.Actor.ID
-				input.Grants[i].GrantedAt = c.now().UTC().Format(time.RFC3339)
-			}
-			for i := range input.Play.Inventory {
-				if id := input.Play.Inventory[i].GrantID; id != "" {
-					input.Play.Inventory[i].GrantID = grantIDs[id]
-				}
-			}
-		}
+		input = imported
 	default:
 		return input, failure(workerrpc.KindInvalidRequest, "Choose a supported character change.")
 	}
