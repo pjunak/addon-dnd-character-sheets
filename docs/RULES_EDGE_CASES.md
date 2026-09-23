@@ -223,3 +223,12 @@ Builder and play share one name/level filter with a live result count and explic
 Spell choices, casting abilities, activations and counters follow Engine acquisition keys. Unassigned older state has an explicit source picker or discard action in Builder. Ambiguous aliases never fan out. After a structural edit, the coordinator withdraws only Engine-rejected selections already present in the saved snapshot; it preserves valid sibling spells and counters, rejects newly invalid input, and does not reset an available counter. A save response applies corrections without resurrecting removed choices or overwriting subsequent edits.
 
 Combat displays saved damage type, versatile damage, mastery availability, sense units and conditional explanation terms. Saved details and print remain independent of a live rules provider. The browser performs no edition arithmetic.
+
+## Focus after a completed repair
+
+Shared control focus restoration keeps the existing action when usable. If a
+completed edit disables that action, a declared `data-focus-scope` limits the
+fallback to the next usable control in the same row (or the preceding control
+when none follows). Inventory rows use this for explicit unattunement after
+losing a prerequisite. The action stays disabled and eligibility remains owned
+by the Engine; focus never jumps to another item or the document body.

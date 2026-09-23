@@ -56,6 +56,24 @@ export function numberInput(value, change, min, max) {
         input.value = accepted; });
     return input;
 }
+// A completed edit may disable its own action. Keep keyboard position within
+// the owning repeated row instead of dropping focus on the document body.
+export function restoreControlFocus(target) {
+    if (!target)
+        return;
+    target.focus({ preventScroll: true });
+    if (document.activeElement === target || !target.matches(":disabled"))
+        return;
+    const controls = [...(target.closest("[data-focus-scope]")?.querySelectorAll("button,input,select,textarea,a[href],[tabindex]") ?? [])];
+    const index = controls.indexOf(target);
+    for (const next of [...controls.slice(index + 1), ...controls.slice(0, index).reverse()]) {
+        if (!next.getClientRects().length || next.matches(":disabled,[aria-disabled=true]") || next.closest("[inert]"))
+            continue;
+        next.focus({ preventScroll: true });
+        if (document.activeElement === next)
+            return;
+    }
+}
 export function select(value, options, change, t = translator("en")) {
     const node = el("select");
     const blank = el("option", t("Choose…"));

@@ -13,7 +13,7 @@ import { spellFilters, spellSourceLabel, unassignedSpellState, savedSpellBook } 
 import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileCharacterChoices, reconcileCharacterMap, newId, object, parseCharacter, rows, strings, type CatalogRecord } from "./character-client.js";
 import { buildView, type BuildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
-import { builderTarget, button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
+import { builderTarget, button, checkbox, download, el, field, human, label, panel, restoreControlFocus, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
 import { readCharacterPending, type CharacterPending, type CommandAttempt, type SaveAttempt, type CharacterTab as Tab } from "./character-pending.js";
 
 const runtimes = new Map<string, { client: CharacterClient; enhance: AddonContext["ui"]["enhance"] }>();
@@ -254,7 +254,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       }
       const restore = focusKey ? root.querySelector<HTMLElement>('[data-focus-key="' + CSS.escape(focusKey) + '"]') : focusId ? root.querySelector<HTMLElement>("#" + CSS.escape(focusId)) : undefined;
       for (let parent = restore?.parentElement; parent && parent !== root; parent = parent.parentElement) if (parent instanceof HTMLDetailsElement) parent.open = true;
-      restore?.focus({ preventScroll: true });
+      restoreControlFocus(restore);
       if (selection?.start !== null && selection?.start !== undefined && selection.end !== null && (restore instanceof HTMLTextAreaElement || restore instanceof HTMLInputElement)) restore.setSelectionRange(selection.start, selection.end);
     }
     #sheetView(): SheetView {
@@ -455,7 +455,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       const trigger = document.activeElement, focusKey = trigger instanceof HTMLElement ? trigger.dataset["focusKey"] : undefined;
       dialog.addEventListener("close", () => {
         const target = trigger instanceof HTMLElement && trigger.isConnected ? trigger : focusKey ? this.querySelector<HTMLElement>('[data-focus-key="' + CSS.escape(focusKey) + '"]') : undefined;
-        target?.focus();
+        restoreControlFocus(target);
       });
       this.#dialog = dialog; this.append(dialog); dialog.showModal(); this.#syncBusyButtons();
     }

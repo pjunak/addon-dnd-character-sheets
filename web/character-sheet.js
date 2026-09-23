@@ -142,6 +142,7 @@ export function backpack(view) {
         for (const item of items) {
             const row = styled("div", "dse-item");
             row.dataset["item"] = item.id;
+            row.dataset["focusScope"] = "";
             row.append(styled("span", "dse-item-name", savedRule(view.projection, item.name, undefined, item.reference)));
             if (view.editing) {
                 const quantity = numberInput(item.quantity, value => { item.quantity = value ?? 0; if (item.quantity === 0) {

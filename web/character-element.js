@@ -11,7 +11,7 @@ import { spellFilters, spellSourceLabel, unassignedSpellState, savedSpellBook } 
 import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileCharacterChoices, reconcileCharacterMap, newId, object, parseCharacter, rows, strings } from "./character-client.js";
 import { buildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
-import { builderTarget, button, checkbox, download, el, field, human, label, panel, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
+import { builderTarget, button, checkbox, download, el, field, human, label, panel, restoreControlFocus, rule, select, styled, tabStrip, textInput } from "./character-ui.js";
 import { readCharacterPending } from "./character-pending.js";
 const runtimes = new Map();
 export function defineCharacterElement(generation, client, enhance) {
@@ -449,7 +449,7 @@ export function defineCharacterElement(generation, client, enhance) {
             for (let parent = restore?.parentElement; parent && parent !== root; parent = parent.parentElement)
                 if (parent instanceof HTMLDetailsElement)
                     parent.open = true;
-            restore?.focus({ preventScroll: true });
+            restoreControlFocus(restore);
             if (selection?.start !== null && selection?.start !== undefined && selection.end !== null && (restore instanceof HTMLTextAreaElement || restore instanceof HTMLInputElement))
                 restore.setSelectionRange(selection.start, selection.end);
         }
@@ -738,7 +738,7 @@ export function defineCharacterElement(generation, client, enhance) {
             const trigger = document.activeElement, focusKey = trigger instanceof HTMLElement ? trigger.dataset["focusKey"] : undefined;
             dialog.addEventListener("close", () => {
                 const target = trigger instanceof HTMLElement && trigger.isConnected ? trigger : focusKey ? this.querySelector('[data-focus-key="' + CSS.escape(focusKey) + '"]') : undefined;
-                target?.focus();
+                restoreControlFocus(target);
             });
             this.#dialog = dialog;
             this.append(dialog);

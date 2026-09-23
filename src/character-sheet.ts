@@ -108,7 +108,7 @@ export function backpack(view: SheetView): HTMLElement {
   for (const location of ["equipped", "carried", "stored"]) {
     const items = view.input.play.inventory.filter(item => item.location === location), group = styled("div", "dse-bp-group", styled("h4", "dse-bp-label", t(label(location)) + " · " + items.length));
     for (const item of items) {
-      const row = styled("div", "dse-item"); row.dataset["item"] = item.id;
+      const row = styled("div", "dse-item"); row.dataset["item"] = item.id; row.dataset["focusScope"] = "";
       row.append(styled("span", "dse-item-name", savedRule(view.projection, item.name, undefined, item.reference)));
       if (view.editing) {
         const quantity = numberInput(item.quantity, value => { item.quantity = value ?? 0; if (item.quantity === 0) { item.attuned = false; if (item.location === "equipped") item.location = "carried"; } view.change(); }, 0); quantity.className = "dse-number"; quantity.setAttribute("aria-label", t("{0} quantity", [item.name]));

@@ -29,6 +29,20 @@ export function numberInput(value: number | undefined, change: (value: number | 
   let accepted = input.value;
   input.addEventListener("input", () => { if (input.validity.valid) { accepted = input.value; change(input.value === "" ? undefined : input.valueAsNumber); } }); input.addEventListener("blur", () => { if (!input.validity.valid) input.value = accepted; }); return input;
 }
+// A completed edit may disable its own action. Keep keyboard position within
+// the owning repeated row instead of dropping focus on the document body.
+export function restoreControlFocus(target: HTMLElement | null | undefined): void {
+  if (!target) return;
+  target.focus({ preventScroll: true });
+  if (document.activeElement === target || !target.matches(":disabled")) return;
+  const controls = [...(target.closest("[data-focus-scope]")?.querySelectorAll<HTMLElement>("button,input,select,textarea,a[href],[tabindex]") ?? [])];
+  const index = controls.indexOf(target);
+  for (const next of [...controls.slice(index + 1), ...controls.slice(0, index).reverse()]) {
+    if (!next.getClientRects().length || next.matches(":disabled,[aria-disabled=true]") || next.closest("[inert]")) continue;
+    next.focus({ preventScroll: true });
+    if (document.activeElement === next) return;
+  }
+}
 export interface Option { id: string; label: string; description?: string; disabled?: boolean }
 export function select(value: string, options: readonly Option[], change: (value: string) => void, t = translator("en")): HTMLSelectElement {
   const node = el("select"); const blank = el("option", t("Choose…")); blank.value = ""; node.append(blank);
