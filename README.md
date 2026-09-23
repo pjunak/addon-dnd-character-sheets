@@ -40,7 +40,9 @@ saved values, export and printing remain usable.
 The sheet is limited to 1,120 px and has no duplicate character heading. Compact
 uses tighter ability cards and places currency directly below inventory. When
 enlarged text leaves too little room beside navigation, the rail stacks above
-the sheet and keeps its vertical keyboard behavior.
+the sheet and keeps its vertical keyboard behavior. Ability cards stack their
+score and skill list when the available width would squeeze enlarged skill
+names into narrow columns.
 
 The host owns the core profile, portrait and relationships. The native worker
 provides `dnd5e.character` 2.0.0 and is the only writer of the `dnd-sheets`

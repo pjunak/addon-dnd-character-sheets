@@ -45,7 +45,7 @@
 .dse-cols { display:flex; gap:var(--space-4); align-items:flex-start; flex-wrap:wrap; min-width:0; }
 .dse-cards { display:flex; flex-direction:column; gap:var(--space-3); flex:0 1 17rem; min-width:14rem; }
 .dse-cols-main { display:flex; flex-direction:column; align-self:stretch; flex:1 1 20rem; min-width:0; gap:var(--space-5); }
-.dse-ability { min-width:0; padding:var(--space-2) var(--space-3); }
+.dse-ability { min-width:0; padding:var(--space-2) var(--space-3); container:ability-card / inline-size; }
 .dse-ability-title { display:flex; align-items:center; gap:var(--space-2); padding-bottom:var(--space-1); border-bottom:1px solid var(--border-subtle); margin-bottom:var(--space-1); font-size:var(--text-sm); color:var(--text-parchment); font-weight:600; letter-spacing:.03em; }
 .dse-ability-body { display:flex; align-items:flex-start; gap:var(--space-2); }
 .dse-ability-details { flex:1; min-width:0; }
@@ -366,6 +366,13 @@
 .addon-dnd-character .dse-layout-compact .dse-coins { margin-top:.5rem; }
 .addon-dnd-character .dse-layout-compact .dse-vitals { gap:.35rem; }
 .addon-dnd-character .dse-layout-compact .dse-vitals .codex-tile { padding:.4rem; }
+/* Stack scores and skills when enlarged text leaves too little reading width. */
+@container ability-card (max-width:13rem) {
+ .addon-dnd-character .dse-ability-body { display:grid; grid-template-columns:minmax(0,1fr); }
+ .addon-dnd-character .dse-ability-details { display:contents; }
+ .addon-dnd-character .dse-ability-title { grid-row:1; }
+ .addon-dnd-character .dse-score { justify-self:start; }
+}
 @container builder (max-width:38rem) {
  .addon-dnd-character .character-build .character-stats { grid-template-columns:repeat(auto-fit,minmax(min(100%,7rem),1fr)); }
  .character-foundation { grid-template-columns:1fr; }
