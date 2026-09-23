@@ -102,7 +102,9 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 	}
 	if err != nil {
 		var rpcError *workerrpc.RPCError
-		if errors.As(err, &rpcError) && rpcError.Data != nil && (rpcError.Data.Kind == workerrpc.KindInvalidRequest || rpcError.Data.Kind == workerrpc.KindValidationFailed) {
+		// Reading depends on our saved schema, not a replacement provider's
+		// contract. Edit validation must still reach the caller unchanged.
+		if method != "load" && errors.As(err, &rpcError) && rpcError.Data != nil && (rpcError.Data.Kind == workerrpc.KindInvalidRequest || rpcError.Data.Kind == workerrpc.KindValidationFailed) {
 			return nil, err
 		}
 		response.Status = "unavailable"

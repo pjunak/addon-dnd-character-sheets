@@ -88,8 +88,12 @@ Installed acceptance combines two separate Magic Initiate acquisitions and spent
 free casts with effect changes, item rebinding, provider restart, explicit source
 policy adoption and revocation. Each surviving acquisition keeps its choices,
 casting ability and spent uses. A provider restart alone retains rules identity;
-a policy change requires explicit adoption. Broader incompatible-provider/schema
-transitions and human assistive-technology acceptance remain in the host backlog.
+a policy change requires explicit adoption. Installed compatibility acceptance also
+replaces the engine with an incompatible service major or response schema and
+restores the exact original generation without losing spent casts. A sheet-schema
+change is blocked before activation; worker-only writes and the exact schema-4
+state remain protected, including in a portable backup. Broader combinations and
+human assistive-technology acceptance remain in the host backlog.
 
 ## Service feedback
 
@@ -195,6 +199,10 @@ Without a compatible provider, saved projections and explanations render as
 stored; mechanical changes stay disabled. The versioned notes service remains
 compatible for existing clients, but the sheet offers no character notes editor.
 Loading never adopts changed rules. Tools provides explicit adoption.
+A malformed response, incompatible contract version or broker validation failure
+on load returns the unchanged saved state as unavailable. Provider validation
+errors on edits remain errors; they cannot masquerade as a successful save.
+Offline notes retain the exact accepted projection and rules identity.
 
 If an autosave discovers changed rules, its rejected response updates the rules
 status without replacing pending input or advancing the opening revision.
