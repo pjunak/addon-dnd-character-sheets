@@ -1,6 +1,6 @@
 import { object, rows } from "./character-client.js";
 import { translator } from "./character-locale.js";
-import { button, el, field, human, label, panel, rule, select, styled, textInput } from "./character-ui.js";
+import { builderTarget, button, checkbox, el, field, human, label, panel, rule, select, styled, textInput } from "./character-ui.js";
 export function spellSourceLabel(sourceValue, locale = "en") {
     const source = object(sourceValue), acquired = object(source["acquisition"]), t = translator(locale);
     const name = String(source["name"] ?? label(String(source["id"] ?? source["type"] ?? "")));
@@ -9,13 +9,11 @@ export function spellSourceLabel(sourceValue, locale = "en") {
     const owner = acquired["classId"] ? t(label(String(acquired["classId"]))) : String(acquired["name"] ?? acquired["id"]);
     return [name, owner, t("Level {0}", [acquired["level"]])].join(" · ");
 }
-// Every spell surface uses the same two native controls, enhanced by the host.
-// Filtering is local presentation and never changes an authored selection.
-export function spellFilters(key, locale, changed) {
-    const t = translator(locale), search = textInput("", changed);
+export function spellFilters(key, locale, changed, state = { query: "", level: "" }) {
+    const t = translator(locale), search = textInput(state.query, value => { state.query = value; changed(); });
     search.type = "search";
     search.dataset["ui"] = "search";
-    const level = select("", [{ id: "0", label: t("Cantrips") }, ...Array.from({ length: 9 }, (_, i) => ({ id: String(i + 1), label: t("Level {0}", [i + 1]) }))], changed, t);
+    const level = select(state.level, [{ id: "0", label: t("Cantrips") }, ...Array.from({ length: 9 }, (_, i) => ({ id: String(i + 1), label: t("Level {0}", [i + 1]) }))], value => { state.level = value; changed(); }, t);
     level.options[0].textContent = t("All spell levels");
     const nameField = field(t("Filter spells"), search), levelField = field(t("Spell level"), level);
     nameField.dataset["uiKey"] = key + ":name";
@@ -29,6 +27,43 @@ export function spellFilters(key, locale, changed) {
         matches: (name, value) => name.toLocaleLowerCase(locale).includes(search.value.trim().toLocaleLowerCase(locale)) && (!level.value || String(value) === level.value),
         report: shown => { status.textContent = shown ? t("{0} spells shown", [shown]) : t("No matching spells."); },
     };
+}
+// Builder and Manage spells share selection, filtering and host-owned focus behavior.
+export function spellPicker(title, key, ids, selected, maximum, catalog, state, locale, changed) {
+    const t = translator(locale), summary = el("summary"), details = el("details", summary), list = el("fieldset");
+    details.open = state.open;
+    details.dataset["spellPicker"] = key;
+    details.addEventListener("toggle", () => { if (details.isConnected)
+        state.open = details.open; });
+    const filters = spellFilters(key, locale, () => render(), state);
+    const render = () => {
+        summary.textContent = t("{0} ({1} selected)", [title, selected.length]);
+        list.replaceChildren(el("legend", title));
+        const shown = [...new Set([...selected, ...ids])].filter(id => {
+            const record = catalog.find(record => record.id === id);
+            return filters.matches(String(record?.value["name"] ?? id), record?.value["level"]);
+        });
+        filters.report(shown.length);
+        for (const id of shown) {
+            const record = catalog.find(record => record.id === id);
+            const choice = checkbox(String(record?.value["name"] ?? id), selected.includes(id), checked => {
+                if (checked && (selected.length >= maximum || !ids.includes(id)))
+                    return;
+                selected = checked ? [...selected, id] : selected.filter(item => item !== id);
+                changed(selected);
+                render();
+            });
+            // ui.controls.v1 restores a replaced field's child control by this stable key.
+            choice.dataset["uiKey"] = key + ":spell:" + id;
+            const control = choice.querySelector("input");
+            control.dataset["focusKey"] = choice.dataset["uiKey"];
+            control.disabled = !selected.includes(id) && (selected.length >= maximum || !ids.includes(id));
+            list.append(el("div", choice, rule(t("Details"), { kind: "spell", id })));
+        }
+    };
+    details.append(filters.controls, list);
+    render();
+    return builderTarget(key, details);
 }
 export function markSpellRow(row, id, catalog) {
     const spell = catalog.find(record => record.id === id);

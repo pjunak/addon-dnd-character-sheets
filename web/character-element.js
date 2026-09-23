@@ -7,7 +7,7 @@ import { abilityRail, backpack, combatDetails, preferredLayout, vitals } from ".
 import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment } from "./character-inventory.js";
 import { equipmentPicker } from "./character-equipment.js";
 import { builderShell, focusBuilderTarget } from "./character-builder-nav.js";
-import { spellFilters, spellSourceLabel, unassignedSpellState, savedSpellBook } from "./character-spells.js";
+import { spellPicker, spellSourceLabel, unassignedSpellState, savedSpellBook } from "./character-spells.js";
 import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileCharacterChoices, reconcileCharacterMap, newId, object, parseCharacter, rows, strings } from "./character-client.js";
 import { buildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
@@ -50,11 +50,16 @@ export function defineCharacterElement(generation, client, enhance) {
         #blocked = false;
         #layout = "compact";
         #builderNav = { tab: "character", target: "", open: true };
+        #spellPickers = new Map();
+        #spellManagementOpen = false;
         #t = (key, values) => translator(this.#context?.host.locale ?? "en")(key, values);
         #feedback = (message) => feedbackMessage(message, this.#context?.host.locale ?? "en");
         #unsubscribe;
         #refreshTimer;
-        set codexContribution(value) { const previous = this.#context; this.#context = value; if (this.isConnected && previous?.host.key !== value.host.key) {
+        set codexContribution(value) { const previous = this.#context; this.#context = value; if (previous?.host.key !== value.host.key) {
+            this.#spellPickers.clear();
+            this.#spellManagementOpen = false;
+        } if (this.isConnected && previous?.host.key !== value.host.key) {
             this.#epoch++;
             this.#pending = undefined;
             this.#saving = undefined;
@@ -380,6 +385,14 @@ export function defineCharacterElement(generation, client, enhance) {
             if (!this.isConnected || !this.#context)
                 return;
             const dialog = this.#dialog?.open ? this.#dialog : undefined;
+            for (const picker of this.querySelectorAll("[data-spell-picker]")) {
+                const state = this.#spellPickers.get(picker.dataset["spellPicker"]);
+                if (state)
+                    state.open = picker.open;
+            }
+            const management = this.querySelector("[data-spell-management]");
+            if (management)
+                this.#spellManagementOpen = management.open;
             const rail = this.querySelector(".dse-build-rail");
             if (rail)
                 this.#builderNav.open = rail.open;
@@ -546,6 +559,8 @@ export function defineCharacterElement(generation, client, enhance) {
             }
             const choices = el("details", el("summary", this.#t("Manage spells"))), fields = el("fieldset");
             fields.disabled = !this.#editable || this.#response?.status === "unavailable" || !!this.#response?.rulesChanged;
+            choices.dataset["spellManagement"] = "";
+            choices.open = this.#spellManagementOpen;
             fields.append(this.#spellChoices());
             choices.append(fields);
             root.append(controls, choices);
@@ -578,22 +593,13 @@ export function defineCharacterElement(generation, client, enhance) {
         #spellChoices() {
             const root = panel(this.#t("Spells")), options = this.#evaluation?.spellOptions ?? {}, casting = object(this.#evaluation?.sheet["spellcasting"]), spells = this.#catalogs.get("spell") ?? [];
             root.append(...unassignedSpellState(this.#input, this.#evaluation, () => { this.#changed(); this.#render(); void this.#evaluate(true); }, this.#context?.host.locale ?? "en"));
-            const picks = (title, ids, current, set, maximum, target = "") => {
-                const details = el("details", el("summary", this.#t("{0} ({1} selected)", [title, current.length]))), list = el("fieldset", el("legend", title));
-                const filters = spellFilters(target || title, this.#context?.host.locale ?? "en", () => render());
-                const render = () => { list.replaceChildren(el("legend", title)); const shown = [...new Set([...current, ...ids])].filter(id => { const record = spells.find(record => record.id === id); return filters.matches(String(record?.value["name"] ?? id), record?.value["level"]); }); filters.report(shown.length); for (const id of shown) {
-                    const record = spells.find(record => record.id === id);
-                    list.append(el("div", checkbox(String(record?.value["name"] ?? id), current.includes(id), selected => { if (selected && (current.length >= maximum || !ids.includes(id)))
-                        return; current = selected ? [...current, id] : current.filter(item => item !== id); set(current); details.querySelector("summary").textContent = this.#t("{0} ({1} selected)", [title, current.length]); this.#changed(); render(); }), rule(this.#t("Details"), { kind: "spell", id })));
-                    const control = list.lastElementChild?.querySelector("input");
-                    if (control) {
-                        control.dataset["uiKey"] = (target || title) + ":spell:" + id;
-                        control.disabled = !current.includes(id) && (current.length >= maximum || !ids.includes(id));
-                    }
-                } };
-                details.append(filters.controls, list);
-                render();
-                return target ? builderTarget(target, details) : details;
+            const picks = (title, ids, current, set, maximum, target) => {
+                let state = this.#spellPickers.get(target);
+                if (!state) {
+                    state = { open: false, query: "", level: "" };
+                    this.#spellPickers.set(target, state);
+                }
+                return spellPicker(title, target, ids, current, maximum, spells, state, this.#context?.host.locale ?? "en", value => { set(value); this.#changed(); });
             };
             for (const classOptions of rows(options["classes"])) {
                 const id = String(classOptions["classId"]), caster = rows(casting["perClass"]).find(row => row["classId"] === id) ?? {}, eligible = strings(classOptions["spellIds"]), zero = eligible.filter(id => Number(spells.find(record => record.id === id)?.value["level"]) === 0), leveled = eligible.filter(id => !zero.includes(id));

@@ -23,7 +23,11 @@ Use **+** to add an eligible class and the class tab to add or remove levels.
 Point buy and granted ability increases show live used/remaining budgets with
 bounded steppers. Searchable dropdowns display descriptions while browsing and
 accept only offered options. The engine supplies class and feat eligibility;
-duplicate granted selections are excluded.
+duplicate granted selections are excluded. Spell selectors in Builder and
+**Manage spells** share the same controls. Selecting or preparing spells preserves
+keyboard focus, expanded groups and search/level filters through automatic saves
+and tab changes. These view preferences belong to the open character, not its
+saved rules state.
 
 **Tools** owns export, reviewed replacement import, printing, layout and rules
 status. Transfers use `dnd-character.v1` / schema 4.0.0 and contain the current

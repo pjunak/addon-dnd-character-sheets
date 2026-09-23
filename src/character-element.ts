@@ -9,7 +9,7 @@ import { equipmentPicker } from "./character-equipment.js";
 import { builderShell, focusBuilderTarget, type BuilderNavigation } from "./character-builder-nav.js";
 import type { AddonContext, ContributionContext } from "./sdk.js";
 import type { Grant, Inputs, Request, Response, Result, State } from "./character-model.js";
-import { spellFilters, spellSourceLabel, unassignedSpellState, savedSpellBook } from "./character-spells.js";
+import { spellPicker, spellSourceLabel, unassignedSpellState, savedSpellBook, type SpellPickerState } from "./character-spells.js";
 import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileCharacterChoices, reconcileCharacterMap, newId, object, parseCharacter, rows, strings, type CatalogRecord } from "./character-client.js";
 import { buildView, type BuildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
@@ -41,11 +41,13 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     #blocked = false;
     #layout: Layout = "compact";
     #builderNav: BuilderNavigation = { tab: "character", target: "", open: true };
+    #spellPickers = new Map<string, SpellPickerState>();
+    #spellManagementOpen = false;
     #t = (key: string, values?: readonly unknown[]): string => translator(this.#context?.host.locale ?? "en")(key, values);
     #feedback = (message: string): string => feedbackMessage(message, this.#context?.host.locale ?? "en");
     #unsubscribe: (() => void) | undefined;
     #refreshTimer: ReturnType<typeof setTimeout> | undefined;
-    set codexContribution(value: ContributionContext) { const previous = this.#context; this.#context = value; if (this.isConnected && previous?.host.key !== value.host.key) { this.#epoch++; this.#pending = undefined; this.#saving = undefined; this.#attempt = undefined; this.#command = undefined; this.#changeVersion++; this.#busy = false; this.#response = undefined; this.#evaluation = undefined; this.#catalogs.clear(); this.#dialog?.close(); clearTimeout(this.#timer); void this.#load(); } else this.#render(); }
+    set codexContribution(value: ContributionContext) { const previous = this.#context; this.#context = value; if (previous?.host.key !== value.host.key) { this.#spellPickers.clear(); this.#spellManagementOpen = false; } if (this.isConnected && previous?.host.key !== value.host.key) { this.#epoch++; this.#pending = undefined; this.#saving = undefined; this.#attempt = undefined; this.#command = undefined; this.#changeVersion++; this.#busy = false; this.#response = undefined; this.#evaluation = undefined; this.#catalogs.clear(); this.#dialog?.close(); clearTimeout(this.#timer); void this.#load(); } else this.#render(); }
     connectedCallback(): void { this.#controls = this.#runtime.enhance(this); this.#pending = this.#context?.edits.handoff?.take(); this.classList.add("addon-dnd-character", "addon-dnd-sheets"); this.#busy = false; this.#unsubscribe = this.#runtime.client.subscribe(() => { clearTimeout(this.#refreshTimer); this.#refreshTimer = setTimeout(() => { void this.#refreshSaved(); }, 250); }); void this.#load(); }
     disconnectedCallback(): void { this.#controls?.dispose(); this.#controls = undefined; this.#epoch++; this.#saving = undefined; this.#attempt = undefined; this.#command = undefined; this.#changeVersion++; this.#unsubscribe?.(); clearTimeout(this.#refreshTimer); clearTimeout(this.#timer); this.#dialog?.close(); this.#context?.edits.set({ dirty: false, saving: false }); }
     get #key(): string { return this.#context?.host.key ?? ""; }
@@ -214,6 +216,10 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       this.lang = this.#context?.host.locale ?? "en";
       if (!this.isConnected || !this.#context) return;
       const dialog = this.#dialog?.open ? this.#dialog : undefined;
+      for (const picker of this.querySelectorAll<HTMLDetailsElement>("[data-spell-picker]")) {
+        const state = this.#spellPickers.get(picker.dataset["spellPicker"]!); if (state) state.open = picker.open;
+      }
+      const management = this.querySelector<HTMLDetailsElement>("[data-spell-management]"); if (management) this.#spellManagementOpen = management.open;
       const rail = this.querySelector<HTMLDetailsElement>(".dse-build-rail"); if (rail) this.#builderNav.open = rail.open;
       const focused = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
       const focusKey = focused?.dataset["focusKey"], focusId = focused?.id;
@@ -327,6 +333,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
         controls.append(savedSpellBook(this.#input,view.projection,view.locale));
       }
       const choices = el("details", el("summary", this.#t("Manage spells"))), fields = el("fieldset"); fields.disabled = !this.#editable || this.#response?.status === "unavailable" || !!this.#response?.rulesChanged;
+      choices.dataset["spellManagement"] = ""; choices.open = this.#spellManagementOpen;
       fields.append(this.#spellChoices()); choices.append(fields);
       root.append(controls, choices);
       return root;
@@ -348,11 +355,10 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     #spellChoices(): HTMLElement {
       const root = panel(this.#t("Spells")), options = this.#evaluation?.spellOptions ?? {}, casting = object(this.#evaluation?.sheet["spellcasting"]), spells = this.#catalogs.get("spell") ?? [];
       root.append(...unassignedSpellState(this.#input,this.#evaluation,()=>{this.#changed();this.#render();void this.#evaluate(true);},this.#context?.host.locale ?? "en"));
-      const picks = (title: string, ids: string[], current: string[], set: (ids: string[]) => void, maximum: number, target = ""): HTMLElement => {
-        const details = el("details", el("summary", this.#t("{0} ({1} selected)", [title, current.length]))), list = el("fieldset", el("legend",title));
-        const filters=spellFilters(target || title,this.#context?.host.locale ?? "en",()=>render());
-        const render = (): void => { list.replaceChildren(el("legend",title)); const shown = [...new Set([...current, ...ids])].filter(id => { const record=spells.find(record=>record.id===id); return filters.matches(String(record?.value["name"] ?? id),record?.value["level"]); }); filters.report(shown.length); for (const id of shown) { const record = spells.find(record => record.id === id); list.append(el("div", checkbox(String(record?.value["name"] ?? id), current.includes(id), selected => { if (selected && (current.length >= maximum || !ids.includes(id))) return; current = selected ? [...current, id] : current.filter(item => item !== id); set(current); details.querySelector("summary")!.textContent = this.#t("{0} ({1} selected)", [title, current.length]); this.#changed(); render(); }), rule(this.#t("Details"), { kind: "spell", id }))); const control = list.lastElementChild?.querySelector<HTMLInputElement>("input"); if (control) { control.dataset["uiKey"]=(target||title)+":spell:"+id; control.disabled = !current.includes(id) && (current.length >= maximum || !ids.includes(id)); } } };
-        details.append(filters.controls, list); render(); return target ? builderTarget(target, details) : details;
+      const picks = (title: string, ids: string[], current: string[], set: (ids: string[]) => void, maximum: number, target: string): HTMLElement => {
+        let state = this.#spellPickers.get(target);
+        if (!state) { state = { open: false, query: "", level: "" }; this.#spellPickers.set(target, state); }
+        return spellPicker(title, target, ids, current, maximum, spells, state, this.#context?.host.locale ?? "en", value => { set(value); this.#changed(); });
       };
       for (const classOptions of rows(options["classes"])) {
         const id = String(classOptions["classId"]), caster = rows(casting["perClass"]).find(row => row["classId"] === id) ?? {}, eligible = strings(classOptions["spellIds"]), zero = eligible.filter(id => Number(spells.find(record => record.id === id)?.value["level"]) === 0), leveled = eligible.filter(id => !zero.includes(id));
