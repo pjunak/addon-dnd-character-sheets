@@ -1,5 +1,5 @@
 import { grantedSpellsRead } from "./character-spells.js";
-import { senseDetails } from "./character-sheet.js";
+import { featDetails, senseDetails } from "./character-sheet.js";
 import { translator } from "./character-locale.js";
 import { abilities, object, rows } from "./character-client.js";
 import { el, human, label, panel, rule } from "./character-ui.js";
@@ -68,6 +68,9 @@ export function projectionView(projection, locale = "en") {
         if (list.children.length)
             root.append(panel(t(label(group)), list));
     }
+    const feats = featDetails(projection, locale);
+    if (feats)
+        root.append(feats);
     const granted = grantedSpellsRead(projection, locale);
     if (granted)
         root.append(granted);

@@ -1,5 +1,5 @@
 import { grantedSpellsRead } from "./character-spells.js";
-import { senseDetails } from "./character-sheet.js";
+import { featDetails, senseDetails } from "./character-sheet.js";
 import type { Projection, State } from "./character-model.js";
 import { translator } from "./character-locale.js";
 import { abilities, object, rows } from "./character-client.js";
@@ -47,6 +47,7 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
     });
     if (list.children.length) root.append(panel(t(label(group)), list));
   }
+  const feats = featDetails(projection, locale); if (feats) root.append(feats);
   const granted=grantedSpellsRead(projection,locale); if(granted)root.append(granted);
   for (const group of ["languages", "resistances", "damageImmunities", "conditionImmunities", "traits"]) {
     if (human(sheet[group]) && sheet[group] !== undefined && (!Array.isArray(sheet[group]) || (sheet[group] as unknown[]).length > 0)) root.append(panel(t(label(group)), el("p", human(sheet[group]))));

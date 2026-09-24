@@ -23,6 +23,21 @@ export function savedRule(projection, name, path, reference) {
         node.details["savedSources"] = sources.map(({ reference, name, summary, hash }) => ({ reference, name, summary, hash }));
     return node;
 }
+export function featDetails(projection, locale) {
+    const feats = rows(projection?.sheet["feats"]);
+    if (!feats.length)
+        return undefined;
+    const t = translator(locale), root = panel(t("Feats"));
+    root.className = "dse-section";
+    for (const feat of feats) {
+        const id = String(feat["id"]), reference = { kind: "feat", id };
+        const evidence = projection?.evidence.find(row => row.reference.kind === reference.kind && row.reference.id === id);
+        const name = String(feat["name"] ?? evidence?.name ?? id), count = Number(feat["count"] ?? 1);
+        const heading = count > 1 ? name + " × " + count : name;
+        root.append(el("details", el("summary", savedRule(projection, heading, undefined, reference)), el("p", evidence?.summary ?? "")));
+    }
+    return root;
+}
 export function recordName(view, kind, id) {
     return String(view.catalogs.get(kind)?.find(record => record.id === id)?.value["name"] ?? view.projection?.evidence.find(source => source.reference.kind === kind && source.reference.id === id)?.name ?? id);
 }
@@ -256,6 +271,9 @@ export function combatDetails(view) {
         if (sheet[key] !== undefined)
             traits.append(el("p", el("strong", t(label(key)) + ": "), human(sheet[key])));
     root.append(attacks, resources, senseDetails(view.projection, view.locale), traits);
+    const feats = featDetails(view.projection, view.locale);
+    if (feats)
+        root.append(feats);
     return root;
 }
 export function senseDetails(projection, locale) {

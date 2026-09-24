@@ -95,6 +95,15 @@ change is blocked before activation; worker-only writes and the exact schema-4
 state remain protected, including in a portable backup. Broader combinations and
 human assistive-technology acceptance remain in the host backlog.
 
+## Saved feat display
+
+Combat details and print share the same feat renderer, borrowing the host's
+rule-details control and reading the Engine's acquired `sheet.feats` identities
+and counts. Summaries come from exact kind-and-ID matches in saved evidence.
+Provider-free output never queries the catalog or infers an acquisition from
+unrelated evidence. Older projections without this additive list remain readable;
+a deliberate recalculation is needed to capture newly available output.
+
 ## Service feedback
 
 The shared save/recovery status translates known coordinator responses and
