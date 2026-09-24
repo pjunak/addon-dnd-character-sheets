@@ -59,7 +59,7 @@ export function spellPicker(title: string, key: string, ids: string[], selected:
       const control = choice.querySelector<HTMLInputElement>("input")!;
       control.dataset["focusKey"] = choice.dataset["uiKey"];
       control.disabled = !selected.includes(id) && (selected.length >= maximum || !ids.includes(id));
-      list.append(el("div", choice, rule(t("Details"), { kind: "spell", id })));
+      list.append(styled("div", "dnd-workflow-controls", choice, rule(t("Details"), { kind: "spell", id })));
     }
   };
   details.append(filters.controls, list); render(); return builderTarget(key, details);

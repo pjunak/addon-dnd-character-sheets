@@ -95,6 +95,18 @@ change is blocked before activation; worker-only writes and the exact schema-4
 state remain protected, including in a portable backup. Broader combinations and
 human assistive-technology acceptance remain in the host backlog.
 
+## Class-granted choices and spell pickers
+
+Class-granted feats and conditional spell alternatives use the same Engine-owned
+Builder descriptors and spell pickers as other sources. Source lists, counts,
+casting abilities and branch availability stay in the provider/Engine; Sheets
+adds no class-specific controls. Changing a branch uses the existing exact-choice
+and spell-grant withdrawal policy while preserving unrelated saved state.
+
+The shared spell picker uses the existing wrapping control layout to separate
+each checkbox label from its borrowed rule-details control. Builder and Manage
+spells share this rendering and focus behavior, including enlarged phone views.
+
 ## Saved feat display
 
 Combat details and print share the same feat renderer, borrowing the host's
