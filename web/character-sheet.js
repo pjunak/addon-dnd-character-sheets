@@ -95,6 +95,8 @@ export function vitals(view) {
     ac.classList.add("dse-ac");
     band.append(ac);
     const stats = styled("div", "dse-vitals-grid", tile("Speed", "speed"), tile("Proficiency", "proficiencyBonus", true));
+    if (Object.hasOwn(derived, "size"))
+        stats.append(styled("div", "codex-tile", styled("span", "dse-stat-label", t("Size")), el("strong", savedRule(view.projection, typeof derived["size"] === "string" ? t(derived["size"]) : t("Needs a choice"), "derived.size"))));
     if (view.layout === "classic")
         stats.append(tile("Initiative", "initiative", true), tile("Passive perception", "passivePerception"));
     band.append(stats);

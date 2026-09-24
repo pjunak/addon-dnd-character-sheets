@@ -3,6 +3,11 @@ import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { blank, parseCharacter, exportCharacter, mergeCharacter } from '../web/character-client.js';
 
+test('provider option labels translate only explicit UI keys', async () => {
+  const { guidanceOptions } = await import('../web/character-build.js');
+  assert.deepEqual(guidanceOptions([{id:'Small', label:'Small', labelKey:'Small'}, {id:'record', label:'Small'}], 'cs').map(option=>option.label), ['Malá', 'Small']);
+});
+
 test('current transfer accepts only the explicit current envelope and preserves authored inputs', () => {
   const inputs = blank(); inputs.notes = 'Mira — a new beginning'; inputs.play.rolls = [{ id: 'roll-one', resource: 'hit-dice-d10', die: 10, result: 6, at: '2026-09-11T00:00:00Z' }];
   const state = { schemaVersion: '4.0.0', inputs, rules: { engineId: 'rules', engineVersion: '4.0.0', engineGeneration: 'generation', identity: {} }, projection: { sheet: {}, explanations: {}, evidence: [], issues: [] }, operationId: 'first' };

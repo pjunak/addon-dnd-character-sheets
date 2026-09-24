@@ -577,7 +577,14 @@ export const catalogs = {
         "Active": "Active",
         "Inactive": "Inactive",
         "Spell list": "Spell list",
-        "Granted spells": "Granted spells"
+        "Granted spells": "Granted spells",
+        "Size": "Size",
+        "Tiny": "Tiny",
+        "Small": "Small",
+        "Medium": "Medium",
+        "Large": "Large",
+        "Huge": "Huge",
+        "Gargantuan": "Gargantuan"
     },
     "cs": {
         "Currency": "Měna",
@@ -1156,6 +1163,13 @@ export const catalogs = {
         "Active": "Aktivní",
         "Inactive": "Neaktivní",
         "Spell list": "Seznam kouzel",
-        "Granted spells": "Udělená kouzla"
+        "Granted spells": "Udělená kouzla",
+        "Size": "Velikost",
+        "Tiny": "Drobná",
+        "Small": "Malá",
+        "Medium": "Střední",
+        "Large": "Velká",
+        "Huge": "Obrovská",
+        "Gargantuan": "Gigantická"
     }
 };

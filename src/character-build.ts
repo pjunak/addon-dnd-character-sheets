@@ -8,7 +8,7 @@ export interface BuildView {
   changed(): void; refresh(): void; navigate?(tab: string): void;
 }
 const options = (records: readonly CatalogRecord[]): Option[] => records.map(record => ({ id: record.id, label: String(record.value["name"] ?? record.id), description: String(record.value["summary"] ?? record.value["text"] ?? "").slice(0, 1200) }));
-export const guidanceOptions = (value: unknown): Option[] => rows(value).map(row => ({ id: String(row["id"]), label: String(row["label"] ?? row["name"] ?? row["id"]), description: String(row["description"] ?? "") }));
+export const guidanceOptions = (value: unknown, locale = "en"): Option[] => rows(value).map(row => ({ id: String(row["id"]), label: row["labelKey"] ? builderLabel(row, locale) : String(row["label"] ?? row["name"] ?? row["id"]), description: String(row["description"] ?? "") }));
 export function buildView(view: BuildView, active = "character"): HTMLElement {
   const t = translator(view.locale), { input, policy } = view, build = input.build, root = styled("div", "character-build");
   const plan = view.evaluation?.plan ?? {}, guidance = object(view.evaluation?.guidance["choices"]);
@@ -145,7 +145,7 @@ function choiceView(descriptor: Record<string, unknown>, guidance: Record<string
     if(mode==="asi")root.append(choiceView({...object(descriptor["ability"]),kind:"abilityBudget"},{},view));
     if(mode==="feat") {const feat=object(descriptor["feat"]);root.append(choiceView({...feat,kind:"feat"},{options:guidance["featOptions"]},view));const ability=object(feat["ability"]);if(strings(ability["eligible"]).length)root.append(choiceView({...ability,kind:"abilityBudget"},{},view));}
   } else {
-    const choices=guidanceOptions(guidance["options"]);
+    const choices=guidanceOptions(guidance["options"],view.locale);
     for(let slot=0;slot<Number(descriptor["count"]??1);slot++) {
       const selection=field(t("Selection {0}",[slot+1]),combo(String(current(slot)??""),()=>choices.filter(option=>!view.input.build.choices.some(choice=>choice.id===id&&choice.slot!==slot&&choice.value===option.id)),value=>{set(slot,value);if(kind==="feat")view.refresh();},t));
       if(!choices.some(option=>option.id===current(slot)))selection.dataset["builderPending"]="";

@@ -79,6 +79,7 @@ export function vitals(view: SheetView): HTMLElement {
   const tile = (name: string, key: string, sign = false): HTMLElement => styled("div", "codex-tile", styled("span", "dse-stat-label", t(name)), el("strong", savedRule(view.projection, sign ? signed(derived[key]) : human(derived[key]), "derived." + key)));
   const ac = tile("Armor class", "armorClass"); ac.classList.add("dse-ac"); band.append(ac);
   const stats = styled("div", "dse-vitals-grid", tile("Speed", "speed"), tile("Proficiency", "proficiencyBonus", true));
+  if (Object.hasOwn(derived, "size")) stats.append(styled("div", "codex-tile", styled("span", "dse-stat-label", t("Size")), el("strong", savedRule(view.projection, typeof derived["size"] === "string" ? t(derived["size"]) : t("Needs a choice"), "derived.size"))));
   if (view.layout === "classic") stats.append(tile("Initiative", "initiative", true), tile("Passive perception", "passivePerception"));
   band.append(stats);
   const worn = styled("div", "dse-worn", styled("span", "dse-stat-label", t("Worn equipment")));

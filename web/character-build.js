@@ -2,7 +2,7 @@ import { builderLabel, translator } from "./character-locale.js";
 import { abilities, newId, object, rows, strings } from "./character-client.js";
 import { builderTarget, button, combo, el, field, human, label, panel, refreshSteppers, rule, select, stepper, styled } from "./character-ui.js";
 const options = (records) => records.map(record => ({ id: record.id, label: String(record.value["name"] ?? record.id), description: String(record.value["summary"] ?? record.value["text"] ?? "").slice(0, 1200) }));
-export const guidanceOptions = (value) => rows(value).map(row => ({ id: String(row["id"]), label: String(row["label"] ?? row["name"] ?? row["id"]), description: String(row["description"] ?? "") }));
+export const guidanceOptions = (value, locale = "en") => rows(value).map(row => ({ id: String(row["id"]), label: row["labelKey"] ? builderLabel(row, locale) : String(row["label"] ?? row["name"] ?? row["id"]), description: String(row["description"] ?? "") }));
 export function buildView(view, active = "character") {
     const t = translator(view.locale), { input, policy } = view, build = input.build, root = styled("div", "character-build");
     const plan = view.evaluation?.plan ?? {}, guidance = object(view.evaluation?.guidance["choices"]);
@@ -219,7 +219,7 @@ function choiceView(descriptor, guidance, view) {
         }
     }
     else {
-        const choices = guidanceOptions(guidance["options"]);
+        const choices = guidanceOptions(guidance["options"], view.locale);
         for (let slot = 0; slot < Number(descriptor["count"] ?? 1); slot++) {
             const selection = field(t("Selection {0}", [slot + 1]), combo(String(current(slot) ?? ""), () => choices.filter(option => !view.input.build.choices.some(choice => choice.id === id && choice.slot !== slot && choice.value === option.id)), value => { set(slot, value); if (kind === "feat")
                 view.refresh(); }, t));

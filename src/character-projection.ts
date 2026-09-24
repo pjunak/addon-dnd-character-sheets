@@ -19,6 +19,7 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
   const stat = (name: string, path: string, value: unknown): HTMLElement => el("div", savedRule(name, undefined, projection.explanations[path]), el("strong", human(value)));
   const derived = object(sheet["derived"]), vitals = el("div"); vitals.className = "character-stats";
   for (const key of ["armorClass", "initiative", "speed", "proficiencyBonus", "maxHp"]) vitals.append(stat(t(label(key)), `derived.${key}`, derived[key]));
+  if (Object.hasOwn(derived, "size")) vitals.append(stat(t("Size"), "derived.size", typeof derived["size"] === "string" ? t(derived["size"]) : t("Needs a choice")));
   root.append(vitals);
   const scores = el("div"); scores.className = "character-stats";
   for (const ability of abilities) { const score = object(object(sheet["abilities"])[ability]); scores.append(panel(ability, stat(t("Score"), `abilities.${ability}.score`, score["score"]), stat(t("Modifier"), `abilities.${ability}.mod`, score["mod"]))); }

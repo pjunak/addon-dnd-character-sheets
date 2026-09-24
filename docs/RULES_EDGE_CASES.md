@@ -144,6 +144,23 @@ the page clears the transient handoff. Unsubmitted dialog fields and import text
 that has not reached approved commit are not character input checkpoints.
 Older hosts without this optional handle retain ordinary in-place save recovery.
 
+## Source-defined size
+
+Species size uses an ordinary Engine-owned Builder choice and the borrowed host
+combobox. The UI translates explicit option label keys and leaves authored
+record labels intact. Both sheet layouts and print read saved
+`projection.sheet.derived.size` with source evidence; neither looks up a
+species to guess a value. Older saved projections without the field remain
+readable. A newly required size remains an unfinished choice until selected.
+
+A species/source change uses the existing exact-slot repair rules. Surviving
+choices, notes and play values retain their ownership; missing providers leave
+the saved size readable. Temporary size transformations remain outside this
+base-size display. The shared stat grid wraps by available space and text size,
+rather than assuming two rows. The [W3C reflow guidance](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html)
+informs this layout; the installed tests check desktop and enlarged Czech phone
+views without claiming complete accessibility conformance.
+
 ## Builder guidance
 
 The Engine owns required decisions, prerequisite checks, counts and repair

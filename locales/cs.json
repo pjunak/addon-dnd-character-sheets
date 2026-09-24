@@ -575,5 +575,12 @@
   "Active": "Aktivní",
   "Inactive": "Neaktivní",
   "Spell list": "Seznam kouzel",
-  "Granted spells": "Udělená kouzla"
+  "Granted spells": "Udělená kouzla",
+  "Size": "Velikost",
+  "Tiny": "Drobná",
+  "Small": "Malá",
+  "Medium": "Střední",
+  "Large": "Velká",
+  "Huge": "Obrovská",
+  "Gargantuan": "Gigantická"
 }

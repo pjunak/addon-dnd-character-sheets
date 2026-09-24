@@ -575,5 +575,12 @@
   "Active": "Active",
   "Inactive": "Inactive",
   "Spell list": "Spell list",
-  "Granted spells": "Granted spells"
+  "Granted spells": "Granted spells",
+  "Size": "Size",
+  "Tiny": "Tiny",
+  "Small": "Small",
+  "Medium": "Medium",
+  "Large": "Large",
+  "Huge": "Huge",
+  "Gargantuan": "Gargantuan"
 }
