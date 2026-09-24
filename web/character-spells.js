@@ -109,11 +109,7 @@ export function unassignedSpellState(input, evaluation, changed, locale) {
     return panels;
 }
 function savedSpellRule(projection, id, name) {
-    const node = rule(name, { kind: "spell", id });
-    const evidence = projection?.evidence.find(row => row.reference.kind === "spell" && row.reference.id === id);
-    if (evidence)
-        node.details["savedSources"] = [evidence];
-    return node;
+    return rule(name, { kind: "spell", id }, undefined, undefined, projection);
 }
 export function grantedSpellsRead(projection, locale) {
     const grants = rows(object(projection?.sheet["spellcasting"])["granted"]), t = translator(locale);

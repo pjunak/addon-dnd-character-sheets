@@ -234,7 +234,11 @@ pushing totals off-screen; the backpack heading wraps around its Add item action
 ## Rules and transfer
 
 Without a compatible provider, saved projections and explanations render as
-stored; mechanical changes stay disabled. The versioned notes service remains
+stored; mechanical changes stay disabled. Spell, sheet and projection details share
+one adapter for the host's closed saved-evidence contract. Stored metadata and
+spell facts stay in the projection; detail controls receive only their reference,
+name, summary and hash. This preserves readable spell labels without a provider.
+The versioned notes service remains
 compatible for existing clients, but the sheet offers no character notes editor.
 Loading never adopts changed rules. Tools provides explicit adoption.
 A malformed response, incompatible contract version or broker validation failure

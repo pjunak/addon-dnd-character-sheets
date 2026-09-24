@@ -23,11 +23,7 @@ export function preferredLayout(storage: Storage | undefined, actor: string, key
 }
 export function savedRule(projection: Projection | undefined, name: string, path?: string, reference?: Reference): HTMLElement {
   const explanation = path ? projection?.explanations[path] : undefined;
-  const node = rule(name, reference, explanation) as HTMLElement & { details: Record<string, unknown> };
-  const references = reference ? [reference] : explanation?.sources ?? [];
-  const sources = projection?.evidence.filter(source => references.some(ref => ref.kind === source.reference.kind && ref.id === source.reference.id)) ?? [];
-  if (sources.length) node.details["savedSources"] = sources.map(({ reference, name, summary, hash }) => ({ reference, name, summary, hash }));
-  return node;
+  return rule(name, reference, explanation, undefined, projection);
 }
 export function featDetails(projection: Projection | undefined, locale: string): HTMLElement | undefined {
   const feats = rows(projection?.sheet["feats"]);

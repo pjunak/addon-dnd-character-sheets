@@ -16,12 +16,7 @@ export function preferredLayout(storage, actor, key) {
 }
 export function savedRule(projection, name, path, reference) {
     const explanation = path ? projection?.explanations[path] : undefined;
-    const node = rule(name, reference, explanation);
-    const references = reference ? [reference] : explanation?.sources ?? [];
-    const sources = projection?.evidence.filter(source => references.some(ref => ref.kind === source.reference.kind && ref.id === source.reference.id)) ?? [];
-    if (sources.length)
-        node.details["savedSources"] = sources.map(({ reference, name, summary, hash }) => ({ reference, name, summary, hash }));
-    return node;
+    return rule(name, reference, explanation, undefined, projection);
 }
 export function featDetails(projection, locale) {
     const feats = rows(projection?.sheet["feats"]);

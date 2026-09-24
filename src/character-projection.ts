@@ -8,13 +8,7 @@ import { el, human, label, panel, rule } from "./character-ui.js";
 export function projectionView(projection: Projection, locale = "en"): HTMLElement {
   const t = translator(locale);
   const sheet = projection.sheet, root = el("div"); root.className = "character-projection";
-  const savedRule: typeof rule = (name, reference, explanation, summary) => {
-    const node = rule(name, reference, explanation, summary) as HTMLElement & { details: Record<string, unknown> };
-    const references = reference ? [reference] : explanation?.sources ?? [];
-    const sources = projection.evidence.filter(source => references.some(ref => ref.kind === source.reference.kind && ref.id === source.reference.id));
-    if (sources.length) node.details["savedSources"] = sources.map(({ reference, name, summary, hash }) => ({ reference, name, summary, hash }));
-    return node;
-  };
+  const savedRule: typeof rule = (name, reference, explanation, summary) => rule(name, reference, explanation, summary, projection);
   if (sheet["status"] === "needs-choices") { root.append(panel(t("Calculated values"), rule(t("Needs a choice"), undefined, projection.explanations["status"]))); return root; }
   const stat = (name: string, path: string, value: unknown): HTMLElement => el("div", savedRule(name, undefined, projection.explanations[path]), el("strong", human(value)));
   const derived = object(sheet["derived"]), vitals = el("div"); vitals.className = "character-stats";

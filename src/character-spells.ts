@@ -102,10 +102,7 @@ export function unassignedSpellState(input: Inputs, evaluation: Result | undefin
 }
 
 function savedSpellRule(projection: Projection | undefined, id: string, name: string): HTMLElement {
- const node=rule(name,{kind:"spell",id}) as HTMLElement & {details:Record<string,unknown>};
- const evidence=projection?.evidence.find(row=>row.reference.kind==="spell"&&row.reference.id===id);
- if(evidence)node.details["savedSources"]=[evidence];
- return node;
+ return rule(name,{kind:"spell",id},undefined,undefined,projection);
 }
 
 export function grantedSpellsRead(projection: Projection | undefined, locale: string): HTMLElement | undefined {

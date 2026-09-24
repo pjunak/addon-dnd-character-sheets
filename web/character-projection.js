@@ -7,14 +7,7 @@ export function projectionView(projection, locale = "en") {
     const t = translator(locale);
     const sheet = projection.sheet, root = el("div");
     root.className = "character-projection";
-    const savedRule = (name, reference, explanation, summary) => {
-        const node = rule(name, reference, explanation, summary);
-        const references = reference ? [reference] : explanation?.sources ?? [];
-        const sources = projection.evidence.filter(source => references.some(ref => ref.kind === source.reference.kind && ref.id === source.reference.id));
-        if (sources.length)
-            node.details["savedSources"] = sources.map(({ reference, name, summary, hash }) => ({ reference, name, summary, hash }));
-        return node;
-    };
+    const savedRule = (name, reference, explanation, summary) => rule(name, reference, explanation, summary, projection);
     if (sheet["status"] === "needs-choices") {
         root.append(panel(t("Calculated values"), rule(t("Needs a choice"), undefined, projection.explanations["status"])));
         return root;

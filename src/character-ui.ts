@@ -1,4 +1,4 @@
-import type { Explanation, Reference } from "./character-model.js";
+import type { Explanation, Projection, Reference } from "./character-model.js";
 import { object } from "./character-client.js";
 import { translator } from "./character-locale.js";
 
@@ -63,9 +63,13 @@ export function human(value: unknown): string {
   return Object.entries(object(value)).map(([key, item]) => `${label(key)}: ${human(item)}`).join("; ");
 }
 export function label(value: string): string { return (value ?? "").replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[-_]/g, " ").replace(/^./, c => c.toUpperCase()); }
-export function rule(name: string, reference?: Reference, explanation?: Explanation, summary?: string): HTMLElement {
+export function rule(name: string, reference?: Reference, explanation?: Explanation, summary?: string, projection?: Projection): HTMLElement {
+  const references = reference ? [reference] : explanation?.sources ?? [];
+  // The host accepts a bounded evidence view, not the stored record metadata.
+  const savedSources = projection?.evidence.filter(source => references.some(ref => ref.kind === source.reference.kind && ref.id === source.reference.id))
+    .map(({ reference, name, summary, hash }) => ({ reference, name, summary, hash })) ?? [];
   const node = document.createElement("codex-addon-rule-details") as HTMLElement & { details: unknown };
-  node.details = { label: name, ...(reference ? { reference } : {}), ...(explanation ? { explanation } : {}), ...(summary ? { summary } : {}) };
+  node.details = { label: name, ...(reference ? { reference } : {}), ...(explanation ? { explanation } : {}), ...(summary ? { summary } : {}), ...(savedSources.length ? { savedSources } : {}) };
   // Readable text also provides a usable fallback before custom-element upgrade.
   node.textContent = name; return node;
 }
