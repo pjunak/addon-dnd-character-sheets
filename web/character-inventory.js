@@ -1,5 +1,36 @@
 import { object } from "./character-client.js";
 import { translator } from "./character-locale.js";
+export function assignContainer(input, itemId, containerId) {
+    const item = input.play.inventory.find(item => item.id === itemId);
+    if (!item || (item.containerId ?? "") === containerId)
+        return false;
+    if (containerId && (!["carried", "stored"].includes(item.location) || !input.play.containers?.some(container => container.id === containerId)))
+        return false;
+    if (containerId)
+        item.containerId = containerId;
+    else
+        delete item.containerId;
+    return true;
+}
+export function removeContainer(input, id) {
+    if (!input.play.containers?.some(container => container.id === id))
+        return false;
+    const remaining = input.play.containers.filter(container => container.id !== id);
+    if (remaining.length)
+        input.play.containers = remaining;
+    else
+        delete input.play.containers;
+    for (const item of input.play.inventory)
+        if (item.containerId === id)
+            delete item.containerId;
+    return true;
+}
+export function containerOptions(containers) {
+    return containers.map((container, index) => ({
+        id: container.id,
+        label: containers.filter(other => other.name === container.name).length > 1 ? container.name + " (" + (index + 1) + ")" : container.name,
+    }));
+}
 export function pinQuickUse(input, id, pinned) {
     if (pinned && !input.play.inventory.some(item => item.id === id))
         return false;
@@ -44,6 +75,7 @@ export function moveEquipment(inventory, id, location, guidance, projection) {
     if (location === "equipped") {
         if (object(guidance[id])["canEquip"] !== true)
             return false;
+        delete item.containerId;
         const slot = equipmentSlot(item, guidance, projection);
         if (slot === "armor" || slot === "shield")
             for (const other of inventory) {

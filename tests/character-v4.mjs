@@ -10,7 +10,7 @@ test('provider option labels translate only explicit UI keys', async () => {
 
 test('current transfer accepts only the explicit current envelope and preserves authored inputs', () => {
   const inputs = blank(); inputs.notes = 'Mira — a new beginning'; inputs.play.inspiration = false; inputs.play.rolls = [{ id: 'roll-one', resource: 'hit-dice-d10', die: 10, result: 6, at: '2026-09-11T00:00:00Z' }];
-  inputs.play.inventory = [{ id: 'spent', name: 'Supplies', quantity: 0, location: 'carried', attuned: false, acquisition: 'Reward', notes: 'Keep me' }]; inputs.play.quickUse = ['spent'];
+  inputs.play.inventory = [{ id: 'spent', name: 'Supplies', quantity: 0, location: 'carried', attuned: false, acquisition: 'Reward', notes: 'Keep me' }]; inputs.play.quickUse = ['spent']; inputs.play.containers = [{ id: 'pack', name: 'Bag' }]; inputs.play.inventory[0].containerId = 'pack';
   const state = { schemaVersion: '4.0.0', inputs, rules: { engineId: 'rules', engineVersion: '4.0.0', engineGeneration: 'generation', identity: {} }, projection: { sheet: {}, explanations: {}, evidence: [], issues: [] }, operationId: 'first' };
   assert.deepEqual(parseCharacter(exportCharacter(state)), inputs);
   for (const value of [inputs, { v: 3 }, { format: 'dnd-character.v1', schemaVersion: '3.0.0', inputs }, { format: 'dnd-character.v1', schemaVersion: '4.0.0', inputs, admin: true }]) assert.throws(() => parseCharacter(JSON.stringify(value)));

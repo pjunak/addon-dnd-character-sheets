@@ -19,6 +19,11 @@ export interface Choice {
   value: unknown;
 }
 
+export interface Container {
+  id: string;
+  name: string;
+}
+
 export interface Difference {
   path: string;
   before: unknown;
@@ -88,6 +93,7 @@ export interface Issue {
 
 export interface Item {
   id: string;
+  containerId?: string;
   reference?: Reference;
   spellId?: string;
   name: string;
@@ -108,6 +114,7 @@ export interface Level {
 export interface Play {
   inspiration?: boolean;
   quickUse?: Array<string>;
+  containers?: Array<Container>;
   rolls: Array<PlayRoll>;
   hp: number;
   temporaryHp: number;

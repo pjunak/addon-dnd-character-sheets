@@ -266,7 +266,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       for (const child of [...this.children]) if (child !== dialog) child.remove();
       this.prepend(root); this.#syncBusyButtons(); this.#controls?.refresh(); this.#publish();
       for (const field of root.querySelectorAll<HTMLElement>(".character-field")) {
-        for (const control of field.querySelectorAll<HTMLElement>("input,select,textarea,button")) control.dataset["focusKey"] = field.dataset["uiKey"] + "/" + (control.getAttribute("aria-label") ?? control.tagName);
+        for (const control of field.querySelectorAll<HTMLElement>("input,select,textarea,button")) control.dataset["focusKey"] ??= field.dataset["uiKey"] + "/" + (control.getAttribute("aria-label") ?? control.tagName);
       }
       const restore = focusKey ? root.querySelector<HTMLElement>('[data-focus-key="' + CSS.escape(focusKey) + '"]') : focusId ? root.querySelector<HTMLElement>("#" + CSS.escape(focusId)) : undefined;
       for (let parent = restore?.parentElement; parent && parent !== root; parent = parent.parentElement) if (parent instanceof HTMLDetailsElement) parent.open = true;
@@ -282,6 +282,8 @@ export function defineCharacterElement(generation: string, client: CharacterClie
         canEditInspiration: editing && object(this.#evaluation?.guidance["authoredPlay"])["inspiration"] === true,
         canEditQuickUse: editing && object(this.#evaluation?.guidance["authoredPlay"])["quickUse"] === true,
         quickUse: editing ? object(this.#evaluation?.guidance["quickUse"]) : {},
+        canEditStorage: editing && object(this.#evaluation?.guidance["authoredPlay"])["storage"] === true,
+        storage: object(this.#evaluation?.guidance["storage"]),
         // A rejected HP value must remain correctable while other play actions are blocked.
         canEditHP: editing && !!this.#response?.state && (canPlay || this.#dirty && rows(this.#evaluation?.guidance["saveIssues"]).some(issue => issue["target"] === "hp")),
         change: this.#changed, refresh: () => this.#render(), addItem: () => this.#equipment(), fillSlot: slot => this.#slot(slot),
@@ -290,7 +292,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
     #equipment(): void {
       this.#open(this.#t("Add equipment"), [equipmentPicker(this.#catalogs, this.#context?.host.locale ?? "en", items => {
         this.#input.play.inventory.push(...items); this.#changed(); this.#dialog?.close(); this.#render();
-      })]);
+      }, this.#sheetView().canEditStorage ? this.#input.play.containers ?? [] : [])]);
     }
     #slot(slot: EquipmentSlot): void {
       const view = this.#sheetView(), attuning = slot === "attuned";

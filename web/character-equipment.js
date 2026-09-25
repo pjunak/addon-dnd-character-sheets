@@ -1,10 +1,17 @@
+import { containerOptions } from "./character-inventory.js";
 import { newId } from "./character-client.js";
 import { translator } from "./character-locale.js";
-import { button, el, field, label, numberInput, rule, styled, textInput } from "./character-ui.js";
-export function equipmentPicker(catalogs, locale, submit) {
+import { button, el, field, label, numberInput, rule, select, styled, textInput } from "./character-ui.js";
+export function equipmentPicker(catalogs, locale, submit, containers = []) {
     const t = translator(locale), root = styled("div", "dnd-equipment-picker"), catalog = ["armor", "weapon", "magic-item", "gear"].flatMap(kind => catalogs.get(kind) ?? []);
     const tray = new Map();
-    let category = "", folder = "", query = "";
+    let category = "", folder = "", query = "", destination = "";
+    const addItems = (items) => submit(items.map(item => destination ? { ...item, containerId: destination } : item));
+    if (containers.length) {
+        const control = select("", containerOptions(containers), value => { destination = value; }, t);
+        control.options[0].textContent = t("No container");
+        root.append(field(t("Destination container"), control));
+    }
     const path = styled("nav", "dnd-equipment-path");
     path.setAttribute("aria-label", t("Equipment folders"));
     const results = styled("div", "dnd-picker-results"), selected = styled("div", "dnd-picker-tray");
@@ -52,7 +59,7 @@ export function equipmentPicker(catalogs, locale, submit) {
         selected.append(button(t("Add selected items"), () => {
             if (![...root.querySelectorAll("input")].every(input => input.reportValidity()))
                 return;
-            submit([...tray.values()].map(({ record, quantity }) => ({ id: newId(), reference: { kind: record.kind, id: record.id }, name: String(record.value["name"] ?? record.id), quantity, location: "carried", attuned: false, acquisition: "", notes: "" })));
+            addItems([...tray.values()].map(({ record, quantity }) => ({ id: newId(), reference: { kind: record.kind, id: record.id }, name: String(record.value["name"] ?? record.id), quantity, location: "carried", attuned: false, acquisition: "", notes: "" })));
         }, !tray.size));
     };
     const search = textInput("", value => { query = value.toLocaleLowerCase().trim(); render(); });
@@ -62,7 +69,7 @@ export function equipmentPicker(catalogs, locale, submit) {
     let name = "", quantity = 1;
     custom.append(field(t("Name"), textInput("", value => { name = value; })), field(t("Quantity"), numberInput(1, value => { quantity = value ?? 1; }, 1)), button(t("Add narrative item"), () => {
         if (name.trim() && quantity > 0)
-            submit([{ id: newId(), name: name.trim(), quantity, location: "carried", attuned: false, acquisition: "", notes: "" }]);
+            addItems([{ id: newId(), name: name.trim(), quantity, location: "carried", attuned: false, acquisition: "", notes: "" }]);
     }));
     root.append(custom);
     render();

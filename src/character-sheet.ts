@@ -1,3 +1,4 @@
+import { itemContainer, storage } from "./character-storage.js";
 import { spellSourceLabel } from "./character-spells.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
 import type { Inputs, Projection, Reference } from "./character-model.js";
@@ -10,7 +11,7 @@ import { button, checkbox, el, field, human, label, numberInput, panel, rule, se
 export type Layout = "compact" | "classic";
 export interface SheetView {
   locale: string; layout: Layout; input: Inputs; projection: Projection | undefined; catalogs: Map<string, CatalogRecord[]>;
-  editing: boolean; canPlay: boolean; canEditHP: boolean; canEditInspiration: boolean; canEditQuickUse: boolean; quickUse: Record<string, unknown>; equipment: Record<string, unknown>;
+  editing: boolean; canPlay: boolean; canEditHP: boolean; canEditInspiration: boolean; canEditQuickUse: boolean; canEditStorage: boolean; storage: Record<string, unknown>; quickUse: Record<string, unknown>; equipment: Record<string, unknown>;
   change(): void; refresh(): void; addItem(): void; fillSlot(slot: EquipmentSlot): void;
   act(change: Record<string, unknown>, summary: string): Promise<void>;
 }
@@ -118,7 +119,7 @@ export function backpack(view: SheetView): HTMLElement {
   const t = translator(view.locale), pack = styled("section", "dse-backpack"), head = styled("div", "dse-bp-head", styled("h3", "dse-bp-title", t("Backpack")));
   head.querySelector("h3")!.prepend(icon("M8 6V4a4 4 0 0 1 8 0v2M5 6h14v15H5ZM5 10h14M9 10v3h6v-3"));
   if (view.editing) head.append(button(t("Add item"), view.addItem));
-  pack.append(head);
+  pack.append(head, storage(view));
   const split = styled("div", "dse-bp-split"), carried = styled("div", "dse-bp-col"), stored = styled("div", "dse-bp-col dse-bp-right");
   for (const location of ["equipped", "carried", "stored"]) {
     const items = view.input.play.inventory.filter(item => item.location === location), group = styled("div", "dse-bp-group", styled("h4", "dse-bp-label", t(label(location)) + " · " + items.length));
@@ -156,6 +157,7 @@ export function backpack(view: SheetView): HTMLElement {
         if (equipReason && equipReason !== reason) details.append(el("p", t("Equipment") + ": " + equipReason));
         row.append(details);
       } else { row.append(el("span", "× " + item.quantity + (item.attuned ? " ★" : ""))); if (item.notes) row.append(styled("details", "dse-item-notes", el("summary", t("Notes")), el("p", item.notes))); }
+      const destination = itemContainer(view, item); if (destination) row.append(destination);
       group.append(row);
     }
     if (!items.length) group.append(styled("p", "dse-empty", t("Empty")));

@@ -2,7 +2,7 @@
 
 The coordinator owns the current `dnd-sheets` extension for each core character
 lifetime. Schema 4.0.0 accepts earlier characters and the optional authored
-Inspiration and quick-use fields; installing a changed schema requires the review below. The core profile, portrait and relationships are host-owned.
+Inspiration, quick-use and storage fields; installing a changed schema requires the review below. The core profile, portrait and relationships are host-owned.
 
 ## Inspiration and compatible schema upgrades
 
@@ -61,6 +61,36 @@ pins. Older/incompatible providers leave saved state readable. Print/export
 preserve pin order and depleted entries; reviewed replacement import validates
 references normally. Both pre-Inspiration and pre-quick-use schema-4 values pass
 the compatible schema review with exact JSON bytes and revisions preserved.
+
+## Storage identity and membership
+
+Optional `inputs.play.containers` holds flat named groups; an item's optional
+`containerId` refers to one group. These organize owned instances without
+creating backpack items, changing carried/stored location or imposing capacity.
+Names may repeat; IDs distinguish the groups. Equipped items cannot be assigned,
+and explicit equipping removes the selected item's membership atomically.
+Depleted entries, quick-use pins, grants, notes and existing attunement survive.
+
+The shared Backpack editor creates, renames and removes containers and assigns
+inventory entries. The existing item picker offers the same destination list
+for catalog and narrative additions; additions remain separate instances.
+Removing a group unassigns only its members without deleting inventory.
+Native labelled fields/actions use `ui.controls.v1`, semantic tokens and stable
+focus keys. The sheet renderer preserves keys assigned by reusable controls
+and only generates fallback keys for unkeyed fields. Editing requires live `guidance.authoredPlay.storage`; counts and
+labels remain readable without a provider, and print/export retain membership.
+
+The worker rejects results that drop, rename, reorder or substitute groups or
+change membership. Engine validation rejects dangling memberships, invalid names,
+duplicate IDs and equipped assignments without normalization. Disjoint edits may
+merge; competing container or inventory arrays conflict. A concurrent removal can
+leave a merged assignment invalid: it remains pending for explicit unassignment,
+never a silent recreation. Reviewed replacement import uses the same validation.
+Optional fields preserve all three previous schema-4 generations through the
+host's saved-data review, with no JSON or document-revision rewrite.
+
+The final Equipment tab, searchable floating Backpack dialog, compartment
+filter/sort and explicit existing-stack choice remain T63 work.
 
 ## Automatic saving
 

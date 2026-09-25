@@ -1,3 +1,4 @@
+import { itemContainer, storage } from "./character-storage.js";
 import { spellSourceLabel } from "./character-spells.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
 import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, pinQuickUse, removeInventoryItem, stowAndUnattune } from "./character-inventory.js";
@@ -156,7 +157,7 @@ export function backpack(view) {
     head.querySelector("h3").prepend(icon("M8 6V4a4 4 0 0 1 8 0v2M5 6h14v15H5ZM5 10h14M9 10v3h6v-3"));
     if (view.editing)
         head.append(button(t("Add item"), view.addItem));
-    pack.append(head);
+    pack.append(head, storage(view));
     const split = styled("div", "dse-bp-split"), carried = styled("div", "dse-bp-col"), stored = styled("div", "dse-bp-col dse-bp-right");
     for (const location of ["equipped", "carried", "stored"]) {
         const items = view.input.play.inventory.filter(item => item.location === location), group = styled("div", "dse-bp-group", styled("h4", "dse-bp-label", t(label(location)) + " · " + items.length));
@@ -233,6 +234,9 @@ export function backpack(view) {
                 if (item.notes)
                     row.append(styled("details", "dse-item-notes", el("summary", t("Notes")), el("p", item.notes)));
             }
+            const destination = itemContainer(view, item);
+            if (destination)
+                row.append(destination);
             group.append(row);
         }
         if (!items.length)

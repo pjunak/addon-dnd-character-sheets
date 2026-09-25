@@ -382,10 +382,27 @@ func (c *Coordinator) evaluate(ctx context.Context, meta *workerrpc.Meta, input 
 		return evaluated{}, RulesContext{}, err
 	}
 	var value evaluated
-	if decode(result.Result, &value) != nil || value.ContractVersion != "rules-character-response.v1" || value.Evaluation.ContractVersion != model.ContractVersion || !reflect.DeepEqual(input.Play.Inspiration, value.Evaluation.Inputs.Play.Inspiration) || !slices.Equal(input.Play.QuickUse, value.Evaluation.Inputs.Play.QuickUse) {
+	if decode(result.Result, &value) != nil || value.ContractVersion != "rules-character-response.v1" || value.Evaluation.ContractVersion != model.ContractVersion || !reflect.DeepEqual(input.Play.Inspiration, value.Evaluation.Inputs.Play.Inspiration) || !slices.Equal(input.Play.QuickUse, value.Evaluation.Inputs.Play.QuickUse) || !preservesStorage(input.Play, value.Evaluation.Inputs.Play) {
 		return value, RulesContext{}, failure(workerrpc.KindValidationFailed, "Rules returned an incompatible character result.")
 	}
 	return value, RulesContext{EngineID: result.ProviderAddonID, EngineVersion: result.ProviderContractVersion, EngineGeneration: result.ProviderGeneration, Identity: value.Identity}, nil
+}
+
+// Evaluation and play commands must not silently reorganize authored storage.
+func preservesStorage(before, after model.Play) bool {
+	if !slices.Equal(before.Containers, after.Containers) {
+		return false
+	}
+	membership := func(play model.Play) map[string]string {
+		result := map[string]string{}
+		for _, item := range play.Inventory {
+			if item.ContainerID != "" {
+				result[item.ID] = item.ContainerID
+			}
+		}
+		return result
+	}
+	return reflect.DeepEqual(membership(before), membership(after))
 }
 
 func (c *Coordinator) commit(ctx context.Context, meta *workerrpc.Meta, r Request, response Response) (Response, error) {
