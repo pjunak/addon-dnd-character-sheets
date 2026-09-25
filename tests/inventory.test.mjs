@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment } from '../web/character-inventory.js';
+import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, stowAndUnattune } from '../web/character-inventory.js';
 
 const item = (id, location = 'carried') => ({ id, name: id, location, quantity: 1, attuned: false, acquisition: 'Keep provenance', notes: 'Keep notes' });
 
@@ -42,8 +42,38 @@ test('saved slots and older evidence render without a provider or catalog ID heu
   assert.equal(equipmentSlot({ ...shield, reference: { kind: 'armor', id: 'shield' } }, {}), 'worn', 'IDs are not mechanics');
 });
 
+test('new attunements require equipped positive quantities and engine eligibility', () => {
+  for (const location of ['carried', 'stored', 'equipped']) {
+    const candidate = item('candidate', location), before = structuredClone(candidate);
+    const guidance = { candidate: { canAttune: true } };
+    assert.equal(attunementChoice(candidate, guidance).allowed, location === 'equipped');
+    assert.equal(attuneEquipment(candidate, true, guidance), location === 'equipped');
+    assert.deepEqual(candidate, { ...before, attuned: location === 'equipped' });
+    candidate.attuned = true;
+    assert.equal(attuneEquipment(candidate, false, {}), true, 'Old allocations are always repairable');
+    candidate.quantity = 0;
+    assert.equal(attuneEquipment(candidate, true, guidance), false);
+    assert.equal(attunementChoice(candidate, guidance).reason, 'empty');
+  }
+  const candidate = item('candidate', 'equipped'), before = structuredClone(candidate);
+  assert.equal(attuneEquipment(candidate, true, { candidate: { canAttune: false, attuneReason: 'prerequisite' } }), false);
+  assert.deepEqual(candidate, before);
+});
+
+test('stowing explicitly releases only the selected allocation and preserves its instance', () => {
+  for (const location of ['carried', 'stored', 'equipped']) {
+    const inventory = [item('selected', location), item('other', 'equipped')];
+    Object.assign(inventory[0], { attuned: true, quantity: 2, grantId: 'grant', spellId: 'spell', reference: { kind: 'magic-item', id: 'source' } });
+    inventory[1].attuned = true;
+    const before = structuredClone(inventory);
+    assert.equal(stowAndUnattune(inventory[0]), true);
+    assert.deepEqual(inventory, [{ ...before[0], location: 'stored', attuned: false }, before[1]]);
+    assert.equal(stowAndUnattune(inventory[0]), false, 'A stale action cannot stow a subsequently unattuned item');
+  }
+});
+
 test('all equipment rejection codes have translated explanations', () => {
-  for (const reason of ['empty', 'source', 'mechanics', 'not-required', 'build', 'capacity', 'duplicate', 'prerequisite']) {
+  for (const reason of ['empty', 'not-equipped', 'source', 'mechanics', 'not-required', 'build', 'capacity', 'duplicate', 'prerequisite']) {
     assert.ok(equipmentReason(reason, 'en'));
     assert.notEqual(equipmentReason(reason, 'cs'), equipmentReason(reason, 'en'), reason);
   }

@@ -3,7 +3,11 @@
 The workspace has **Sheet**, **Combat**, **Spells**, **Builder** and **Tools**
 tabs in a vertical left rail, with Builder and Tools at the bottom. Compact and Classic layouts share one engine-calculated
 character. Authorized editors can change inventory, equipment, currency, HP,
-resources and spells directly in their tabs. Character notes belong to the core
+resources and spells directly in their tabs. New attunements select equipped
+items; existing carried/stored attunements remain visible and count toward
+capacity. **Stow & unattune** moves an item to Stored and releases its allocation
+in one automatic save. Ordinary moves preserve attunement.
+Character notes belong to the core
 profile; the sheet has no Notes tab or notes section in print.
 
 Common fields, searchable choices, actions, tabs and modal focus use the host's

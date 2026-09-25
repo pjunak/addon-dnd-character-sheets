@@ -250,10 +250,23 @@ and acquisition details survive. Other worn items coexist. Unequipping does
 not implicitly unattune; quantity-zero cleanup retains its existing behavior.
 
 The Engine supplies action eligibility, physical slots and stable rejection
-codes. Both layouts show translated reasons, and the attunement picker includes
-blocked candidates with descriptions instead of suggesting an empty backpack.
-The capacity count comes from the saved projection. Custom item mechanics
-still require an authenticated active DM grant; the UI never infers authority.
+codes. New UI attunement selections require a positive-quantity equipped
+instance and Engine eligibility. The picker lists only equipped candidates,
+with translated descriptions for blocked prerequisites/capacity. Inventory
+actions explain when an otherwise eligible item must first be equipped.
+This is a selection rule, not a change to the stored or Engine contract:
+existing carried/stored attunements remain valid, visible with their location,
+count toward the saved capacity, and can always be explicitly released.
+
+**Stow & unattune** sets that same instance's location to `stored` and its
+attunement to false in one existing optimistic autosave. It preserves quantity,
+reference, item/grant IDs, acquisition and notes; it does not change other
+allocations. Focus returns to that item's Move control after the action
+disappears. Existing uncertain-save exact retry and concurrency protection
+apply to the complete transition. Ordinary Move and worn-slot removal still
+preserve attunement; zero-quantity cleanup remains atomic. No schema or service
+version changes are required. Custom item mechanics still require an
+authenticated active DM grant; the UI never infers authority.
 
 New projections retain slot facts for provider-free display. Older projections
 fall back only to their saved `armorType` evidence, never a replacement live

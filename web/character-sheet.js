@@ -1,6 +1,6 @@
 import { spellSourceLabel } from "./character-spells.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
-import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment } from "./character-inventory.js";
+import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, stowAndUnattune } from "./character-inventory.js";
 import { abilities, object, rows } from "./character-client.js";
 import { abilityNames, translator } from "./character-locale.js";
 import { button, el, field, human, label, numberInput, panel, rule, select, signed, styled, textInput } from "./character-ui.js";
@@ -122,12 +122,14 @@ export function vitals(view) {
         const items = view.input.play.inventory.filter(item => item.quantity > 0 && (slot === "attuned" ? item.attuned : item.location === "equipped" && equipmentSlot(item, view.equipment, view.projection) === slot));
         for (const item of items) {
             const token = styled("span", "dse-equipment-slot", savedRule(view.projection, item.name, undefined, item.reference));
+            if (slot === "attuned" && item.location !== "equipped")
+                token.append(styled("span", "dse-equipment-location", t(label(item.location))));
             if (view.editing) {
                 const remove = button("×", () => { if (slot === "attuned")
                     attuneEquipment(item, false, view.equipment);
                 else
                     moveEquipment(view.input.play.inventory, item.id, "carried", view.equipment, view.projection); view.change(); view.refresh(); });
-                remove.setAttribute("aria-label", t("Remove {0}", [item.name]));
+                remove.setAttribute("aria-label", slot === "attuned" ? t("Unattune {0}", [item.name]) : t("Remove {0}", [item.name]));
                 token.append(remove);
             }
             group.append(token);
@@ -166,14 +168,14 @@ export function backpack(view) {
                 } view.change(); }, 0);
                 quantity.className = "dse-number";
                 quantity.setAttribute("aria-label", t("{0} quantity", [item.name]));
-                const eligibility = object(view.equipment[item.id]);
+                const eligibility = object(view.equipment[item.id]), choice = attunementChoice(item, view.equipment);
                 const attune = button(item.attuned ? "★" : "☆", () => { if (attuneEquipment(item, !item.attuned, view.equipment)) {
                     view.change();
                     view.refresh();
-                } }, !item.attuned && eligibility["canAttune"] !== true);
+                } }, !item.attuned && !choice.allowed);
                 attune.setAttribute("aria-label", t("Attune {0}", [item.name]));
                 attune.setAttribute("aria-pressed", String(item.attuned));
-                const reason = equipmentReason(eligibility["attuneReason"], view.locale);
+                const reason = item.attuned ? "" : equipmentReason(choice.reason, view.locale);
                 if (reason) {
                     attune.title = reason;
                     attune.setAttribute("aria-description", reason);
@@ -189,6 +191,17 @@ export function backpack(view) {
                 for (const [action, control] of Object.entries({ quantity, attune, move, remove }))
                     control.dataset["focusKey"] = "inventory/" + item.id + "/" + action;
                 row.append(quantity, attune, move, remove);
+                if (item.attuned) {
+                    const stow = button(t("Stow & unattune"), () => {
+                        if (stowAndUnattune(item)) {
+                            move.focus();
+                            view.change();
+                            view.refresh();
+                        }
+                    }, false, "inventory/" + item.id + "/stow");
+                    stow.setAttribute("aria-label", t("Stow & unattune {0}", [item.name]));
+                    row.append(styled("div", "dse-attunement-actions", stow));
+                }
                 const details = styled("details", "dse-item-notes", el("summary", t("Details")));
                 details.append(field(t("Name"), textInput(item.name, value => { item.name = value; view.change(); })), field(t("Acquired from"), textInput(item.acquisition, value => { item.acquisition = value; view.change(); })), field(t("Notes"), textInput(item.notes, value => { item.notes = value; view.change(); }, true)), field(t("Scroll spell (optional)"), select(item.spellId ?? "", (view.catalogs.get("spell") ?? []).map(row => ({ id: row.id, label: String(row.value["name"] ?? row.id) })), value => { if (value)
                     item.spellId = value;

@@ -93,6 +93,8 @@
 .dse-item-name { flex:1 1 6rem; min-width:0; width:6rem; overflow-wrap:anywhere; }
 .addon-dnd-sheets .dse-item button { padding:0 var(--space-1); }
 .dse-item-location { width:5.5rem; font-size:var(--text-xs) !important; }
+.dse-attunement-actions { width:100%; display:flex; flex-wrap:wrap; gap:var(--space-1); }
+.dse-equipment-location { margin-inline-start:var(--space-2); color:var(--text-muted); }
 .dse-item-notes { width:100%; color:var(--text-muted); font-size:var(--text-xs); }
 .dse-item-notes summary { cursor:pointer; }
 .dse-item-notes textarea { width:100%; resize:vertical; }

@@ -488,7 +488,7 @@ export function defineCharacterElement(generation, client, enhance) {
         #slot(slot) {
             const view = this.#sheetView(), attuning = slot === "attuned";
             const choices = this.#input.play.inventory.filter(item => item.quantity > 0 && (attuning
-                ? !item.attuned && object(view.equipment[item.id])["attuneReason"] !== "not-required"
+                ? item.location === "equipped" && !item.attuned && object(view.equipment[item.id])["attuneReason"] !== "not-required"
                 : item.location !== "equipped" && equipmentSlot(item, view.equipment, view.projection) === slot));
             const picker = styled("div", "dnd-slot-picker");
             for (const item of choices) {
@@ -511,6 +511,7 @@ export function defineCharacterElement(generation, client, enhance) {
                 picker.append(row);
             }
             this.#open(attuning ? this.#t("Attune an item") : this.#t("Choose {0}", [this.#t(label(slot))]), [picker,
+                ...(attuning ? [el("p", this.#t("Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it."))] : []),
                 ...(!choices.length ? [el("p", this.#t(this.#input.play.inventory.length ? "No other items are available for this slot." : "Add an item to your backpack first."))] : []),
                 button(this.#t("Add item"), () => this.#equipment())], "heading");
         }

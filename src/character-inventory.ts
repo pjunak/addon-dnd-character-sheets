@@ -29,9 +29,26 @@ export function moveEquipment(inventory: Item[], id: string, location: string, g
   return true;
 }
 
+export function attunementChoice(item: Item, guidance: EquipmentGuidance): { allowed: boolean; reason?: unknown } {
+  if (item.quantity <= 0) return { allowed: false, reason: "empty" };
+  const eligibility = object(guidance[item.id]);
+  if (eligibility["canAttune"] !== true) return { allowed: false, reason: eligibility["attuneReason"] };
+  if (item.location !== "equipped") return { allowed: false, reason: "not-equipped" };
+  return { allowed: true };
+}
+
 export function attuneEquipment(item: Item, attuned: boolean, guidance: EquipmentGuidance): boolean {
-  if (attuned && object(guidance[item.id])["canAttune"] !== true) return false;
+  // Selecting a new allocation requires equipped gear; saved allocations remain
+  // valid in other locations and can always be explicitly released.
+  if (attuned && !attunementChoice(item, guidance).allowed) return false;
   item.attuned = attuned;
+  return true;
+}
+
+export function stowAndUnattune(item: Item): boolean {
+  if (!item.attuned) return false;
+  item.location = "stored";
+  item.attuned = false;
   return true;
 }
 
@@ -39,6 +56,7 @@ export function equipmentReason(reason: unknown, locale: string): string {
   const t = translator(locale);
   switch (reason) {
     case "empty": return t("Increase the quantity before using this item.");
+    case "not-equipped": return t("Equip this item before attuning it.");
     case "source": return t("This item's rules source is unavailable.");
     case "mechanics": return t("This item needs supported rules or active DM mechanics.");
     case "not-required": return t("This item does not require attunement.");

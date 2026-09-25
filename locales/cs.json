@@ -596,5 +596,10 @@
   "None recorded": "Žádné zaznamenané",
   "Not recorded": "Nezaznamenáno",
   "Proficiency details were not saved.": "Podrobnosti o zběhlostech nebyly uloženy.",
-  "{0} — saving throw: {1}": "{0} — záchranný hod: {1}"
+  "{0} — saving throw: {1}": "{0} — záchranný hod: {1}",
+  "Equip this item before attuning it.": "Před sladěním si tento předmět vybavte.",
+  "Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it.": "Před výběrem si předmět vybavte. Přesun sladěného předmětu zachová sladění, dokud je výslovně neukončíte.",
+  "Unattune {0}": "Zrušit sladění: {0}",
+  "Stow & unattune": "Uložit a zrušit sladění",
+  "Stow & unattune {0}": "Uložit a zrušit sladění: {0}"
 }

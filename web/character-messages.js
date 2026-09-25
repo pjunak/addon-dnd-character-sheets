@@ -598,7 +598,12 @@ export const catalogs = {
         "None recorded": "None recorded",
         "Not recorded": "Not recorded",
         "Proficiency details were not saved.": "Proficiency details were not saved.",
-        "{0} — saving throw: {1}": "{0} — saving throw: {1}"
+        "{0} — saving throw: {1}": "{0} — saving throw: {1}",
+        "Equip this item before attuning it.": "Equip this item before attuning it.",
+        "Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it.": "Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it.",
+        "Unattune {0}": "Unattune {0}",
+        "Stow & unattune": "Stow & unattune",
+        "Stow & unattune {0}": "Stow & unattune {0}"
     },
     "cs": {
         "Currency": "Měna",
@@ -1198,6 +1203,11 @@ export const catalogs = {
         "None recorded": "Žádné zaznamenané",
         "Not recorded": "Nezaznamenáno",
         "Proficiency details were not saved.": "Podrobnosti o zběhlostech nebyly uloženy.",
-        "{0} — saving throw: {1}": "{0} — záchranný hod: {1}"
+        "{0} — saving throw: {1}": "{0} — záchranný hod: {1}",
+        "Equip this item before attuning it.": "Před sladěním si tento předmět vybavte.",
+        "Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it.": "Před výběrem si předmět vybavte. Přesun sladěného předmětu zachová sladění, dokud je výslovně neukončíte.",
+        "Unattune {0}": "Zrušit sladění: {0}",
+        "Stow & unattune": "Uložit a zrušit sladění",
+        "Stow & unattune {0}": "Uložit a zrušit sladění: {0}"
     }
 };

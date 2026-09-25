@@ -596,5 +596,10 @@
   "None recorded": "None recorded",
   "Not recorded": "Not recorded",
   "Proficiency details were not saved.": "Proficiency details were not saved.",
-  "{0} — saving throw: {1}": "{0} — saving throw: {1}"
+  "{0} — saving throw: {1}": "{0} — saving throw: {1}",
+  "Equip this item before attuning it.": "Equip this item before attuning it.",
+  "Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it.": "Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it.",
+  "Unattune {0}": "Unattune {0}",
+  "Stow & unattune": "Stow & unattune",
+  "Stow & unattune {0}": "Stow & unattune {0}"
 }
