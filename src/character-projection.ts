@@ -1,5 +1,6 @@
 import { grantedSpellsRead } from "./character-spells.js";
 import { featDetails, senseDetails } from "./character-sheet.js";
+import { proficiencyDetails } from "./character-proficiencies.js";
 import type { Projection, State } from "./character-model.js";
 import { translator } from "./character-locale.js";
 import { abilities, object, rows } from "./character-client.js";
@@ -23,7 +24,7 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
     for (const [key, value] of Object.entries(object(sheet[group]))) { list.append(el("dt", savedRule(t(label(key)), group === "skills" ? { kind: "skill", id: key } : undefined, projection.explanations[`${group}.${key}.total`])), el("dd", human(object(value)["total"]))); }
     root.append(panel(t(label(group)), list));
   }
-  root.append(senseDetails(projection,locale));
+  root.append(proficiencyDetails(projection, locale), senseDetails(projection,locale));
   for (const group of ["weapons", "spellcasting", "resources", "features"]) {
     const list = el("div");
     const prefix = group === "spellcasting" ? "spellcasting.perClass" : group;
@@ -43,7 +44,7 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
   }
   const feats = featDetails(projection, locale); if (feats) root.append(feats);
   const granted=grantedSpellsRead(projection,locale); if(granted)root.append(granted);
-  for (const group of ["languages", "resistances", "damageImmunities", "conditionImmunities", "traits"]) {
+  for (const group of ["resistances", "damageImmunities", "conditionImmunities", "traits"]) {
     if (human(sheet[group]) && sheet[group] !== undefined && (!Array.isArray(sheet[group]) || (sheet[group] as unknown[]).length > 0)) root.append(panel(t(label(group)), el("p", human(sheet[group]))));
   }
   const active = rows(sheet["activations"]).filter(row=>row["active"] && row["condition"]);
@@ -58,7 +59,7 @@ export function printCharacter(state: State, _revision: number, name: string, op
   if (!view) throw new Error("Allow the print window, then try again.");
   view.document.title = name;
   view.document.documentElement.lang = locale;
-  const style = view.document.createElement("style"); style.textContent = "body{font:12pt system-ui;max-width:1000px;margin:2rem;color:#111;overflow-wrap:anywhere}h1,h2,h3,summary{break-after:avoid}section,details{margin-block:1rem}details,tr,dl{break-inside:avoid}p{white-space:pre-wrap;orphans:3;widows:3}small{display:block;margin-top:.25rem}dl{display:grid;grid-template-columns:1fr 2fr;gap:.35rem}dd{margin:0} .character-stats{display:flex;gap:1rem;flex-wrap:wrap}.character-stats>div{min-width:6rem}strong{display:block}button{display:none}@page{margin:15mm}@media print{body{margin:0;font-size:10pt}}"; view.document.head.append(style);
+  const style = view.document.createElement("style"); style.textContent = "body{font:12pt system-ui;max-width:1000px;margin:2rem;color:#111;overflow-wrap:anywhere}h1,h2,h3,summary{break-after:avoid}section,details{margin-block:1rem}details,tr,dl{break-inside:avoid}p{white-space:pre-wrap;orphans:3;widows:3}small{display:block;margin-top:.25rem}dl{display:grid;grid-template-columns:1fr 2fr;gap:.35rem}dd{margin:0} .character-stats{display:flex;gap:1rem;flex-wrap:wrap}.character-stats>div{min-width:6rem}strong{display:block}button{display:none}.dse-proficiencies>dl{display:block}.dse-training-group{break-inside:avoid;margin-block:.6rem}.dse-training-group dt{font-weight:600}.dse-training-group ul{margin:.2rem 0;padding-inline-start:1.25rem}@page{margin:15mm}@media print{body{margin:0;font-size:10pt}}"; view.document.head.append(style);
   const root = el("main", el("h1", name), el("p", t("Calculated with engine {0}. This print preserves the saved rules revision.", [state.rules.engineVersion])));
   const origin = [["species", state.inputs.build.species], ["lineage", state.inputs.build.lineage], ["background", state.inputs.build.background]] as const;
   root.append(el("p", origin.filter(([, id]) => id).map(([kind, id]) => recordName(kind, id)).join(" · ")));

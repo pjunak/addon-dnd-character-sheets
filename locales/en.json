@@ -583,5 +583,18 @@
   "Medium": "Medium",
   "Large": "Large",
   "Huge": "Huge",
-  "Gargantuan": "Gargantuan"
+  "Gargantuan": "Gargantuan",
+  "Proficiencies": "Proficiencies",
+  "Saving throws": "Saving throws",
+  "Light armor": "Light armor",
+  "Medium armor": "Medium armor",
+  "Heavy armor": "Heavy armor",
+  "Shields": "Shields",
+  "Simple weapons": "Simple weapons",
+  "Martial weapons": "Martial weapons",
+  "Martial weapons (finesse)": "Martial weapons (finesse)",
+  "None recorded": "None recorded",
+  "Not recorded": "Not recorded",
+  "Proficiency details were not saved.": "Proficiency details were not saved.",
+  "{0} — saving throw: {1}": "{0} — saving throw: {1}"
 }

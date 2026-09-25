@@ -116,6 +116,34 @@ Provider-free output never queries the catalog or infers an acquisition from
 unrelated evidence. Older projections without this additive list remain readable;
 a deliberate recalculation is needed to capture newly available output.
 
+## Saved proficiency display
+
+Combat and print use one renderer for saved saving-throw training, skills,
+Expertise, armor, weapons, tools and languages. Only explicit trained values
+appear; Expertise has its own group instead of duplicating a skill. Recorded
+empty groups and missing saved data have distinct English/Czech messages.
+Languages appear once in this summary.
+
+The view formats Engine-owned category tokens and ability/skill labels. Equipment
+and language records use names from exact kind-and-ID matches in saved evidence
+when available; otherwise their saved text is made readable without a live
+catalog lookup. Source names remain authored text. It never infers training from
+a class, feat or source record and never writes a character revision.
+
+Available explanations and saved references use the existing host rule-details
+control, including provider-free reading and keyboard focus return. Saving-throw
+markers use the same saved trained flag for their visible fill and accessible
+name. Both layouts share these behaviors.
+
+Native description lists associate training groups with their values; nested
+unordered lists expose individual entries. The
+[W3C content-structure guidance](https://www.w3.org/WAI/tutorials/page-structure/content/)
+informs this grouping, and [reflow guidance](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html)
+informs wrapping without fixed column counts. Installed acceptance covers
+English Compact and Czech Classic at enlarged phone width, multiclass training,
+DM proficiency withdrawal, provider restart, saved details, print and export.
+Human screen-reader and physical printer acceptance remain separate.
+
 ## Service feedback
 
 The shared save/recovery status translates known coordinator responses and

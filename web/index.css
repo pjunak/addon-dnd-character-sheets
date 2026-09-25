@@ -61,7 +61,7 @@
 .dse-total { flex:none; font-size:var(--text-sm); color:var(--text-parchment); font-variant-numeric:tabular-nums; }
 .addon-dnd-sheets .dse-dot { display:inline-flex; align-items:center; justify-content:center; padding:0; width:14px; height:18px; border:0; background:transparent; color:var(--accent-gold); flex:none; }
 .dse-shield svg { width:14px; height:14px; fill:none; stroke:var(--text-muted); stroke-width:1.7; stroke-linejoin:round; }
-.dse-shield[aria-pressed=true] svg { fill:var(--accent-gold); stroke:var(--accent-gold); }
+.dse-shield[data-proficient=true] svg { fill:var(--accent-gold); stroke:var(--accent-gold); }
 .dse-empty { color:var(--text-muted); font-size:var(--text-xs); padding:var(--space-1) var(--space-2); }
 .dse-vitals { display:flex; flex-wrap:wrap; gap:var(--space-2); align-items:stretch; }
 .dse-vitals .codex-tile { display:flex; flex-direction:column; justify-content:center; align-items:center; min-width:3.5rem; padding:var(--space-2); gap:var(--space-1); }
@@ -99,6 +99,12 @@
 .dse-coins { display:grid; grid-template-columns:repeat(5,1fr); gap:var(--space-2); border-top:1px solid var(--border-subtle); padding-top:var(--space-2); margin-top:auto; }
 .dse-coins label { display:flex; justify-content:center; align-items:center; gap:var(--space-1); font-size:var(--text-xs); color:var(--accent-gold); }
 .dse-combat { display:grid; grid-template-columns:minmax(0,1fr); gap:var(--space-4); }
+.dse-proficiencies > dl { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr)); gap:var(--space-4); margin:0; }
+.dse-training-group { min-width:0; overflow-wrap:anywhere; }
+.dse-training-group dt { color:var(--text-parchment); font-weight:600; margin-bottom:var(--space-2); }
+.dse-training-group dd { margin:0; }
+.dse-training-group ul { display:flex; flex-wrap:wrap; column-gap:1.5em; row-gap:var(--space-2); margin:0; padding-inline-start:1.25em; }
+.dse-training-group li { max-width:100%; }
 .dse-section h3 { color:var(--text-parchment); font-size:var(--text-lg); border-bottom:1px solid var(--border-subtle); padding-bottom:var(--space-2); margin-bottom:var(--space-2); }
 .dse-section p { font-size:var(--text-sm); }
 .dse-attack { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:var(--space-3); padding:var(--space-2) 0; font-size:var(--text-sm); }

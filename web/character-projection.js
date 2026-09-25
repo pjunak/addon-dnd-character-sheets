@@ -1,5 +1,6 @@
 import { grantedSpellsRead } from "./character-spells.js";
 import { featDetails, senseDetails } from "./character-sheet.js";
+import { proficiencyDetails } from "./character-proficiencies.js";
 import { translator } from "./character-locale.js";
 import { abilities, object, rows } from "./character-client.js";
 import { el, human, label, panel, rule } from "./character-ui.js";
@@ -35,7 +36,7 @@ export function projectionView(projection, locale = "en") {
         }
         root.append(panel(t(label(group)), list));
     }
-    root.append(senseDetails(projection, locale));
+    root.append(proficiencyDetails(projection, locale), senseDetails(projection, locale));
     for (const group of ["weapons", "spellcasting", "resources", "features"]) {
         const list = el("div");
         const prefix = group === "spellcasting" ? "spellcasting.perClass" : group;
@@ -67,7 +68,7 @@ export function projectionView(projection, locale = "en") {
     const granted = grantedSpellsRead(projection, locale);
     if (granted)
         root.append(granted);
-    for (const group of ["languages", "resistances", "damageImmunities", "conditionImmunities", "traits"]) {
+    for (const group of ["resistances", "damageImmunities", "conditionImmunities", "traits"]) {
         if (human(sheet[group]) && sheet[group] !== undefined && (!Array.isArray(sheet[group]) || sheet[group].length > 0))
             root.append(panel(t(label(group)), el("p", human(sheet[group]))));
     }
@@ -85,7 +86,7 @@ export function printCharacter(state, _revision, name, options, locale = "en") {
     view.document.title = name;
     view.document.documentElement.lang = locale;
     const style = view.document.createElement("style");
-    style.textContent = "body{font:12pt system-ui;max-width:1000px;margin:2rem;color:#111;overflow-wrap:anywhere}h1,h2,h3,summary{break-after:avoid}section,details{margin-block:1rem}details,tr,dl{break-inside:avoid}p{white-space:pre-wrap;orphans:3;widows:3}small{display:block;margin-top:.25rem}dl{display:grid;grid-template-columns:1fr 2fr;gap:.35rem}dd{margin:0} .character-stats{display:flex;gap:1rem;flex-wrap:wrap}.character-stats>div{min-width:6rem}strong{display:block}button{display:none}@page{margin:15mm}@media print{body{margin:0;font-size:10pt}}";
+    style.textContent = "body{font:12pt system-ui;max-width:1000px;margin:2rem;color:#111;overflow-wrap:anywhere}h1,h2,h3,summary{break-after:avoid}section,details{margin-block:1rem}details,tr,dl{break-inside:avoid}p{white-space:pre-wrap;orphans:3;widows:3}small{display:block;margin-top:.25rem}dl{display:grid;grid-template-columns:1fr 2fr;gap:.35rem}dd{margin:0} .character-stats{display:flex;gap:1rem;flex-wrap:wrap}.character-stats>div{min-width:6rem}strong{display:block}button{display:none}.dse-proficiencies>dl{display:block}.dse-training-group{break-inside:avoid;margin-block:.6rem}.dse-training-group dt{font-weight:600}.dse-training-group ul{margin:.2rem 0;padding-inline-start:1.25rem}@page{margin:15mm}@media print{body{margin:0;font-size:10pt}}";
     view.document.head.append(style);
     const root = el("main", el("h1", name), el("p", t("Calculated with engine {0}. This print preserves the saved rules revision.", [state.rules.engineVersion])));
     const origin = [["species", state.inputs.build.species], ["lineage", state.inputs.build.lineage], ["background", state.inputs.build.background]];

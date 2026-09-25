@@ -29,6 +29,11 @@ keyboard focus, expanded groups and search/level filters through automatic saves
 and tab changes. These view preferences belong to the open character, not its
 saved rules state.
 
+Combat and print share readable proficiency groups, including separate Expertise,
+trained saving throws, equipment training and languages. Saved source details
+remain usable without a rules provider; missing data stays distinct from an
+empty group. Saving-throw shields show and name their saved training state.
+
 **Tools** owns export, reviewed replacement import, printing, layout and rules
 status. Transfers use `dnd-character.v1` / schema 4.0.0 and contain the current
 character only. Changed installed rules require explicit adoption. If an

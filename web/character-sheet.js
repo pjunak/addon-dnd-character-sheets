@@ -1,10 +1,10 @@
 import { spellSourceLabel } from "./character-spells.js";
+import { proficiencyDetails } from "./character-proficiencies.js";
 import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment } from "./character-inventory.js";
 import { abilities, object, rows } from "./character-client.js";
-import { translator } from "./character-locale.js";
+import { abilityNames, translator } from "./character-locale.js";
 import { button, el, field, human, label, numberInput, panel, rule, select, signed, styled, textInput } from "./character-ui.js";
 function icon(path) { const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"), shape = document.createElementNS("http://www.w3.org/2000/svg", "path"); svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("aria-hidden", "true"); shape.setAttribute("d", path); svg.append(shape); return svg; }
-const abilityNames = { STR: "Strength", DEX: "Dexterity", CON: "Constitution", INT: "Intelligence", WIS: "Wisdom", CHA: "Charisma" };
 export function preferredLayout(storage, actor, key) {
     try {
         const value = storage?.getItem("dnd-character-layout:" + actor + ":" + key) ?? storage?.getItem("dse-ui:renderer:" + key) ?? storage?.getItem("dse-ui:layout:" + key) ?? storage?.getItem("dse-ui:layout") ?? storage?.getItem("dnd-character-layout:" + actor);
@@ -49,7 +49,9 @@ export function abilityRail(view) {
         const proficiency = styled("span", "dse-dot dse-shield");
         proficiency.append(icon("M12 2.4 19.3 5.3V11c0 4.8-3.3 8.6-7.3 10.5C8 19.6 4.7 15.8 4.7 11V5.3Z"));
         proficiency.dataset["proficient"] = String(save["proficient"] === true);
-        proficiency.title = t("Saving throw");
+        proficiency.title = t("{0} — saving throw: {1}", [t(abilityNames[ability]), t(save["proficient"] === true ? "Proficient" : "Untrained")]);
+        proficiency.setAttribute("role", "img");
+        proficiency.setAttribute("aria-label", proficiency.title);
         title.append(el("span", t(abilityNames[ability])), dock, proficiency, savedRule(view.projection, signed(save["total"]), "saves." + ability + ".total"));
         const tile = styled("div", "dse-score", el("strong", savedRule(view.projection, signed(score["mod"]), "abilities." + ability + ".mod")), styled("span", "dse-number", savedRule(view.projection, human(score["score"]), "abilities." + ability + ".score")));
         const details = styled("div", "dse-ability-details");
@@ -262,10 +264,10 @@ export function combatDetails(view) {
         const id = String(feature["id"]);
         traits.append(el("details", el("summary", savedRule(view.projection, String(feature["name"] ?? id), undefined, { kind: "feature", id })), el("p", view.projection?.evidence.find(row => row.reference.id === id)?.summary ?? "")));
     }
-    for (const key of ["languages", "resistances", "damageImmunities", "conditionImmunities", "proficiencies"])
+    for (const key of ["resistances", "damageImmunities", "conditionImmunities"])
         if (sheet[key] !== undefined)
             traits.append(el("p", el("strong", t(label(key)) + ": "), human(sheet[key])));
-    root.append(attacks, resources, senseDetails(view.projection, view.locale), traits);
+    root.append(attacks, resources, proficiencyDetails(view.projection, view.locale), senseDetails(view.projection, view.locale), traits);
     const feats = featDetails(view.projection, view.locale);
     if (feats)
         root.append(feats);

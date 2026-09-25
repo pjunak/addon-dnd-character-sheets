@@ -1,5 +1,7 @@
 import { catalogs } from "./character-messages.js";
 
+export const abilityNames: Record<string, string> = { STR: "Strength", DEX: "Dexterity", CON: "Constitution", INT: "Intelligence", WIS: "Wisdom", CHA: "Charisma" };
+
 export function builderLabel(guidance: Record<string, unknown>, locale: string, fallback = ""): string {
   return translator(locale)(String(guidance["labelKey"] ?? guidance["label"] ?? fallback), Array.isArray(guidance["labelArgs"]) ? guidance["labelArgs"] : []);
 }

@@ -585,7 +585,20 @@ export const catalogs = {
     "Medium": "Medium",
     "Large": "Large",
     "Huge": "Huge",
-    "Gargantuan": "Gargantuan"
+    "Gargantuan": "Gargantuan",
+    "Proficiencies": "Proficiencies",
+    "Saving throws": "Saving throws",
+    "Light armor": "Light armor",
+    "Medium armor": "Medium armor",
+    "Heavy armor": "Heavy armor",
+    "Shields": "Shields",
+    "Simple weapons": "Simple weapons",
+    "Martial weapons": "Martial weapons",
+    "Martial weapons (finesse)": "Martial weapons (finesse)",
+    "None recorded": "None recorded",
+    "Not recorded": "Not recorded",
+    "Proficiency details were not saved.": "Proficiency details were not saved.",
+    "{0} — saving throw: {1}": "{0} — saving throw: {1}"
   },
   "cs": {
     "Currency": "Měna",
@@ -1172,6 +1185,19 @@ export const catalogs = {
     "Medium": "Střední",
     "Large": "Velká",
     "Huge": "Obrovská",
-    "Gargantuan": "Gigantická"
+    "Gargantuan": "Gigantická",
+    "Proficiencies": "Zběhlosti",
+    "Saving throws": "Záchranné hody",
+    "Light armor": "Lehké zbroje",
+    "Medium armor": "Střední zbroje",
+    "Heavy armor": "Těžké zbroje",
+    "Shields": "Štíty",
+    "Simple weapons": "Jednoduché zbraně",
+    "Martial weapons": "Válečné zbraně",
+    "Martial weapons (finesse)": "Válečné zbraně (vytříbené)",
+    "None recorded": "Žádné zaznamenané",
+    "Not recorded": "Nezaznamenáno",
+    "Proficiency details were not saved.": "Podrobnosti o zběhlostech nebyly uloženy.",
+    "{0} — saving throw: {1}": "{0} — záchranný hod: {1}"
   }
 } as const;
