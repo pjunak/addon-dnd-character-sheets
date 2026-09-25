@@ -175,7 +175,7 @@ export function backpack(view) {
                 } }, !item.attuned && !choice.allowed);
                 attune.setAttribute("aria-label", t("Attune {0}", [item.name]));
                 attune.setAttribute("aria-pressed", String(item.attuned));
-                const reason = item.attuned ? "" : equipmentReason(choice.reason, view.locale);
+                const reason = equipmentReason(item.attuned ? eligibility["attuneReason"] : choice.reason, view.locale);
                 if (reason) {
                     attune.title = reason;
                     attune.setAttribute("aria-description", reason);
