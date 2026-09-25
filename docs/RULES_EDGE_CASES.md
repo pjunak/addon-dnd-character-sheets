@@ -2,7 +2,7 @@
 
 The coordinator owns the current `dnd-sheets` extension for each core character
 lifetime. Schema 4.0.0 accepts earlier characters and the optional authored
-Inspiration field; installing its changed schema requires the review below. The core profile, portrait and relationships are host-owned.
+Inspiration and quick-use fields; installing a changed schema requires the review below. The core profile, portrait and relationships are host-owned.
 
 ## Inspiration and compatible schema upgrades
 
@@ -25,9 +25,42 @@ first, disable Sheets, then use **Review saved-data compatibility** for the
 inspected new package. Apply that exact review, then review and activate the
 package normally. The host checks every stored value and preserves its bytes,
 document revision and recovery evidence. This is not an automatic converter or
-a reset. The optional field does not require rewriting current characters.
+a reset. These optional fields do not require rewriting current characters.
 A package rollback after new values have been saved can require a separate
 review and may be blocked if the old schema cannot represent them.
+
+## Quick-use identity and consumption
+
+`inputs.play.quickUse` optionally stores ordered inventory instance IDs.
+Pinning works for legal unfinished builds when the Engine advertises
+`guidance.authoredPlay.quickUse`. Using an item requires a ready character and
+live `guidance.quickUse[id].canUse`. One shared panel serves Sheet and Combat;
+native actions, stable focus keys and semantic tokens come from the host UI.
+
+While an asynchronous play action disables controls, completion restores the
+initiating control by its stable key if the browser lost focus. If the last unit
+makes that action unavailable, focus moves to the next usable control in the
+same item row. Focus deliberately moved outside the sheet is left alone.
+
+Pins do not copy inventory or create a second quantity counter. `consume-item`
+uses one carried/equipped unit through the worker's ordinary optimistic play
+command. Empty entries and pins remain; the last equipped/attuned unit releases
+that allocation atomically. Notes, acquisition, source and grant references
+stay attached to the original instance. The action records consumption only;
+item effects are resolved separately. Rests and recalculation never replenish it.
+Stored/empty pins remain visible but cannot be used.
+
+Unpinning preserves the item. Explicit inventory deletion removes that same
+instance's pin in one autosave. Missing or duplicate references from other
+clients/imports are rejected rather than silently repaired. Independent fields
+can merge, competing pin lists conflict, and a merge against a remotely deleted
+item remains pending for explicit unpinning; it cannot recreate the entry.
+
+The coordinator rejects an Engine response that drops, reorders or substitutes
+pins. Older/incompatible providers leave saved state readable. Print/export
+preserve pin order and depleted entries; reviewed replacement import validates
+references normally. Both pre-Inspiration and pre-quick-use schema-4 values pass
+the compatible schema review with exact JSON bytes and revisions preserved.
 
 ## Automatic saving
 

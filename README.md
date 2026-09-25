@@ -10,6 +10,10 @@ rest and recalculation do not award or spend it. New attunements select equipped
 items; existing carried/stored attunements remain visible and count toward
 capacity. **Stow & unattune** moves an item to Stored and releases its allocation
 in one automatic save. Ordinary moves preserve attunement.
+**Quick use** pins existing inventory entries in a shared Sheet/Combat panel.
+**Use one** spends from the real quantity without applying item effects.
+Stored/depleted pins and item notes stay visible; unpinning keeps the item,
+and deleting an item removes its pin in the same save.
 Character notes belong to the core
 profile; the sheet has no Notes tab or notes section in print.
 
@@ -60,7 +64,7 @@ The host owns the core profile, portrait and relationships. The native worker
 provides `dnd5e.character` 2.0.0 and is the only writer of the `dnd-sheets`
 schema-4 extension. Its `workerOnly` declaration preserves authorization without
 retaining character snapshots. Install the compatible updated host before this
-package. The optional Inspiration field changes the stored schema hash, so
+package. The optional Inspiration and quick-use fields change the stored schema hash, so
 materialized installations need the host's [compatible schema review](docs/RULES_EDGE_CASES.md#inspiration-and-compatible-schema-upgrades)
 before activation. Existing schema-4 characters keep their exact inputs and
 saved projection; no reset or value conversion is required.

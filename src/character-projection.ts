@@ -1,3 +1,4 @@
+import { quickUseRead } from "./character-quick-use.js";
 import { grantedSpellsRead } from "./character-spells.js";
 import { featDetails, senseDetails } from "./character-sheet.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
@@ -75,6 +76,7 @@ export function printCharacter(state: State, _revision: number, name: string, op
     root.append(panel(t("Currency"), values));
   }
   root.append(projectionView(projection, locale));
+  if (options.equipment && state.inputs.play.quickUse?.length) root.append(quickUseRead(state.inputs, state.projection, locale));
   if (options.equipment && state.inputs.play.inventory.some(item => item.quantity > 0)) root.append(panel(t("Equipment"), ...state.inputs.play.inventory.filter(item => item.quantity > 0).map(item => el("p", t("{0} × {1}; {2}{3}. {4}", [item.quantity, item.name, t(label(item.location)), item.attuned ? t("; attuned") : "", item.notes])))));
   if (options.spells) {
     const sections = [["Cantrips", state.inputs.build.spells.cantrips], ["Spellbook", state.inputs.build.spells.spellbook], ["Prepared spells", state.inputs.play.preparedSpells]] as const;

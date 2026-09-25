@@ -1,6 +1,31 @@
-import type { Item, Projection } from "./character-model.js";
+import type { Inputs, Item, Projection } from "./character-model.js";
 import { object } from "./character-client.js";
 import { translator } from "./character-locale.js";
+
+export function pinQuickUse(input: Inputs, id: string, pinned: boolean): boolean {
+  if (pinned && !input.play.inventory.some(item => item.id === id)) return false;
+  const current = input.play.quickUse ?? [];
+  if (current.includes(id) === pinned) return false;
+  const next = pinned ? [...current, id] : current.filter(itemId => itemId !== id);
+  if (next.length) input.play.quickUse = next; else delete input.play.quickUse;
+  return true;
+}
+
+export function removeInventoryItem(input: Inputs, id: string): void {
+  input.play.inventory = input.play.inventory.filter(item => item.id !== id);
+  pinQuickUse(input, id, false);
+}
+
+export function quickUseReason(reason: unknown, locale: string): string {
+  const t = translator(locale);
+  switch (reason) {
+    case "empty": return t("No items remaining.");
+    case "stored": return t("Carry this item before using it.");
+    case "missing": return t("This inventory entry is missing. Remove its pin.");
+    case "build": return t("Complete the character's required choices before using items.");
+    default: return "";
+  }
+}
 
 export type EquipmentSlot = "armor" | "shield" | "worn" | "attuned";
 export type EquipmentGuidance = Record<string, unknown>;

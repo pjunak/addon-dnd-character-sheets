@@ -1,7 +1,7 @@
 import { spellSourceLabel } from "./character-spells.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
 import type { Inputs, Projection, Reference } from "./character-model.js";
-import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, stowAndUnattune, type EquipmentSlot } from "./character-inventory.js";
+import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, pinQuickUse, removeInventoryItem, stowAndUnattune, type EquipmentSlot } from "./character-inventory.js";
 import type { CatalogRecord } from "./character-client.js";
 import { abilities, object, rows } from "./character-client.js";
 import { abilityNames, translator } from "./character-locale.js";
@@ -10,7 +10,7 @@ import { button, checkbox, el, field, human, label, numberInput, panel, rule, se
 export type Layout = "compact" | "classic";
 export interface SheetView {
   locale: string; layout: Layout; input: Inputs; projection: Projection | undefined; catalogs: Map<string, CatalogRecord[]>;
-  editing: boolean; canPlay: boolean; canEditHP: boolean; canEditInspiration: boolean; equipment: Record<string, unknown>;
+  editing: boolean; canPlay: boolean; canEditHP: boolean; canEditInspiration: boolean; canEditQuickUse: boolean; quickUse: Record<string, unknown>; equipment: Record<string, unknown>;
   change(): void; refresh(): void; addItem(): void; fillSlot(slot: EquipmentSlot): void;
   act(change: Record<string, unknown>, summary: string): Promise<void>;
 }
@@ -132,9 +132,15 @@ export function backpack(view: SheetView): HTMLElement {
         const reason = equipmentReason(item.attuned ? eligibility["attuneReason"] : choice.reason, view.locale);
         if (reason) { attune.title = reason; attune.setAttribute("aria-description", reason); }
         const move = select(item.location, ["equipped", "carried", "stored"].map(id => ({ id, label: t(label(id)), disabled: id === "equipped" && eligibility["canEquip"] !== true })), value => { if (value && moveEquipment(view.input.play.inventory, item.id, value, view.equipment, view.projection)) { view.change(); view.refresh(); } }, t); move.className = "dse-item-location"; move.setAttribute("aria-label", t("Move {0}", [item.name]));
-        const remove = button("×", () => { view.input.play.inventory = view.input.play.inventory.filter(row => row.id !== item.id); view.change(); view.refresh(); }); remove.setAttribute("aria-label", t("Remove {0}", [item.name]));
+        const remove = button("×", () => { removeInventoryItem(view.input, item.id); view.change(); view.refresh(); }); remove.setAttribute("aria-label", t("Remove {0}", [item.name]));
         for (const [action, control] of Object.entries({ quantity, attune, move, remove })) control.dataset["focusKey"] = "inventory/" + item.id + "/" + action;
         row.append(quantity, attune, move, remove);
+        const pin = button(t("Quick use"), () => {
+          if (pinQuickUse(view.input, item.id, !(view.input.play.quickUse ?? []).includes(item.id))) { view.change(); view.refresh(); }
+        }, !view.canEditQuickUse, "inventory/" + item.id + "/quick-use");
+        pin.setAttribute("aria-label", t("Quick use: {0}", [item.name]));
+        pin.setAttribute("aria-pressed", String((view.input.play.quickUse ?? []).includes(item.id)));
+        row.append(styled("div", "dse-item-actions", pin));
         if (item.attuned) {
           const stow = button(t("Stow & unattune"), () => {
             if (stowAndUnattune(item)) { move.focus(); view.change(); view.refresh(); }

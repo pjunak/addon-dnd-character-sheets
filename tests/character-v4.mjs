@@ -10,6 +10,7 @@ test('provider option labels translate only explicit UI keys', async () => {
 
 test('current transfer accepts only the explicit current envelope and preserves authored inputs', () => {
   const inputs = blank(); inputs.notes = 'Mira — a new beginning'; inputs.play.inspiration = false; inputs.play.rolls = [{ id: 'roll-one', resource: 'hit-dice-d10', die: 10, result: 6, at: '2026-09-11T00:00:00Z' }];
+  inputs.play.inventory = [{ id: 'spent', name: 'Supplies', quantity: 0, location: 'carried', attuned: false, acquisition: 'Reward', notes: 'Keep me' }]; inputs.play.quickUse = ['spent'];
   const state = { schemaVersion: '4.0.0', inputs, rules: { engineId: 'rules', engineVersion: '4.0.0', engineGeneration: 'generation', identity: {} }, projection: { sheet: {}, explanations: {}, evidence: [], issues: [] }, operationId: 'first' };
   assert.deepEqual(parseCharacter(exportCharacter(state)), inputs);
   for (const value of [inputs, { v: 3 }, { format: 'dnd-character.v1', schemaVersion: '3.0.0', inputs }, { format: 'dnd-character.v1', schemaVersion: '4.0.0', inputs, admin: true }]) assert.throws(() => parseCharacter(JSON.stringify(value)));
@@ -44,6 +45,17 @@ test('autosave rebases disjoint fields and rejects overlapping changes', () => {
  remote.notes='Remote notes';assert.equal(mergeCharacter(base,local,remote),undefined);
  const same=mergeCharacter(base,local,local);assert.deepEqual(same,local);
  local.play.inventory=[{id:'local'}];remote.notes=base.notes;remote.play.inventory=[{id:'remote'}];assert.equal(mergeCharacter(base,local,remote),undefined);
+});
+
+test('quick-use order merges only disjoint edits and never merges competing pin lists', () => {
+ const base=blank(),local=structuredClone(base),remote=structuredClone(base);
+ local.play.quickUse=['one'];remote.play.currency.gp=5;
+ assert.deepEqual(mergeCharacter(base,local,remote).play,{...remote.play,quickUse:['one']});
+ remote.play.quickUse=['two'];assert.equal(mergeCharacter(base,local,remote),undefined);
+ remote.play.quickUse=['one'];assert.deepEqual(mergeCharacter(base,local,remote).play.quickUse,['one']);
+ const pinned=structuredClone(local),removed=structuredClone(pinned),other=structuredClone(pinned);
+ delete removed.play.quickUse;other.notes='Keep this';
+ assert.equal(Object.hasOwn(mergeCharacter(pinned,removed,other).play,'quickUse'),false);
 });
 
 test('Inspiration merges disjoint edits and preserves explicit false versus absent state', () => {

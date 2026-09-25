@@ -31,6 +31,8 @@ func TestCommandRetryAfterLostCommitAndWorkerRestart(t *testing.T) {
 			input := model.Blank()
 			inspiration := true
 			input.Play.Inspiration = &inspiration
+			input.Play.Inventory = []model.Item{{ID: "supplies", Name: "Supplies", Quantity: 2, Location: "carried"}}
+			input.Play.QuickUse = []string{"supplies"}
 			if _, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "initial-character", Summary: "Create", Inputs: &input}); err != nil {
 				t.Fatal(err)
 			}

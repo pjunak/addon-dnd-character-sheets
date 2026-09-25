@@ -94,7 +94,7 @@
 .dse-item-name { flex:1 1 6rem; min-width:0; width:6rem; overflow-wrap:anywhere; }
 .addon-dnd-sheets .dse-item button { padding:0 var(--space-1); }
 .dse-item-location { width:5.5rem; font-size:var(--text-xs) !important; }
-.dse-attunement-actions { width:100%; display:flex; flex-wrap:wrap; gap:var(--space-1); }
+.dse-attunement-actions, .dse-item-actions { width:100%; display:flex; flex-wrap:wrap; gap:var(--space-1); }
 .dse-equipment-location { margin-inline-start:var(--space-2); color:var(--text-muted); }
 .dse-item-notes { width:100%; color:var(--text-muted); font-size:var(--text-xs); }
 .dse-item-notes summary { cursor:pointer; }
@@ -422,3 +422,8 @@
  .addon-dnd-character .dnd-sheet-tabs .codex-tab.is-active { border-left-color:var(--accent-gold); }
 }
 .character-combo { display:block; min-width:0; }
+.dse-quick-use-item { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-2); padding-block:var(--space-2); border-bottom:1px solid var(--border-subtle); min-width:0; }
+.dse-quick-use-name { flex:1 1 12rem; min-width:0; display:grid; gap:var(--space-1); overflow-wrap:anywhere; }
+.dse-quick-use-notes, .dse-quick-use-item > p { flex-basis:100%; overflow-wrap:anywhere; }
+.dse-quick-use .dnd-workflow-controls { max-width:100%; flex-wrap:wrap; }
+.dse-quick-use button, .dse-item-actions button { white-space:normal; overflow-wrap:anywhere; }

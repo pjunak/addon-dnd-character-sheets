@@ -1,8 +1,32 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, stowAndUnattune } from '../web/character-inventory.js';
+import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, pinQuickUse, removeInventoryItem, quickUseReason, stowAndUnattune } from '../web/character-inventory.js';
+
+import { blank } from '../web/character-client.js';
 
 const item = (id, location = 'carried') => ({ id, name: id, location, quantity: 1, attuned: false, acquisition: 'Keep provenance', notes: 'Keep notes' });
+
+test('quick use pins exact instances without copying or resetting inventory', () => {
+  const input = blank();
+  input.play.inventory = [item('one'), { ...item('two'), name: 'one', quantity: 0, location: 'stored', grantId: 'reward' }];
+  const before = structuredClone(input.play.inventory);
+  assert.equal(pinQuickUse(input, 'missing', true), false);
+  assert.equal(pinQuickUse(input, 'two', true), true);
+  assert.equal(pinQuickUse(input, 'one', true), true);
+  assert.equal(pinQuickUse(input, 'two', true), false);
+  assert.deepEqual(input.play.quickUse, ['two', 'one']);
+  assert.deepEqual(input.play.inventory, before);
+  removeInventoryItem(input, 'one');
+  assert.deepEqual(input.play.quickUse, ['two']);
+  assert.deepEqual(input.play.inventory, [before[1]]);
+  assert.equal(pinQuickUse(input, 'two', false), true);
+  assert.equal(Object.hasOwn(input.play, 'quickUse'), false);
+  assert.deepEqual(input.play.inventory, [before[1]], 'Unpinning never removes an item');
+  for (const reason of ['empty', 'stored', 'missing', 'build']) {
+    assert.ok(quickUseReason(reason, 'en'));
+    assert.notEqual(quickUseReason(reason, 'cs'), quickUseReason(reason, 'en'));
+  }
+});
 
 test('both inventory entry points can replace only the occupied exclusive slot', () => {
   for (const slot of ['armor', 'shield']) {

@@ -1,6 +1,6 @@
 import { spellSourceLabel } from "./character-spells.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
-import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, stowAndUnattune } from "./character-inventory.js";
+import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, pinQuickUse, removeInventoryItem, stowAndUnattune } from "./character-inventory.js";
 import { abilities, object, rows } from "./character-client.js";
 import { abilityNames, translator } from "./character-locale.js";
 import { button, checkbox, el, field, human, label, numberInput, panel, rule, select, signed, styled, textInput } from "./character-ui.js";
@@ -191,11 +191,20 @@ export function backpack(view) {
                 } }, t);
                 move.className = "dse-item-location";
                 move.setAttribute("aria-label", t("Move {0}", [item.name]));
-                const remove = button("×", () => { view.input.play.inventory = view.input.play.inventory.filter(row => row.id !== item.id); view.change(); view.refresh(); });
+                const remove = button("×", () => { removeInventoryItem(view.input, item.id); view.change(); view.refresh(); });
                 remove.setAttribute("aria-label", t("Remove {0}", [item.name]));
                 for (const [action, control] of Object.entries({ quantity, attune, move, remove }))
                     control.dataset["focusKey"] = "inventory/" + item.id + "/" + action;
                 row.append(quantity, attune, move, remove);
+                const pin = button(t("Quick use"), () => {
+                    if (pinQuickUse(view.input, item.id, !(view.input.play.quickUse ?? []).includes(item.id))) {
+                        view.change();
+                        view.refresh();
+                    }
+                }, !view.canEditQuickUse, "inventory/" + item.id + "/quick-use");
+                pin.setAttribute("aria-label", t("Quick use: {0}", [item.name]));
+                pin.setAttribute("aria-pressed", String((view.input.play.quickUse ?? []).includes(item.id)));
+                row.append(styled("div", "dse-item-actions", pin));
                 if (item.attuned) {
                     const stow = button(t("Stow & unattune"), () => {
                         if (stowAndUnattune(item)) {

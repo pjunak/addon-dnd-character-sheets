@@ -3,6 +3,7 @@ import { comparisonView } from "./character-comparison.js";
 import { translator } from "./character-locale.js";
 import { feedbackMessage } from "./character-feedback.js";
 import { playActions } from "./character-play.js";
+import { quickUse } from "./character-quick-use.js";
 import { abilityRail, backpack, combatDetails, preferredLayout, vitals, type Layout, type SheetView } from "./character-sheet.js";
 import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment, type EquipmentSlot } from "./character-inventory.js";
 import { equipmentPicker } from "./character-equipment.js";
@@ -60,9 +61,18 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       return response;
     }
     async #guard(action: () => Promise<void>): Promise<void> {
-      if (this.#busy) return; const epoch = this.#epoch; this.#busy = true; this.setAttribute("aria-busy", "true"); this.#publish(); this.#status(); this.#syncBusyButtons(); if (!this.#response) this.#render();
+      if (this.#busy) return;
+      const focused = document.activeElement instanceof HTMLElement && this.contains(document.activeElement) ? document.activeElement : undefined;
+      const focusKey = focused?.dataset["focusKey"];
+      const epoch = this.#epoch; this.#busy = true; this.setAttribute("aria-busy", "true"); this.#publish(); this.#status(); this.#syncBusyButtons(); if (!this.#response) this.#render();
       try { await action(); } catch (error) { if (epoch === this.#epoch && !this.#runtime.client.signal.aborted && this.isConnected) this.#message = error instanceof Error ? error.message : "The character request failed. Your edit has not been saved."; }
-      finally { if (epoch === this.#epoch) { this.#busy = false; this.removeAttribute("aria-busy"); this.#publish(); this.#syncBusyButtons(); this.#render(); } }
+      finally { if (epoch === this.#epoch) {
+        // Native disabling can blur the initiating control. Restore its stable
+        // target only when focus was lost, never after the user moved elsewhere.
+        const lostFocus = document.activeElement === document.body;
+        this.#busy = false; this.removeAttribute("aria-busy"); this.#publish(); this.#syncBusyButtons(); this.#render();
+        if (lostFocus && focusKey && !this.#command) restoreControlFocus(this.querySelector<HTMLElement>('[data-focus-key="' + CSS.escape(focusKey) + '"]') ?? undefined);
+      } }
     }
     #syncBusyButtons(): void {
       for (const control of this.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>("button,input,select,textarea")) {
@@ -244,7 +254,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       else {
         const main = styled("div", "dse-cols-main", vitals(view));
         if (!this.#response.state) main.append(panel(this.#t("Create your character"), el("p", this.#t("Choose your origin, abilities and first class to start building.")), button(this.#t("Open Builder"), () => { this.#tab = "builder"; this.#render(); })));
-        main.append(this.#tab === "combat" ? this.#combat() : backpack(view));
+        main.append(quickUse(view), this.#tab === "combat" ? this.#combat() : backpack(view));
         content.append(styled("div", "dse-cols", abilityRail(view), main));
       }
       root.append(nav, styled("div", "dnd-sheet-workspace", status, content));
@@ -270,6 +280,8 @@ export function defineCharacterElement(generation: string, client: CharacterClie
         equipment: this.#response?.rulesChanged || this.#response?.status === "unavailable" ? {} : object(this.#evaluation?.guidance["equipment"]),
         editing, canPlay,
         canEditInspiration: editing && object(this.#evaluation?.guidance["authoredPlay"])["inspiration"] === true,
+        canEditQuickUse: editing && object(this.#evaluation?.guidance["authoredPlay"])["quickUse"] === true,
+        quickUse: editing ? object(this.#evaluation?.guidance["quickUse"]) : {},
         // A rejected HP value must remain correctable while other play actions are blocked.
         canEditHP: editing && !!this.#response?.state && (canPlay || this.#dirty && rows(this.#evaluation?.guidance["saveIssues"]).some(issue => issue["target"] === "hp")),
         change: this.#changed, refresh: () => this.#render(), addItem: () => this.#equipment(), fillSlot: slot => this.#slot(slot),

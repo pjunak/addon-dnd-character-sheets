@@ -17,13 +17,15 @@ func (call providerCall) Call(ctx context.Context, meta *workerrpc.Meta, request
 }
 
 func TestIncompatibleProviderPreservesSavedReadingAndRejectsEdits(t *testing.T) {
-	for _, scenario := range []string{"malformed-result", "response-version", "evaluation-version", "broker-validation", "broker-request", "dropped-inspiration", "changed-inspiration"} {
+	for _, scenario := range []string{"malformed-result", "response-version", "evaluation-version", "broker-validation", "broker-request", "dropped-inspiration", "changed-inspiration", "dropped-quick-use", "changed-quick-use"} {
 		t.Run(scenario, func(t *testing.T) {
 			c, data, engine, meta := fixture(t)
 			input := model.Blank()
 			input.Notes = "Keep this character"
 			inspiration := true
 			input.Play.Inspiration = &inspiration
+			input.Play.Inventory = []model.Item{{ID: "one", Name: "Supplies", Quantity: 1, Location: "carried"}, {ID: "two", Name: "Other supplies", Quantity: 2, Location: "carried"}}
+			input.Play.QuickUse = []string{"one"}
 			saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "initial-character", Summary: "Create", Inputs: &input})
 			if err != nil || saved.Status != "ready" {
 				t.Fatalf("seed: %+v %v", saved, err)
@@ -47,6 +49,10 @@ func TestIncompatibleProviderPreservesSavedReadingAndRejectsEdits(t *testing.T) 
 					}
 					if scenario == "response-version" {
 						value.ContractVersion = "rules-character-response.v99"
+					} else if scenario == "dropped-quick-use" {
+						value.Evaluation.Inputs.Play.QuickUse = nil
+					} else if scenario == "changed-quick-use" {
+						value.Evaluation.Inputs.Play.QuickUse = []string{"two"}
 					} else if scenario == "dropped-inspiration" {
 						value.Evaluation.Inputs.Play.Inspiration = nil
 					} else if scenario == "changed-inspiration" {
