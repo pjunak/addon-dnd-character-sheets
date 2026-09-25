@@ -178,7 +178,6 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 		response.Message = "This character snapshot exceeds the storage limit. Reduce authored notes or inventory before committing."
 		return response, nil
 	}
-	response.Changes = diff(state, &next)
 	if !saveable(evaluation.Evaluation) {
 		response.Status = "invalid"
 		response.Message = "This change is outside the character rules."
@@ -195,6 +194,7 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 		}
 		return c.persist(ctx, rpc.Meta, request.Key, revision, next, response)
 	}
+	response.Changes = diff(state, &next)
 	token, err := randomID()
 	if err != nil {
 		return nil, err
@@ -497,15 +497,28 @@ func diff(before, after *State) []Difference {
 				ordered = append(ordered, k)
 			}
 			sort.Strings(ordered)
+			start := len(result)
 			for _, k := range ordered {
 				walk(path+"/"+k, l[k], r[k])
+				// Each of the three review groups gets part of the service's
+				// 500-entry bound. Collapse a large subtree without truncating
+				// its before/after values or changing the immutable review.
+				if len(result)-start > 500/3 {
+					result = append(result[:start], Difference{Path: path, Before: left, After: right})
+					return
+				}
 			}
 			return
 		}
 		result = append(result, Difference{Path: path, Before: left, After: right})
 	}
-	for _, key := range []string{"inputs", "rules", "projection"} {
+	for _, key := range []string{"inputs", "rules"} {
 		walk("/"+key, a[key], b[key])
 	}
+	var leftSheet any
+	if projection, ok := a["projection"].(map[string]any); ok {
+		leftSheet = projection["sheet"]
+	}
+	walk("/projection/sheet", leftSheet, b["projection"].(map[string]any)["sheet"])
 	return result
 }

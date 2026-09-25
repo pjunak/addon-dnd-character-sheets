@@ -18,6 +18,14 @@ Optimistic revision numbers and the last operation ID protect concurrency and
 lost-response retries; they are not a browsable history. Normal host transaction
 bookkeeping remains part of database integrity.
 
+Ordinary saves return the accepted current state and evaluation without an
+import-review comparison. This keeps a large successful write from failing its
+response contract because of hundreds of generated statistic changes. Import
+previews compare authored inputs, rules identity and calculated sheet values;
+source evidence/explanations remain available in the projection. Large review
+subtrees are grouped with complete before/after values within the existing
+500-entry response bound. Approval still commits the exact retained proposal.
+
 The engine's `guidance.canSave` permits legal incomplete builds. Its additive
 `guidance.saveIssues` lists actual save blockers separately from unfinished
 required choices. `ready` still requires all choices and mechanical bounds to
