@@ -24,11 +24,13 @@ func (data *lostReplyData) Transact(ctx context.Context, meta *workerrpc.Meta, m
 }
 
 func TestCommandRetryAfterLostCommitAndWorkerRestart(t *testing.T) {
-	for _, operation := range []string{"play", "grant", "import"} {
+	for _, operation := range []string{"build", "play", "grant", "import"} {
 		t.Run(operation, func(t *testing.T) {
 			c, data, engine, meta := fixture(t)
 			meta.Actor.Role = "dm"
 			input := model.Blank()
+			inspiration := true
+			input.Play.Inspiration = &inspiration
 			if _, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "initial-character", Summary: "Create", Inputs: &input}); err != nil {
 				t.Fatal(err)
 			}
@@ -37,6 +39,10 @@ func TestCommandRetryAfterLostCommitAndWorkerRestart(t *testing.T) {
 			command := Request{Operation: operation, OperationID: "uncertain-command", ExpectedRevision: data.revision, Summary: "Apply action"}
 			method := "save"
 			switch operation {
+			case "build":
+				spent := false
+				input.Play.Inspiration = &spent
+				command.Inputs = &input
 			case "play":
 				command.Change = map[string]any{"operation": "damage", "amount": 1}
 			case "grant":

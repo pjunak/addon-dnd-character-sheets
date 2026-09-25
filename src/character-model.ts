@@ -106,6 +106,7 @@ export interface Level {
 }
 
 export interface Play {
+  inspiration?: boolean;
   rolls: Array<PlayRoll>;
   hp: number;
   temporaryHp: number;

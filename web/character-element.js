@@ -472,6 +472,7 @@ export function defineCharacterElement(generation, client, enhance) {
             return { locale: this.#context?.host.locale ?? "en", layout: this.#layout, input: this.#input, projection: this.#response?.state?.projection, catalogs: this.#catalogs,
                 equipment: this.#response?.rulesChanged || this.#response?.status === "unavailable" ? {} : object(this.#evaluation?.guidance["equipment"]),
                 editing, canPlay,
+                canEditInspiration: editing && object(this.#evaluation?.guidance["authoredPlay"])["inspiration"] === true,
                 // A rejected HP value must remain correctable while other play actions are blocked.
                 canEditHP: editing && !!this.#response?.state && (canPlay || this.#dirty && rows(this.#evaluation?.guidance["saveIssues"]).some(issue => issue["target"] === "hp")),
                 change: this.#changed, refresh: () => this.#render(), addItem: () => this.#equipment(), fillSlot: slot => this.#slot(slot),

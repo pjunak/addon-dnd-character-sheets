@@ -67,6 +67,7 @@ export function printCharacter(state: State, _revision: number, name: string, op
   const projection = structuredClone(state.projection);
   if (!options.spells) delete projection.sheet["spellcasting"];
   root.append(panel(t("Hit points"), el("p", t("Current: {0} / {1}. Temporary: {2}.", [state.inputs.play.hp, human(object(projection.sheet["derived"])["maxHp"]), state.inputs.play.temporaryHp]))));
+  root.append(panel(t("Inspiration"), el("p", t(state.inputs.play.inspiration === true ? "Available" : "Not available"))));
   const currency = Object.entries(state.inputs.play.currency);
   if (currency.length) {
     const values = el("dl");

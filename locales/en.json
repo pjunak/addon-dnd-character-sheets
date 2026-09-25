@@ -601,5 +601,8 @@
   "Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it.": "Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it.",
   "Unattune {0}": "Unattune {0}",
   "Stow & unattune": "Stow & unattune",
-  "Stow & unattune {0}": "Stow & unattune {0}"
+  "Stow & unattune {0}": "Stow & unattune {0}",
+  "Inspiration": "Inspiration",
+  "Available": "Available",
+  "Not available": "Not available"
 }

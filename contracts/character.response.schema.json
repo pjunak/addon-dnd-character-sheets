@@ -774,6 +774,9 @@
                   "minimum": -1000000,
                   "type": "integer"
                 },
+                "inspiration": {
+                  "type": "boolean"
+                },
                 "inventory": {
                   "items": {
                     "additionalProperties": false,
@@ -1619,6 +1622,9 @@
                   "maximum": 1000000,
                   "minimum": -1000000,
                   "type": "integer"
+                },
+                "inspiration": {
+                  "type": "boolean"
                 },
                 "inventory": {
                   "items": {

@@ -3,7 +3,10 @@
 The workspace has **Sheet**, **Combat**, **Spells**, **Builder** and **Tools**
 tabs in a vertical left rail, with Builder and Tools at the bottom. Compact and Classic layouts share one engine-calculated
 character. Authorized editors can change inventory, equipment, currency, HP,
-resources and spells directly in their tabs. New attunements select equipped
+resources and spells directly in their tabs. Sheet and Combat share an
+**Inspiration** checkbox that saves the authored allocation automatically,
+including for legal unfinished builds. Saved print/export keeps the value;
+rest and recalculation do not award or spend it. New attunements select equipped
 items; existing carried/stored attunements remain visible and count toward
 capacity. **Stow & unattune** moves an item to Stored and releases its allocation
 in one automatic save. Ordinary moves preserve attunement.
@@ -57,7 +60,10 @@ The host owns the core profile, portrait and relationships. The native worker
 provides `dnd5e.character` 2.0.0 and is the only writer of the `dnd-sheets`
 schema-4 extension. Its `workerOnly` declaration preserves authorization without
 retaining character snapshots. Install the compatible updated host before this
-package. Existing schema-4 characters keep their inputs and saved projection.
+package. The optional Inspiration field changes the stored schema hash, so
+materialized installations need the host's [compatible schema review](docs/RULES_EDGE_CASES.md#inspiration-and-compatible-schema-upgrades)
+before activation. Existing schema-4 characters keep their exact inputs and
+saved projection; no reset or value conversion is required.
 
 Autosave serializes requests and rebases disjoint concurrent edits. Rejected
 edits stay on the page with a reason; Retry confirms an uncertain save before

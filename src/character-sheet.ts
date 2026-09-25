@@ -5,12 +5,12 @@ import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, move
 import type { CatalogRecord } from "./character-client.js";
 import { abilities, object, rows } from "./character-client.js";
 import { abilityNames, translator } from "./character-locale.js";
-import { button, el, field, human, label, numberInput, panel, rule, select, signed, styled, textInput } from "./character-ui.js";
+import { button, checkbox, el, field, human, label, numberInput, panel, rule, select, signed, styled, textInput } from "./character-ui.js";
 
 export type Layout = "compact" | "classic";
 export interface SheetView {
   locale: string; layout: Layout; input: Inputs; projection: Projection | undefined; catalogs: Map<string, CatalogRecord[]>;
-  editing: boolean; canPlay: boolean; canEditHP: boolean; equipment: Record<string, unknown>;
+  editing: boolean; canPlay: boolean; canEditHP: boolean; canEditInspiration: boolean; equipment: Record<string, unknown>;
   change(): void; refresh(): void; addItem(): void; fillSlot(slot: EquipmentSlot): void;
   act(change: Record<string, unknown>, summary: string): Promise<void>;
 }
@@ -90,6 +90,10 @@ export function vitals(view: SheetView): HTMLElement {
   const stats = styled("div", "dse-vitals-grid", tile("Speed", "speed"), tile("Proficiency", "proficiencyBonus", true));
   if (Object.hasOwn(derived, "size")) stats.append(styled("div", "codex-tile", styled("span", "dse-stat-label", t("Size")), el("strong", savedRule(view.projection, typeof derived["size"] === "string" ? t(derived["size"]) : t("Needs a choice"), "derived.size"))));
   if (view.layout === "classic") stats.append(tile("Initiative", "initiative", true), tile("Passive perception", "passivePerception"));
+  const inspiration = checkbox(t("Inspiration"), view.input.play.inspiration === true, value => { view.input.play.inspiration = value; view.change(); });
+  const inspirationInput = inspiration.querySelector("input")!;
+  inspirationInput.disabled = !view.canEditInspiration; inspirationInput.dataset["focusKey"] = "vitals/inspiration";
+  stats.append(styled("div", "codex-tile dse-inspiration", inspiration));
   band.append(stats);
   const worn = styled("div", "dse-worn", styled("span", "dse-stat-label", t("Worn equipment")));
   for (const slot of ["armor", "shield", "worn", "attuned"] as const) {

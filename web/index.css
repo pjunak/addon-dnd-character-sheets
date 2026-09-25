@@ -76,6 +76,7 @@
 .dse-vitals-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,6rem),1fr)); flex:1 1 12rem; min-width:0; gap:var(--space-2); }
 .dse-vitals-grid > .codex-tile { min-width:0; }
 .dse-vitals-grid .dse-stat-label { max-width:100%; overflow-wrap:anywhere; }
+.dse-inspiration label { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:var(--space-1); max-width:100%; overflow-wrap:anywhere; }
 .dse-worn { display:flex; flex:1 1 13rem; align-content:start; align-items:start; gap:var(--space-1); flex-wrap:wrap; }
 .dse-worn > .dse-stat-label { width:100%; }
 .dse-equipment-slot { border:1px solid rgba(var(--accent-gold-rgb),.35); border-radius:var(--radius-sm); background:var(--bg-raised); padding:var(--space-1) var(--space-2); font-size:var(--text-xs); }

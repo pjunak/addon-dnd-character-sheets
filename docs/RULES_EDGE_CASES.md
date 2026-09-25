@@ -1,8 +1,33 @@
 # Character saves and failure semantics
 
 The coordinator owns the current `dnd-sheets` extension for each core character
-lifetime. Schema 4.0.0 retains its existing shape so installed characters remain
-readable. The core profile, portrait and relationships are host-owned.
+lifetime. Schema 4.0.0 accepts earlier characters and the optional authored
+Inspiration field; installing its changed schema requires the review below. The core profile, portrait and relationships are host-owned.
+
+## Inspiration and compatible schema upgrades
+
+`inputs.play.inspiration` is an optional boolean. Absent means unavailable
+without adding a value to an existing character; explicit false records spending
+it. Sheet and Combat share one labelled native checkbox and automatic-save path.
+Editing requires `guidance.authoredPlay.inspiration: true` from the selected
+Engine. It also works for legal unfinished builds. Recalculation, rest and other
+play operations preserve the value; no automatic awards or dice rerolls occur.
+
+The worker rejects an Engine result that drops or changes authored Inspiration.
+Older providers that reject the new input leave the saved character readable;
+provider-free display, print and export retain the allocation. Replacement
+imports carry explicit false and true values through the ordinary review.
+Concurrent disjoint fields may merge; conflicting explicit values remain pending.
+
+The extension namespace and schema version stay `dnd-sheets` / `4.0.0`, but the
+closed schema's hash changes. On a materialized installation, update the host
+first, disable Sheets, then use **Review saved-data compatibility** for the
+inspected new package. Apply that exact review, then review and activate the
+package normally. The host checks every stored value and preserves its bytes,
+document revision and recovery evidence. This is not an automatic converter or
+a reset. The optional field does not require rewriting current characters.
+A package rollback after new values have been saved can require a separate
+review and may be blocked if the old schema cannot represent them.
 
 ## Automatic saving
 

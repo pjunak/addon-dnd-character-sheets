@@ -3,7 +3,7 @@ import { proficiencyDetails } from "./character-proficiencies.js";
 import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, stowAndUnattune } from "./character-inventory.js";
 import { abilities, object, rows } from "./character-client.js";
 import { abilityNames, translator } from "./character-locale.js";
-import { button, el, field, human, label, numberInput, panel, rule, select, signed, styled, textInput } from "./character-ui.js";
+import { button, checkbox, el, field, human, label, numberInput, panel, rule, select, signed, styled, textInput } from "./character-ui.js";
 function icon(path) { const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"), shape = document.createElementNS("http://www.w3.org/2000/svg", "path"); svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("aria-hidden", "true"); shape.setAttribute("d", path); svg.append(shape); return svg; }
 export function preferredLayout(storage, actor, key) {
     try {
@@ -111,6 +111,11 @@ export function vitals(view) {
         stats.append(styled("div", "codex-tile", styled("span", "dse-stat-label", t("Size")), el("strong", savedRule(view.projection, typeof derived["size"] === "string" ? t(derived["size"]) : t("Needs a choice"), "derived.size"))));
     if (view.layout === "classic")
         stats.append(tile("Initiative", "initiative", true), tile("Passive perception", "passivePerception"));
+    const inspiration = checkbox(t("Inspiration"), view.input.play.inspiration === true, value => { view.input.play.inspiration = value; view.change(); });
+    const inspirationInput = inspiration.querySelector("input");
+    inspirationInput.disabled = !view.canEditInspiration;
+    inspirationInput.dataset["focusKey"] = "vitals/inspiration";
+    stats.append(styled("div", "codex-tile dse-inspiration", inspiration));
     band.append(stats);
     const worn = styled("div", "dse-worn", styled("span", "dse-stat-label", t("Worn equipment")));
     for (const slot of ["armor", "shield", "worn", "attuned"]) {

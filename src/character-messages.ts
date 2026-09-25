@@ -603,7 +603,10 @@ export const catalogs = {
     "Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it.": "Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it.",
     "Unattune {0}": "Unattune {0}",
     "Stow & unattune": "Stow & unattune",
-    "Stow & unattune {0}": "Stow & unattune {0}"
+    "Stow & unattune {0}": "Stow & unattune {0}",
+    "Inspiration": "Inspiration",
+    "Available": "Available",
+    "Not available": "Not available"
   },
   "cs": {
     "Currency": "Měna",
@@ -1208,6 +1211,9 @@ export const catalogs = {
     "Equip an item before selecting it here. Moving an attuned item keeps its attunement until you explicitly end it.": "Před výběrem si předmět vybavte. Přesun sladěného předmětu zachová sladění, dokud je výslovně neukončíte.",
     "Unattune {0}": "Zrušit sladění: {0}",
     "Stow & unattune": "Uložit a zrušit sladění",
-    "Stow & unattune {0}": "Uložit a zrušit sladění: {0}"
+    "Stow & unattune {0}": "Uložit a zrušit sladění: {0}",
+    "Inspiration": "Inspirace",
+    "Available": "K dispozici",
+    "Not available": "Není k dispozici"
   }
 } as const;

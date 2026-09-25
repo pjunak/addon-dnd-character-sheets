@@ -381,7 +381,7 @@ func (c *Coordinator) evaluate(ctx context.Context, meta *workerrpc.Meta, input 
 		return evaluated{}, RulesContext{}, err
 	}
 	var value evaluated
-	if decode(result.Result, &value) != nil || value.ContractVersion != "rules-character-response.v1" || value.Evaluation.ContractVersion != model.ContractVersion {
+	if decode(result.Result, &value) != nil || value.ContractVersion != "rules-character-response.v1" || value.Evaluation.ContractVersion != model.ContractVersion || !reflect.DeepEqual(input.Play.Inspiration, value.Evaluation.Inputs.Play.Inspiration) {
 		return value, RulesContext{}, failure(workerrpc.KindValidationFailed, "Rules returned an incompatible character result.")
 	}
 	return value, RulesContext{EngineID: result.ProviderAddonID, EngineVersion: result.ProviderContractVersion, EngineGeneration: result.ProviderGeneration, Identity: value.Identity}, nil
