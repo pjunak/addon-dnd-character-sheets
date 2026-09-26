@@ -1,3 +1,4 @@
+import { bodyPlacementLabel } from "./character-placement.js";
 import { storageRead } from "./character-storage.js";
 import { containerOptions } from "./character-inventory.js";
 import { quickUseRead } from "./character-quick-use.js";
@@ -115,7 +116,7 @@ export function printCharacter(state, _revision, name, options, locale = "en") {
         root.append(storageRead(state.inputs, locale));
     const containers = containerOptions(state.inputs.play.containers ?? []);
     if (options.equipment && state.inputs.play.inventory.some(item => item.quantity > 0))
-        root.append(panel(t("Equipment"), ...state.inputs.play.inventory.filter(item => item.quantity > 0).map(item => el("p", t("{0} × {1}; {2}{3}. {4}", [item.quantity, item.name, t(label(item.location)), item.attuned ? t("; attuned") : "", item.notes + (item.containerId ? " · " + t("Container: {0}", [containers.find(container => container.id === item.containerId)?.label ?? item.containerId]) : "")])))));
+        root.append(panel(t("Equipment"), ...state.inputs.play.inventory.filter(item => item.quantity > 0).map(item => el("p", t("{0} × {1}; {2}{3}. {4}", [item.quantity, item.name, t(label(item.location)), item.attuned ? t("; attuned") : "", item.notes + (item.bodyPlacement ? " · " + t("Body placement: {0}", [bodyPlacementLabel(item.bodyPlacement, locale ?? "en")]) : "") + (item.containerId ? " · " + t("Container: {0}", [containers.find(container => container.id === item.containerId)?.label ?? item.containerId]) : "")])))));
     if (options.spells) {
         const sections = [["Cantrips", state.inputs.build.spells.cantrips], ["Spellbook", state.inputs.build.spells.spellbook], ["Prepared spells", state.inputs.play.preparedSpells]];
         for (const [title, groups] of sections) {

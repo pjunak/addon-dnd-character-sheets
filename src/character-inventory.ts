@@ -2,6 +2,14 @@ import type { Container, Inputs, Item, Projection } from "./character-model.js";
 import { object } from "./character-client.js";
 import { translator } from "./character-locale.js";
 
+export function assignBodyPlacement(item: Item, placement: string, guidance: EquipmentGuidance): boolean {
+  if ((item.bodyPlacement ?? "") === placement) return false;
+  const eligibility = object(guidance[item.id]);
+  if (placement && (item.location !== "equipped" || item.quantity < 1 || eligibility["canEquip"] !== true || !Array.isArray(eligibility["bodyPlacements"]) || !eligibility["bodyPlacements"].includes(placement))) return false;
+  if (placement) item.bodyPlacement = placement; else delete item.bodyPlacement;
+  return true;
+}
+
 export function assignContainer(input: Inputs, itemId: string, containerId: string): boolean {
   const item = input.play.inventory.find(item => item.id === itemId);
   if (!item || (item.containerId ?? "") === containerId) return false;
@@ -71,10 +79,11 @@ export function moveEquipment(inventory: Item[], id: string, location: string, g
     delete item.containerId;
     const slot = equipmentSlot(item, guidance, projection);
     if (slot === "armor" || slot === "shield") for (const other of inventory) {
-      if (other.id !== id && other.location === "equipped" && equipmentSlot(other, guidance, projection) === slot) other.location = "carried";
+      if (other.id !== id && other.location === "equipped" && equipmentSlot(other, guidance, projection) === slot) { other.location = "carried"; delete other.bodyPlacement; }
     }
   }
   item.location = location;
+  if (location !== "equipped") delete item.bodyPlacement;
   return true;
 }
 
@@ -97,6 +106,7 @@ export function attuneEquipment(item: Item, attuned: boolean, guidance: Equipmen
 export function stowAndUnattune(item: Item): boolean {
   if (!item.attuned) return false;
   item.location = "stored";
+  delete item.bodyPlacement;
   item.attuned = false;
   return true;
 }

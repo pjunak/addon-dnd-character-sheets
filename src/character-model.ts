@@ -94,6 +94,7 @@ export interface Issue {
 export interface Item {
   id: string;
   containerId?: string;
+  bodyPlacement?: string;
   reference?: Reference;
   spellId?: string;
   name: string;

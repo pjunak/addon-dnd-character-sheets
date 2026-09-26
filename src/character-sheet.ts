@@ -1,3 +1,4 @@
+import { itemBodyPlacement } from "./character-placement.js";
 import { itemContainer, storage } from "./character-storage.js";
 import { spellSourceLabel } from "./character-spells.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
@@ -11,7 +12,7 @@ import { button, checkbox, el, field, human, label, numberInput, panel, rule, se
 export type Layout = "compact" | "classic";
 export interface SheetView {
   locale: string; layout: Layout; input: Inputs; projection: Projection | undefined; catalogs: Map<string, CatalogRecord[]>;
-  editing: boolean; canPlay: boolean; canEditHP: boolean; canEditInspiration: boolean; canEditQuickUse: boolean; canEditStorage: boolean; storage: Record<string, unknown>; quickUse: Record<string, unknown>; equipment: Record<string, unknown>;
+  editing: boolean; canPlay: boolean; canEditHP: boolean; canEditInspiration: boolean; canEditQuickUse: boolean; canEditStorage: boolean; canEditPlacement: boolean; storage: Record<string, unknown>; quickUse: Record<string, unknown>; equipment: Record<string, unknown>;
   change(): void; refresh(): void; addItem(): void; fillSlot(slot: EquipmentSlot): void;
   act(change: Record<string, unknown>, summary: string): Promise<void>;
 }
@@ -127,7 +128,7 @@ export function backpack(view: SheetView): HTMLElement {
       const row = styled("div", "dse-item"); row.dataset["item"] = item.id; row.dataset["focusScope"] = "";
       row.append(styled("span", "dse-item-name", savedRule(view.projection, item.name, undefined, item.reference)));
       if (view.editing) {
-        const quantity = numberInput(item.quantity, value => { item.quantity = value ?? 0; if (item.quantity === 0) { item.attuned = false; if (item.location === "equipped") item.location = "carried"; } view.change(); }, 0); quantity.className = "dse-number"; quantity.setAttribute("aria-label", t("{0} quantity", [item.name]));
+        const quantity = numberInput(item.quantity, value => { item.quantity = value ?? 0; if (item.quantity === 0) { delete item.bodyPlacement; item.attuned = false; if (item.location === "equipped") item.location = "carried"; } view.change(); }, 0); quantity.className = "dse-number"; quantity.setAttribute("aria-label", t("{0} quantity", [item.name]));
         const eligibility = object(view.equipment[item.id]), choice = attunementChoice(item, view.equipment);
         const attune = button(item.attuned ? "★" : "☆", () => { if (attuneEquipment(item, !item.attuned, view.equipment)) { view.change(); view.refresh(); } }, !item.attuned && !choice.allowed); attune.setAttribute("aria-label", t("Attune {0}", [item.name])); attune.setAttribute("aria-pressed", String(item.attuned));
         const reason = equipmentReason(item.attuned ? eligibility["attuneReason"] : choice.reason, view.locale);
@@ -157,6 +158,7 @@ export function backpack(view: SheetView): HTMLElement {
         if (equipReason && equipReason !== reason) details.append(el("p", t("Equipment") + ": " + equipReason));
         row.append(details);
       } else { row.append(el("span", "× " + item.quantity + (item.attuned ? " ★" : ""))); if (item.notes) row.append(styled("details", "dse-item-notes", el("summary", t("Notes")), el("p", item.notes))); }
+      const placement = itemBodyPlacement(view, item); if (placement) row.append(placement);
       const destination = itemContainer(view, item); if (destination) row.append(destination);
       group.append(row);
     }

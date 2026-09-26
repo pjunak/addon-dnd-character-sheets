@@ -1,3 +1,4 @@
+import { itemBodyPlacement } from "./character-placement.js";
 import { itemContainer, storage } from "./character-storage.js";
 import { spellSourceLabel } from "./character-spells.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
@@ -168,6 +169,7 @@ export function backpack(view) {
             row.append(styled("span", "dse-item-name", savedRule(view.projection, item.name, undefined, item.reference)));
             if (view.editing) {
                 const quantity = numberInput(item.quantity, value => { item.quantity = value ?? 0; if (item.quantity === 0) {
+                    delete item.bodyPlacement;
                     item.attuned = false;
                     if (item.location === "equipped")
                         item.location = "carried";
@@ -234,6 +236,9 @@ export function backpack(view) {
                 if (item.notes)
                     row.append(styled("details", "dse-item-notes", el("summary", t("Notes")), el("p", item.notes)));
             }
+            const placement = itemBodyPlacement(view, item);
+            if (placement)
+                row.append(placement);
             const destination = itemContainer(view, item);
             if (destination)
                 row.append(destination);

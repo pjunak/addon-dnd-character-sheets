@@ -17,7 +17,7 @@ func (call providerCall) Call(ctx context.Context, meta *workerrpc.Meta, request
 }
 
 func TestIncompatibleProviderPreservesSavedReadingAndRejectsEdits(t *testing.T) {
-	for _, scenario := range []string{"malformed-result", "response-version", "evaluation-version", "broker-validation", "broker-request", "dropped-inspiration", "changed-inspiration", "dropped-quick-use", "changed-quick-use", "dropped-containers", "changed-containers", "dropped-membership", "changed-membership"} {
+	for _, scenario := range []string{"malformed-result", "response-version", "evaluation-version", "broker-validation", "broker-request", "dropped-inspiration", "changed-inspiration", "dropped-quick-use", "changed-quick-use", "dropped-containers", "changed-containers", "dropped-membership", "changed-membership", "dropped-placement", "changed-placement"} {
 		t.Run(scenario, func(t *testing.T) {
 			c, data, engine, meta := fixture(t)
 			input := model.Blank()
@@ -28,6 +28,8 @@ func TestIncompatibleProviderPreservesSavedReadingAndRejectsEdits(t *testing.T) 
 			input.Play.QuickUse = []string{"one"}
 			input.Play.Containers = []model.Container{{ID: "pack", Name: "Pack"}, {ID: "pouch", Name: "Pouch"}}
 			input.Play.Inventory[0].ContainerID = "pack"
+			input.Play.Inventory[1].Location = "equipped"
+			input.Play.Inventory[1].BodyPlacement = "neck"
 			saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "initial-character", Summary: "Create", Inputs: &input})
 			if err != nil || saved.Status != "ready" {
 				t.Fatalf("seed: %+v %v", saved, err)
@@ -63,6 +65,10 @@ func TestIncompatibleProviderPreservesSavedReadingAndRejectsEdits(t *testing.T) 
 						value.Evaluation.Inputs.Play.Inventory[0].ContainerID = ""
 					} else if scenario == "changed-membership" {
 						value.Evaluation.Inputs.Play.Inventory[0].ContainerID = "pouch"
+					} else if scenario == "dropped-placement" {
+						value.Evaluation.Inputs.Play.Inventory[1].BodyPlacement = ""
+					} else if scenario == "changed-placement" {
+						value.Evaluation.Inputs.Play.Inventory[1].BodyPlacement = "face"
 					} else if scenario == "dropped-inspiration" {
 						value.Evaluation.Inputs.Play.Inspiration = nil
 					} else if scenario == "changed-inspiration" {

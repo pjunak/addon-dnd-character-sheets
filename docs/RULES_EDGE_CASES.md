@@ -2,7 +2,7 @@
 
 The coordinator owns the current `dnd-sheets` extension for each core character
 lifetime. Schema 4.0.0 accepts earlier characters and the optional authored
-Inspiration, quick-use and storage fields; installing a changed schema requires the review below. The core profile, portrait and relationships are host-owned.
+Inspiration, quick-use, storage and body-placement fields; installing a changed schema requires the review below. The core profile, portrait and relationships are host-owned.
 
 ## Inspiration and compatible schema upgrades
 
@@ -91,6 +91,34 @@ host's saved-data review, with no JSON or document-revision rewrite.
 
 The final Equipment tab, searchable floating Backpack dialog, compartment
 filter/sort and explicit existing-stack choice remain T63 work.
+
+## Body placement and source eligibility
+
+Optional `inputs.play.inventory[].bodyPlacement` organizes a positive-quantity
+equipped instance. The shared inventory control uses live Engine
+`authoredPlay.bodyPlacement` support and `equipment[id].bodyPlacements`
+options. Native labels, styling, keyboard operation and stable focus keys use
+the host UI. It does not infer compatibility from names, tags or a humanoid grid.
+Multiple items may share a group. Armor/shield limits, supported mechanics and
+attunement are checked separately; custom items still need active DM authority.
+
+Unassigned old characters remain unchanged. The same instance retains notes,
+source, acquisition, quantity, grants and attunement when placement changes.
+Moving it to carried/stored, replacing its exclusive armor/shield slot, setting
+quantity to zero, or explicitly stowing/unattuning clears placement atomically.
+Consuming the final unit does likewise through the worker play command.
+Rest and recalculation preserve it. The worker rejects dropped/substituted
+placements in provider results except that exact final-unit transition.
+
+A removed source option leaves a visible unavailable selection which can be
+cleared for repair; no default replacement is saved. Disjoint edits can merge,
+but competing inventory changes retain pending input for conflict resolution,
+including remote item deletion. Lost responses retry the exact request.
+Saved reading, print and replacement export/import retain placement without
+a provider. Schema-4 installations use the compatible review above; all four
+preceding schema generations preserve exact JSON bytes and revisions.
+The final mannequin, Other worn picker, hand/grip state and Equipment workspace
+remain separate T63 work.
 
 ## Automatic saving
 

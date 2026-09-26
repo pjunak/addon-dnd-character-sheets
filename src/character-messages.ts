@@ -645,7 +645,23 @@ export const catalogs = {
     "Give each container a name of at most 120 characters.": "Give each container a name of at most 120 characters.",
     "Containers exceed the character input limit.": "Containers exceed the character input limit.",
     "Choose an existing container or remove this item's container assignment.": "Choose an existing container or remove this item's container assignment.",
-    "Only carried or stored items can be assigned to a container. Remove the assignment before equipping.": "Only carried or stored items can be assigned to a container. Remove the assignment before equipping."
+    "Only carried or stored items can be assigned to a container. Remove the assignment before equipping.": "Only carried or stored items can be assigned to a container. Remove the assignment before equipping.",
+    "Body placement": "Body placement",
+    "Body placement: {0}": "Body placement: {0}",
+    "Body placement for {0}": "Body placement for {0}",
+    "Unassigned": "Unassigned",
+    "Unavailable": "Unavailable",
+    "Other worn": "Other worn",
+    "Head": "Head",
+    "Body": "Body",
+    "Wrists": "Wrists",
+    "Legs": "Legs",
+    "Feet": "Feet",
+    "Face": "Face",
+    "Neck": "Neck",
+    "Shoulders": "Shoulders",
+    "Waist": "Waist",
+    "Gloves": "Gloves"
   },
   "cs": {
     "Quick use": "Rychlé použití",
@@ -1292,6 +1308,22 @@ export const catalogs = {
     "Give each container a name of at most 120 characters.": "Každý úložný prostor pojmenujte názvem o délce nejvýše 120 znaků.",
     "Containers exceed the character input limit.": "Počet úložných prostorů překračuje limit vstupu postavy.",
     "Choose an existing container or remove this item's container assignment.": "Vyberte existující úložný prostor nebo zrušte přiřazení tohoto předmětu.",
-    "Only carried or stored items can be assigned to a container. Remove the assignment before equipping.": "Do úložného prostoru lze přiřadit jen nesené nebo uložené předměty. Před vybavením přiřazení zrušte."
+    "Only carried or stored items can be assigned to a container. Remove the assignment before equipping.": "Do úložného prostoru lze přiřadit jen nesené nebo uložené předměty. Před vybavením přiřazení zrušte.",
+    "Body placement": "Umístění na těle",
+    "Body placement: {0}": "Umístění na těle: {0}",
+    "Body placement for {0}": "Umístění na těle: {0}",
+    "Unassigned": "Nepřiřazeno",
+    "Unavailable": "Nedostupné",
+    "Other worn": "Další nošené předměty",
+    "Head": "Hlava",
+    "Body": "Trup",
+    "Wrists": "Zápěstí",
+    "Legs": "Nohy",
+    "Feet": "Chodidla",
+    "Face": "Obličej",
+    "Neck": "Krk",
+    "Shoulders": "Ramena",
+    "Waist": "Pas",
+    "Gloves": "Rukavice"
   }
 } as const;

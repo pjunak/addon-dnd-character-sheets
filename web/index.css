@@ -256,7 +256,7 @@
 .addon-dnd-character .dse-bp-group + .dse-bp-group { margin-top:1rem; }
 .addon-dnd-character .dse-bp-label { margin-bottom:.5rem; }
 .addon-dnd-character .dse-item { padding:.35rem 0; }
-.addon-dnd-character .dse-item :is(input,select,button) { min-height:32px; padding:.2rem .35rem; }
+.addon-dnd-character .dse-item :is(input,select,button) { min-height:var(--ui-target,2.5rem); padding:.2rem .35rem; }
 .addon-dnd-character .dse-item .dse-number { width:3rem; }
 .addon-dnd-character .dse-item-location { width:6.5rem; }
 .addon-dnd-character .dse-worn button { min-height:28px; padding:.15rem .4rem; }
@@ -432,5 +432,5 @@
 .dse-storage-group :is(h4,p,ul) { flex-basis:100%; min-width:0; overflow-wrap:anywhere; }
 .dse-storage :is(button,input) { max-width:100%; min-height:var(--ui-target,40px); }
 .dse-storage button { white-space:normal; overflow-wrap:anywhere; }
-.dse-item-container { flex-basis:100%; min-width:0; overflow-wrap:anywhere; }
-.dse-item-container select { max-width:100%; min-width:0; }
+.dse-item-container, .dse-item-placement { flex-basis:100%; min-width:0; overflow-wrap:anywhere; }
+.dse-item-container select, .dse-item-placement select { max-width:100%; min-width:0; }

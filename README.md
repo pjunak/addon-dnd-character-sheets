@@ -19,6 +19,10 @@ Create, rename or remove a group and choose destinations in inventory or the
 item picker. Removing a container leaves its items intact; equipping an item
 clears only its membership. Organization adds no items or carrying-capacity
 rules, and saved reading, print and export retain it without a provider.
+**Body placement** organizes equipped instances using Engine-provided source
+choices. It does not add bonuses or equipment limits. Ordinary stowing clears
+placement while preserving the item and its attunement; saved reading, print
+and export retain assigned placements without a provider.
 Character notes belong to the core
 profile; the sheet has no Notes tab or notes section in print.
 
@@ -69,7 +73,7 @@ The host owns the core profile, portrait and relationships. The native worker
 provides `dnd5e.character` 2.0.0 and is the only writer of the `dnd-sheets`
 schema-4 extension. Its `workerOnly` declaration preserves authorization without
 retaining character snapshots. Install the compatible updated host before this
-package. The optional Inspiration, quick-use and storage fields change the stored schema hash, so
+package. The optional Inspiration, quick-use, storage and body-placement fields change the stored schema hash, so
 materialized installations need the host's [compatible schema review](docs/RULES_EDGE_CASES.md#inspiration-and-compatible-schema-upgrades)
 before activation. Existing schema-4 characters keep their exact inputs and
 saved projection; no reset or value conversion is required.

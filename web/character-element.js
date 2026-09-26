@@ -483,6 +483,7 @@ export function defineCharacterElement(generation, client, enhance) {
                 canEditInspiration: editing && object(this.#evaluation?.guidance["authoredPlay"])["inspiration"] === true,
                 canEditQuickUse: editing && object(this.#evaluation?.guidance["authoredPlay"])["quickUse"] === true,
                 quickUse: editing ? object(this.#evaluation?.guidance["quickUse"]) : {},
+                canEditPlacement: editing && object(this.#evaluation?.guidance["authoredPlay"])["bodyPlacement"] === true,
                 canEditStorage: editing && object(this.#evaluation?.guidance["authoredPlay"])["storage"] === true,
                 storage: object(this.#evaluation?.guidance["storage"]),
                 // A rejected HP value must remain correctable while other play actions are blocked.

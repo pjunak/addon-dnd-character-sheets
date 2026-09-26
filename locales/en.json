@@ -643,5 +643,21 @@
   "Give each container a name of at most 120 characters.": "Give each container a name of at most 120 characters.",
   "Containers exceed the character input limit.": "Containers exceed the character input limit.",
   "Choose an existing container or remove this item's container assignment.": "Choose an existing container or remove this item's container assignment.",
-  "Only carried or stored items can be assigned to a container. Remove the assignment before equipping.": "Only carried or stored items can be assigned to a container. Remove the assignment before equipping."
+  "Only carried or stored items can be assigned to a container. Remove the assignment before equipping.": "Only carried or stored items can be assigned to a container. Remove the assignment before equipping.",
+  "Body placement": "Body placement",
+  "Body placement: {0}": "Body placement: {0}",
+  "Body placement for {0}": "Body placement for {0}",
+  "Unassigned": "Unassigned",
+  "Unavailable": "Unavailable",
+  "Other worn": "Other worn",
+  "Head": "Head",
+  "Body": "Body",
+  "Wrists": "Wrists",
+  "Legs": "Legs",
+  "Feet": "Feet",
+  "Face": "Face",
+  "Neck": "Neck",
+  "Shoulders": "Shoulders",
+  "Waist": "Waist",
+  "Gloves": "Gloves"
 }
