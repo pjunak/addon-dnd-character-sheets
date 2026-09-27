@@ -44,7 +44,9 @@ instructions were loaded or read unrelated sibling implementations.
 - The removed v2 renderer service must not return as a live object/function or
   raw-HTML boundary. A future renderer contract must be serializable,
   schema-owned, selected by the host, and justified by a real consumer.
-- Runtime source is TypeScript under `src/`; `web/`, `worker/` and `dist/` are
+- Authored browser, tool and test source is TypeScript. The source guard rejects
+  tracked or untracked, non-ignored JavaScript; generated JavaScript remains
+  permitted only in ignored build output. `web/`, `worker/` and `dist/` are
   ignored build output. Never hand-edit or commit them. The package command
   rebuilds browser assets and native workers without relying on existing output.
   Public generated schemas and TypeScript models remain versioned; builds must
@@ -70,13 +72,20 @@ and verify changed commands or contract claims. Runtime builds and operational
 acceptance are required only for the affected behavior below. Reuse successful
 checks on unchanged inputs; preserve complete CI and release gates.
 
-Run npm run check for source/build changes. Build a package for installation,
+Run `npm run check:fast` while iterating and `npm run check` for source/build
+changes. The fast gate covers the authored-source boundary, strict TypeScript,
+typed Oxlint, Prettier and fast Go analysis. The full gate adds a clean browser
+build, TypeScript tests against that build and the complete Go test scope.
+CI additionally runs `npm run check:dependencies`, `npm run check:workflows`
+and `npm run check:vulnerabilities`; network checks stay outside the fast gate.
+Build a package for installation,
 manifest/schema/package changes and release candidates. Each package command
 performs its own build; keep that standalone guarantee. During iteration use
 focused tests and reuse a successful build only through an existing checked
 script, not by silently bypassing package preparation.
 
 ```powershell
+npm run check:fast
 npm run check
 npm run package
 ```

@@ -2,60 +2,100 @@ import type { Container, Inputs, Item, Projection } from "./character-model.js";
 import { object } from "./character-client.js";
 import { translator } from "./character-locale.js";
 
-export function assignBodyPlacement(item: Item, placement: string, guidance: EquipmentGuidance): boolean {
+export function assignBodyPlacement(
+  item: Item,
+  placement: string,
+  guidance: EquipmentGuidance,
+): boolean {
   if ((item.bodyPlacement ?? "") === placement) return false;
   const eligibility = object(guidance[item.id]);
-  if (placement && (item.location !== "equipped" || item.quantity < 1 || eligibility["canEquip"] !== true || !Array.isArray(eligibility["bodyPlacements"]) || !eligibility["bodyPlacements"].includes(placement))) return false;
-  if (placement) item.bodyPlacement = placement; else delete item.bodyPlacement;
+  if (
+    placement &&
+    (item.location !== "equipped" ||
+      item.quantity < 1 ||
+      eligibility["canEquip"] !== true ||
+      !Array.isArray(eligibility["bodyPlacements"]) ||
+      !eligibility["bodyPlacements"].includes(placement))
+  )
+    return false;
+  if (placement) item.bodyPlacement = placement;
+  else delete item.bodyPlacement;
   return true;
 }
 
 export function assignContainer(input: Inputs, itemId: string, containerId: string): boolean {
-  const item = input.play.inventory.find(item => item.id === itemId);
+  const item = input.play.inventory.find((item) => item.id === itemId);
   if (!item || (item.containerId ?? "") === containerId) return false;
-  if (containerId && (!["carried", "stored"].includes(item.location) || !input.play.containers?.some(container => container.id === containerId))) return false;
-  if (containerId) item.containerId = containerId; else delete item.containerId;
+  if (
+    containerId &&
+    (!["carried", "stored"].includes(item.location) ||
+      !input.play.containers?.some((container) => container.id === containerId))
+  )
+    return false;
+  if (containerId) item.containerId = containerId;
+  else delete item.containerId;
   return true;
 }
 
 export function removeContainer(input: Inputs, id: string): boolean {
-  if (!input.play.containers?.some(container => container.id === id)) return false;
-  const remaining = input.play.containers.filter(container => container.id !== id);
-  if (remaining.length) input.play.containers = remaining; else delete input.play.containers;
+  if (!input.play.containers?.some((container) => container.id === id)) return false;
+  const remaining = input.play.containers.filter((container) => container.id !== id);
+  if (remaining.length) input.play.containers = remaining;
+  else delete input.play.containers;
   for (const item of input.play.inventory) if (item.containerId === id) delete item.containerId;
   return true;
 }
 
-export function containerOptions(containers: readonly Container[]): Array<{ id: string; label: string }> {
+export function containerOptions(
+  containers: readonly Container[],
+): Array<{ id: string; label: string }> {
   return containers.map((container, index) => ({
     id: container.id,
-    label: containers.filter(other => other.name === container.name).length > 1 ? container.name + " (" + (index + 1) + ")" : container.name,
+    label:
+      containers.filter((other) => other.name === container.name).length > 1
+        ? container.name + " (" + (index + 1) + ")"
+        : container.name,
   }));
 }
 
 export function pinQuickUse(input: Inputs, id: string, pinned: boolean): boolean {
-  if (pinned && !input.play.inventory.some(item => item.id === id)) return false;
+  if (pinned && !input.play.inventory.some((item) => item.id === id)) return false;
   const current = input.play.quickUse ?? [];
   if (current.includes(id) === pinned) return false;
-  const next = pinned ? [...current, id] : current.filter(itemId => itemId !== id);
-  if (next.length) input.play.quickUse = next; else delete input.play.quickUse;
+  const next = pinned ? [...current, id] : current.filter((itemId) => itemId !== id);
+  if (next.length) input.play.quickUse = next;
+  else delete input.play.quickUse;
   return true;
 }
 
 export function removeInventoryItem(input: Inputs, id: string): void {
-  input.play.inventory = input.play.inventory.filter(item => item.id !== id);
+  input.play.inventory = input.play.inventory.filter((item) => item.id !== id);
   pinQuickUse(input, id, false);
 }
 
 // The picker uses an existing ID only after an explicit stack choice. Preserve
 // that instance's notes, grants and identity; new copies remain separate.
-export function appendEquipment(input: Inputs, items: readonly Item[], stacks: readonly string[] = []): boolean {
-  if (items.some(item => {
-    const prior = input.play.inventory.find(row => row.id === item.id);
-    return stacks.includes(item.id) ? !prior || prior.location !== "carried" || prior.attuned || prior.containerId !== item.containerId || prior.reference?.kind !== item.reference?.kind || prior.reference?.id !== item.reference?.id : !!prior;
-  })) return false;
+export function appendEquipment(
+  input: Inputs,
+  items: readonly Item[],
+  stacks: readonly string[] = [],
+): boolean {
+  if (
+    items.some((item) => {
+      const prior = input.play.inventory.find((row) => row.id === item.id);
+      return stacks.includes(item.id)
+        ? !prior ||
+            prior.location !== "carried" ||
+            prior.attuned ||
+            prior.containerId !== item.containerId ||
+            prior.reference?.kind !== item.reference?.kind ||
+            prior.reference?.id !== item.reference?.id
+        : !!prior;
+    })
+  )
+    return false;
   for (const item of items) {
-    const existing = input.play.inventory.find(row => row.id === item.id);
+    const existing = input.play.inventory.find((row) => row.id === item.id);
     if (existing) existing.quantity += item.quantity;
     else input.play.inventory.push(item);
   }
@@ -65,52 +105,91 @@ export function appendEquipment(input: Inputs, items: readonly Item[], stacks: r
 export function quickUseReason(reason: unknown, locale: string): string {
   const t = translator(locale);
   switch (reason) {
-    case "empty": return t("No items remaining.");
-    case "stored": return t("Carry this item before using it.");
-    case "missing": return t("This inventory entry is missing. Remove its pin.");
-    case "build": return t("Complete the character's required choices before using items.");
-    default: return "";
+    case "empty":
+      return t("No items remaining.");
+    case "stored":
+      return t("Carry this item before using it.");
+    case "missing":
+      return t("This inventory entry is missing. Remove its pin.");
+    case "build":
+      return t("Complete the character's required choices before using items.");
+    default:
+      return "";
   }
 }
 
 export type EquipmentSlot = "armor" | "shield" | "worn" | "attuned";
 export type EquipmentGuidance = Record<string, unknown>;
 
-export function equipmentSlot(item: Item, guidance: EquipmentGuidance, projection?: Projection): Exclude<EquipmentSlot, "attuned"> {
-  const slot = object(guidance[item.id])["slot"] ?? object(object(projection?.sheet["equipment"])[item.id])["slot"];
+export function equipmentSlot(
+  item: Item,
+  guidance: EquipmentGuidance,
+  projection?: Projection,
+): Exclude<EquipmentSlot, "attuned"> {
+  const slot =
+    object(guidance[item.id])["slot"] ??
+    object(object(projection?.sheet["equipment"])[item.id])["slot"];
   if (slot === "armor" || slot === "shield" || slot === "worn") return slot;
   // Older saved projections have source facts but no per-instance slot facts.
   // Reading them must not depend on whichever live catalog is installed today.
-  const facts = item.reference ? projection?.evidence.find(source => source.reference.kind === item.reference!.kind && source.reference.id === item.reference!.id)?.facts : undefined;
+  const facts = item.reference
+    ? projection?.evidence.find(
+        (source) =>
+          source.reference.kind === item.reference!.kind &&
+          source.reference.id === item.reference!.id,
+      )?.facts
+    : undefined;
   const armor = facts?.["armorType"];
   return armor === "shield" ? "shield" : typeof armor === "string" && armor ? "armor" : "worn";
 }
 
-export function moveEquipment(inventory: Item[], id: string, location: string, guidance: EquipmentGuidance, projection?: Projection): boolean {
-  const item = inventory.find(item => item.id === id);
+export function moveEquipment(
+  inventory: Item[],
+  id: string,
+  location: string,
+  guidance: EquipmentGuidance,
+  projection?: Projection,
+): boolean {
+  const item = inventory.find((item) => item.id === id);
   if (!item || !["equipped", "carried", "stored"].includes(location)) return false;
   if (location === "equipped") {
     if (object(guidance[id])["canEquip"] !== true) return false;
     delete item.containerId;
     const slot = equipmentSlot(item, guidance, projection);
-    if (slot === "armor" || slot === "shield") for (const other of inventory) {
-      if (other.id !== id && other.location === "equipped" && equipmentSlot(other, guidance, projection) === slot) { other.location = "carried"; delete other.bodyPlacement; }
-    }
+    if (slot === "armor" || slot === "shield")
+      for (const other of inventory) {
+        if (
+          other.id !== id &&
+          other.location === "equipped" &&
+          equipmentSlot(other, guidance, projection) === slot
+        ) {
+          other.location = "carried";
+          delete other.bodyPlacement;
+        }
+      }
   }
   item.location = location;
   if (location !== "equipped") delete item.bodyPlacement;
   return true;
 }
 
-export function attunementChoice(item: Item, guidance: EquipmentGuidance): { allowed: boolean; reason?: unknown } {
+export function attunementChoice(
+  item: Item,
+  guidance: EquipmentGuidance,
+): { allowed: boolean; reason?: unknown } {
   if (item.quantity <= 0) return { allowed: false, reason: "empty" };
   const eligibility = object(guidance[item.id]);
-  if (eligibility["canAttune"] !== true) return { allowed: false, reason: eligibility["attuneReason"] };
+  if (eligibility["canAttune"] !== true)
+    return { allowed: false, reason: eligibility["attuneReason"] };
   if (item.location !== "equipped") return { allowed: false, reason: "not-equipped" };
   return { allowed: true };
 }
 
-export function attuneEquipment(item: Item, attuned: boolean, guidance: EquipmentGuidance): boolean {
+export function attuneEquipment(
+  item: Item,
+  attuned: boolean,
+  guidance: EquipmentGuidance,
+): boolean {
   // Selecting a new allocation requires equipped gear; saved allocations remain
   // valid in other locations and can always be explicitly released.
   if (attuned && !attunementChoice(item, guidance).allowed) return false;
@@ -129,15 +208,25 @@ export function stowAndUnattune(item: Item): boolean {
 export function equipmentReason(reason: unknown, locale: string): string {
   const t = translator(locale);
   switch (reason) {
-    case "empty": return t("Increase the quantity before using this item.");
-    case "not-equipped": return t("Equip this item before attuning it.");
-    case "source": return t("This item's rules source is unavailable.");
-    case "mechanics": return t("This item needs supported rules or active DM mechanics.");
-    case "not-required": return t("This item does not require attunement.");
-    case "build": return t("Choose abilities, species, background and a class before attuning items.");
-    case "capacity": return t("All attunement slots are in use. Unattune an item first.");
-    case "duplicate": return t("Another copy of this item is already attuned.");
-    case "prerequisite": return t("Meet this item's prerequisite or record a DM ruling.");
-    default: return "";
+    case "empty":
+      return t("Increase the quantity before using this item.");
+    case "not-equipped":
+      return t("Equip this item before attuning it.");
+    case "source":
+      return t("This item's rules source is unavailable.");
+    case "mechanics":
+      return t("This item needs supported rules or active DM mechanics.");
+    case "not-required":
+      return t("This item does not require attunement.");
+    case "build":
+      return t("Choose abilities, species, background and a class before attuning items.");
+    case "capacity":
+      return t("All attunement slots are in use. Unattune an item first.");
+    case "duplicate":
+      return t("Another copy of this item is already attuned.");
+    case "prerequisite":
+      return t("Meet this item's prerequisite or record a DM ruling.");
+    default:
+      return "";
   }
 }

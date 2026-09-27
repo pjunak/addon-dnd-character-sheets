@@ -1,12 +1,30 @@
 import { catalogs } from "./character-messages.js";
+import { text } from "./character-client.js";
 
-export const abilityNames: Record<string, string> = { STR: "Strength", DEX: "Dexterity", CON: "Constitution", INT: "Intelligence", WIS: "Wisdom", CHA: "Charisma" };
+export const abilityNames: Record<string, string> = {
+  STR: "Strength",
+  DEX: "Dexterity",
+  CON: "Constitution",
+  INT: "Intelligence",
+  WIS: "Wisdom",
+  CHA: "Charisma",
+};
 
-export function builderLabel(guidance: Record<string, unknown>, locale: string, fallback = ""): string {
-  return translator(locale)(String(guidance["labelKey"] ?? guidance["label"] ?? fallback), Array.isArray(guidance["labelArgs"]) ? guidance["labelArgs"] : []);
+export function builderLabel(
+  guidance: Record<string, unknown>,
+  locale: string,
+  fallback = "",
+): string {
+  return translator(locale)(
+    text(guidance["labelKey"] ?? guidance["label"], fallback),
+    Array.isArray(guidance["labelArgs"]) ? guidance["labelArgs"] : [],
+  );
 }
 
 export function translator(locale: string): (key: string, values?: readonly unknown[]) => string {
   const catalog: Readonly<Record<string, string>> = locale === "cs" ? catalogs.cs : catalogs.en;
-  return (key, values = []) => (catalog[key] ?? key ?? "").replace(/\{(\d+)\}/gu, (_token, index: string) => String(values[Number(index)] ?? ""));
+  return (key, values = []) =>
+    (catalog[key] ?? key ?? "").replace(/\{(\d+)\}/gu, (_token, index: string) =>
+      text(values[Number(index)]),
+    );
 }

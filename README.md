@@ -144,24 +144,39 @@ engine's [public contract](../addon-dnd-engine/contract/README.md), and the
 
 ## Development
 
-Use Node.js 26 and the Go version in [go.mod](go.mod). Its local module
+Use Node.js 26 (`.nvmrc`; 26.0 or newer) and the Go version in [go.mod](go.mod). Its local module
 replacements expect compatible `ttrpg-codex` and `addon-dnd-engine` checkouts
 beside this repository. This build dependency does not require an installed
 engine at runtime.
 
 ```text
 npm ci
+npm run check:fast
 npm run check
 npm run package
 ```
+
+`check:fast` rejects authored JavaScript, type-checks browser source, tools and
+tests, runs typed Oxlint and Prettier checks, and performs the fast Go checks.
+Use `npm run typecheck`, `npm run lint`, `npm run lint:fix`, `npm run format` or
+`npm run format:check` for a focused iteration. Generated schemas, models,
+catalogs and package output stay under their owning generators and are excluded
+from source formatting and linting.
+Browser source and Node tools/tests have separate typed-lint passes. CI and
+weekly maintenance also run `npm run check:dependencies` against the npm lockfile;
+high or critical advisories fail this network check without applying fixes.
+Use `npm run check:workflows` and `npm run check:vulnerabilities` to run the
+matching workflow and reachable Go vulnerability checks locally.
 
 Inspect the resulting ZIP from the host with
 `go run ./cmd/codex-addon-inspect ../addon-dnd-character-sheets/dist/dnd-sheets-4.0.0.zip`.
 The package command rebuilds web assets and native workers from source, including
 when neither output directory exists. `web/`, `worker/` and `dist/` are ignored
 build artifacts; public schemas and generated TypeScript models remain versioned.
-CI checks that builds preserve tracked source. Tests import freshly built `web/`
-through `npm run check`; `npm test` is a focused rerun after building. Source checkout
+CI checks that builds preserve tracked source. Tests type-check against `src/`
+and import freshly built `web/` at runtime through `npm run check`; `npm test` is
+a focused rerun after building. The source guard rejects tracked or untracked,
+non-ignored JavaScript source while allowing ignored compiled output. Source checkout
 edits become visible only after rebuilding and reviewed activation. Current
 integration tests live in the host's installed character/rules/sheets suites.
 The installed-character suite checks both layouts on desktop and phone, keyboard

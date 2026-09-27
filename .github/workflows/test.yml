@@ -46,19 +46,22 @@ jobs:
           go-version-file: addon-dnd-character-sheets/go.mod
           cache-dependency-path: |
             addon-dnd-character-sheets/go.sum
+            addon-dnd-character-sheets/go.tools.sum
             addon-dnd-engine/go.sum
             ttrpg-codex/go.sum
       - run: npm ci
         working-directory: addon-dnd-character-sheets
+      - run: npm run check:dependencies
+        working-directory: addon-dnd-character-sheets
+      - run: go mod download -modfile=go.tools.mod
+        working-directory: addon-dnd-character-sheets
+      - run: go run ./tools/check.go workflows
+        working-directory: addon-dnd-character-sheets
+      - run: go run ./tools/check.go vuln
+        working-directory: addon-dnd-character-sheets
+      - run: npm run check
+        working-directory: addon-dnd-character-sheets
       - run: npm run package
-        working-directory: addon-dnd-character-sheets
-      - run: npm test
-        working-directory: addon-dnd-character-sheets
-      - run: go test ./...
-        working-directory: addon-dnd-character-sheets
-      - run: go vet ./...
-        working-directory: addon-dnd-character-sheets
-      - run: go test -race ./internal/character
         working-directory: addon-dnd-character-sheets
       - name: Verify builds preserve source ownership
         run: |

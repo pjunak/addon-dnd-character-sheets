@@ -1,136 +1,607 @@
 /* Compact layout from the approved sheet mockup. Native controls and semantic
    host tokens keep keyboard behavior and skins shared with the application. */
-.addon-dnd-character[data-layout=compact] { max-width:85rem; }
-.addon-dnd-character .dse-layout-compact { --dsc-gap:.65rem; align-items:stretch; grid-template-columns:7.5rem minmax(0,1fr); gap:.75rem; }
-.addon-dnd-character .dse-layout-compact .dnd-sheet-tabs { position:static; height:auto; min-height:0; padding-right:.4rem; }
-.addon-dnd-character .dse-layout-compact .dnd-sheet-tabs .codex-tab { font-size:.82rem; display:flex; align-items:center; gap:.4rem; padding-inline:.4rem; }
-.dse-layout-compact .dnd-sheet-tabs svg { width:1rem; height:1rem; flex:none; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
-.addon-dnd-character .dse-layout-compact .dnd-sheet-workspace { display:block; min-height:max(48rem,var(--dsc-content-height,0px)); }
-.addon-dnd-character .dse-layout-compact .dnd-save-status { margin-bottom:.5rem; }
-.addon-dnd-character .dse-layout-compact .dnd-sheet-panel { display:block; }
-.dsc-sheet, .dsc-top { display:grid; grid-template-columns:minmax(0,1fr) 17.25rem; gap:var(--dsc-gap); align-items:start; }
-.dsc-sheet-main, .dsc-combat, .dsc-equipment-column { display:grid; gap:var(--dsc-gap); min-width:0; align-content:start; }
-.addon-dnd-character .dse-layout-compact .dse-cards { display:flex; min-width:0; gap:.4rem; }
-.addon-dnd-character .dse-layout-compact .dse-ability-title { border:0; font-size:.78rem; letter-spacing:0; flex-wrap:wrap; }
-.addon-dnd-character .dse-layout-compact .dse-ability-body { gap:.4rem; }
-.addon-dnd-character .dse-layout-compact .dse-ability-details { display:block; width:auto; }
-.addon-dnd-character .dse-layout-compact .dse-skill { padding:0; line-height:1.5; gap:.3rem; }
-.addon-dnd-character .dse-layout-compact .dse-score { background:var(--bg-raised); border:0; }
-.addon-dnd-character .dse-layout-compact .dse-score .dse-number { background:transparent; border:0; }
-.addon-dnd-character .dse-layout-compact .dse-dock { white-space:normal; font-size:.65rem; }
-.dse-casting { flex-wrap:wrap; gap:.3rem; }
-.dse-casting > small { flex-basis:100%; text-align:center; }
-.dsc-vitals { display:grid; grid-template-columns:minmax(9rem,1.5fr) minmax(5.5rem,1fr) minmax(4rem,.65fr) minmax(4.25rem,.7fr) minmax(5.25rem,.85fr); gap:.4rem; align-items:stretch; min-width:0; }
-.addon-dnd-character .dsc-stat { background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius); min-width:0; padding:.55rem; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; gap:.2rem; min-height:7rem; text-align:left; }
-.dsc-stat-label { font-size:.66rem; color:var(--text-muted); text-transform:uppercase; overflow-wrap:anywhere; }
-.dsc-stat > strong { font-size:1.6rem; font-weight:500; }
-.dsc-stat > small { font-size:.7rem; color:var(--text-muted); }
-.dsc-hp-values { display:flex; align-items:center; gap:.4rem; font-size:1.25rem; min-width:0; }
-.addon-dnd-character .dsc-hp-values input { width:4rem; max-width:100%; padding:.2rem .35rem; font-size:1.4rem; min-height:2.5rem; }
-.dsc-health-track { width:min(100%,10rem); height:.65rem; border-radius:3px; background:var(--bg-raised); overflow:hidden; margin-block:.2rem; }
-.dsc-health-track > span { display:block; height:100%; width:var(--health); background:var(--color-success); }
-.dsc-health-track[data-health=medium] > span { background:var(--accent-gold); }
-.dsc-health-track[data-health=low] > span { background:var(--color-danger); }
-.dsc-temp { display:flex; align-items:center; flex-wrap:wrap; gap:.25rem; font-size:.65rem; color:var(--text-muted); }
-.addon-dnd-character .dsc-temp input { width:3rem; min-height:2rem; padding:.1rem; font-size:.8rem; }
-.addon-dnd-character .dsc-inspiration { width:100%; }
-.dsc-inspiration { position:relative; cursor:pointer; }
-.addon-dnd-character .dsc-inspiration > input { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:inherit; }
-.dsc-inspiration > span:nth-child(3) { font-size:1.3rem; }
-.addon-dnd-character .dsc-inspiration:has(:checked) { background:var(--bg-raised); border-color:var(--accent-gold); }
-.addon-dnd-character .dsc-inspiration:has(:focus-visible) { outline:2px solid var(--accent-gold); outline-offset:2px; }
-.addon-dnd-character .dsc-inspiration:has(:disabled) { cursor:default; }
-.dsc-ready { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:var(--dsc-gap); }
-.addon-dnd-character .dse-layout-compact :is(.character-panel,.dse-section) { border:1px solid var(--border-subtle); border-radius:var(--radius); padding:.65rem; background:var(--bg-surface); min-width:0; }
-.addon-dnd-character .dse-layout-compact :is(.character-panel,.dse-section) { margin:0; }
-.addon-dnd-character .dse-layout-compact :is(.character-panel,.dse-section) h3 { font-family:var(--font-ui); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.5rem; margin:0 0 .5rem; }
-.addon-dnd-character .dse-layout-compact .dse-resource { padding-block:.4rem; border-bottom:1px solid var(--border-subtle); gap:.4rem; }
-.addon-dnd-character .dse-layout-compact .dse-resource > span:first-child { flex:1 1 7rem; }
-.addon-dnd-character .dse-layout-compact .dse-quick-use-name { flex:1 1 8rem; }
-.dsc-exploration > details { padding-block:.35rem; }
-.dsc-adjustments { font-size:.8rem; color:var(--text-muted); }
-.dsc-adjustments > div { margin-top:.5rem; }
-.addon-dnd-character .dsc-exploration .dse-section { border:0; padding:.5rem 0; }
-.dsc-reference { padding:.55rem; border:1px solid var(--border-subtle); border-radius:var(--radius); background:var(--bg-surface); min-width:0; }
-.dsc-reference-row { display:flex; justify-content:space-between; align-items:center; gap:.5rem; font-size:.75rem; padding-block:.25rem; }
-.dsc-combat-abilities { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:.4rem; }
-.dsc-combat-ability { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:.3rem; padding:.55rem; border:1px solid var(--border-subtle); border-radius:var(--radius); background:var(--bg-surface); }
-.dsc-combat-ability > small { grid-column:1/-1; color:var(--text-muted); font-size:.7rem; }
-.dsc-combat-ability > strong { font-weight:500; font-size:1.4rem; }
-.dsc-save { display:inline-flex; align-items:center; gap:.3rem; }
-.addon-dnd-character .dse-layout-compact .dse-hands > button { max-width:6rem; font-size:.72rem; padding:.4rem; }
-.addon-dnd-character .dse-layout-compact [data-hands] > small { display:block; margin-top:.35rem; color:var(--text-muted); font-size:.7rem; }
-.dsc-equipment { display:flex; flex-direction:column; gap:var(--dsc-gap); min-height:46rem; }
-.dsc-equipment-columns { display:grid; grid-template-columns:1.05fr 1fr; gap:var(--dsc-gap); align-items:start; }
-.dsc-mannequin { display:grid; grid-template-columns:minmax(0,1fr) 5rem minmax(0,1fr); grid-template-rows:repeat(5,minmax(4.5rem,auto)); gap:.75rem .2rem; position:relative; align-items:center; }
-.dsc-body { grid-column:2; grid-row:1/6; align-self:stretch; display:flex; align-items:center; justify-content:center; pointer-events:none; }
-.dsc-body svg { width:9rem; max-width:none; height:100%; max-height:27rem; flex:none; fill:color-mix(in srgb,var(--text-muted) 25%,var(--bg-surface)); stroke:var(--text-muted); stroke-width:1.5; }
-.addon-dnd-character .dsc-body-slot { min-width:0; width:100%; min-height:3.75rem; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:.25rem; padding:.5rem; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--bg-surface); text-align:left; overflow-wrap:anywhere; z-index:1; }
-.dsc-body-slot:nth-child(even) { grid-column:1; }
-.dsc-body-slot:nth-child(odd) { grid-column:3; }
-.dsc-body-slot small { text-transform:uppercase; color:var(--text-muted); font-size:.65rem; }
-.dsc-body-slot span { font-size:.8rem; }
-.dsc-worn-item { display:flex; gap:.75rem; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border-subtle); padding-block:.5rem; min-width:0; overflow-wrap:anywhere; }
-.dsc-container-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; margin-top:.5rem; }
-.addon-dnd-character .dsc-pack-open { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.35rem; width:100%; text-align:left; padding:1rem; background:var(--bg-raised); }
-.dsc-pack-open strong { grid-column:1/-1; font-family:var(--font-ui); font-size:1.2rem; }
-.dsc-pack-open span { font-size:.8rem; }
-.addon-dnd-character .dsc-currency { margin-top:auto; display:flex; flex-wrap:wrap; align-items:center; gap:.75rem; }
-.addon-dnd-character .dsc-currency > h3 { margin:0; }
-.dsc-currency .dse-coins { flex:1 1 25rem; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.75rem; }
-.addon-dnd-character .dsc-currency .dse-coins input { width:100%; min-width:0; text-align:left; padding:.3rem .5rem; }
-.dsc-placement-picker { display:grid; gap:.5rem; }
-.character-dialog:has(.dsc-backpack-dialog) { width:min(64rem,calc(100vw - 2rem)); max-width:calc(100vw - 2rem); }
-.dsc-pack-toolbar { display:flex; flex-wrap:wrap; gap:.5rem; align-items:end; }
-.dsc-pack-toolbar .character-field { flex:1 1 10rem; min-width:0; }
-.dsc-pack-toolbar button { max-width:100%; }
-.dsc-backpack-dialog .dse-bp-split { display:block; }
-.dsc-backpack-dialog .dse-bp-right:empty { display:none; }
-.dsc-backpack-dialog .dse-item { margin-top:.75rem; padding-block:.75rem; }
-.dsc-backpack-dialog .dse-item-notes { flex-basis:100%; }
-.dsc-backpack-dialog > details { margin-top:1rem; }
+.addon-dnd-character[data-layout="compact"] {
+  max-width: 85rem;
+}
+.addon-dnd-character .dse-layout-compact {
+  --dsc-gap: 0.65rem;
+  align-items: stretch;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+.addon-dnd-character .dse-layout-compact .dnd-sheet-tabs {
+  position: static;
+  height: auto;
+  min-height: 0;
+  padding-right: 0.4rem;
+}
+.addon-dnd-character .dse-layout-compact .dnd-sheet-tabs .codex-tab {
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-inline: 0.4rem;
+}
+.dse-layout-compact .dnd-sheet-tabs svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.addon-dnd-character .dse-layout-compact .dnd-sheet-workspace {
+  display: block;
+  min-height: max(48rem, var(--dsc-content-height, 0px));
+}
+.addon-dnd-character .dse-layout-compact .dnd-save-status {
+  margin-bottom: 0.5rem;
+}
+.addon-dnd-character .dse-layout-compact .dnd-sheet-panel {
+  display: block;
+}
+.dsc-sheet,
+.dsc-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 17.25rem;
+  gap: var(--dsc-gap);
+  align-items: start;
+}
+.dsc-sheet-main,
+.dsc-combat,
+.dsc-equipment-column {
+  display: grid;
+  gap: var(--dsc-gap);
+  min-width: 0;
+  align-content: start;
+}
+.addon-dnd-character .dse-layout-compact .dse-cards {
+  display: flex;
+  min-width: 0;
+  gap: 0.4rem;
+}
+.addon-dnd-character .dse-layout-compact .dse-ability-title {
+  border: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0;
+  flex-wrap: wrap;
+}
+.addon-dnd-character .dse-layout-compact .dse-ability-body {
+  gap: 0.4rem;
+}
+.addon-dnd-character .dse-layout-compact .dse-ability-details {
+  display: block;
+  width: auto;
+}
+.addon-dnd-character .dse-layout-compact .dse-skill {
+  padding: 0;
+  line-height: 1.5;
+  gap: 0.3rem;
+}
+.addon-dnd-character .dse-layout-compact .dse-score {
+  background: var(--bg-raised);
+  border: 0;
+}
+.addon-dnd-character .dse-layout-compact .dse-score .dse-number {
+  background: transparent;
+  border: 0;
+}
+.addon-dnd-character .dse-layout-compact .dse-dock {
+  white-space: normal;
+  font-size: 0.65rem;
+}
+.dse-casting {
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.dse-casting > small {
+  flex-basis: 100%;
+  text-align: center;
+}
+.dsc-vitals {
+  display: grid;
+  grid-template-columns:
+    minmax(9rem, 1.5fr) minmax(5.5rem, 1fr) minmax(4rem, 0.65fr) minmax(4.25rem, 0.7fr)
+    minmax(5.25rem, 0.85fr);
+  gap: 0.4rem;
+  align-items: stretch;
+  min-width: 0;
+}
+.addon-dnd-character .dsc-stat {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  min-width: 0;
+  padding: 0.55rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.2rem;
+  min-height: 7rem;
+  text-align: left;
+}
+.dsc-stat-label {
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.dsc-stat > strong {
+  font-size: 1.6rem;
+  font-weight: 500;
+}
+.dsc-stat > small {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+.dsc-hp-values {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.25rem;
+  min-width: 0;
+}
+.addon-dnd-character .dsc-hp-values input {
+  width: 4rem;
+  max-width: 100%;
+  padding: 0.2rem 0.35rem;
+  font-size: 1.4rem;
+  min-height: 2.5rem;
+}
+.dsc-health-track {
+  width: min(100%, 10rem);
+  height: 0.65rem;
+  border-radius: 3px;
+  background: var(--bg-raised);
+  overflow: hidden;
+  margin-block: 0.2rem;
+}
+.dsc-health-track > span {
+  display: block;
+  height: 100%;
+  width: var(--health);
+  background: var(--color-success);
+}
+.dsc-health-track[data-health="medium"] > span {
+  background: var(--accent-gold);
+}
+.dsc-health-track[data-health="low"] > span {
+  background: var(--color-danger);
+}
+.dsc-temp {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+.addon-dnd-character .dsc-temp input {
+  width: 3rem;
+  min-height: 2rem;
+  padding: 0.1rem;
+  font-size: 0.8rem;
+}
+.addon-dnd-character .dsc-inspiration {
+  width: 100%;
+}
+.dsc-inspiration {
+  position: relative;
+  cursor: pointer;
+}
+.addon-dnd-character .dsc-inspiration > input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: inherit;
+}
+.dsc-inspiration > span:nth-child(3) {
+  font-size: 1.3rem;
+}
+.addon-dnd-character .dsc-inspiration:has(:checked) {
+  background: var(--bg-raised);
+  border-color: var(--accent-gold);
+}
+.addon-dnd-character .dsc-inspiration:has(:focus-visible) {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+.addon-dnd-character .dsc-inspiration:has(:disabled) {
+  cursor: default;
+}
+.dsc-ready {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--dsc-gap);
+}
+.addon-dnd-character .dse-layout-compact :is(.character-panel, .dse-section) {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 0.65rem;
+  background: var(--bg-surface);
+  min-width: 0;
+}
+.addon-dnd-character .dse-layout-compact :is(.character-panel, .dse-section) {
+  margin: 0;
+}
+.addon-dnd-character .dse-layout-compact :is(.character-panel, .dse-section) h3 {
+  font-family: var(--font-ui);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+}
+.addon-dnd-character .dse-layout-compact .dse-resource {
+  padding-block: 0.4rem;
+  border-bottom: 1px solid var(--border-subtle);
+  gap: 0.4rem;
+}
+.addon-dnd-character .dse-layout-compact .dse-resource > span:first-child {
+  flex: 1 1 7rem;
+}
+.addon-dnd-character .dse-layout-compact .dse-quick-use-name {
+  flex: 1 1 8rem;
+}
+.dsc-exploration > details {
+  padding-block: 0.35rem;
+}
+.dsc-adjustments {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.dsc-adjustments > div {
+  margin-top: 0.5rem;
+}
+.addon-dnd-character .dsc-exploration .dse-section {
+  border: 0;
+  padding: 0.5rem 0;
+}
+.dsc-reference {
+  padding: 0.55rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  min-width: 0;
+}
+.dsc-reference-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  padding-block: 0.25rem;
+}
+.dsc-combat-abilities {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+.dsc-combat-ability {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.55rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+}
+.dsc-combat-ability > small {
+  grid-column: 1/-1;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+.dsc-combat-ability > strong {
+  font-weight: 500;
+  font-size: 1.4rem;
+}
+.dsc-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.addon-dnd-character .dse-layout-compact .dse-hands > button {
+  max-width: 6rem;
+  font-size: 0.72rem;
+  padding: 0.4rem;
+}
+.addon-dnd-character .dse-layout-compact [data-hands] > small {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+.dsc-equipment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dsc-gap);
+  min-height: 46rem;
+}
+.dsc-equipment-columns {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: var(--dsc-gap);
+  align-items: start;
+}
+.dsc-mannequin {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5rem minmax(0, 1fr);
+  grid-template-rows: repeat(5, minmax(4.5rem, auto));
+  gap: 0.75rem 0.2rem;
+  position: relative;
+  align-items: center;
+}
+.dsc-body {
+  grid-column: 2;
+  grid-row: 1/6;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.dsc-body svg {
+  width: 9rem;
+  max-width: none;
+  height: 100%;
+  max-height: 27rem;
+  flex: none;
+  fill: color-mix(in srgb, var(--text-muted) 25%, var(--bg-surface));
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+}
+.addon-dnd-character .dsc-body-slot {
+  min-width: 0;
+  width: 100%;
+  min-height: 3.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  text-align: left;
+  overflow-wrap: anywhere;
+  z-index: 1;
+}
+.dsc-body-slot:nth-child(even) {
+  grid-column: 1;
+}
+.dsc-body-slot:nth-child(odd) {
+  grid-column: 3;
+}
+.dsc-body-slot small {
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+.dsc-body-slot span {
+  font-size: 0.8rem;
+}
+.dsc-worn-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-block: 0.5rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dsc-container-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.addon-dnd-character .dsc-pack-open {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem;
+  width: 100%;
+  text-align: left;
+  padding: 1rem;
+  background: var(--bg-raised);
+}
+.dsc-pack-open strong {
+  grid-column: 1/-1;
+  font-family: var(--font-ui);
+  font-size: 1.2rem;
+}
+.dsc-pack-open span {
+  font-size: 0.8rem;
+}
+.addon-dnd-character .dsc-currency {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.addon-dnd-character .dsc-currency > h3 {
+  margin: 0;
+}
+.dsc-currency .dse-coins {
+  flex: 1 1 25rem;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.addon-dnd-character .dsc-currency .dse-coins input {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: 0.3rem 0.5rem;
+}
+.dsc-placement-picker {
+  display: grid;
+  gap: 0.5rem;
+}
+.character-dialog:has(.dsc-backpack-dialog) {
+  width: min(64rem, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+}
+.dsc-pack-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: end;
+}
+.dsc-pack-toolbar .character-field {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+.dsc-pack-toolbar button {
+  max-width: 100%;
+}
+.dsc-backpack-dialog .dse-bp-split {
+  display: block;
+}
+.dsc-backpack-dialog .dse-bp-right:empty {
+  display: none;
+}
+.dsc-backpack-dialog .dse-item {
+  margin-top: 0.75rem;
+  padding-block: 0.75rem;
+}
+.dsc-backpack-dialog .dse-item-notes {
+  flex-basis: 100%;
+}
+.dsc-backpack-dialog > details {
+  margin-top: 1rem;
+}
 @container sheet-workspace (max-width:54rem) {
- .dsc-sheet, .dsc-top { grid-template-columns:minmax(0,1fr) 15rem; }
- .dsc-vitals { grid-template-columns:repeat(4,minmax(0,1fr)); }
- .dsc-health { grid-column:1/-1; }
- .addon-dnd-character .dsc-health { display:grid; grid-template-columns:auto 1fr; }
- .dsc-health .dsc-stat-label { grid-column:1; }
- .dsc-hp-values { grid-column:1; }
- .dsc-health-track { grid-column:2; grid-row:2; justify-self:end; }
- .dsc-temp { grid-column:2; grid-row:1; justify-self:end; }
- .dsc-stat { min-height:5.5rem; }
+  .dsc-sheet,
+  .dsc-top {
+    grid-template-columns: minmax(0, 1fr) 15rem;
+  }
+  .dsc-vitals {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .dsc-health {
+    grid-column: 1/-1;
+  }
+  .addon-dnd-character .dsc-health {
+    display: grid;
+    grid-template-columns: auto 1fr;
+  }
+  .dsc-health .dsc-stat-label {
+    grid-column: 1;
+  }
+  .dsc-hp-values {
+    grid-column: 1;
+  }
+  .dsc-health-track {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+  }
+  .dsc-temp {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+  .dsc-stat {
+    min-height: 5.5rem;
+  }
 }
 @container sheet-workspace (max-width:48rem) {
- .dsc-sheet, .dsc-top, .dsc-equipment-columns { grid-template-columns:minmax(0,1fr); }
- .addon-dnd-character .dse-layout-compact .dse-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
- .dsc-combat-abilities { grid-template-columns:repeat(3,minmax(0,1fr)); }
- .dsc-equipment { min-height:0; }
+  .dsc-sheet,
+  .dsc-top,
+  .dsc-equipment-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .addon-dnd-character .dse-layout-compact .dse-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dsc-combat-abilities {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .dsc-equipment {
+    min-height: 0;
+  }
 }
 @container character-sheet (max-width:48rem) {
- .addon-dnd-character .dse-layout-compact .dnd-sheet-workspace { min-height:0; }
+  .addon-dnd-character .dse-layout-compact .dnd-sheet-workspace {
+    min-height: 0;
+  }
 }
 @container sheet-workspace (max-width:30rem) {
- .dsc-ready { grid-template-columns:minmax(0,1fr); }
- .dsc-vitals { grid-template-columns:repeat(2,minmax(0,1fr)); }
- .addon-dnd-character .dsc-health { display:flex; }
- .dsc-combat-abilities { grid-template-columns:repeat(2,minmax(0,1fr)); }
- .addon-dnd-character .dse-layout-compact .dse-cards { display:flex; }
- .dsc-mannequin { grid-template-columns:minmax(0,1fr) 1.5rem minmax(0,1fr); }
- .dsc-body svg { width:7rem; }
- .dsc-currency .dse-coins { gap:.3rem; grid-template-columns:repeat(auto-fit,minmax(3.5rem,1fr)); }
- .dsc-container-cards { grid-template-columns:minmax(0,1fr); }
+  .dsc-ready {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dsc-vitals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .addon-dnd-character .dsc-health {
+    display: flex;
+  }
+  .dsc-combat-abilities {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .addon-dnd-character .dse-layout-compact .dse-cards {
+    display: flex;
+  }
+  .dsc-mannequin {
+    grid-template-columns: minmax(0, 1fr) 1.5rem minmax(0, 1fr);
+  }
+  .dsc-body svg {
+    width: 7rem;
+  }
+  .dsc-currency .dse-coins {
+    gap: 0.3rem;
+    grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr));
+  }
+  .dsc-container-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 @container character-sheet (max-width:24rem) {
- .addon-dnd-character .dse-layout-compact { grid-template-columns:minmax(0,1fr); }
- .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-right:0; border-bottom:1px solid var(--border-subtle); gap:.25rem; padding:0 0 .4rem; }
- .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs .codex-tab { height:100%; }
- .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs #dnd-tab-builder { margin:0; }
+  .addon-dnd-character .dse-layout-compact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-right: 0;
+    border-bottom: 1px solid var(--border-subtle);
+    gap: 0.25rem;
+    padding: 0 0 0.4rem;
+  }
+  .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs .codex-tab {
+    height: 100%;
+  }
+  .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs #dnd-tab-builder {
+    margin: 0;
+  }
 }
-@media (pointer:coarse) {
- .addon-dnd-character .dse-layout-compact :is(button,input,select), .addon-dnd-character[data-layout=compact] .character-dialog :is(button,input,select) { min-height:44px; }
+@media (pointer: coarse) {
+  .addon-dnd-character .dse-layout-compact :is(button, input, select),
+  .addon-dnd-character[data-layout="compact"] .character-dialog :is(button, input, select) {
+    min-height: 44px;
+  }
 }
-@media (forced-colors:active) {
- .dsc-health-track { border:1px solid CanvasText; }
- .dsc-health-track > span { background:Highlight; }
- .dsc-body svg { fill:Canvas; stroke:CanvasText; }
+@media (forced-colors: active) {
+  .dsc-health-track {
+    border: 1px solid CanvasText;
+  }
+  .dsc-health-track > span {
+    background: Highlight;
+  }
+  .dsc-body svg {
+    fill: Canvas;
+    stroke: CanvasText;
+  }
 }

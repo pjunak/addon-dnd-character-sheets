@@ -3,16 +3,42 @@
   "version": "4.0.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#web/*": {
+      "types": "./src/*.ts",
+      "default": "./web/*.js"
+    }
+  },
+  "engines": {
+    "node": ">=26.0.0"
+  },
   "scripts": {
     "build": "go run ./cmd/character-contract && node tools/build-locales.ts && node tools/clean-web.ts && tsc -p tsconfig.json && node tools/copy-style.ts",
     "package": "npm run build && node tools/build-worker.ts && node tools/package.ts",
-    "test": "node --test tests/*.mjs",
-    "check": "npm run build && npm test && go test ./... && go vet ./..."
+    "test": "node --test tests/*.mts",
+    "check:source": "node tools/check-source.mts",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json",
+    "lint:src": "oxlint --type-aware --tsconfig tsconfig.json --deny-warnings --report-unused-disable-directives src",
+    "lint:node": "oxlint --type-aware --tsconfig tsconfig.node.json --deny-warnings --report-unused-disable-directives tools tests",
+    "lint": "npm run lint:src && npm run lint:node",
+    "lint:fix": "npm run lint:src -- --fix && npm run lint:node -- --fix",
+    "format": "prettier --write \"src/**/*.{ts,css}\" \"tools/**/*.ts\" \"tools/**/*.mts\" \"tests/**/*.mts\" package.json \"tsconfig*.json\" .oxlintrc.json .prettierrc.json",
+    "format:check": "prettier --check \"src/**/*.{ts,css}\" \"tools/**/*.ts\" \"tools/**/*.mts\" \"tests/**/*.mts\" package.json \"tsconfig*.json\" .oxlintrc.json .prettierrc.json",
+    "check:go": "go run ./tools/check.go",
+    "check:workflows": "go run ./tools/check.go workflows",
+    "check:vulnerabilities": "go run ./tools/check.go vuln",
+    "check:dependencies": "npm audit --package-lock-only --audit-level=high",
+    "check:fast": "npm run check:source && npm run typecheck && npm run lint && npm run format:check && go run ./tools/check.go fast",
+    "check": "npm run check:fast && npm run build && npm test && go run ./tools/check.go test"
   },
   "devDependencies": {
     "@types/archiver": "^7.0.0",
-    "@types/node": "^24.0.0",
+    "@types/node": "26.6.3",
     "archiver": "^7.0.1",
-    "typescript": "^5.9.0"
+    "oxc-parser": "0.151.0",
+    "oxlint": "1.85.0",
+    "oxlint-tsgolint": "7.0.2003",
+    "prettier": "3.9.9",
+    "typescript": "7.0.2"
   }
 }
