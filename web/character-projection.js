@@ -1,4 +1,5 @@
 import { bodyPlacementLabel } from "./character-placement.js";
+import { handsRead } from "./character-hands.js";
 import { storageRead } from "./character-storage.js";
 import { containerOptions } from "./character-inventory.js";
 import { quickUseRead } from "./character-quick-use.js";
@@ -112,6 +113,8 @@ export function printCharacter(state, _revision, name, options, locale = "en") {
     root.append(projectionView(projection, locale));
     if (options.equipment && state.inputs.play.quickUse?.length)
         root.append(quickUseRead(state.inputs, state.projection, locale));
+    if (options.equipment && state.inputs.play.hands)
+        root.append(handsRead(state.inputs, state.projection, locale));
     if (options.equipment && state.inputs.play.containers?.length)
         root.append(storageRead(state.inputs, locale));
     const containers = containerOptions(state.inputs.play.containers ?? []);

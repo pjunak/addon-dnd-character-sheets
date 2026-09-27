@@ -4,6 +4,7 @@ import { translator } from "./character-locale.js";
 import { feedbackMessage } from "./character-feedback.js";
 import { playActions } from "./character-play.js";
 import { quickUse } from "./character-quick-use.js";
+import { handControls } from "./character-hands.js";
 import { abilityRail, backpack, combatDetails, preferredLayout, vitals, type Layout, type SheetView } from "./character-sheet.js";
 import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment, type EquipmentSlot } from "./character-inventory.js";
 import { equipmentPicker } from "./character-equipment.js";
@@ -254,7 +255,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       else {
         const main = styled("div", "dse-cols-main", vitals(view));
         if (!this.#response.state) main.append(panel(this.#t("Create your character"), el("p", this.#t("Choose your origin, abilities and first class to start building.")), button(this.#t("Open Builder"), () => { this.#tab = "builder"; this.#render(); })));
-        main.append(quickUse(view), this.#tab === "combat" ? this.#combat() : backpack(view));
+        main.append(handControls(view,this.#tab === "combat"),quickUse(view), this.#tab === "combat" ? this.#combat() : backpack(view));
         content.append(styled("div", "dse-cols", abilityRail(view), main));
       }
       root.append(nav, styled("div", "dnd-sheet-workspace", status, content));
@@ -279,6 +280,8 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       return { locale: this.#context?.host.locale ?? "en", layout: this.#layout, input: this.#input, projection: this.#response?.state?.projection, catalogs: this.#catalogs,
         equipment: this.#response?.rulesChanged || this.#response?.status === "unavailable" ? {} : object(this.#evaluation?.guidance["equipment"]),
         editing, canPlay,
+        canEditHands: editing && !!this.#response?.state && object(this.#evaluation?.guidance["authoredPlay"])["hands"] === true,
+        hands: editing ? object(this.#evaluation?.guidance["hands"]) : {},
         canEditInspiration: editing && object(this.#evaluation?.guidance["authoredPlay"])["inspiration"] === true,
         canEditQuickUse: editing && object(this.#evaluation?.guidance["authoredPlay"])["quickUse"] === true,
         quickUse: editing ? object(this.#evaluation?.guidance["quickUse"]) : {},

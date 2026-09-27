@@ -2,7 +2,7 @@
 
 The coordinator owns the current `dnd-sheets` extension for each core character
 lifetime. Schema 4.0.0 accepts earlier characters and the optional authored
-Inspiration, quick-use, storage and body-placement fields; installing a changed schema requires the review below. The core profile, portrait and relationships are host-owned.
+Inspiration, quick-use, storage, body-placement and hand fields; installing a changed schema requires the review below. The core profile, portrait and relationships are host-owned.
 
 ## Inspiration and compatible schema upgrades
 
@@ -118,8 +118,43 @@ including remote item deletion. Lost responses retry the exact request.
 Saved reading, print and replacement export/import retain placement without
 a provider. Schema-4 installations use the compatible review above; all four
 preceding schema generations preserve exact JSON bytes and revisions.
-The final mannequin, Other worn picker, hand/grip state and Equipment workspace
+The final mannequin, Other worn picker and Equipment workspace
 remain separate T63 work.
+
+## Hands and suspended equipment
+
+Optional `inputs.play.hands` follows the [Engine-owned contract](../../addon-dnd-engine/contract/README.md#hands-and-grip).
+Sheet and Combat share native labelled main/off-hand fields and a central
+two-handed toggle, enabled by live `guidance.authoredPlay.hands`. The same
+component uses borrowed controls, semantic tokens and stable focus keys in both
+layouts. The toggle keeps a stable accessible label and `aria-pressed`, following
+the [WAI button pattern](https://www.w3.org/WAI/ARIA/apg/patterns/button/).
+Its selected appearance uses the host's primary variant. Suspended items remain
+visible in muted text with an explicit inactive explanation; color alone does
+not convey their state. Combat alone adds saved attack/damage detail controls.
+
+The Engine owns closed `set-hand` and `set-grip` commands. They work on legal
+incomplete builds and save through the ordinary optimistic worker path.
+Two-handing carries the exact selected off-hand item and suppresses its active
+effects; its attunement allocation remains. Releasing restores only an unchanged,
+still eligible instance, including its prior compatible body placement. A moved,
+edited, consumed, removed or newly blocked item is never silently restored or
+recreated; the saved projection explains the refusal. Hand changes do not track
+turn, action or shield don/doff timing.
+
+The coordinator allows only the requested hand identities and involved item
+location/container/placement transitions. It rejects provider changes to notes,
+quantities, grants, attunement, other instances or unrelated Play values, and
+checks exact restoration fingerprints. Ordinary evaluations, rests and other
+commands cannot rewrite the hand state. Conflicting revisions remain explicit;
+uncertain writes retain the exact command and operation ID for Retry.
+
+Provider-free saved reading, printing and reviewed replacement transfer keep
+main/off-hand, grip and suspended-instance identity. Old characters do not gain
+default fields. All five preceding schema-4 generations retain exact JSON and
+document revisions through the host's compatible review, including **Heal and
+update** for the preceding placement-enabled package. The final shared-card
+geometry, conditions, Equipment workspace and mannequin remain T63 work.
 
 ## Automatic saving
 

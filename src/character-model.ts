@@ -76,6 +76,13 @@ export interface Grant {
   waivers: Array<string>;
 }
 
+export interface Hands {
+  main: string;
+  off: string;
+  grip: string;
+  suspendedOff?: SuspendedHand;
+}
+
 export interface Inputs {
   build: Build;
   play: Play;
@@ -113,6 +120,7 @@ export interface Level {
 }
 
 export interface Play {
+  hands?: Hands;
   inspiration?: boolean;
   quickUse?: Array<string>;
   containers?: Array<Container>;
@@ -244,6 +252,12 @@ export interface State {
   projection: Projection;
   rules: RulesContext;
   operationId: string;
+}
+
+export interface SuspendedHand {
+  itemId: string;
+  expectedItemSha256: string;
+  bodyPlacement?: string;
 }
 
 export interface Term {

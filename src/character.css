@@ -434,3 +434,16 @@
 .dse-storage button { white-space:normal; overflow-wrap:anywhere; }
 .dse-item-container, .dse-item-placement { flex-basis:100%; min-width:0; overflow-wrap:anywhere; }
 .dse-item-container select, .dse-item-placement select { max-width:100%; min-width:0; }
+.dse-hands { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:var(--space-2); align-items:start; }
+.dse-hands > :is(button,.character-field) { min-width:0; max-width:100%; }
+.addon-dnd-character .dse-hands > .character-field { grid-column:1; grid-row:1 / span 4; grid-template-rows:subgrid; margin:0; }
+.addon-dnd-character .dse-hands > .character-field:last-child { grid-column:3; }
+.dse-hands > button { grid-column:2; grid-row:2; white-space:normal; overflow-wrap:anywhere; display:inline-flex; align-items:center; justify-content:center; gap:var(--space-1); }
+.dse-hands > button svg { width:1.2em; height:1.2em; fill:none; stroke:currentColor; stroke-width:2; }
+.dse-hand-suspended { color:var(--text-muted); border-inline-start:3px solid var(--border-subtle); padding-inline-start:var(--space-2); }
+.dse-hands :is(p,small) { overflow-wrap:anywhere; }
+@container character-sheet (max-width:42rem) {
+ .dse-hands { grid-template-columns:minmax(0,1fr); }
+ .addon-dnd-character .dse-hands > .character-field, .addon-dnd-character .dse-hands > .character-field:last-child { grid-column:1; grid-row:auto; grid-template-rows:none; }
+ .dse-hands > button { grid-column:1; grid-row:auto; justify-self:start; flex-direction:column; }
+}

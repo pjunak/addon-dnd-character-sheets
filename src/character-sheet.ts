@@ -12,7 +12,7 @@ import { button, checkbox, el, field, human, label, numberInput, panel, rule, se
 export type Layout = "compact" | "classic";
 export interface SheetView {
   locale: string; layout: Layout; input: Inputs; projection: Projection | undefined; catalogs: Map<string, CatalogRecord[]>;
-  editing: boolean; canPlay: boolean; canEditHP: boolean; canEditInspiration: boolean; canEditQuickUse: boolean; canEditStorage: boolean; canEditPlacement: boolean; storage: Record<string, unknown>; quickUse: Record<string, unknown>; equipment: Record<string, unknown>;
+  editing: boolean; canPlay: boolean; canEditHP: boolean; canEditInspiration: boolean; canEditQuickUse: boolean; canEditStorage: boolean; canEditPlacement: boolean; canEditHands: boolean; hands: Record<string, unknown>; storage: Record<string, unknown>; quickUse: Record<string, unknown>; equipment: Record<string, unknown>;
   change(): void; refresh(): void; addItem(): void; fillSlot(slot: EquipmentSlot): void;
   act(change: Record<string, unknown>, summary: string): Promise<void>;
 }
