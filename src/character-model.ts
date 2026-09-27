@@ -19,6 +19,11 @@ export interface Choice {
   value: unknown;
 }
 
+export interface Condition {
+  id: string;
+  level: number;
+}
+
 export interface Container {
   id: string;
   name: string;
@@ -120,6 +125,7 @@ export interface Level {
 }
 
 export interface Play {
+  conditions?: Array<Condition>;
   hands?: Hands;
   inspiration?: boolean;
   quickUse?: Array<string>;

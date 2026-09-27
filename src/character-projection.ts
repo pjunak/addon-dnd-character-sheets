@@ -3,6 +3,7 @@ import { handsRead } from "./character-hands.js";
 import { storageRead } from "./character-storage.js";
 import { containerOptions } from "./character-inventory.js";
 import { quickUseRead } from "./character-quick-use.js";
+import { conditionsRead } from "./character-conditions.js";
 import { grantedSpellsRead } from "./character-spells.js";
 import { featDetails, senseDetails } from "./character-sheet.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
@@ -73,6 +74,7 @@ export function printCharacter(state: State, _revision: number, name: string, op
   if (!options.spells) delete projection.sheet["spellcasting"];
   root.append(panel(t("Hit points"), el("p", t("Current: {0} / {1}. Temporary: {2}.", [state.inputs.play.hp, human(object(projection.sheet["derived"])["maxHp"]), state.inputs.play.temporaryHp]))));
   root.append(panel(t("Inspiration"), el("p", t(state.inputs.play.inspiration === true ? "Available" : "Not available"))));
+  if (state.inputs.play.conditions?.length) root.append(conditionsRead(state.inputs, state.projection, locale));
   const currency = Object.entries(state.inputs.play.currency);
   if (currency.length) {
     const values = el("dl");

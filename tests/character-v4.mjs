@@ -69,6 +69,17 @@ test('Inspiration merges disjoint edits and preserves explicit false versus abse
  assert.equal(mergeCharacter(authored,spent,other).play.inspiration,false);
 });
 
+test('condition edits rebase independent notes and never merge competing condition lists', () => {
+ const base=blank(),local=structuredClone(base),remote=structuredClone(base);
+ local.play.conditions=[{id:'fatigue',level:2}];remote.notes='Other editor';
+ const merged=mergeCharacter(base,local,remote);
+ assert.deepEqual(merged.play.conditions,local.play.conditions);assert.equal(merged.notes,remote.notes);
+ remote.play.conditions=[{id:'held',level:1}];assert.equal(mergeCharacter(base,local,remote),undefined);
+ remote.play.conditions=structuredClone(local.play.conditions);assert.deepEqual(mergeCharacter(base,local,remote).play.conditions,local.play.conditions);
+ const removed=structuredClone(local),changed=structuredClone(local);removed.play.conditions=[];changed.play.conditions[0].level=3;
+ assert.equal(mergeCharacter(local,removed,changed),undefined);
+});
+
 test('accepted choice withdrawals preserve newer edits without restoring retired selections', async () => {
  const { reconcileCharacterChoices } = await import('../web/character-client.js');
  const old = { id: 'old-origin', slot: 0, value: 'former-choice' }, newer = { id: 'new-origin', slot: 0, value: 'new-choice' };

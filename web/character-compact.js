@@ -4,6 +4,7 @@ import { assignBodyPlacement, containerOptions, moveEquipment, stowAndUnattune }
 import { bodyPlacementLabel } from "./character-placement.js";
 import { handControls } from "./character-hands.js";
 import { quickUse } from "./character-quick-use.js";
+import { conditions } from "./character-conditions.js";
 import { abilityNames, translator } from "./character-locale.js";
 import { button, el, field, human, numberInput, panel, signed, styled } from "./character-ui.js";
 export function compactNavigation(nav) {
@@ -121,7 +122,7 @@ export function compactSheet(view, combat, rest, openBackpack) {
         attacks.dataset["detailsKey"] = "combat/attacks";
         const recovery = el("details", el("summary", t("Rest and recovery")), rest);
         recovery.dataset["detailsKey"] = "combat/recovery";
-        root.append(styled("div", "dsc-top", compactVitals(view), combatReference(view)), combatAbilities(view), handControls(view, true), ready, attacks, hpActions(view), recovery, exploration(view));
+        root.append(styled("div", "dsc-top", compactVitals(view), combatReference(view)), combatAbilities(view), conditions(view), handControls(view, true), ready, attacks, hpActions(view), recovery, exploration(view));
     }
     else {
         root.append(styled("div", "dsc-sheet-main", compactVitals(view), handControls(view, false), ready, hpActions(view), exploration(view)), abilityRail(view));

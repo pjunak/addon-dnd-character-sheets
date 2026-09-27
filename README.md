@@ -58,8 +58,15 @@ armor/shield/worn controls remain available separately from body placement.
 The desktop frame retains the largest measured view at the current width and
 grows when new content needs space, without rendering duplicate hidden tabs.
 Small screens use normal document flow. It cannot predict the height of an
-unvisited, expanded view. Conditions remain a separate Engine/worker contract
-task; the mockup's simulated condition toggle is not a saved feature.
+unvisited, expanded view.
+
+**Conditions** in Combat use the same saved panel in both layouts. Select a
+condition, adjust its source-defined level or remove it; changes save
+automatically. Speed includes supported condition restrictions. A separate D20
+roll adjustment is shown explicitly and is not folded into the displayed
+bonuses or spell save DCs. Condition summaries survive provider loss, print and
+export. End conditions explicitly, including after a rest; situational effects,
+concentration, dropped items and death remain table decisions.
 
 Valid changes save automatically. Build completion is separate from validity:
 an unfinished character is saved as it is built, while rules-dependent play

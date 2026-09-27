@@ -2,7 +2,29 @@
 
 The coordinator owns the current `dnd-sheets` extension for each core character
 lifetime. Schema 4.0.0 accepts earlier characters and the optional authored
-Inspiration, quick-use, storage, body-placement and hand fields; installing a changed schema requires the review below. The core profile, portrait and relationships are host-owned.
+Inspiration, quick-use, storage, body-placement, hand and condition fields; installing a changed schema requires the review below. The core profile, portrait and relationships are host-owned.
+
+## Authored conditions
+
+Optional `inputs.play.conditions` stores the Engine-owned `{id,level}` DTO.
+Compact and Classic Combat use one shared condition panel, borrowed combobox,
+native level input and explicit removal actions. Current condition levels,
+source summaries and roll adjustments also survive print/export without rules.
+Controls require live `guidance.authoredPlay.conditions`; unavailable sources
+leave existing selections removable without inventing catalog defaults.
+
+The worker rejects providers that drop, reorder or rewrite this authored list
+during evaluation or play. Automatic saving, exact retries, conflict handling
+and replacement import use the ordinary character boundary. Recalculation and
+rests preserve the list. Displayed Speed includes declared restrictions; the
+separate D20 adjustment must be applied once to rolls, without changing printed
+bonuses or save DCs. Other effects require table adjudication; see the
+[Engine contract](../../addon-dnd-engine/contract/README.md#authored-conditions).
+
+This optional closed field changes the schema hash without invalidating earlier
+schema-4 data. Use the existing guided **Heal and update** compatibility check;
+it preserves exact character JSON and document revisions. No data reset,
+manual disabling or bespoke migration is required.
 
 ## Inspiration and compatible schema upgrades
 

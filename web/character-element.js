@@ -4,6 +4,7 @@ import { translator } from "./character-locale.js";
 import { feedbackMessage } from "./character-feedback.js";
 import { playActions } from "./character-play.js";
 import { quickUse } from "./character-quick-use.js";
+import { conditions } from "./character-conditions.js";
 import { handControls } from "./character-hands.js";
 import { compactEquipment, compactNavigation, compactSheet, placementPicker } from "./character-compact.js";
 import { backpackDialog } from "./character-backpack.js";
@@ -528,6 +529,8 @@ export function defineCharacterElement(generation, client, enhance) {
                 canEditHands: editing && !!this.#response?.state && object(this.#evaluation?.guidance["authoredPlay"])["hands"] === true,
                 hands: editing ? object(this.#evaluation?.guidance["hands"]) : {},
                 canEditInspiration: editing && object(this.#evaluation?.guidance["authoredPlay"])["inspiration"] === true,
+                canEditConditions: editing && object(this.#evaluation?.guidance["authoredPlay"])["conditions"] === true,
+                conditions: editing ? object(this.#evaluation?.guidance["conditions"]) : {},
                 canEditQuickUse: editing && object(this.#evaluation?.guidance["authoredPlay"])["quickUse"] === true,
                 quickUse: editing ? object(this.#evaluation?.guidance["quickUse"]) : {},
                 canEditPlacement: editing && object(this.#evaluation?.guidance["authoredPlay"])["bodyPlacement"] === true,
@@ -672,7 +675,7 @@ export function defineCharacterElement(generation, client, enhance) {
                 rest.append(button(this.#t("{0} rest", [this.#t(label(value))]), () => view.act({ operation: "rest", rest: value }, value + " rest"), !view.canPlay));
             root.append(rest);
             if (includeDetails)
-                root.append(combatDetails(view));
+                root.append(conditions(view), combatDetails(view));
             if (this.#evaluation) {
                 const recovery = el("fieldset");
                 recovery.disabled = !view.canPlay;

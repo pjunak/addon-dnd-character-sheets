@@ -31,6 +31,7 @@ func TestCommandRetryAfterLostCommitAndWorkerRestart(t *testing.T) {
 			input := model.Blank()
 			inspiration := true
 			input.Play.Inspiration = &inspiration
+			input.Play.Conditions = []model.Condition{{ID: "fatigue", Level: 2}}
 			input.Play.Inventory = []model.Item{{ID: "supplies", Name: "Supplies", Quantity: 2, Location: "carried"}}
 			input.Play.QuickUse = []string{"supplies"}
 			input.Play.Containers = []model.Container{{ID: "pack", Name: "Pack"}}
@@ -46,6 +47,7 @@ func TestCommandRetryAfterLostCommitAndWorkerRestart(t *testing.T) {
 			case "build":
 				spent := false
 				input.Play.Inspiration = &spent
+				input.Play.Conditions[0].Level = 3
 				command.Inputs = &input
 			case "play":
 				command.Change = map[string]any{"operation": "damage", "amount": 1}

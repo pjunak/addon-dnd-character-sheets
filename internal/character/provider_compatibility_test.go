@@ -17,13 +17,14 @@ func (call providerCall) Call(ctx context.Context, meta *workerrpc.Meta, request
 }
 
 func TestIncompatibleProviderPreservesSavedReadingAndRejectsEdits(t *testing.T) {
-	for _, scenario := range []string{"malformed-result", "response-version", "evaluation-version", "broker-validation", "broker-request", "dropped-inspiration", "changed-inspiration", "dropped-quick-use", "changed-quick-use", "dropped-containers", "changed-containers", "dropped-membership", "changed-membership", "dropped-placement", "changed-placement"} {
+	for _, scenario := range []string{"malformed-result", "response-version", "evaluation-version", "broker-validation", "broker-request", "dropped-inspiration", "changed-inspiration", "dropped-conditions", "changed-conditions", "dropped-quick-use", "changed-quick-use", "dropped-containers", "changed-containers", "dropped-membership", "changed-membership", "dropped-placement", "changed-placement"} {
 		t.Run(scenario, func(t *testing.T) {
 			c, data, engine, meta := fixture(t)
 			input := model.Blank()
 			input.Notes = "Keep this character"
 			inspiration := true
 			input.Play.Inspiration = &inspiration
+			input.Play.Conditions = []model.Condition{{ID: "fatigue", Level: 2}}
 			input.Play.Inventory = []model.Item{{ID: "one", Name: "Supplies", Quantity: 1, Location: "carried"}, {ID: "two", Name: "Other supplies", Quantity: 2, Location: "carried"}}
 			input.Play.QuickUse = []string{"one"}
 			input.Play.Containers = []model.Container{{ID: "pack", Name: "Pack"}, {ID: "pouch", Name: "Pouch"}}
@@ -53,6 +54,10 @@ func TestIncompatibleProviderPreservesSavedReadingAndRejectsEdits(t *testing.T) 
 					}
 					if scenario == "response-version" {
 						value.ContractVersion = "rules-character-response.v99"
+					} else if scenario == "dropped-conditions" {
+						value.Evaluation.Inputs.Play.Conditions = nil
+					} else if scenario == "changed-conditions" {
+						value.Evaluation.Inputs.Play.Conditions[0].Level = 1
 					} else if scenario == "dropped-quick-use" {
 						value.Evaluation.Inputs.Play.QuickUse = nil
 					} else if scenario == "changed-quick-use" {
