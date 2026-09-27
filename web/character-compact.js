@@ -1,4 +1,4 @@
-import { abilityRail, attackDetails, castingDetails, currency, explorationDetails, resourceDetails, savedRule, wornEquipment } from "./character-sheet.js";
+import { abilityRail, attackDetails, castingDetails, currency, explorationDetails, resourceDetails, savedRule, sizeDetails, wornEquipment } from "./character-sheet.js";
 import { abilities, object, rows, strings } from "./character-client.js";
 import { assignBodyPlacement, containerOptions, moveEquipment, stowAndUnattune } from "./character-inventory.js";
 import { bodyPlacementLabel } from "./character-placement.js";
@@ -102,8 +102,8 @@ function combatReference(view) {
 function exploration(view) {
     const t = translator(view.locale), root = panel(t("Exploration")), contents = explorationDetails(view);
     root.classList.add("dsc-exploration");
-    if (view.projection?.sheet["derived"])
-        root.append(styled("p", "dsc-size", styled("span", "dse-stat-label", t("Size")), " ", savedRule(view.projection, human(object(view.projection.sheet["derived"])["size"]), "derived.size")));
+    if (Object.hasOwn(object(view.projection?.sheet["derived"]), "size"))
+        root.append(styled("p", "dsc-size", styled("span", "dse-stat-label", t("Size")), " ", sizeDetails(view)));
     for (const [index, section] of [...contents.children].entries()) {
         const title = section.querySelector("h3")?.textContent ?? t("Details");
         const details = el("details", el("summary", title), section);

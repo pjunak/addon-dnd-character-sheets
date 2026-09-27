@@ -27,6 +27,10 @@ export function savedRule(projection: Projection | undefined, name: string, path
   const explanation = path ? projection?.explanations[path] : undefined;
   return rule(name, reference, explanation, undefined, projection);
 }
+export function sizeDetails(view: Pick<SheetView, "locale" | "projection">): HTMLElement {
+  const t = translator(view.locale), size = object(view.projection?.sheet["derived"])["size"];
+  return savedRule(view.projection, typeof size === "string" ? t(size) : t("Needs a choice"), "derived.size");
+}
 export function featDetails(projection: Projection | undefined, locale: string): HTMLElement | undefined {
   const feats = rows(projection?.sheet["feats"]);
   if (!feats.length) return undefined;
@@ -97,7 +101,7 @@ export function vitals(view: SheetView): HTMLElement {
   const tile = (name: string, key: string, sign = false): HTMLElement => styled("div", "codex-tile", styled("span", "dse-stat-label", t(name)), el("strong", savedRule(view.projection, sign ? signed(derived[key]) : human(derived[key]), "derived." + key)));
   const ac = tile("Armor class", "armorClass"); ac.classList.add("dse-ac"); band.append(ac);
   const stats = styled("div", "dse-vitals-grid", tile("Speed", "speed"), tile("Proficiency", "proficiencyBonus", true));
-  if (Object.hasOwn(derived, "size")) stats.append(styled("div", "codex-tile", styled("span", "dse-stat-label", t("Size")), el("strong", savedRule(view.projection, typeof derived["size"] === "string" ? t(derived["size"]) : t("Needs a choice"), "derived.size"))));
+  if (Object.hasOwn(derived, "size")) stats.append(styled("div", "codex-tile", styled("span", "dse-stat-label", t("Size")), el("strong", sizeDetails(view))));
   if (view.layout === "classic") stats.append(tile("Initiative", "initiative", true), tile("Passive perception", "passivePerception"));
   const inspiration = checkbox(t("Inspiration"), view.input.play.inspiration === true, value => { view.input.play.inspiration = value; view.change(); });
   const inspirationInput = inspiration.querySelector("input")!;
