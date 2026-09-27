@@ -26,3 +26,8 @@ test("pending recovery rejects incompatible versions, identities, requests and o
     { inputs: { ...blank(), notes: "x".repeat(180001) } },
   ]) assert.throws(() => readCharacterPending({ ...pending(), ...change }), /Pending changes could not be restored/);
 });
+
+test("Equipment navigation survives the host-owned pending handoff", () => {
+  const original = { ...pending(), tab: "equipment" };
+  assert.deepEqual(readCharacterPending(original), original);
+});

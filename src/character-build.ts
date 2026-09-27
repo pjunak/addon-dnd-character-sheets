@@ -4,6 +4,7 @@ import { abilities, newId, object, rows, strings, type CatalogRecord } from "./c
 import { builderTarget, button, combo, el, field, human, label, panel, refreshSteppers, rule, select, stepper, styled, type Option } from "./character-ui.js";
 
 export interface BuildView {
+  compact?: boolean;
   locale: string; input: Inputs; evaluation: Result | undefined; policy: Record<string, unknown>; catalogs: Map<string, CatalogRecord[]>;
   changed(): void; refresh(): void; navigate?(tab: string): void;
 }
@@ -14,7 +15,9 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
   const plan = view.evaluation?.plan ?? {}, guidance = object(view.evaluation?.guidance["choices"]);
   const update = (action: () => void, render = false): void => { action(); view.changed(); refreshSteppers(root); if (render) view.refresh(); };
   if (active === "character") {
-    const foundation = panel(t("Character")); foundation.classList.add("character-foundation");
+    const foundation = panel(t(view.compact ? "Ability scores" : "Character")); foundation.classList.add("character-foundation");
+    const origin = view.compact ? panel(t("Origin")) : foundation;
+    if (view.compact) origin.classList.add("character-foundation");
     const pointBuy = object(plan["pointBuy"]), costs = object(pointBuy["cost"]), minimum = Number(pointBuy["min"]), maximum = Number(pointBuy["max"]), budget = Number(pointBuy["budget"]);
     const method = select(build.method, ["point-buy", "array", "rolled"].map(id => ({ id, label: t(label(id)) })), value => {
       if (!value) return;
@@ -54,10 +57,11 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
     if (build.method === "point-buy" && Number.isFinite(budget)) { refreshBudget(); foundation.append(progress); }
     for (const kind of ["species", "background"] as const) {
       const records = view.catalogs.get(kind) ?? [], choice = combo(build[kind], options(records), value => update(() => { build[kind] = value; if(kind === "species") build.lineage=""; },true),t);
-      const source = field(t(label(kind)),choice); source.dataset["builderTarget"]=kind; foundation.append(source);
+      const source = field(t(label(kind)),choice); source.dataset["builderTarget"]=kind; origin.append(source);
       const selected = records.find(record => record.id === build[kind]);
-      if (kind === "species" && selected && rows(selected.value["lineages"]).length) foundation.append(builderTarget("lineage",field(t("Lineage"),combo(build.lineage,guidanceOptions(selected.value["lineages"]),value=>update(()=>{build.lineage=value;},true),t))));
+      if (kind === "species" && selected && rows(selected.value["lineages"]).length) origin.append(builderTarget("lineage",field(t("Lineage"),combo(build.lineage,guidanceOptions(selected.value["lineages"]),value=>update(()=>{build.lineage=value;},true),t))));
     }
+    if (view.compact) root.append(origin);
     root.append(foundation);
     const choices = panel(t("Granted choices"));
     for (const repair of unassignedFeatChoices(view, rows(plan["creationChoices"]), guidance)) choices.append(repair);
@@ -88,6 +92,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
     if(active!=="levels"&&level.classId!==active)return;
     classLevel++;
     const row = styled("details","dse-build-level"); row.open=true; row.id="character-level-"+encodeURIComponent(level.id); row.dataset["builderTarget"]="class:"+level.classId;
+    row.dataset["detailsKey"] = "level/" + level.id;
     const name=String((view.catalogs.get("class")??[]).find(record=>record.id===level.classId)?.value["name"]??level.classId);
     row.append(styled("summary","dse-build-level-head",el("strong",t("Level {0}",[active==="levels"?index+1:classLevel])),el("span",active==="levels"?name:t("Character level {0}",[index+1]))));
     if(active!=="levels") {

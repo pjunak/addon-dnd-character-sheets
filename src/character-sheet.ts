@@ -2,7 +2,7 @@ import { itemBodyPlacement } from "./character-placement.js";
 import { itemContainer, storage } from "./character-storage.js";
 import { spellSourceLabel } from "./character-spells.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
-import type { Inputs, Projection, Reference } from "./character-model.js";
+import type { Inputs, Item, Projection, Reference } from "./character-model.js";
 import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, pinQuickUse, removeInventoryItem, stowAndUnattune, type EquipmentSlot } from "./character-inventory.js";
 import type { CatalogRecord } from "./character-client.js";
 import { abilities, object, rows } from "./character-client.js";
@@ -49,8 +49,8 @@ export function abilityRail(view: SheetView): HTMLElement {
     const score = object(object(sheet["abilities"])[ability]), save = object(object(sheet["saves"])[ability]);
     const card = styled("section", "codex-surface dse-ability"), title = styled("div", "dse-ability-title");
     const dock = styled("span", "dse-dock-slot"), derived = object(sheet["derived"]);
-    if (view.layout === "compact" && ability === "DEX") dock.append(styled("span", "dse-dock", t("Init {0}", [signed(derived["initiative"])])));
-    if (view.layout === "compact" && ability === "WIS") dock.append(styled("span", "dse-dock", t("Passive {0}", [human(derived["passivePerception"])])));
+    if (view.layout === "compact" && ability === "DEX") dock.append(styled("span", "dse-dock", savedRule(view.projection, t("Init {0}", [signed(derived["initiative"])]), "derived.initiative")));
+    if (view.layout === "compact" && ability === "WIS") dock.append(styled("span", "dse-dock", savedRule(view.projection, t("Passive {0}", [human(derived["passivePerception"])]), "derived.passivePerception")));
     const proficiency = styled("span", "dse-dot dse-shield"); proficiency.append(icon("M12 2.4 19.3 5.3V11c0 4.8-3.3 8.6-7.3 10.5C8 19.6 4.7 15.8 4.7 11V5.3Z")); proficiency.dataset["proficient"] = String(save["proficient"] === true); proficiency.title = t("{0} — saving throw: {1}", [t(abilityNames[ability]!), t(save["proficient"] === true ? "Proficient" : "Untrained")]); proficiency.setAttribute("role", "img"); proficiency.setAttribute("aria-label", proficiency.title);
     title.append(el("span", t(abilityNames[ability]!)), dock, proficiency, savedRule(view.projection, signed(save["total"]), "saves." + ability + ".total"));
     const tile = styled("div", "dse-score", el("strong", savedRule(view.projection, signed(score["mod"]), "abilities." + ability + ".mod")), styled("span", "dse-number", savedRule(view.projection, human(score["score"]), "abilities." + ability + ".score")));
@@ -58,19 +58,26 @@ export function abilityRail(view: SheetView): HTMLElement {
     if (view.layout === "classic") details.append(title);
     for (const [index, caster] of rows(object(sheet["spellcasting"])["perClass"]).entries()) if (view.layout === "compact" && caster["ability"] === ability) {
       card.classList.add("dse-caster");
-      details.append(styled("div", "dse-dock dse-casting", savedRule(view.projection, t("DC {0} · Attack {1}", [human(caster["saveDC"]), signed(caster["spellAttack"])]), "spellcasting.perClass." + index + ".saveDC")));
+      details.append(castingDetails(view, caster, index));
     }
     const skills = Object.entries(object(sheet["skills"])).filter(([, raw]) => object(raw)["ability"] === ability);
     for (const [id, raw] of skills) {
       const skill = object(raw), dot = styled("span", "dse-dot", skill["expertise"] ? "◆" : skill["proficient"] ? "●" : "○");
       dot.title = t(skill["expertise"] ? "Expertise" : skill["proficient"] ? "Proficient" : "Untrained");
-      details.append(styled("div", "dse-skill", dot, el("span", savedRule(view.projection, t(label(id)), "skills." + id + ".total", { kind: "skill", id })), styled("strong", "dse-total", signed(skill["total"]))));
+      details.append(styled("div", "dse-skill", dot, el("span", savedRule(view.projection, t(label(id)), "skills." + id + ".total", { kind: "skill", id })), styled("strong", "dse-total", savedRule(view.projection, signed(skill["total"]), "skills." + id + ".total"))));
     }
     if (!skills.length) details.append(styled("span", "dse-empty", "—"));
     if (view.layout === "compact") card.append(title);
     card.append(styled("div", "dse-ability-body", tile, details)); rail.append(card);
   }
   return rail;
+}
+export function castingDetails(view: SheetView, caster: Record<string, unknown>, index: number): HTMLElement {
+  const t = translator(view.locale), path = "spellcasting.perClass." + index;
+  const source = caster["source"] ? spellSourceLabel(caster["source"], view.locale) : recordName(view, "class", String(caster["classId"] ?? ""));
+  return styled("div", "dse-dock dse-casting", el("small", source),
+    savedRule(view.projection, t("DC {0}", [human(caster["saveDC"])]), path + ".saveDC"),
+    savedRule(view.projection, t("Attack {0}", [signed(caster["spellAttack"])]), path + ".spellAttack"));
 }
 export function vitals(view: SheetView): HTMLElement {
   const t = translator(view.locale), sheet = view.projection?.sheet ?? {}, derived = object(sheet["derived"]), band = styled("div", "dse-vitals");
@@ -97,8 +104,12 @@ export function vitals(view: SheetView): HTMLElement {
   inspirationInput.disabled = !view.canEditInspiration; inspirationInput.dataset["focusKey"] = "vitals/inspiration";
   stats.append(styled("div", "codex-tile dse-inspiration", inspiration));
   band.append(stats);
+  band.append(wornEquipment(view)); return band;
+}
+export function wornEquipment(view: SheetView, slots: readonly EquipmentSlot[] = ["armor", "shield", "worn", "attuned"]): HTMLElement {
+  const t = translator(view.locale), sheet = view.projection?.sheet ?? {};
   const worn = styled("div", "dse-worn", styled("span", "dse-stat-label", t("Worn equipment")));
-  for (const slot of ["armor", "shield", "worn", "attuned"] as const) {
+  for (const slot of slots) {
     const group = styled("div", "dse-worn-group", styled("span", "dse-stat-label", t(label(slot))));
     group.dataset["equipmentSlot"] = slot;
     const attunement = object(sheet["attunement"]);
@@ -114,16 +125,18 @@ export function vitals(view: SheetView): HTMLElement {
     else if (!items.length) group.append(styled("span", "dse-empty", "—"));
     worn.append(group);
   }
-  band.append(worn); return band;
+  return worn;
 }
-export function backpack(view: SheetView): HTMLElement {
+export function backpack(view: SheetView, options: { items?: readonly Item[]; heading?: boolean; storage?: boolean; coins?: boolean; flat?: boolean } = {}): HTMLElement {
   const t = translator(view.locale), pack = styled("section", "dse-backpack"), head = styled("div", "dse-bp-head", styled("h3", "dse-bp-title", t("Backpack")));
   head.querySelector("h3")!.prepend(icon("M8 6V4a4 4 0 0 1 8 0v2M5 6h14v15H5ZM5 10h14M9 10v3h6v-3"));
   if (view.editing) head.append(button(t("Add item"), view.addItem));
-  pack.append(head, storage(view));
+  if (options.heading !== false) pack.append(head);
+  if (options.storage !== false) pack.append(storage(view));
   const split = styled("div", "dse-bp-split"), carried = styled("div", "dse-bp-col"), stored = styled("div", "dse-bp-col dse-bp-right");
-  for (const location of ["equipped", "carried", "stored"]) {
-    const items = view.input.play.inventory.filter(item => item.location === location), group = styled("div", "dse-bp-group", styled("h4", "dse-bp-label", t(label(location)) + " · " + items.length));
+  for (const location of options.flat ? ["all"] : ["equipped", "carried", "stored"]) {
+    const items = (options.items ?? view.input.play.inventory).filter(item => location === "all" || item.location === location), group = styled("div", "dse-bp-group");
+    if (!options.flat) group.append(styled("h4", "dse-bp-label", t(label(location)) + " · " + items.length));
     for (const item of items) {
       const row = styled("div", "dse-item"); row.dataset["item"] = item.id; row.dataset["focusScope"] = "";
       row.append(styled("span", "dse-item-name", savedRule(view.projection, item.name, undefined, item.reference)));
@@ -151,6 +164,7 @@ export function backpack(view: SheetView): HTMLElement {
           row.append(styled("div", "dse-attunement-actions", stow));
         }
         const details = styled("details", "dse-item-notes", el("summary", t("Details")));
+        details.dataset["detailsKey"] = "inventory/" + item.id + "/notes";
         details.append(field(t("Name"), textInput(item.name, value => { item.name = value; view.change(); })), field(t("Acquired from"), textInput(item.acquisition, value => { item.acquisition = value; view.change(); })), field(t("Notes"), textInput(item.notes, value => { item.notes = value; view.change(); }, true)),
           field(t("Scroll spell (optional)"), select(item.spellId ?? "", (view.catalogs.get("spell") ?? []).map(row => ({ id: row.id, label: String(row.value["name"] ?? row.id) })), value => { if (value) item.spellId = value; else delete item.spellId; view.change(); }, t)));
         if (reason) details.append(el("p", t("Attunement") + ": " + reason));
@@ -166,17 +180,23 @@ export function backpack(view: SheetView): HTMLElement {
     (location === "stored" ? stored : carried).append(group);
   }
   split.append(carried, stored); pack.append(split);
+  if (options.coins !== false) pack.append(currency(view));
+  return pack;
+}
+export function currency(view: SheetView): HTMLElement {
   const coins = styled("div", "dse-coins");
   for (const coin of ["cp", "sp", "ep", "gp", "pp"]) {
     const value = view.input.play.currency[coin] ?? 0;
     const control = view.editing ? numberInput(value, value => { view.input.play.currency[coin] = value ?? 0; view.change(); }, 0) : el("span", value);
     control.className = "dse-number"; control.setAttribute("aria-label", coin.toUpperCase()); coins.append(el("label", el("span", coin.toUpperCase()), control));
   }
-  pack.append(coins);
-  return pack;
+  return coins;
 }
 export function combatDetails(view: SheetView): HTMLElement {
-  const t = translator(view.locale), sheet = view.projection?.sheet ?? {}, root = styled("div", "dse-combat");
+  return styled("div", "dse-combat", attackDetails(view), resourceDetails(view), explorationDetails(view));
+}
+export function attackDetails(view: SheetView): HTMLElement {
+  const t = translator(view.locale), sheet = view.projection?.sheet ?? {};
   const attacks = panel(t("Attacks")); attacks.className = "dse-section";
   rows(sheet["weapons"]).forEach((weapon,index)=>{
     const path="weapons."+index, reference={kind:"weapon",id:String(weapon["ref"])};
@@ -188,7 +208,11 @@ export function combatDetails(view: SheetView): HTMLElement {
     attacks.append(row);
   });
   if (attacks.children.length === 1) attacks.append(styled("p", "dse-empty", t("No attacks yet.")));
-  const resources = panel(t("Resources")); resources.className = "dse-section";
+  return attacks;
+}
+export function resourceDetails(view: SheetView): HTMLElement {
+  const t = translator(view.locale), sheet = view.projection?.sheet ?? {};
+  const resources = panel(t("Resources")); resources.className = "dse-section dse-resources";
   for (const resource of rows(sheet["resources"])) {
     const key = String(resource["key"]), name = String(resource["name"] ?? key);
     const row = styled("div", "dse-resource", el("span", savedRule(view.projection, name, "resources." + key + ".remaining")), el("strong", human(resource["remaining"]) + " / " + human(resource["max"])));
@@ -197,10 +221,15 @@ export function combatDetails(view: SheetView): HTMLElement {
     resources.append(row);
   }
   for (const activation of rows(sheet["activations"])) { const key = String(activation["key"]), name = String(activation["name"]); resources.append(button(t("{0} {1}", [t(view.input.play.activeFeatures[key] ? "End" : "Activate"), name]), () => view.act({ operation: "toggle-feature", key, enabled: !view.input.play.activeFeatures[key] }, name), !view.canPlay)); }
+  if (resources.children.length === 1) resources.append(el("p", t("No resources yet.")));
+  return resources;
+}
+export function explorationDetails(view: SheetView): HTMLElement {
+  const t = translator(view.locale), sheet = view.projection?.sheet ?? {}, root = styled("div", "dse-exploration");
   const traits = panel(t("Features and traits")); traits.className = "dse-section";
   for (const feature of rows(sheet["features"])) { const id = String(feature["id"]); traits.append(el("details", el("summary", savedRule(view.projection, String(feature["name"] ?? id), undefined, { kind: "feature", id })), el("p", view.projection?.evidence.find(row => row.reference.id === id)?.summary ?? ""))); }
   for (const key of ["resistances", "damageImmunities", "conditionImmunities"]) if (sheet[key] !== undefined) traits.append(el("p", el("strong", t(label(key)) + ": "), human(sheet[key])));
-  root.append(attacks, resources, proficiencyDetails(view.projection, view.locale), senseDetails(view.projection,view.locale), traits);
+  root.append(proficiencyDetails(view.projection, view.locale), senseDetails(view.projection,view.locale), traits);
   const feats = featDetails(view.projection, view.locale); if (feats) root.append(feats);
   return root;
 }

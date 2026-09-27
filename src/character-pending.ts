@@ -2,7 +2,7 @@ import type { Inputs, Request, Response } from "./character-model.js";
 import type { BuilderNavigation } from "./character-builder-nav.js";
 import { object, parseCharacter } from "./character-client.js";
 
-export type CharacterTab = "sheet" | "combat" | "spells" | "builder" | "tools";
+export type CharacterTab = "sheet" | "combat" | "equipment" | "spells" | "builder" | "tools";
 export interface CommandAttempt { method: "save" | "commit"; request: Omit<Request, "contractVersion">; retry: boolean }
 export interface SaveAttempt { request: Omit<Request, "contractVersion"> & { inputs: Inputs }; base: Inputs; version: number }
 export interface CharacterPending {
@@ -25,7 +25,7 @@ export function readCharacterPending(value: unknown): CharacterPending {
     if (row["version"] !== "character-pending.v1" || typeof row["key"] !== "string" ||
       typeof row["actorId"] !== "string" || !["dm", "player"].includes(String(row["role"])) ||
       !integer(row["revision"]) || !integer(row["changeVersion"]) || typeof row["dirty"] !== "boolean" ||
-      !["sheet", "combat", "spells", "builder", "tools"].includes(String(row["tab"])) ||
+      !["sheet", "combat", "equipment", "spells", "builder", "tools"].includes(String(row["tab"])) ||
       typeof builder["tab"] !== "string" || builder["tab"].length > 200 ||
       typeof builder["target"] !== "string" || typeof builder["open"] !== "boolean") throw new Error();
     input(row["inputs"]); input(row["base"]);

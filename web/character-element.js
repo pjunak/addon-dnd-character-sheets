@@ -5,10 +5,12 @@ import { feedbackMessage } from "./character-feedback.js";
 import { playActions } from "./character-play.js";
 import { quickUse } from "./character-quick-use.js";
 import { handControls } from "./character-hands.js";
+import { compactEquipment, compactNavigation, compactSheet, placementPicker } from "./character-compact.js";
+import { backpackDialog } from "./character-backpack.js";
 import { abilityRail, backpack, combatDetails, preferredLayout, vitals } from "./character-sheet.js";
-import { attuneEquipment, equipmentReason, equipmentSlot, moveEquipment } from "./character-inventory.js";
+import { appendEquipment, attuneEquipment, equipmentReason, equipmentSlot, moveEquipment } from "./character-inventory.js";
 import { equipmentPicker } from "./character-equipment.js";
-import { builderShell, focusBuilderTarget } from "./character-builder-nav.js";
+import { builderDestination, builderShell, focusBuilderTarget } from "./character-builder-nav.js";
 import { spellPicker, spellSourceLabel, unassignedSpellState, savedSpellBook } from "./character-spells.js";
 import { CharacterClient, blank, exportCharacter, mergeCharacter, reconcileCharacterChoices, reconcileCharacterMap, newId, object, parseCharacter, rows, strings } from "./character-client.js";
 import { buildView } from "./character-build.js";
@@ -54,32 +56,50 @@ export function defineCharacterElement(generation, client, enhance) {
         #builderNav = { tab: "character", target: "", open: true };
         #spellPickers = new Map();
         #spellManagementOpen = false;
+        #pack = { query: "", container: "", sort: "name" };
+        #packReturnFocus = "storage/open";
+        #dialogContent;
+        #dialogBack;
+        #details = new Map();
+        #frameObserver;
+        #frameWidth = 0;
+        #frameHeight = 0;
         #t = (key, values) => translator(this.#context?.host.locale ?? "en")(key, values);
         #feedback = (message) => feedbackMessage(message, this.#context?.host.locale ?? "en");
         #unsubscribe;
         #refreshTimer;
-        set codexContribution(value) { const previous = this.#context; this.#context = value; if (previous?.host.key !== value.host.key) {
-            this.#spellPickers.clear();
-            this.#spellManagementOpen = false;
-        } if (this.isConnected && previous?.host.key !== value.host.key) {
-            this.#epoch++;
-            this.#pending = undefined;
-            this.#saving = undefined;
-            this.#attempt = undefined;
-            this.#command = undefined;
-            this.#changeVersion++;
-            this.#busy = false;
-            this.#response = undefined;
-            this.#evaluation = undefined;
-            this.#catalogs.clear();
-            this.#dialog?.close();
-            clearTimeout(this.#timer);
-            void this.#load();
+        set codexContribution(value) {
+            const previous = this.#context;
+            this.#context = value;
+            if (previous?.host.key !== value.host.key) {
+                this.#spellPickers.clear();
+                this.#spellManagementOpen = false;
+                this.#pack = { query: "", container: "", sort: "name" };
+                this.#packReturnFocus = "storage/open";
+                this.#details.clear();
+                this.#frameWidth = 0;
+                this.#frameHeight = 0;
+            }
+            if (this.isConnected && previous?.host.key !== value.host.key) {
+                this.#epoch++;
+                this.#pending = undefined;
+                this.#saving = undefined;
+                this.#attempt = undefined;
+                this.#command = undefined;
+                this.#changeVersion++;
+                this.#busy = false;
+                this.#response = undefined;
+                this.#evaluation = undefined;
+                this.#catalogs.clear();
+                this.#dialog?.close();
+                clearTimeout(this.#timer);
+                void this.#load();
+            }
+            else
+                this.#render();
         }
-        else
-            this.#render(); }
         connectedCallback() { this.#controls = this.#runtime.enhance(this); this.#pending = this.#context?.edits.handoff?.take(); this.classList.add("addon-dnd-character", "addon-dnd-sheets"); this.#busy = false; this.#unsubscribe = this.#runtime.client.subscribe(() => { clearTimeout(this.#refreshTimer); this.#refreshTimer = setTimeout(() => { void this.#refreshSaved(); }, 250); }); void this.#load(); }
-        disconnectedCallback() { this.#controls?.dispose(); this.#controls = undefined; this.#epoch++; this.#saving = undefined; this.#attempt = undefined; this.#command = undefined; this.#changeVersion++; this.#unsubscribe?.(); clearTimeout(this.#refreshTimer); clearTimeout(this.#timer); this.#dialog?.close(); this.#context?.edits.set({ dirty: false, saving: false }); }
+        disconnectedCallback() { this.#frameObserver?.disconnect(); this.#controls?.dispose(); this.#controls = undefined; this.#epoch++; this.#saving = undefined; this.#attempt = undefined; this.#command = undefined; this.#changeVersion++; this.#unsubscribe?.(); clearTimeout(this.#refreshTimer); clearTimeout(this.#timer); this.#dialog?.close(); this.#context?.edits.set({ dirty: false, saving: false }); }
         get #key() { return this.#context?.host.key ?? ""; }
         get #editable() { return this.#context?.host.canEdit === true && !this.#busy && !this.#command; }
         get #name() { return String(object(this.#context?.host.value)["name"] ?? "Character"); }
@@ -253,6 +273,7 @@ export function defineCharacterElement(generation, client, enhance) {
                     node.append(el("ul", ...this.#saveIssues.map(message => el("li", this.#feedback(message)))));
                 if (this.#response?.rulesChanged && !this.#attempt)
                     node.append(button(this.#t("Review changed rules"), () => {
+                        this.#dialog?.close();
                         this.#tab = "tools";
                         this.#render();
                         this.querySelector('[data-focus-key="adopt-rules"]')?.focus();
@@ -388,11 +409,13 @@ export function defineCharacterElement(generation, client, enhance) {
             if (render)
                 this.#render();
         }
-        #view() { return { locale: this.#context?.host.locale ?? "en", input: this.#input, evaluation: this.#evaluation, policy: this.#response?.policy ?? {}, catalogs: this.#catalogs, changed: this.#changed, navigate: tab => { this.#builderNav.tab = tab; }, refresh: () => this.#render() }; }
+        #view() { return { compact: this.#layout === "compact", locale: this.#context?.host.locale ?? "en", input: this.#input, evaluation: this.#evaluation, policy: this.#response?.policy ?? {}, catalogs: this.#catalogs, changed: this.#changed, navigate: tab => { this.#builderNav.tab = tab; }, refresh: () => this.#render() }; }
         #render() {
             this.lang = this.#context?.host.locale ?? "en";
             if (!this.isConnected || !this.#context)
                 return;
+            for (const details of this.querySelectorAll("details[data-details-key]"))
+                this.#details.set(details.dataset["detailsKey"], details.open);
             const dialog = this.#dialog?.open ? this.#dialog : undefined;
             for (const picker of this.querySelectorAll("[data-spell-picker]")) {
                 const state = this.#spellPickers.get(picker.dataset["spellPicker"]);
@@ -409,6 +432,8 @@ export function defineCharacterElement(generation, client, enhance) {
             const focusKey = focused?.dataset["focusKey"], focusId = focused?.id;
             const selection = focused instanceof HTMLTextAreaElement || focused instanceof HTMLInputElement ? { start: focused.selectionStart, end: focused.selectionEnd } : undefined;
             const root = styled("section", "dnd-sheet-shell dse-layout-" + this.#layout);
+            if (this.#layout === "compact")
+                root.style.setProperty("--dsc-content-height", this.#frameHeight + "px");
             this.dataset["layout"] = this.#layout;
             if (!this.#response) {
                 const status = el("p", this.#feedback(this.#message || "Loading character…"));
@@ -423,9 +448,13 @@ export function defineCharacterElement(generation, client, enhance) {
                 return;
             }
             const view = this.#sheetView();
-            const options = ["sheet", "combat", "spells", "builder", "tools"].map(id => ({ id, label: this.#t({ sheet: "Sheet", combat: "Combat", spells: "Spells", builder: "Builder", tools: "Tools" }[id]) }));
+            if (this.#layout === "classic" && this.#tab === "equipment")
+                this.#tab = "sheet";
+            const options = ["sheet", "combat", ...(this.#layout === "compact" ? ["equipment"] : []), "spells", "builder", "tools"].map(id => ({ id, label: this.#t({ sheet: "Sheet", combat: "Combat", equipment: "Equipment", spells: "Spells", builder: "Builder", tools: "Tools" }[id]) }));
             const nav = tabStrip(this.#t("Character views"), options, this.#tab, id => { this.#tab = id; this.#render(); }, "dnd", "vertical");
             nav.classList.add("dnd-sheet-tabs");
+            if (this.#layout === "compact")
+                compactNavigation(nav);
             const status = styled("div", "dnd-save-status");
             status.dataset["characterStatus"] = "";
             status.dataset["focusKey"] = "save-status";
@@ -441,7 +470,11 @@ export function defineCharacterElement(generation, client, enhance) {
             else if (this.#tab === "tools")
                 content.append(this.#tools());
             else if (this.#tab === "spells")
-                content.append(vitals(view), this.#spells());
+                content.append(...(this.#layout === "classic" ? [vitals(view)] : []), this.#spells());
+            else if (this.#tab === "equipment")
+                content.append(compactEquipment(view, container => this.#backpack(container), place => this.#placement(place)));
+            else if (this.#layout === "compact")
+                content.append(compactSheet(view, this.#tab === "combat", this.#tab === "combat" ? this.#combat(false) : el("div"), () => this.#backpack()));
             else {
                 const main = styled("div", "dse-cols-main", vitals(view));
                 if (!this.#response.state)
@@ -449,7 +482,11 @@ export function defineCharacterElement(generation, client, enhance) {
                 main.append(handControls(view, this.#tab === "combat"), quickUse(view), this.#tab === "combat" ? this.#combat() : backpack(view));
                 content.append(styled("div", "dse-cols", abilityRail(view), main));
             }
-            root.append(nav, styled("div", "dnd-sheet-workspace", status, content));
+            root.append(nav, styled("div", "dnd-sheet-workspace", ...(dialog ? [] : [status]), content));
+            if (dialog) {
+                dialog.querySelector("[data-character-status]")?.remove();
+                dialog.insertBefore(status, dialog.querySelector("[data-dialog-body]"));
+            }
             for (const field of root.querySelectorAll(".character-field")) {
                 const scope = field.closest("[id^=character-choice-], [data-item], [data-builder-target]");
                 // The shared controls restore focus during refresh, before local caret restoration.
@@ -463,6 +500,11 @@ export function defineCharacterElement(generation, client, enhance) {
             this.#syncBusyButtons();
             this.#controls?.refresh();
             this.#publish();
+            this.#refreshDialog();
+            for (const details of this.querySelectorAll("details[data-details-key]"))
+                if (this.#details.has(details.dataset["detailsKey"]))
+                    details.open = this.#details.get(details.dataset["detailsKey"]);
+            this.#observeFrame(root, content);
             for (const field of root.querySelectorAll(".character-field")) {
                 for (const control of field.querySelectorAll("input,select,textarea,button"))
                     control.dataset["focusKey"] ??= field.dataset["uiKey"] + "/" + (control.getAttribute("aria-label") ?? control.tagName);
@@ -472,6 +514,8 @@ export function defineCharacterElement(generation, client, enhance) {
                 if (parent instanceof HTMLDetailsElement)
                     parent.open = true;
             restoreControlFocus(restore);
+            if (!restore && focused && !focused.isConnected && !dialog && this.#tab === "builder")
+                root.querySelector('.dnd-builder-tabs [aria-selected="true"]')?.focus({ preventScroll: true });
             if (selection?.start !== null && selection?.start !== undefined && selection.end !== null && (restore instanceof HTMLTextAreaElement || restore instanceof HTMLInputElement))
                 restore.setSelectionRange(selection.start, selection.end);
         }
@@ -495,12 +539,81 @@ export function defineCharacterElement(generation, client, enhance) {
                 act: (change, summary) => this.#perform({ ...this.#base("play"), change, summary }) };
         }
         #equipment() {
-            this.#open(this.#t("Add equipment"), [equipmentPicker(this.#catalogs, this.#context?.host.locale ?? "en", items => {
-                    this.#input.play.inventory.push(...items);
+            this.#open(this.#t("Add equipment"), [equipmentPicker(this.#catalogs, this.#context?.host.locale ?? "en", (items, stacks) => {
+                    if (!appendEquipment(this.#input, items, stacks)) {
+                        this.#message = this.#t("The selected stack changed. Close and reopen Add item to choose its current destination.");
+                        this.#status();
+                        return;
+                    }
                     this.#changed();
                     this.#dialog?.close();
                     this.#render();
-                }, this.#sheetView().canEditStorage ? this.#input.play.containers ?? [] : [])]);
+                }, this.#sheetView().canEditStorage ? this.#input.play.containers ?? [] : [], "", this.#input.play.inventory)]);
+        }
+        #backpack(container) {
+            if (!this.#dialog?.open)
+                this.#packReturnFocus = (document.activeElement instanceof HTMLElement ? document.activeElement.dataset["focusKey"] : undefined) ?? "storage/open";
+            if (container !== undefined)
+                this.#pack.container = container;
+            const add = () => this.#equipmentFromBackpack();
+            this.#openDynamic(this.#t("Backpack"), () => [backpackDialog(this.#sheetView(), this.#pack, add)], this.#packReturnFocus);
+        }
+        #equipmentFromBackpack() {
+            const back = () => { this.#backpack(); this.#dialog?.querySelector('[data-focus-key="pack/add"]')?.focus(); };
+            this.#open(this.#t("Add equipment"), [equipmentPicker(this.#catalogs, this.#context?.host.locale ?? "en", (items, stacks) => {
+                    if (!appendEquipment(this.#input, items, stacks)) {
+                        this.#message = this.#t("The selected stack changed. Close and reopen Add item to choose its current destination.");
+                        this.#status();
+                        return;
+                    }
+                    this.#changed();
+                    back();
+                    this.#render();
+                }, this.#sheetView().canEditStorage ? this.#input.play.containers ?? [] : [], this.#pack.container, this.#input.play.inventory)], "control", "pack/add");
+            this.#dialogBack = back;
+        }
+        #placement(place) {
+            this.#openDynamic(this.#t("Choose {0}", [this.#t(place === "other" ? "Other worn" : label(place))]), () => [placementPicker(this.#sheetView(), place)], "placement/" + place);
+        }
+        #openDynamic(title, content, returnFocusKey) {
+            this.#open(title, content(), "heading", returnFocusKey);
+            this.#dialogContent = content;
+        }
+        #refreshDialog() {
+            if (!this.#dialog?.open || !this.#dialogContent)
+                return;
+            const focused = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
+            const key = focused?.dataset["focusKey"], selection = focused instanceof HTMLInputElement || focused instanceof HTMLTextAreaElement ? [focused.selectionStart, focused.selectionEnd] : undefined;
+            this.#dialog.querySelector("[data-dialog-body]").replaceChildren(...this.#dialogContent());
+            this.#controls?.refresh();
+            this.#syncBusyButtons();
+            const target = key ? this.#dialog.querySelector('[data-focus-key="' + CSS.escape(key) + '"]') : undefined;
+            restoreControlFocus(target);
+            if (selection?.[0] != null && selection[1] != null && (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement))
+                target.setSelectionRange(selection[0], selection[1]);
+        }
+        #observeFrame(root, content) {
+            this.#frameObserver?.disconnect();
+            if (this.#layout !== "compact")
+                return;
+            const workspace = root.querySelector(".dnd-sheet-workspace");
+            const measure = () => {
+                if (!root.isConnected || this.firstElementChild !== root)
+                    return;
+                const width = Math.round(workspace.getBoundingClientRect().width);
+                // A viewport scrollbar appearing/disappearing must not discard the
+                // retained height. A real width change starts a new measurement band.
+                if (Math.abs(width - this.#frameWidth) > 24) {
+                    this.#frameWidth = width;
+                    this.#frameHeight = 0;
+                }
+                const box = content.getBoundingClientRect(), top = workspace.getBoundingClientRect().top;
+                this.#frameHeight = Math.max(this.#frameHeight, Math.ceil(box.bottom - top));
+                root.style.setProperty("--dsc-content-height", this.#frameHeight + "px");
+            };
+            this.#frameObserver = new ResizeObserver(measure);
+            this.#frameObserver.observe(content);
+            measure();
         }
         #slot(slot) {
             const view = this.#sheetView(), attuning = slot === "attuned";
@@ -536,6 +649,7 @@ export function defineCharacterElement(generation, client, enhance) {
             const body = el("fieldset");
             body.disabled = !this.#editable || this.#response?.status === "unavailable" || !!this.#response?.rulesChanged;
             const view = this.#view();
+            this.#builderNav.tab = builderDestination(view, this.#builderNav.tab, this.#builderNav.target);
             if (!["character", "levels", "spells", "add-class", "dm-given", ...this.#input.build.levels.map(level => level.classId)].includes(this.#builderNav.tab))
                 this.#builderNav.tab = "character";
             if (this.#builderNav.tab === "dm-given")
@@ -545,18 +659,20 @@ export function defineCharacterElement(generation, client, enhance) {
             else
                 body.append(buildView(view, this.#builderNav.tab));
             return builderShell(view, this.#builderNav, body, (tab, target = "") => {
-                this.#builderNav.tab = tab;
+                this.#builderNav.tab = builderDestination(view, tab, target);
                 this.#builderNav.target = target;
                 this.#render();
                 if (target)
                     focusBuilderTarget(this, target);
             });
         }
-        #combat() {
+        #combat(includeDetails = true) {
             const view = this.#sheetView(), root = styled("div", "dse-combat"), rest = styled("div", "dnd-rest-controls");
             for (const value of ["short", "long"])
                 rest.append(button(this.#t("{0} rest", [this.#t(label(value))]), () => view.act({ operation: "rest", rest: value }, value + " rest"), !view.canPlay));
-            root.append(rest, combatDetails(view));
+            root.append(rest);
+            if (includeDetails)
+                root.append(combatDetails(view));
             if (this.#evaluation) {
                 const recovery = el("fieldset");
                 recovery.disabled = !view.canPlay;
@@ -748,9 +864,14 @@ export function defineCharacterElement(generation, client, enhance) {
             }
         }
         #open(title, content, initialFocus = "control", returnFocusKey) {
+            const status = this.querySelector("[data-character-status]");
+            this.#dialogContent = undefined;
+            this.#dialogBack = undefined;
             this.#dialog?.close();
             this.#dialog?.remove();
-            const heading = el("h2", title), dialog = el("dialog", heading, ...content, button(this.#t("Close"), () => dialog.close()));
+            const body = el("div", ...content);
+            body.dataset["dialogBody"] = "";
+            const heading = el("h2", title), dialog = el("dialog", heading, ...(status ? [status] : []), body, button(this.#t("Close"), () => this.#dialogBack ? this.#dialogBack() : dialog.close()));
             dialog.className = "character-dialog";
             dialog.dataset["uiDialog"] = "";
             heading.id = `character-dialog-${newId()}`;
@@ -763,9 +884,16 @@ export function defineCharacterElement(generation, client, enhance) {
             dialog.addEventListener("close", () => {
                 if (this.#dialog?.open && this.#dialog !== dialog)
                     return;
+                this.#dialogContent = undefined;
+                this.#dialogBack = undefined;
+                this.#render();
                 const target = focusKey ? this.querySelector('[data-focus-key="' + CSS.escape(focusKey) + '"]') : trigger instanceof HTMLElement && trigger.isConnected ? trigger : undefined;
                 restoreControlFocus(target);
             });
+            dialog.addEventListener("cancel", event => { if (this.#dialogBack) {
+                event.preventDefault();
+                this.#dialogBack();
+            } });
             this.#dialog = dialog;
             this.append(dialog);
             dialog.showModal();

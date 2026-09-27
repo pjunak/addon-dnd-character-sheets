@@ -4,6 +4,11 @@ import { builderLabel, translator } from "./character-locale.js";
 import { button, el, human, styled, tabStrip } from "./character-ui.js";
 
 export interface BuilderNavigation { tab: string; target: string; open: boolean }
+export function builderDestination(view: BuildView, tab: string, target = ""): string {
+  if (!view.compact || tab !== "levels") return tab;
+  const owner = target.startsWith("class:") ? target.slice(6) : rows(view.evaluation?.plan["classChoices"]).find(choice => choice["id"] === target)?.["classId"];
+  return typeof owner === "string" && view.input.build.levels.some(level => level.classId === owner) ? owner : view.input.build.levels[0]?.classId ?? "add-class";
+}
 export function builderShell(view: BuildView, state: BuilderNavigation, body: HTMLElement, navigate: (tab: string, target?: string) => void): HTMLElement {
   const t = translator(view.locale), guidance = view.evaluation?.guidance ?? {}, rail = styled("details", "dse-build-rail"); rail.open = state.open;
   rail.setAttribute("aria-label", t("Builder progress")); rail.addEventListener("toggle", () => { if (rail.isConnected) state.open = rail.open; });
@@ -17,7 +22,7 @@ export function builderShell(view: BuildView, state: BuilderNavigation, body: HT
   }
   if (!rows(guidance["sections"]).length) rail.append(styled("section", "dse-build-step", el("p", t("Choose your origin, abilities and first class to start building."))));
   const classes = [...new Set(view.input.build.levels.map(level => level.classId))], tabs = [{ id: "character", label: t("Character") }, { id: "levels", label: t("Levels") }, ...classes.map(id => ({ id, label: String(view.catalogs.get("class")?.find(record => record.id === id)?.value["name"] ?? id) + " " + view.input.build.levels.filter(level => level.classId === id).length })), { id: "add-class", label: "+" }, { id: "spells", label: t("Spells") }, { id: "dm-given", label: t("DM given") }];
-  const nav = tabStrip(t("Builder sections"), tabs, state.tab, id => navigate(id), "dnd-builder"); nav.classList.add("dnd-builder-tabs"); nav.querySelector("#dnd-builder-tab-add-class")?.setAttribute("aria-label", t("Add class"));
+  const nav = tabStrip(t("Builder sections"), tabs.filter(tab => !view.compact || tab.id !== "levels"), state.tab, id => navigate(id), "dnd-builder"); nav.classList.add("dnd-builder-tabs"); nav.querySelector("#dnd-builder-tab-add-class")?.setAttribute("aria-label", t("Add class"));
   body.id = "dnd-builder-panel-" + state.tab; body.setAttribute("role", "tabpanel"); body.setAttribute("aria-labelledby", "dnd-builder-tab-" + state.tab);
   const main = styled("div", "dse-builder-main"), issues = rows(guidance["sections"]).flatMap(section => rows(section["issues"]));
   const next = issues.find(issue => issue["repair"]) ?? issues[0];

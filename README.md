@@ -1,7 +1,10 @@
 # D&D Character Sheets
 
-The workspace has **Sheet**, **Combat**, **Spells**, **Builder** and **Tools**
-tabs in a vertical left rail, with Builder and Tools at the bottom. Compact and Classic layouts share one engine-calculated
+Compact follows the final character-sheet mockup: **Sheet**, **Combat**,
+**Equipment**, **Spells**, **Builder** and **Tools** sit in a left rail, with
+Builder immediately above Tools at the bottom. Its frame fits up to 1,360 px
+inside the host article. Classic retains its existing five-tab arrangement.
+Both layouts share one engine-calculated
 character. Authorized editors can change inventory, equipment, currency, HP,
 resources and spells directly in their tabs. Sheet and Combat share an
 **Inspiration** checkbox that saves the authored allocation automatically,
@@ -38,13 +41,36 @@ required `ui.controls.v1` [shared UI contract](../ttrpg-codex/docs/rewrite/UI_FO
 The host supplies interaction and theme tokens; this package retains build/play
 semantics and automatic saving.
 
+Compact puts abilities and skills on the right. Sheet and Combat share the same
+HP, AC, Speed, Proficiency and Inspiration cards, with a numeric health bar and
+direct current/temporary HP fields. Combat has a short modifier/save row and
+separate saved casting-source details. Additional attacks, recovery and
+exploration details remain available through disclosure controls.
+
+**Equipment** owns all five currency denominations, the source-filtered body
+mannequin, Other worn, attunement and Storage. **Backpack** opens a searchable,
+sortable dialog with container filtering. Add Item returns to that same search
+and compartment; it defaults to a new instance and offers explicit addition to
+a carried stack. Existing item names, notes, grants and equipped copies survive.
+Save feedback and retry actions move into the active dialog. Advanced mechanical
+armor/shield/worn controls remain available separately from body placement.
+
+The desktop frame retains the largest measured view at the current width and
+grows when new content needs space, without rendering duplicate hidden tabs.
+Small screens use normal document flow. It cannot predict the height of an
+unvisited, expanded view. Conditions remain a separate Engine/worker contract
+task; the mockup's simulated condition toggle is not a saved feature.
+
 Valid changes save automatically. Build completion is separate from validity:
 an unfinished character is saved as it is built, while rules-dependent play
 requires outstanding choices to be completed. There are no device drafts,
 manual save buttons, revision history, undo or restore commands.
 
-Builder separates **Character**, **Levels**, one tab per selected class, and
-**DM given**. Progress starts expanded in a left sidebar; narrow layouts stack
+Compact Builder separates **Character**, one tab per selected class, spell
+choices and **DM given**. Add/remove levels in the owning class; their global
+order and acquisition IDs remain unchanged. Compact repair links select the
+owning class instead of a standalone Levels tab. Classic retains Levels.
+Progress starts expanded in a left sidebar; narrow layouts stack
 it above the form.
 Use **+** to add an eligible class and the class tab to add or remove levels.
 Point buy and granted ability increases show live used/remaining budgets with

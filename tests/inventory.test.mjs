@@ -1,10 +1,28 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, pinQuickUse, removeInventoryItem, quickUseReason, stowAndUnattune } from '../web/character-inventory.js';
+import { appendEquipment, attuneEquipment, attunementChoice, equipmentReason, equipmentSlot, moveEquipment, pinQuickUse, removeInventoryItem, quickUseReason, stowAndUnattune } from '../web/character-inventory.js';
 
 import { blank } from '../web/character-client.js';
 
 const item = (id, location = 'carried') => ({ id, name: id, location, quantity: 1, attuned: false, acquisition: 'Keep provenance', notes: 'Keep notes' });
+
+test('explicit stack addition preserves authored identity and never merges another copy by name', () => {
+  const input = blank(), original = { ...item('stack'), grantId: 'reward', containerId: 'pouch', quantity: 2 };
+  input.play.inventory = [structuredClone(original), { ...item('equipped', 'equipped'), name: original.name }];
+  assert.equal(appendEquipment(input, [{ ...item('stack'), containerId: 'pouch', quantity: 3, notes: 'Catalog defaults' }, { ...item('copy'), name: original.name }], ['stack']), true);
+  assert.deepEqual(input.play.inventory[0], { ...original, quantity: 5 });
+  assert.equal(input.play.inventory[1].quantity, 1); assert.equal(input.play.inventory[1].location, 'equipped');
+  assert.equal(input.play.inventory[2].id, 'copy');
+});
+
+test('a removed or moved selected stack cannot be resurrected or partly applied', () => {
+  const input = blank(), additions = [item('new'), item('stack')];
+  for (const inventory of [[], [item('stack', 'equipped')], [{ ...item('stack'), containerId: 'elsewhere' }]]) {
+    input.play.inventory = structuredClone(inventory);
+    assert.equal(appendEquipment(input, additions, ['stack']), false);
+    assert.deepEqual(input.play.inventory, inventory);
+  }
+});
 
 test('quick use pins exact instances without copying or resetting inventory', () => {
   const input = blank();

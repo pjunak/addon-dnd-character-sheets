@@ -47,6 +47,21 @@ export function removeInventoryItem(input: Inputs, id: string): void {
   pinQuickUse(input, id, false);
 }
 
+// The picker uses an existing ID only after an explicit stack choice. Preserve
+// that instance's notes, grants and identity; new copies remain separate.
+export function appendEquipment(input: Inputs, items: readonly Item[], stacks: readonly string[] = []): boolean {
+  if (items.some(item => {
+    const prior = input.play.inventory.find(row => row.id === item.id);
+    return stacks.includes(item.id) ? !prior || prior.location !== "carried" || prior.attuned || prior.containerId !== item.containerId || prior.reference?.kind !== item.reference?.kind || prior.reference?.id !== item.reference?.id : !!prior;
+  })) return false;
+  for (const item of items) {
+    const existing = input.play.inventory.find(row => row.id === item.id);
+    if (existing) existing.quantity += item.quantity;
+    else input.play.inventory.push(item);
+  }
+  return true;
+}
+
 export function quickUseReason(reason: unknown, locale: string): string {
   const t = translator(locale);
   switch (reason) {
