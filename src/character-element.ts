@@ -1025,6 +1025,12 @@ export function defineCharacterElement(
       const workspace = root.querySelector<HTMLElement>(".dnd-sheet-workspace")!;
       const measure = (): void => {
         if (!root.isConnected || this.firstElementChild !== root) return;
+        const navigation = root.querySelector<HTMLElement>(".dnd-sheet-tabs")!;
+        // Keep the borrowed tab keyboard behavior aligned with the CSS layout.
+        navigation.setAttribute(
+          "aria-orientation",
+          getComputedStyle(navigation).flexDirection === "column" ? "vertical" : "horizontal",
+        );
         const width = Math.round(workspace.getBoundingClientRect().width);
         // A viewport scrollbar appearing/disappearing must not discard the
         // retained height. A real width change starts a new measurement band.

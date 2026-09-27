@@ -573,15 +573,18 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    flex-direction: row;
+    flex-wrap: wrap;
     border-right: 0;
     border-bottom: 1px solid var(--border-subtle);
     gap: 0.25rem;
     padding: 0 0 0.4rem;
   }
   .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs .codex-tab {
-    height: 100%;
+    flex: 1 0 auto;
+    width: auto;
+    max-width: 100%;
+    overflow-wrap: normal;
   }
   .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs #dnd-tab-builder {
     margin: 0;

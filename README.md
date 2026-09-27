@@ -59,6 +59,9 @@ The desktop frame retains the largest measured view at the current width and
 grows when new content needs space, without rendering duplicate hidden tabs.
 Small screens use normal document flow. It cannot predict the height of an
 unvisited, expanded view.
+Compact navigation wraps whole labels into rows as space or text size changes.
+It uses the host's tab controls: Up/Down for the desktop rail, Left/Right for
+the narrow-screen rows, with the same selected tab and keyboard focus.
 
 **Conditions** in Combat use the same saved panel in both layouts. Select a
 condition, adjust its source-defined level or remove it; changes save
