@@ -44,9 +44,11 @@ instructions were loaded or read unrelated sibling implementations.
 - The removed v2 renderer service must not return as a live object/function or
   raw-HTML boundary. A future renderer contract must be serializable,
   schema-owned, selected by the host, and justified by a real consumer.
-- Runtime source is TypeScript under `src/`; never hand-edit generated `web/`
-  or `dist/`. Regenerate and commit intentionally tracked `web/` outputs with
-  source changes; install ZIPs and staging directories remain transient.
+- Runtime source is TypeScript under `src/`; `web/`, `worker/` and `dist/` are
+  ignored build output. Never hand-edit or commit them. The package command
+  rebuilds browser assets and native workers without relying on existing output.
+  Public generated schemas and TypeScript models remain versioned; builds must
+  leave tracked source unchanged.
 
 ## Release and installation
 

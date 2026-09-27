@@ -60,8 +60,10 @@ jobs:
         working-directory: addon-dnd-character-sheets
       - run: go test -race ./internal/character
         working-directory: addon-dnd-character-sheets
-      - name: Verify committed browser output matches source
-        run: git diff --exit-code -- web
+      - name: Verify builds preserve source ownership
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files -- web worker)"
         working-directory: addon-dnd-character-sheets
       - name: Locate built package
         id: package

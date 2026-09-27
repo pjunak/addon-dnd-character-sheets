@@ -157,7 +157,11 @@ npm run package
 
 Inspect the resulting ZIP from the host with
 `go run ./cmd/codex-addon-inspect ../addon-dnd-character-sheets/dist/dnd-sheets-4.0.0.zip`.
-The package includes generated web assets and native workers. Source checkout
+The package command rebuilds web assets and native workers from source, including
+when neither output directory exists. `web/`, `worker/` and `dist/` are ignored
+build artifacts; public schemas and generated TypeScript models remain versioned.
+CI checks that builds preserve tracked source. Tests import freshly built `web/`
+through `npm run check`; `npm test` is a focused rerun after building. Source checkout
 edits become visible only after rebuilding and reviewed activation. Current
 integration tests live in the host's installed character/rules/sheets suites.
 The installed-character suite checks both layouts on desktop and phone, keyboard
