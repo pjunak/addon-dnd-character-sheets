@@ -288,6 +288,23 @@ casting abilities and branch availability stay in the provider/Engine; Sheets
 adds no class-specific controls. Changing a branch uses the existing exact-choice
 and spell-grant withdrawal policy while preserving unrelated saved state.
 
+Class-level replacements use one shared panel in each owning class tab, in
+both layouts. The Engine supplies the allowance, selected values and eligible
+replacements; borrowed host comboboxes collect the command. The result retains
+keyboard focus on the spent-allowance message. Legal incomplete builds remain
+editable, and no allowance or class rule is inferred by the UI.
+
+The optional typed `build.replacements` ledger is worker protected. Ordinary
+edits cannot add, erase or rewrite it; an authorized replacement changes only
+the selected feat/spell slot and appends one entry. Every other authored value
+must survive the provider response. Exact command retries, stale-revision
+rejection and saved-state recovery use the existing command coordinator.
+Imports retain consumed allowances with external origin. Older providers that
+drop the ledger are incompatible: the saved projection, reading and export
+remain available, while mechanical edits require compatible rules. Prior
+schema-4 documents omit this field and pass the host's reviewed compatible
+schema update without rewriting their JSON or revision.
+
 The shared spell picker uses the existing wrapping control layout to separate
 each checkbox label from its borrowed rule-details control. Builder and Manage
 spells share this rendering and focus behavior, including enlarged phone views.

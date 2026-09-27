@@ -1,4 +1,5 @@
 import type { Inputs, Result } from "./character-model.js";
+import { classReplacements } from "./character-replacements.js";
 import { builderLabel, translator } from "./character-locale.js";
 import { abilities, newId, object, rows, strings, type CatalogRecord } from "./character-client.js";
 import { builderTarget, button, combo, el, field, human, label, panel, refreshSteppers, rule, select, stepper, styled, type Option } from "./character-ui.js";
@@ -7,6 +8,7 @@ export interface BuildView {
   compact?: boolean;
   locale: string; input: Inputs; evaluation: Result | undefined; policy: Record<string, unknown>; catalogs: Map<string, CatalogRecord[]>;
   changed(): void; refresh(): void; navigate?(tab: string): void;
+  act?(change: Record<string, unknown>, summary: string): Promise<void>;
 }
 const options = (records: readonly CatalogRecord[]): Option[] => records.map(record => ({ id: record.id, label: String(record.value["name"] ?? record.id), description: String(record.value["summary"] ?? record.value["text"] ?? "").slice(0, 1200) }));
 export const guidanceOptions = (value: unknown, locale = "en"): Option[] => rows(value).map(row => ({ id: String(row["id"]), label: row["labelKey"] ? builderLabel(row, locale) : String(row["label"] ?? row["name"] ?? row["id"]), description: String(row["description"] ?? "") }));
@@ -108,7 +110,9 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
   });
   if(active!=="levels") levels.append(button(t("Add level"),()=>add(active),!available.some(option=>option.id===active)));
   if(!build.levels.length) levels.append(el("p",t("Use + to choose your first class.")));
-  root.append(levels); return root;
+  root.append(levels);
+  if (active !== "levels") root.append(...classReplacements(view, active));
+  return root;
 }
 
 function unassignedFeatChoices(view: BuildView, descriptors: Record<string, unknown>[], guidance: Record<string, unknown>): HTMLElement[] {

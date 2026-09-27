@@ -39,6 +39,9 @@ func (c *Coordinator) importedInputs(meta *workerrpc.Meta, request Request) (mod
 	for i := range input.Build.Spells.Swaps {
 		input.Build.Spells.Swaps[i].Origin = "import"
 	}
+	for i := range input.Build.Replacements {
+		input.Build.Replacements[i].Origin = "import"
+	}
 	for i := range input.Grants {
 		grant := &input.Grants[i]
 		grant.ID = ids[grant.ID]

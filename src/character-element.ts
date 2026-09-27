@@ -241,7 +241,7 @@ export function defineCharacterElement(generation: string, client: CharacterClie
       const response = await this.#call("evaluate", { ...this.#base("build"), inputs: structuredClone(this.#input) });
       this.#evaluation = response.evaluation; if (render) this.#render();
     }
-    #view(): BuildView { return { compact: this.#layout === "compact", locale: this.#context?.host.locale ?? "en", input: this.#input, evaluation: this.#evaluation, policy: this.#response?.policy ?? {}, catalogs: this.#catalogs, changed: this.#changed, navigate: tab => { this.#builderNav.tab = tab; }, refresh: () => this.#render() }; }
+    #view(): BuildView { return { compact: this.#layout === "compact", locale: this.#context?.host.locale ?? "en", input: this.#input, evaluation: this.#evaluation, policy: this.#response?.policy ?? {}, catalogs: this.#catalogs, changed: this.#changed, navigate: tab => { this.#builderNav.tab = tab; }, refresh: () => this.#render(), act: (change, summary) => this.#perform({ ...this.#base("play"), change, summary }) }; }
     #render(): void {
       this.lang = this.#context?.host.locale ?? "en";
       if (!this.isConnected || !this.#context) return;

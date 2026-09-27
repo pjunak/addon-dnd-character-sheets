@@ -24,6 +24,7 @@ func TestImportReauthorizesGrantReferencesWithoutChangingTheExport(t *testing.T)
 	input.Play.Rolls = []model.PlayRoll{{ID: "die", Origin: "recorded"}}
 	input.Build.Spells.Acquisitions = []model.SpellAcquisition{{ID: "copy", Origin: "recorded", CostGP: 50}}
 	input.Build.Spells.Swaps = []model.SpellSwap{{Origin: "recorded", In: "spark", Out: "ward"}}
+	input.Build.Replacements = []model.ClassReplacement{{Origin: "recorded", ClassID: "martial", ClassLevel: 2, Kind: "feat", Key: "training", Out: "first", In: "second"}}
 	before := string(raw(input))
 	next, err := c.propose(context.Background(), meta, Request{Operation: "import", OperationID: "reviewed-import", Inputs: &input, ReauthorizeGrants: true}, nil, model.Blank())
 	if err != nil {
@@ -37,6 +38,9 @@ func TestImportReauthorizesGrantReferencesWithoutChangingTheExport(t *testing.T)
 	}
 	if next.Build.Rolls[0].Origin != "import" || next.Play.Rolls[0].Origin != "import" || next.Build.Spells.Acquisitions[0].Origin != "import" || next.Build.Spells.Swaps[0].Origin != "import" {
 		t.Fatal("lost imported claim markers")
+	}
+	if next.Build.Replacements[0].Origin != "import" || next.Build.Replacements[0].ClassLevel != 2 || next.Build.Replacements[0].In != "second" {
+		t.Fatal("import lost the spent class-level allowance")
 	}
 	if string(raw(input)) != before {
 		t.Fatal("review mutated the supplied export")

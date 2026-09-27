@@ -343,8 +343,8 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 		if base != nil {
 			previous = base.Inputs
 		}
-		if !bytes.Equal(raw(input.Play.Rolls), raw(previous.Play.Rolls)) || !bytes.Equal(raw(input.Build.Spells.Acquisitions), raw(previous.Build.Spells.Acquisitions)) || !bytes.Equal(raw(input.Build.Spells.Swaps), raw(previous.Build.Spells.Swaps)) {
-			return input, failure(workerrpc.KindUnauthorized, "Recorded play rolls and spell acquisitions can only change through their play commands.")
+		if !bytes.Equal(raw(input.Play.Rolls), raw(previous.Play.Rolls)) || !bytes.Equal(raw(input.Build.Spells.Acquisitions), raw(previous.Build.Spells.Acquisitions)) || !bytes.Equal(raw(input.Build.Spells.Swaps), raw(previous.Build.Spells.Swaps)) || !slices.Equal(input.Build.Replacements, previous.Build.Replacements) {
+			return input, failure(workerrpc.KindUnauthorized, "Recorded rolls, spell acquisitions and class replacements can only change through their play commands.")
 		}
 	}
 	return input, nil
@@ -382,7 +382,7 @@ func (c *Coordinator) evaluate(ctx context.Context, meta *workerrpc.Meta, input 
 		return evaluated{}, RulesContext{}, err
 	}
 	var value evaluated
-	if decode(result.Result, &value) != nil || value.ContractVersion != "rules-character-response.v1" || value.Evaluation.ContractVersion != model.ContractVersion || !reflect.DeepEqual(input.Play.Inspiration, value.Evaluation.Inputs.Play.Inspiration) || !slices.Equal(input.Play.Conditions, value.Evaluation.Inputs.Play.Conditions) || !slices.Equal(input.Play.QuickUse, value.Evaluation.Inputs.Play.QuickUse) || !preservesEquipment(input.Play, value.Evaluation.Inputs.Play, change) {
+	if decode(result.Result, &value) != nil || value.ContractVersion != "rules-character-response.v1" || value.Evaluation.ContractVersion != model.ContractVersion || !reflect.DeepEqual(input.Play.Inspiration, value.Evaluation.Inputs.Play.Inspiration) || !slices.Equal(input.Play.Conditions, value.Evaluation.Inputs.Play.Conditions) || !slices.Equal(input.Play.QuickUse, value.Evaluation.Inputs.Play.QuickUse) || !preservesEquipment(input.Play, value.Evaluation.Inputs.Play, change) || !preservesClassReplacements(input, value.Evaluation.Inputs, change) {
 		return value, RulesContext{}, failure(workerrpc.KindValidationFailed, "Rules returned an incompatible character result.")
 	}
 	return value, RulesContext{EngineID: result.ProviderAddonID, EngineVersion: result.ProviderContractVersion, EngineGeneration: result.ProviderGeneration, Identity: value.Identity}, nil

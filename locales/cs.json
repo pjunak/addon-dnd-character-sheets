@@ -508,7 +508,6 @@
   "Imported DM grants must be reviewed and authorized by the current DM.": "Importovaná udělení PJ musí zkontrolovat a schválit současný PJ.",
   "Choose a supported character change.": "Vyberte podporovanou změnu postavy.",
   "DM grants require a DM grant command.": "Udělení PJ vyžadují odpovídající příkaz PJ.",
-  "Recorded play rolls and spell acquisitions can only change through their play commands.": "Zaznamenané herní hody a získaná kouzla lze měnit pouze příslušnými herními příkazy.",
   "Rules returned an incompatible character result.": "Pravidla vrátila nekompatibilní výsledek postavy.",
   "This review expired or belongs to another session. Review again.": "Platnost této kontroly vypršela nebo patří jiné relaci. Proveďte kontrolu znovu.",
   "The character changed since this review.": "Postava se od této kontroly změnila.",
@@ -744,5 +743,19 @@
   "Restrained": "Zadržení",
   "Stunned": "Omráčení",
   "Unconscious": "Bezvědomí",
-  "Choose a distinct available condition and a supported level, or remove it.": "Vyberte jedinečný dostupný stav a povolený stupeň, nebo jej odstraňte."
+  "Choose a distinct available condition and a supported level, or remove it.": "Vyberte jedinečný dostupný stav a povolený stupeň, nebo jej odstraňte.",
+  "Class-level replacement": "Výměna při zvýšení úrovně povolání",
+  "Class level {0} · {1} replacement remaining": "Úroveň povolání {0} · zbývající výměny: {1}",
+  "This uses the current class level's allowance. Resting or changing rules does not restore it.": "Tímto využijete výměnu pro aktuální úroveň povolání. Odpočinek ani změna pravidel ji neobnoví.",
+  "Replace class choice": "Vyměnit volbu povolání",
+  "Current choice": "Současná volba",
+  "New choice": "Nová volba",
+  "The replacement for this class level has been used.": "Výměna pro tuto úroveň povolání již byla využita.",
+  "Choose the class feature's initial selections before replacing one.": "Před výměnou vyberte počáteční volby schopnosti povolání.",
+  "Recorded rolls, spell acquisitions and class replacements can only change through their play commands.": "Zaznamenané hody, získaná kouzla a výměny volby povolání lze měnit pouze příslušnými herními příkazy.",
+  "No eligible replacement is available.": "Není dostupná žádná způsobilá náhrada.",
+  "The recorded class replacement allowance is invalid.": "Zaznamenaný limit výměn volby povolání je neplatný.",
+  "Resolve invalid build choices before replacing a class choice.": "Před výměnou volby povolání opravte neplatné volby tvorby postavy.",
+  "The replacement conflicts with another character choice.": "Náhrada je v rozporu s jinou volbou postavy.",
+  "No eligible class-level replacement remains for this choice.": "Pro tuto volbu už na současné úrovni povolání nezbývá způsobilá výměna."
 }
