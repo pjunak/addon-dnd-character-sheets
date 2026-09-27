@@ -173,10 +173,13 @@ uncertain writes retain the exact command and operation ID for Retry.
 
 Provider-free saved reading, printing and reviewed replacement transfer keep
 main/off-hand, grip and suspended-instance identity. Old characters do not gain
-default fields. All five preceding schema-4 generations retain exact JSON and
-document revisions through the host's compatible review, including **Heal and
-update** for the preceding placement-enabled package. The final shared-card
-geometry, conditions, Equipment workspace and mannequin remain T63 work.
+default fields. The hand-state release preserved all five preceding schema-4
+generations through compatible review, including **Heal and update** for the
+placement-enabled package. The later condition upgrade extends that coverage to
+six generations with exact saved JSON and document revisions. Compact now uses
+the shared cards, Equipment workspace and mannequin; both Combat layouts share
+conditions. Unvisited-tab frame sizing and final workflow acceptance remain in
+the [suite backlog](../../ttrpg-codex/docs/BACKLOG.md#t63-character-sheet-design).
 
 ## Automatic saving
 
