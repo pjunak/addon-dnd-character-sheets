@@ -21,11 +21,12 @@ Concurrent disjoint fields may merge; conflicting explicit values remain pending
 
 The extension namespace and schema version stay `dnd-sheets` / `4.0.0`, but the
 closed schema's hash changes. On a materialized installation, update the host
-first, disable Sheets, then use **Review saved-data compatibility** for the
-inspected new package. Apply that exact review, then review and activate the
-package normally. The host checks every stored value and preserves its bytes,
-document revision and recovery evidence. This is not an automatic converter or
-a reset. These optional fields do not require rewriting current characters.
+first, then use its [guided update confirmation](../../ttrpg-codex/docs/SELF_HOSTING.md#add-on-installation).
+Choose **Heal and update** to preserve compatible characters; these optional
+fields do not require rewriting their values. The host owns the scoped backup,
+compatibility check, runtime restart and recovery. No separate manual disable
+or schema application is needed. Removal is an explicit alternative that clears
+current sheet saves, not a conversion of them.
 A package rollback after new values have been saved can require a separate
 review and may be blocked if the old schema cannot represent them.
 
