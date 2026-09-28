@@ -52,6 +52,9 @@ mannequin, Other worn, attunement and Storage. **Backpack** opens a searchable,
 sortable dialog with container filtering. Add Item returns to that same search
 and compartment; it defaults to a new instance and offers explicit addition to
 a carried stack. Existing item names, notes, grants and equipped copies survive.
+The shared Add Item picker groups armor by its declared armor type, magic items
+by their source item type and weapons by their source category. Unclassified
+gear stays under Other; browse grouping never grants equipment eligibility.
 Save feedback and retry actions move into the active dialog. Advanced mechanical
 armor/shield/worn controls remain available separately from body placement.
 Closing a dialog restores its return control when needed; delayed cleanup keeps

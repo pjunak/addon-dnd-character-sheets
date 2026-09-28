@@ -1,6 +1,6 @@
 import type { Projection, Reference } from "./character-model.js";
 import { object } from "./character-client.js";
-import { abilityNames, translator } from "./character-locale.js";
+import { abilityNames, armorCategoryLabels, translator } from "./character-locale.js";
 import { el, label, panel, rule, styled } from "./character-ui.js";
 
 interface TrainingEntry {
@@ -15,13 +15,7 @@ interface TrainingGroup {
   entries: TrainingEntry[];
 }
 const categoryNames: Record<string, Record<string, string>> = {
-  armor: {
-    light: "Light armor",
-    medium: "Medium armor",
-    heavy: "Heavy armor",
-    shield: "Shields",
-    shields: "Shields",
-  },
+  armor: armorCategoryLabels,
   weapon: {
     simple: "Simple weapons",
     martial: "Martial weapons",

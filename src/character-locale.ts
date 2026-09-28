@@ -9,6 +9,13 @@ export const abilityNames: Record<string, string> = {
   WIS: "Wisdom",
   CHA: "Charisma",
 };
+export const armorCategoryLabels: Readonly<Record<string, string>> = {
+  light: "Light armor",
+  medium: "Medium armor",
+  heavy: "Heavy armor",
+  shield: "Shields",
+  shields: "Shields",
+};
 
 export function builderLabel(
   guidance: Record<string, unknown>,

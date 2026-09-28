@@ -2,7 +2,7 @@ import { containerOptions } from "./character-inventory.js";
 import type { Container, Item } from "./character-model.js";
 import type { CatalogRecord } from "./character-client.js";
 import { newId, text } from "./character-client.js";
-import { translator } from "./character-locale.js";
+import { armorCategoryLabels, translator } from "./character-locale.js";
 import {
   button,
   el,
@@ -14,6 +14,16 @@ import {
   styled,
   textInput,
 } from "./character-ui.js";
+
+export function equipmentCategory(record: CatalogRecord): string {
+  const declared =
+    record.kind === "armor"
+      ? record.value["armorType"]
+      : record.kind === "magic-item"
+        ? record.value["itemType"]
+        : undefined;
+  return text(declared ?? record.value["category"] ?? record.value["type"], "Other");
+}
 
 export function equipmentPicker(
   catalogs: Map<string, CatalogRecord[]>,
@@ -57,8 +67,8 @@ export function equipmentPicker(
   path.setAttribute("aria-label", t("Equipment folders"));
   const results = styled("div", "dnd-picker-results"),
     selected = styled("div", "dnd-picker-tray");
-  const categoryOf = (record: CatalogRecord): string =>
-    text(record.value["category"] ?? record.value["type"], t("Other"));
+  const folderLabel = (id: string): string =>
+    t(category === "armor" ? (armorCategoryLabels[id] ?? label(id)) : label(id));
   const render = (): void => {
     type.value = category;
     path.replaceChildren(
@@ -76,15 +86,17 @@ export function equipmentPicker(
           render();
         }),
       );
-    if (folder) path.append(el("span", "›"), el("span", t(label(folder))));
+    if (folder) path.append(el("span", "›"), el("span", folderLabel(folder)));
     results.replaceChildren();
     selected.replaceChildren(el("h3", t("Selected items")));
     if (!query && (!category || !folder)) {
       const folders = !category
         ? ["armor", "weapon", "magic-item", "gear"]
-        : [...new Set(catalog.filter((row) => row.kind === category).map(categoryOf))].sort();
+        : [
+            ...new Set(catalog.filter((row) => row.kind === category).map(equipmentCategory)),
+          ].sort();
       for (const id of folders) {
-        const next = button("▸ " + t(label(id)), () => {
+        const next = button("▸ " + (!category ? t(label(id)) : folderLabel(id)), () => {
           if (!category) category = id;
           else folder = id;
           render();
@@ -96,7 +108,7 @@ export function equipmentPicker(
     const filtered = catalog.filter(
       (row) =>
         (!category || row.kind === category) &&
-        (!folder || categoryOf(row) === folder) &&
+        (!folder || equipmentCategory(row) === folder) &&
         (!magic || (row.kind === "magic-item") === (magic === "magic")) &&
         text(row.value["name"], row.id).toLocaleLowerCase().includes(query),
     );
