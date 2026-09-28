@@ -21,6 +21,10 @@ export class CompactFrame {
     this.#disconnect = undefined;
   }
 
+  restoreHeight(root: HTMLElement): void {
+    root.style.setProperty("--dsc-content-height", this.#height + "px");
+  }
+
   connect(
     root: HTMLElement,
     content: HTMLElement,
@@ -41,7 +45,7 @@ export class CompactFrame {
       stage?.remove();
       stage = undefined;
     };
-    const apply = (): void => root.style.setProperty("--dsc-content-height", this.#height + "px");
+    const apply = (): void => this.restoreHeight(root);
     const prime = async (signature: string): Promise<void> => {
       running = true;
       const surface = document.createElement("div");

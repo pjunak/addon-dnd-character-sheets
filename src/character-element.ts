@@ -709,6 +709,9 @@ export function defineCharacterElement(
           ? { start: focused.selectionStart, end: focused.selectionEnd }
           : undefined;
       const root = styled("section", "dnd-sheet-shell dse-layout-" + this.#layout);
+      // Preserve document height while replacing a tab, before enhancement or
+      // focus restoration can flush the shorter panel's layout and clamp scroll.
+      if (this.#layout === "compact") this.#frame.restoreHeight(root);
       this.dataset["layout"] = this.#layout;
       if (!this.#response) {
         const status = el("p", this.#feedback(this.#message || "Loading character…"));
