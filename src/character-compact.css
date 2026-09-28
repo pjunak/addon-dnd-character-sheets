@@ -34,7 +34,18 @@
 }
 .addon-dnd-character .dse-layout-compact .dnd-sheet-workspace {
   display: block;
+  position: relative;
   min-height: max(48rem, var(--dsc-content-height, 0px));
+}
+.dnd-frame-measure {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  contain: layout style;
 }
 .addon-dnd-character .dse-layout-compact .dnd-save-status {
   margin-bottom: 0.5rem;

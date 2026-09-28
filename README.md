@@ -57,10 +57,12 @@ armor/shield/worn controls remain available separately from body placement.
 Closing a dialog restores its return control when needed; delayed cleanup keeps
 focus on another control if the user has already moved there.
 
-The desktop frame retains the largest measured view at the current width and
-grows when new content needs space, without rendering duplicate hidden tabs.
-Small screens use normal document flow. It cannot predict the height of an
-unvisited, expanded view.
+The desktop frame measures every tab and current Builder section before the
+first visit, then reuses that height during navigation. Width, font and saved-data
+changes refresh the measurements; expanding content can grow the frame. Temporary
+inert samples use the same shared controls, cannot edit data or resolve rule links,
+and are removed after measurement. Only the selected editable view stays mounted.
+Small screens use normal document flow, with no retained desktop minimum height.
 Compact navigation wraps whole labels into rows as space or text size changes.
 It uses the host's tab controls: Up/Down for the desktop rail, Left/Right for
 the narrow-screen rows, with the same selected tab and keyboard focus.

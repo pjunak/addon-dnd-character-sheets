@@ -13,6 +13,7 @@ import {
   placementPicker,
 } from "./character-compact.js";
 import { backpackDialog, type BackpackState } from "./character-backpack.js";
+import { CompactFrame } from "./character-frame.js";
 import {
   abilityRail,
   backpack,
@@ -143,9 +144,7 @@ export function defineCharacterElement(
     #dialogContent: (() => Node[]) | undefined;
     #dialogBack: (() => void) | undefined;
     #details = new Map<string, boolean>();
-    #frameObserver: ResizeObserver | undefined;
-    #frameWidth = 0;
-    #frameHeight = 0;
+    readonly #frame = new CompactFrame();
     #t = (key: string, values?: readonly unknown[]): string =>
       translator(this.#context?.host.locale ?? "en")(key, values);
     #feedback = (message: string): string =>
@@ -161,8 +160,7 @@ export function defineCharacterElement(
         this.#pack = { query: "", container: "", sort: "name" };
         this.#packReturnFocus = "storage/open";
         this.#details.clear();
-        this.#frameWidth = 0;
-        this.#frameHeight = 0;
+        this.#frame.reset();
       }
       if (this.isConnected && previous?.host.key !== value.host.key) {
         this.#epoch++;
@@ -194,7 +192,7 @@ export function defineCharacterElement(
       void this.#load();
     }
     disconnectedCallback(): void {
-      this.#frameObserver?.disconnect();
+      this.#frame.disconnect();
       this.#controls?.dispose();
       this.#controls = undefined;
       this.#epoch++;
@@ -688,6 +686,7 @@ export function defineCharacterElement(
       };
     }
     #render(): void {
+      this.#frame.disconnect();
       this.lang = this.#context?.host.locale ?? "en";
       if (!this.isConnected || !this.#context) return;
       for (const details of this.querySelectorAll<HTMLDetailsElement>("details[data-details-key]"))
@@ -710,8 +709,6 @@ export function defineCharacterElement(
           ? { start: focused.selectionStart, end: focused.selectionEnd }
           : undefined;
       const root = styled("section", "dnd-sheet-shell dse-layout-" + this.#layout);
-      if (this.#layout === "compact")
-        root.style.setProperty("--dsc-content-height", this.#frameHeight + "px");
       this.dataset["layout"] = this.#layout;
       if (!this.#response) {
         const status = el("p", this.#feedback(this.#message || "Loading character…"));
@@ -722,7 +719,6 @@ export function defineCharacterElement(
         this.prepend(root);
         return;
       }
-      const view = this.#sheetView();
       if (this.#layout === "classic" && this.#tab === "equipment") this.#tab = "sheet";
       const options = [
         "sheet",
@@ -765,51 +761,10 @@ export function defineCharacterElement(
       status.setAttribute("role", "status");
       status.tabIndex = -1;
       this.#saveFeedback(status);
-      const content = styled("div", "dnd-sheet-panel");
+      const content = this.#tabPanel(this.#tab);
       content.id = "dnd-panel-" + this.#tab;
       content.setAttribute("role", "tabpanel");
       content.setAttribute("aria-labelledby", "dnd-tab-" + this.#tab);
-      if (this.#tab === "builder") content.append(this.#builder());
-      else if (this.#tab === "tools") content.append(this.#tools());
-      else if (this.#tab === "spells")
-        content.append(...(this.#layout === "classic" ? [vitals(view)] : []), this.#spells());
-      else if (this.#tab === "equipment")
-        content.append(
-          compactEquipment(
-            view,
-            (container) => this.#backpack(container),
-            (place) => this.#placement(place),
-          ),
-        );
-      else if (this.#layout === "compact")
-        content.append(
-          compactSheet(
-            view,
-            this.#tab === "combat",
-            this.#tab === "combat" ? this.#combat(false) : el("div"),
-            () => this.#backpack(),
-          ),
-        );
-      else {
-        const main = styled("div", "dse-cols-main", vitals(view));
-        if (!this.#response.state)
-          main.append(
-            panel(
-              this.#t("Create your character"),
-              el("p", this.#t("Choose your origin, abilities and first class to start building.")),
-              button(this.#t("Open Builder"), () => {
-                this.#tab = "builder";
-                this.#render();
-              }),
-            ),
-          );
-        main.append(
-          handControls(view, this.#tab === "combat"),
-          quickUse(view),
-          this.#tab === "combat" ? this.#combat() : backpack(view),
-        );
-        content.append(styled("div", "dse-cols", abilityRail(view), main));
-      }
       root.append(nav, styled("div", "dnd-sheet-workspace", ...(dialog ? [] : [status]), content));
       if (dialog) {
         dialog.querySelector("[data-character-status]")?.remove();
@@ -835,7 +790,6 @@ export function defineCharacterElement(
       for (const details of this.querySelectorAll<HTMLDetailsElement>("details[data-details-key]"))
         if (this.#details.has(details.dataset["detailsKey"]!))
           details.open = this.#details.get(details.dataset["detailsKey"]!)!;
-      this.#observeFrame(root, content);
       for (const field of root.querySelectorAll<HTMLElement>(".character-field")) {
         for (const control of field.querySelectorAll<HTMLElement>("input,select,textarea,button"))
           control.dataset["focusKey"] ??=
@@ -864,6 +818,99 @@ export function defineCharacterElement(
         (restore instanceof HTMLTextAreaElement || restore instanceof HTMLInputElement)
       )
         restore.setSelectionRange(selection.start, selection.end);
+      if (this.#layout === "compact")
+        this.#frame.connect(
+          root,
+          content,
+          [
+            this.#baseRevision,
+            this.#changeVersion,
+            this.lang,
+            this.#catalogs.size,
+            this.#response.status,
+            this.#response.rulesChanged,
+          ].join("/"),
+          () => this.#frameSamples(),
+          this.#runtime.enhance,
+        );
+    }
+    #tabPanel(tab: Tab, navigation = this.#builderNav, pickers = this.#spellPickers): HTMLElement {
+      const view = this.#sheetView(),
+        content = styled("div", "dnd-sheet-panel");
+      if (tab === "builder") content.append(this.#builder(navigation, pickers));
+      else if (tab === "tools") content.append(this.#tools());
+      else if (tab === "spells")
+        content.append(
+          ...(this.#layout === "classic" ? [vitals(view)] : []),
+          this.#spells(pickers),
+        );
+      else if (tab === "equipment")
+        content.append(
+          compactEquipment(
+            view,
+            (container) => this.#backpack(container),
+            (place) => this.#placement(place),
+          ),
+        );
+      else if (this.#layout === "compact")
+        content.append(
+          compactSheet(
+            view,
+            tab === "combat",
+            tab === "combat" ? this.#combat(false) : el("div"),
+            () => this.#backpack(),
+          ),
+        );
+      else {
+        const main = styled("div", "dse-cols-main", vitals(view));
+        if (!this.#response?.state)
+          main.append(
+            panel(
+              this.#t("Create your character"),
+              el("p", this.#t("Choose your origin, abilities and first class to start building.")),
+              button(this.#t("Open Builder"), () => {
+                this.#tab = "builder";
+                this.#render();
+              }),
+            ),
+          );
+        main.append(
+          handControls(view, tab === "combat"),
+          quickUse(view),
+          tab === "combat" ? this.#combat() : backpack(view),
+        );
+        content.append(styled("div", "dse-cols", abilityRail(view), main));
+      }
+      return content;
+    }
+    *#frameSamples(): Iterable<HTMLElement> {
+      const tabs: Tab[] = ["sheet", "combat", "equipment", "spells", "tools"],
+        destinations = [
+          "character",
+          ...new Set(this.#input.build.levels.map((level) => level.classId)),
+          "add-class",
+          "spells",
+          "dm-given",
+        ];
+      const views = [
+        ...tabs.map((tab) => ({ tab, builder: this.#builderNav.tab })),
+        ...destinations.map((builder) => ({ tab: "builder" as const, builder })),
+      ];
+      for (const { tab, builder } of views) {
+        const navigation = {
+            ...this.#builderNav,
+            tab: builder,
+            target: "",
+          },
+          pickers = new Map([...this.#spellPickers].map(([key, state]) => [key, { ...state }])),
+          sample = this.#tabPanel(tab, navigation, pickers);
+        for (const details of sample.querySelectorAll<HTMLDetailsElement>(
+          "details[data-details-key]",
+        ))
+          if (this.#details.has(details.dataset["detailsKey"]!))
+            details.open = this.#details.get(details.dataset["detailsKey"]!)!;
+        yield sample;
+      }
     }
     #sheetView(): SheetView {
       const editing =
@@ -1019,34 +1066,6 @@ export function defineCharacterElement(
       )
         target.setSelectionRange(selection[0], selection[1]);
     }
-    #observeFrame(root: HTMLElement, content: HTMLElement): void {
-      this.#frameObserver?.disconnect();
-      if (this.#layout !== "compact") return;
-      const workspace = root.querySelector<HTMLElement>(".dnd-sheet-workspace")!;
-      const measure = (): void => {
-        if (!root.isConnected || this.firstElementChild !== root) return;
-        const navigation = root.querySelector<HTMLElement>(".dnd-sheet-tabs")!;
-        // Keep the borrowed tab keyboard behavior aligned with the CSS layout.
-        navigation.setAttribute(
-          "aria-orientation",
-          getComputedStyle(navigation).flexDirection === "column" ? "vertical" : "horizontal",
-        );
-        const width = Math.round(workspace.getBoundingClientRect().width);
-        // A viewport scrollbar appearing/disappearing must not discard the
-        // retained height. A real width change starts a new measurement band.
-        if (Math.abs(width - this.#frameWidth) > 24) {
-          this.#frameWidth = width;
-          this.#frameHeight = 0;
-        }
-        const box = content.getBoundingClientRect(),
-          top = workspace.getBoundingClientRect().top;
-        this.#frameHeight = Math.max(this.#frameHeight, Math.ceil(box.bottom - top));
-        root.style.setProperty("--dsc-content-height", this.#frameHeight + "px");
-      };
-      this.#frameObserver = new ResizeObserver(measure);
-      this.#frameObserver.observe(content);
-      measure();
-    }
     #slot(slot: EquipmentSlot): void {
       const view = this.#sheetView(),
         attuning = slot === "attuned";
@@ -1128,18 +1147,14 @@ export function defineCharacterElement(
         "heading",
       );
     }
-    #builder(): HTMLElement {
+    #builder(navigation = this.#builderNav, pickers = this.#spellPickers): HTMLElement {
       const body = el("fieldset");
       body.disabled =
         !this.#editable ||
         this.#response?.status === "unavailable" ||
         !!this.#response?.rulesChanged;
       const view = this.#view();
-      this.#builderNav.tab = builderDestination(
-        view,
-        this.#builderNav.tab,
-        this.#builderNav.target,
-      );
+      navigation.tab = builderDestination(view, navigation.tab, navigation.target);
       if (
         ![
           "character",
@@ -1148,13 +1163,13 @@ export function defineCharacterElement(
           "add-class",
           "dm-given",
           ...this.#input.build.levels.map((level) => level.classId),
-        ].includes(this.#builderNav.tab)
+        ].includes(navigation.tab)
       )
-        this.#builderNav.tab = "character";
-      if (this.#builderNav.tab === "dm-given") body.append(this.#grants());
-      else if (this.#builderNav.tab === "spells") body.append(this.#spellChoices());
-      else body.append(buildView(view, this.#builderNav.tab));
-      return builderShell(view, this.#builderNav, body, (tab, target = "") => {
+        navigation.tab = "character";
+      if (navigation.tab === "dm-given") body.append(this.#grants());
+      else if (navigation.tab === "spells") body.append(this.#spellChoices(pickers));
+      else body.append(buildView(view, navigation.tab));
+      return builderShell(view, navigation, body, (tab, target = "") => {
         this.#builderNav.tab = builderDestination(view, tab, target);
         this.#builderNav.target = target;
         this.#render();
@@ -1192,7 +1207,7 @@ export function defineCharacterElement(
       }
       return root;
     }
-    #spells(): HTMLElement {
+    #spells(pickers = this.#spellPickers): HTMLElement {
       const root = styled("div", "dnd-spell-browser"),
         view = this.#sheetView();
       const controls = el("fieldset");
@@ -1220,7 +1235,7 @@ export function defineCharacterElement(
         !!this.#response?.rulesChanged;
       choices.dataset["spellManagement"] = "";
       choices.open = this.#spellManagementOpen;
-      fields.append(this.#spellChoices());
+      fields.append(this.#spellChoices(pickers));
       choices.append(fields);
       root.append(controls, choices);
       return root;
@@ -1314,7 +1329,7 @@ export function defineCharacterElement(
       }
       return el("div", tools, provider);
     }
-    #spellChoices(): HTMLElement {
+    #spellChoices(pickers = this.#spellPickers): HTMLElement {
       const root = panel(this.#t("Spells")),
         options = this.#evaluation?.spellOptions ?? {},
         casting = object(this.#evaluation?.sheet["spellcasting"]),
@@ -1339,10 +1354,10 @@ export function defineCharacterElement(
         maximum: number,
         target: string,
       ): HTMLElement => {
-        let state = this.#spellPickers.get(target);
+        let state = pickers.get(target);
         if (!state) {
           state = { open: false, query: "", level: "" };
-          this.#spellPickers.set(target, state);
+          pickers.set(target, state);
         }
         return spellPicker(
           title,
