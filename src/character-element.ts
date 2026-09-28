@@ -1687,7 +1687,12 @@ export function defineCharacterElement(
         if (this.#dialog?.open && this.#dialog !== dialog) return;
         this.#dialogContent = undefined;
         this.#dialogBack = undefined;
+        // Native close events are queued; preserve focus if the user has already
+        // moved to another control before this dialog finishes its cleanup.
+        const active = document.activeElement,
+          restoreReturnFocus = !active || active === document.body || dialog.contains(active);
         this.#render();
+        if (!restoreReturnFocus) return;
         const target = focusKey
           ? this.querySelector<HTMLElement>('[data-focus-key="' + CSS.escape(focusKey) + '"]')
           : trigger instanceof HTMLElement && trigger.isConnected

@@ -54,6 +54,8 @@ and compartment; it defaults to a new instance and offers explicit addition to
 a carried stack. Existing item names, notes, grants and equipped copies survive.
 Save feedback and retry actions move into the active dialog. Advanced mechanical
 armor/shield/worn controls remain available separately from body placement.
+Closing a dialog restores its return control when needed; delayed cleanup keeps
+focus on another control if the user has already moved there.
 
 The desktop frame retains the largest measured view at the current width and
 grows when new content needs space, without rendering duplicate hidden tabs.
