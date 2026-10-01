@@ -32,9 +32,9 @@
     "check": "npm run check:fast && npm run build && npm test && go run ./tools/check.go test"
   },
   "devDependencies": {
-    "@types/archiver": "^7.0.0",
+    "@types/archiver": "^8.0.0",
     "@types/node": "26.6.3",
-    "archiver": "^7.0.1",
+    "archiver": "^8.0.0",
     "oxc-parser": "0.151.0",
     "oxlint": "1.85.0",
     "oxlint-tsgolint": "7.0.2003",
