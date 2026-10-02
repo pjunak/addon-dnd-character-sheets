@@ -159,6 +159,18 @@ replacements expect compatible `ttrpg-codex` and `addon-dnd-engine` checkouts
 beside this repository. This build dependency does not require an installed
 engine at runtime.
 
+Standalone CI fetches the exact commits in
+[host-sdk-revision.txt](host-sdk-revision.txt) and
+[engine-model-revision.txt](engine-model-revision.txt) before checking or
+packaging. Update the relevant pin in a new sheets commit to ship an SDK or
+public character-model change; rerunning an old commit must not silently
+compile newer dependencies or replace its published ZIP.
+`go run ./tools/check.go dependency-ref <revision-file>` validates either pin
+without requiring sibling modules. Local builds use the adjacent checkouts;
+the host's compatibility suite deliberately builds against its candidate SDK
+and engine model and records actual source commits and package hashes separately.
+These build pins do not select runtime service providers.
+
 ```text
 npm ci
 npm run check:fast

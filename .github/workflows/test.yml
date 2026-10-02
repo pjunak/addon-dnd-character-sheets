@@ -1,7 +1,7 @@
 name: Tests
 
-# Tests import the published host harness and exercise the extracted engine
-# through sibling checkouts, matching the local suite layout.
+# Tests use the pinned public host SDK and engine model through sibling
+# checkouts, matching the local suite layout.
 on:
   push:
     branches: [main]
@@ -24,16 +24,37 @@ jobs:
       - uses: actions/checkout@v7
         with:
           path: addon-dnd-character-sheets
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: addon-dnd-character-sheets/go.mod
+          cache-dependency-path: |
+            addon-dnd-character-sheets/go.sum
+            addon-dnd-character-sheets/go.tools.sum
+            addon-dnd-character-sheets/host-sdk-revision.txt
+            addon-dnd-character-sheets/engine-model-revision.txt
+      - name: Resolve immutable native build dependencies
+        id: dependencies
+        shell: bash
+        run: |
+          host_sdk=$(go run ./tools/check.go dependency-ref host-sdk-revision.txt)
+          printf 'host_sdk=%s\n' "$host_sdk" >> "$GITHUB_OUTPUT"
+          engine_model=$(go run ./tools/check.go dependency-ref engine-model-revision.txt)
+          printf 'engine_model=%s\n' "$engine_model" >> "$GITHUB_OUTPUT"
+        working-directory: addon-dnd-character-sheets
 
       - uses: actions/checkout@v7
         with:
           repository: pjunak/ttrpg-codex
+          ref: ${{ steps.dependencies.outputs.host_sdk }}
           path: ttrpg-codex
+          persist-credentials: false
 
       - uses: actions/checkout@v7
         with:
           repository: pjunak/addon-dnd-engine
+          ref: ${{ steps.dependencies.outputs.engine_model }}
           path: addon-dnd-engine
+          persist-credentials: false
 
       - uses: actions/setup-node@v7
         with:
@@ -41,14 +62,6 @@ jobs:
           cache: npm
           cache-dependency-path: addon-dnd-character-sheets/package-lock.json
 
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: addon-dnd-character-sheets/go.mod
-          cache-dependency-path: |
-            addon-dnd-character-sheets/go.sum
-            addon-dnd-character-sheets/go.tools.sum
-            addon-dnd-engine/go.sum
-            ttrpg-codex/go.sum
       - run: npm ci
         working-directory: addon-dnd-character-sheets
       - run: npm run check:dependencies
