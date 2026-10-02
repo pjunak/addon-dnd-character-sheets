@@ -178,8 +178,9 @@ generations through compatible review, including **Heal and update** for the
 placement-enabled package. The later condition upgrade extends that coverage to
 six generations with exact saved JSON and document revisions. Compact now uses
 the shared cards, Equipment workspace and mannequin; both Combat layouts share
-conditions. Unvisited-tab frame sizing and final workflow acceptance remain in
-the [suite backlog](../../ttrpg-codex/docs/BACKLOG.md#t63-character-sheet-design).
+conditions. [Frame acceptance](../../ttrpg-codex/docs/rewrite/HOST_CLEANUP_ACCEPTANCE.md#compact-frame-sizing-before-first-visits)
+records unvisited-tab sizing and installed workflows; remaining refinements and
+human/device checks stay in the [suite backlog](../../ttrpg-codex/docs/BACKLOG.md#addon-dnd-character-sheets).
 
 ## Automatic saving
 
@@ -233,6 +234,9 @@ inputs for Retry. Newer edits wait for that request's acknowledgment before a
 new save is sent. The worker recognizes its last accepted operation; if another
 editor has since written, ordinary revision/conflict handling applies instead.
 An acknowledgment without evaluation triggers a read to refresh guidance.
+An unchanged revision with no warning retains the visible Saved acknowledgment
+after that read. A newer remote revision or a rules/availability message replaces
+it; the refreshed guidance still determines which controls are available.
 Reload requires explicit confirmation before discarding pending edits.
 
 Direct play, grant/amend/revoke and rules-adoption commands also retain their

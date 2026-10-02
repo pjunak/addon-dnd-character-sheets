@@ -405,7 +405,16 @@ export function defineCharacterElement(
             response.rulesChanged === this.#response.rulesChanged)
         )
           return;
+        // A replay receipt confirms persistence before this guidance read.
+        // Keep its acknowledgement when the read has no newer state or warning.
+        const keepAcknowledgement =
+          this.#message === "Saved" &&
+          response.revision === this.#baseRevision &&
+          response.status === "ready" &&
+          !response.rulesChanged &&
+          !response.message;
         this.#accept(response);
+        if (keepAcknowledgement) this.#message = "Saved";
         this.#render();
       } catch {
         /* The next change still uses optimistic revision checks. */
