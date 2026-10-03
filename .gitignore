@@ -31,3 +31,7 @@ Thumbs.db
 test-results/
 playwright-report/
 *.bundle
+
+# Local multi-repository development (go work init . ../ttrpg-codex ../addon-dnd-engine)
+go.work
+go.work.sum
