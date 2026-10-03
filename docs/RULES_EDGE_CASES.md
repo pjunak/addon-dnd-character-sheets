@@ -112,9 +112,6 @@ never a silent recreation. Reviewed replacement import uses the same validation.
 Optional fields preserve all three previous schema-4 generations through the
 host's saved-data review, with no JSON or document-revision rewrite.
 
-The final Equipment tab, searchable floating Backpack dialog, compartment
-filter/sort and explicit existing-stack choice remain T63 work.
-
 ## Body placement and source eligibility
 
 Optional `inputs.play.inventory[].bodyPlacement` organizes a positive-quantity
@@ -140,8 +137,6 @@ including remote item deletion. Lost responses retry the exact request.
 Saved reading, print and replacement export/import retain placement without
 a provider. Schema-4 installations use the compatible review above; all four
 preceding schema generations preserve exact JSON bytes and revisions.
-The final mannequin, Other worn picker and Equipment workspace
-remain separate T63 work.
 
 ## Hands and suspended equipment
 
@@ -178,9 +173,7 @@ generations through compatible review, including **Heal and update** for the
 placement-enabled package. The later condition upgrade extends that coverage to
 six generations with exact saved JSON and document revisions. Compact now uses
 the shared cards, Equipment workspace and mannequin; both Combat layouts share
-conditions. [Frame acceptance](../../ttrpg-codex/docs/rewrite/HOST_CLEANUP_ACCEPTANCE.md#compact-frame-sizing-before-first-visits)
-records unvisited-tab sizing and installed workflows; remaining refinements and
-human/device checks stay in the [suite backlog](../../ttrpg-codex/docs/BACKLOG.md#addon-dnd-character-sheets).
+conditions.
 
 ## Automatic saving
 
@@ -273,16 +266,14 @@ layouts. Required fields use native form validation and keep incomplete input
 in the dialog. Feat and item searches borrow host ui.controls.v1 comboboxes;
 the Engine still owns mechanical validity.
 
-Installed acceptance combines two separate Magic Initiate acquisitions and spent
-free casts with effect changes, item rebinding, provider restart, explicit source
-policy adoption and revocation. Each surviving acquisition keeps its choices,
-casting ability and spent uses. A provider restart alone retains rules identity;
-a policy change requires explicit adoption. Installed compatibility acceptance also
-replaces the engine with an incompatible service major or response schema and
-restores the exact original generation without losing spent casts. A sheet-schema
+Separate acquisitions of the same feat (for example two Magic Initiate picks)
+each keep their own choices, casting ability and spent uses through effect
+changes, item rebinding, provider restarts and source-policy changes. A provider
+restart alone keeps the rules identity; a policy change requires explicit
+adoption. Replacing the engine with an incompatible service version or response
+schema leaves the saved state, including spent casts, untouched. A sheet-schema
 change is blocked before activation; worker-only writes and the exact schema-4
-state remain protected, including in a portable backup. Broader combinations and
-human assistive-technology acceptance remain in the host backlog.
+state stay protected, including in a portable backup.
 
 ## Class-granted choices and spell pickers
 
@@ -345,10 +336,7 @@ Native description lists associate training groups with their values; nested
 unordered lists expose individual entries. The
 [W3C content-structure guidance](https://www.w3.org/WAI/tutorials/page-structure/content/)
 informs this grouping, and [reflow guidance](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html)
-informs wrapping without fixed column counts. Installed acceptance covers
-English Compact and Czech Classic at enlarged phone width, multiclass training,
-DM proficiency withdrawal, provider restart, saved details, print and export.
-Human screen-reader and physical printer acceptance remain separate.
+informs wrapping without fixed column counts.
 
 ## Service feedback
 
@@ -507,8 +495,8 @@ A successful adoption clears the changed-rules flag in the authoritative save
 response, so the sheet can resume editing without an event-stream refresh.
 A lost acknowledgment retains the exact adoption request for Retry and cannot
 write a second revision. This recovery applies to the mounted generation; a
-forced provider/package replacement has a separate lifetime boundary and remains
-tracked in the suite backlog. No input is persisted as a device draft.
+forced provider/package replacement has a separate lifetime boundary. No input
+is persisted as a device draft.
 Tools actions wrap at their natural label widths on phones, including enlarged
 Czech text, instead of forcing every button into the same narrow row.
 
