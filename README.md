@@ -37,7 +37,7 @@ Character notes belong to the core
 profile; the sheet has no Notes tab or notes section in print.
 
 Common fields, searchable choices, actions, tabs and modal focus use the host's
-required `ui.controls.v1` [shared UI contract](../ttrpg-codex/docs/rewrite/UI_FOUNDATIONS.md).
+required `ui.controls.v1` [shared UI contract](../ttrpg-codex/docs/reference/UI_FOUNDATIONS.md).
 The host supplies interaction and theme tokens; this package retains build/play
 semantics and automatic saving.
 
@@ -141,7 +141,7 @@ English and Czech catalogs cover controls and known save/recovery explanations.
 Source prose, authored values and unknown provider diagnostics keep their original
 wording. See [save semantics](docs/RULES_EDGE_CASES.md), the
 engine's [public contract](../addon-dnd-engine/contract/README.md), and the
-[character workflow](../ttrpg-codex/docs/rewrite/CHARACTER_BUILD_HISTORY.md).
+[character workflow](docs/WORKFLOW.md).
 
 ## Code ownership
 
@@ -154,22 +154,12 @@ engine's [public contract](../addon-dnd-engine/contract/README.md), and the
 
 ## Development
 
-Use Node.js 26 (`.nvmrc`; 26.0 or newer) and the Go version in [go.mod](go.mod). Its local module
-replacements expect compatible `ttrpg-codex` and `addon-dnd-engine` checkouts
-beside this repository. This build dependency does not require an installed
-engine at runtime.
-
-Standalone CI fetches the exact commits in
-[host-sdk-revision.txt](host-sdk-revision.txt) and
-[engine-model-revision.txt](engine-model-revision.txt) before checking or
-packaging. Update the relevant pin in a new sheets commit to ship an SDK or
-public character-model change; rerunning an old commit must not silently
-compile newer dependencies or replace its published ZIP.
-`go run ./tools/check.go dependency-ref <revision-file>` validates either pin
-without requiring sibling modules. Local builds use the adjacent checkouts;
-the host's compatibility suite deliberately builds against its candidate SDK
-and engine model and records actual source commits and package hashes separately.
-These build pins do not select runtime service providers.
+Use Node.js 26 (`.nvmrc`) and the Go version in [go.mod](go.mod). The repository
+builds from a plain clone: the host's worker SDK and the Engine's public
+`character` model are ordinary Go module requirements (a build dependency only;
+no engine is needed at runtime). To develop against unreleased host or Engine
+changes, run `go work init . ../ttrpg-codex ../addon-dnd-engine` (the `go.work`
+file is ignored).
 
 ```text
 npm ci
@@ -190,8 +180,8 @@ high or critical advisories fail this network check without applying fixes.
 Use `npm run check:workflows` and `npm run check:vulnerabilities` to run the
 matching workflow and reachable Go vulnerability checks locally.
 
-Inspect the resulting ZIP from the host with
-`go run ./cmd/codex-addon-inspect ../addon-dnd-character-sheets/dist/dnd-sheets-4.0.0.zip`.
+Inspect the resulting ZIP with the host's inspector:
+`go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-4.0.0.zip`.
 The package command rebuilds web assets and native workers from source, including
 when neither output directory exists. `web/`, `worker/` and `dist/` are ignored
 build artifacts; public schemas and generated TypeScript models remain versioned.
@@ -199,11 +189,9 @@ CI checks that builds preserve tracked source. Tests type-check against `src/`
 and import freshly built `web/` at runtime through `npm run check`; `npm test` is
 a focused rerun after building. The source guard rejects tracked or untracked,
 non-ignored JavaScript source while allowing ignored compiled output. Source checkout
-edits become visible only after rebuilding and reviewed activation. Current
-integration tests live in the host's installed character/rules/sheets suites.
-The installed-character suite checks both layouts on desktop and phone, keyboard
-tabs, engine-owned score values, automatic equipment saves, current-state persistence
-and provider-absence behavior.
+edits become visible only after rebuilding and reviewed activation. The host's
+installed add-on smoke test installs this package with the Engine and Compendium
+and builds, saves, transfers and prints a character.
 
 
 ## Install and update from tested commits

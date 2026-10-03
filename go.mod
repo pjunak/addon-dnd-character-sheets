@@ -3,7 +3,7 @@ module github.com/pjunak/addon-dnd-character-sheets
 go 1.27.1
 
 require (
-	github.com/pjunak/addon-dnd-engine v0.0.0
+	github.com/pjunak/addon-dnd-engine v0.0.0-20261002113553-f19f634f6ca5
 	github.com/pjunak/ttrpg-codex v0.0.0
 )
 
@@ -13,6 +13,6 @@ require (
 	golang.org/x/text v0.41.0 // indirect
 )
 
-replace github.com/pjunak/addon-dnd-engine => ../addon-dnd-engine
-
-replace github.com/pjunak/ttrpg-codex => ../ttrpg-codex
+// The published engine go.mod still names the host as v0.0.0. Drop this
+// replace after requiring an engine commit that names a real host version.
+replace github.com/pjunak/ttrpg-codex v0.0.0 => github.com/pjunak/ttrpg-codex v0.0.0-20261002110254-8463f4aa1e38

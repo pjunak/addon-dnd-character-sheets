@@ -1,10 +1,9 @@
 name: Tests
 
-# Tests use the pinned public host SDK and engine model through sibling
-# checkouts, matching the local suite layout.
 on:
   push:
     branches: [main]
+    paths-ignore: ["**/*.md"]
   pull_request:
   workflow_dispatch:
 
@@ -22,86 +21,41 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-        with:
-          path: addon-dnd-character-sheets
       - uses: actions/setup-go@v7
         with:
-          go-version-file: addon-dnd-character-sheets/go.mod
+          go-version-file: go.mod
           cache-dependency-path: |
-            addon-dnd-character-sheets/go.sum
-            addon-dnd-character-sheets/go.tools.sum
-            addon-dnd-character-sheets/host-sdk-revision.txt
-            addon-dnd-character-sheets/engine-model-revision.txt
-      - name: Resolve immutable native build dependencies
-        id: dependencies
-        shell: bash
-        run: |
-          host_sdk=$(go run ./tools/check.go dependency-ref host-sdk-revision.txt)
-          printf 'host_sdk=%s\n' "$host_sdk" >> "$GITHUB_OUTPUT"
-          engine_model=$(go run ./tools/check.go dependency-ref engine-model-revision.txt)
-          printf 'engine_model=%s\n' "$engine_model" >> "$GITHUB_OUTPUT"
-        working-directory: addon-dnd-character-sheets
-
-      - uses: actions/checkout@v7
-        with:
-          repository: pjunak/ttrpg-codex
-          ref: ${{ steps.dependencies.outputs.host_sdk }}
-          path: ttrpg-codex
-          persist-credentials: false
-
-      - uses: actions/checkout@v7
-        with:
-          repository: pjunak/addon-dnd-engine
-          ref: ${{ steps.dependencies.outputs.engine_model }}
-          path: addon-dnd-engine
-          persist-credentials: false
-
+            go.sum
+            go.tools.sum
       - uses: actions/setup-node@v7
         with:
           node-version: 26
           cache: npm
-          cache-dependency-path: addon-dnd-character-sheets/package-lock.json
-
       - run: npm ci
-        working-directory: addon-dnd-character-sheets
       - run: npm run check:dependencies
-        working-directory: addon-dnd-character-sheets
       - run: go mod download -modfile=go.tools.mod
-        working-directory: addon-dnd-character-sheets
       - run: go run ./tools/check.go workflows
-        working-directory: addon-dnd-character-sheets
       - run: go run ./tools/check.go vuln
-        working-directory: addon-dnd-character-sheets
       - run: npm run check
-        working-directory: addon-dnd-character-sheets
       - run: npm run package
-        working-directory: addon-dnd-character-sheets
-      - name: Verify builds preserve source ownership
+      - name: Verify the build left tracked source unchanged
         run: |
           git diff --exit-code
           test -z "$(git ls-files -- web worker)"
-        working-directory: addon-dnd-character-sheets
       - name: Locate built package
         id: package
-        shell: bash
         run: |
           archive="$(jq -er '"dist/\(.id)-\(.version).zip"' addon.json)"
           test -f "$archive"
-          printf 'archive=%s/%s\n' "$PWD" "$archive" >> "$GITHUB_OUTPUT"
-        working-directory: addon-dnd-character-sheets
-      - name: Inspect release package with the host
-        env:
-          ADDON_ARCHIVE: ${{ steps.package.outputs.archive }}
-        run: go run ./cmd/codex-addon-inspect "$ADDON_ARCHIVE"
-        working-directory: ttrpg-codex
-
+          printf 'archive=%s\n' "$archive" >> "$GITHUB_OUTPUT"
+      - name: Inspect release package with the host inspector
+        run: go tool -modfile=go.tools.mod codex-addon-inspect "${{ steps.package.outputs.archive }}"
       - uses: actions/upload-artifact@v7
         with:
           name: reviewed-package
           path: ${{ steps.package.outputs.archive }}
           if-no-files-found: error
           retention-days: 14
-
 
   publish:
     name: Publish tested commit
