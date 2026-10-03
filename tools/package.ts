@@ -1,4 +1,4 @@
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 import { createHash } from "node:crypto";
 import { createWriteStream } from "node:fs";
 import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
@@ -54,7 +54,7 @@ async function listFiles(directory: string): Promise<readonly string[]> {
 async function createArchive(source: string, destination: string): Promise<void> {
   await new Promise<void>((resolveArchive, rejectArchive) => {
     const output = createWriteStream(destination, { flags: "wx" });
-    const archive = archiver("zip", { zlib: { level: 9 } });
+    const archive = new ZipArchive({ zlib: { level: 9 } });
     output.once("close", resolveArchive);
     output.once("error", rejectArchive);
     archive.once("warning", rejectArchive);
