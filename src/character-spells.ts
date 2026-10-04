@@ -167,37 +167,15 @@ export function unassignedSpellState(
   ];
   for (const [saved, descriptors] of groups)
     for (const [key, value] of Object.entries(saved)) {
-      if (descriptors.some((row) => row["key"] === key)) continue;
-      const owners = descriptors.filter(
-        (row) => row["legacyKey"] === key && !Object.hasOwn(saved, String(row["key"])),
-      );
       if (
-        !owners.length &&
-        ((Array.isArray(value) && !value.length) || value === 0 || value === false)
+        descriptors.some((row) => row["key"] === key) ||
+        (Array.isArray(value) && !value.length) ||
+        value === 0 ||
+        value === false
       )
         continue;
-      const root = panel(t("Assign saved spell state"), el("p", key + ": " + human(value)));
+      const root = panel(t("Unavailable saved spell state"), el("p", key + ": " + human(value)));
       root.dataset["spellRepair"] = key;
-      if (owners.length) {
-        const control = select(
-          "",
-          owners.map((row) => ({
-            id: String(row["key"]),
-            label: spellSourceLabel(row["source"], locale),
-          })),
-          (id) => {
-            if (!id) return;
-            saved[id] = structuredClone(value);
-            delete saved[key];
-            changed();
-          },
-          t,
-        );
-        control.dataset["ui"] = "combobox";
-        const ownerField = field(t("Granting source"), control);
-        ownerField.dataset["uiKey"] = "spell-repair:" + key;
-        root.append(ownerField);
-      }
       root.append(
         button(t("Discard saved spell state"), () => {
           delete saved[key];

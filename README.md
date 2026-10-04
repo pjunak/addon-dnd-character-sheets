@@ -181,7 +181,7 @@ Use `npm run check:workflows` and `npm run check:vulnerabilities` to run the
 matching workflow and reachable Go vulnerability checks locally.
 
 Inspect the resulting ZIP with the host's inspector:
-`go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-4.0.0.zip`.
+`go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-4.1.0.zip`.
 The package command rebuilds web assets and native workers from source, including
 when neither output directory exists. `web/`, `worker/` and `dist/` are ignored
 build artifacts; public schemas and generated TypeScript models remain versioned.

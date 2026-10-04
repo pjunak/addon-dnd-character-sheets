@@ -230,7 +230,7 @@ func (c *Coordinator) load(ctx context.Context, meta *workerrpc.Meta, key string
 	}
 	var state State
 	if decode(document.Value, &state) != nil || state.SchemaVersion != SchemaVersion {
-		return nil, 0, failure(workerrpc.KindValidationFailed, "The retired sheet format must be reset through the documented cutover; it cannot be edited as a current character.")
+		return nil, 0, failure(workerrpc.KindValidationFailed, "This saved sheet uses an unsupported format and cannot be edited.")
 	}
 	return &state, document.Revision, nil
 }

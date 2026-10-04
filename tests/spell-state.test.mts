@@ -2,20 +2,17 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { reconcileCharacterMap } from "#web/character-client";
 import { spellSourceLabel } from "#web/character-spells";
-void test("accepted spell withdrawals preserve later selections and alias edits", () => {
+void test("accepted spell withdrawals preserve later selections and edits", () => {
   const sent = { first: ["a", "b"], second: ["c"] },
     current = { first: ["a", "b"], second: ["later"] };
   reconcileCharacterMap(sent, current, { first: ["a"], second: ["c"] });
   assert.deepEqual(current, { first: ["a"], second: ["later"] });
-  const migrated = { legacy: 1 };
-  reconcileCharacterMap({ legacy: 1 }, migrated, { canonical: 1 });
-  assert.deepEqual(migrated, { canonical: 1 });
-  const later = { legacy: 1, other: 2 };
-  reconcileCharacterMap({ legacy: 1, other: 1 }, later, { canonical: 1, other: 1 });
-  assert.deepEqual(later, { legacy: 1, other: 2 });
-  const edited = { legacy: 0 };
-  reconcileCharacterMap({ legacy: 1 }, edited, { canonical: 1 });
-  assert.deepEqual(edited, { legacy: 0 });
+  const withdrawn = { removed: 1, kept: 2 };
+  reconcileCharacterMap({ removed: 1, kept: 1 }, withdrawn, { kept: 1 });
+  assert.deepEqual(withdrawn, { kept: 2 });
+  const edited = { removed: 0 };
+  reconcileCharacterMap({ removed: 1 }, edited, {});
+  assert.deepEqual(edited, { removed: 0 });
 });
 void test("grant labels identify acquisitions and translate only UI terms", () => {
   const source = {

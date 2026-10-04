@@ -1,7 +1,7 @@
 # Character saves and failure semantics
 
 The coordinator owns the current `dnd-sheets` extension for each core character
-lifetime. Schema 4.0.0 accepts earlier characters and the optional authored
+lifetime. Schema 4.0.0 includes the optional authored
 Inspiration, quick-use, storage, body-placement, hand and condition fields; installing a changed schema requires the review below. The core profile, portrait and relationships are host-owned.
 
 ## Authored conditions
@@ -43,7 +43,7 @@ Concurrent disjoint fields may merge; conflicting explicit values remain pending
 
 The extension namespace and schema version stay `dnd-sheets` / `4.0.0`, but the
 closed schema's hash changes. On a materialized installation, update the host
-first, then use its [guided update confirmation](../../ttrpg-codex/docs/SELF_HOSTING.md#add-on-installation).
+first, then use its [guided update confirmation](https://github.com/pjunak/ttrpg-codex/blob/main/docs/SELF_HOSTING.md#add-on-installation).
 Choose **Heal and update** to preserve compatible characters; these optional
 fields do not require rewriting their values. The host owns the scoped backup,
 compatibility check, runtime restart and recovery. No separate manual disable
@@ -310,8 +310,8 @@ Combat details and print share the same feat renderer, borrowing the host's
 rule-details control and reading the Engine's acquired `sheet.feats` identities
 and counts. Summaries come from exact kind-and-ID matches in saved evidence.
 Provider-free output never queries the catalog or infers an acquisition from
-unrelated evidence. Older projections without this additive list remain readable;
-a deliberate recalculation is needed to capture newly available output.
+unrelated evidence. A projection without this list stays readable; a deliberate
+recalculation captures newly available output.
 
 ## Saved proficiency display
 
@@ -393,8 +393,8 @@ Species size uses an ordinary Engine-owned Builder choice and the borrowed host
 combobox. The UI translates explicit option label keys and leaves authored
 record labels intact. Both sheet layouts and print read saved
 `projection.sheet.derived.size` with source evidence; neither looks up a
-species to guess a value. Older saved projections without the field remain
-readable. A newly required size remains an unfinished choice until selected.
+species to guess a value. A projection without a size stays readable. A newly
+required size remains an unfinished choice until selected.
 
 A species/source change uses the existing exact-slot repair rules. Surviving
 choices, notes and play values retain their ownership; missing providers leave
@@ -419,13 +419,9 @@ such as Selection 1 must not move focus to another acquisition after autosave.
 Reduced-motion settings disable animated navigation.
 
 Repeatable feat choices carry Engine-owned acquisition IDs and source labels.
-The shared Builder controls render each set independently. A single historical
-unscoped choice is attached to its sole owner in the Engine's detached result
-and becomes durable only on an authorized save/adoption. Ambiguous historical
-choices remain visible in an assignment panel: select an empty granting source
-or explicitly discard them. They never populate every repeat or get silently
-withdrawn as unavailable. Removing one acquisition preserves other acquisitions'
-IDs, exact slots and authored play state.
+The shared Builder controls render each set independently. Removing one
+acquisition preserves other acquisitions' IDs, exact slots and authored play
+state, and its choices are never rebound to another acquisition.
 
 ## Equipment and attunement
 
@@ -544,7 +540,7 @@ part of inventory.
 
 Builder and play share one name/level filter with a live result count and explicit empty state. Class spells, rituals and granted spells participate; filtering does not edit selections. Grant labels include their acquisition, and host-enhanced controls keep stable field keys. Both locales and layouts use the same component.
 
-Spell choices, casting abilities, activations and counters follow Engine acquisition keys. Unassigned older state has an explicit source picker or discard action in Builder. Ambiguous aliases never fan out. After a structural edit, the coordinator withdraws only Engine-rejected selections already present in the saved snapshot; it preserves valid sibling spells and counters, rejects newly invalid input, and does not reset an available counter. A save response applies corrections without resurrecting removed choices or overwriting subsequent edits.
+Spell choices, casting abilities, activations and counters follow Engine acquisition keys. Saved state whose source is no longer available has an explicit discard action in Builder. After a structural edit, the coordinator withdraws only Engine-rejected selections already present in the saved snapshot; it preserves valid sibling spells and counters, rejects newly invalid input, and does not reset an available counter. A save response applies corrections without resurrecting removed choices or overwriting subsequent edits.
 
 Combat displays saved damage type, versatile damage, mastery availability, sense units and conditional explanation terms. Saved details and print remain independent of a live rules provider. The browser performs no edition arithmetic.
 

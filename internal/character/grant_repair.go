@@ -8,17 +8,17 @@ import (
 )
 
 // Only selections present in the saved snapshot can be withdrawn automatically.
-// Ambiguous historical aliases and newly supplied invalid values require repair.
+// Newly supplied invalid values require repair.
 func repairGrantSelections(input *model.Inputs, previous model.Inputs, evaluation model.Result) bool {
 	issues := map[string]bool{}
 	for _, issue := range evaluation.Issues {
 		issues[issue.ID] = true
 	}
-	pending, aliases := grantDescriptors(evaluation.SpellOptions["pendingChoices"])
+	pending := grantDescriptors(evaluation.SpellOptions["pendingChoices"])
 	changed := false
 	for key, ids := range input.Build.Spells.GrantChoices {
 		old, saved := previous.Build.Spells.GrantChoices[key]
-		if !saved || !reflect.DeepEqual(ids, old) || aliases[key] {
+		if !saved || !reflect.DeepEqual(ids, old) {
 			continue
 		}
 		choice, available := pending[key]
@@ -41,26 +41,25 @@ func repairGrantSelections(input *model.Inputs, previous model.Inputs, evaluatio
 			changed = true
 		}
 	}
-	_, aliases = grantDescriptors(evaluation.SpellOptions["castingAbilityChoices"])
 	for key, value := range input.Build.Spells.CastingAbilities {
 		old, saved := previous.Build.Spells.CastingAbilities[key]
-		if saved && value == old && !aliases[key] && issues["casting-ability:"+key] {
+		if saved && value == old && issues["casting-ability:"+key] {
 			delete(input.Build.Spells.CastingAbilities, key)
 			changed = true
 		}
 	}
-	resources, aliases := grantDescriptors(evaluation.Sheet["resources"])
+	resources := grantDescriptors(evaluation.Sheet["resources"])
 	for key, value := range input.Play.ResourceUses {
 		old, saved := previous.Play.ResourceUses[key]
-		if _, exists := resources[key]; !exists && saved && value == old && !aliases[key] && issues["resource:"+key] {
+		if _, exists := resources[key]; !exists && saved && value == old && issues["resource:"+key] {
 			delete(input.Play.ResourceUses, key)
 			changed = true
 		}
 	}
-	activations, aliases := grantDescriptors(evaluation.Sheet["activations"])
+	activations := grantDescriptors(evaluation.Sheet["activations"])
 	for key, value := range input.Play.ActiveFeatures {
 		old, saved := previous.Play.ActiveFeatures[key]
-		if _, exists := activations[key]; !exists && saved && value == old && !aliases[key] && issues["activation:"+key] {
+		if _, exists := activations[key]; !exists && saved && value == old && issues["activation:"+key] {
 			delete(input.Play.ActiveFeatures, key)
 			changed = true
 		}
@@ -68,17 +67,13 @@ func repairGrantSelections(input *model.Inputs, previous model.Inputs, evaluatio
 	return changed
 }
 
-func grantDescriptors(value any) (map[string]map[string]any, map[string]bool) {
+func grantDescriptors(value any) map[string]map[string]any {
 	var rows []map[string]any
 	_ = json.Unmarshal(raw(value), &rows)
-	indexed, aliases := map[string]map[string]any{}, map[string]bool{}
+	indexed := map[string]map[string]any{}
 	for _, row := range rows {
 		key, _ := row["key"].(string)
 		indexed[key] = row
-		alias, _ := row["legacyKey"].(string)
-		if alias != "" && alias != key {
-			aliases[alias] = true
-		}
 	}
-	return indexed, aliases
+	return indexed
 }

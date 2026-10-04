@@ -120,7 +120,6 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
               "ref",
               "text",
               "description",
-              "legacyKey",
               "resourceKey",
             ].includes(key)
           )

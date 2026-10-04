@@ -145,7 +145,7 @@ void test("worn items coexist and denied actions preserve every authored field",
   );
 });
 
-void test("saved slots and older evidence render without a provider or catalog ID heuristics", () => {
+void test("saved slots and source evidence render without a provider or catalog ID heuristics", () => {
   const shield = { ...item("guard", "equipped"), reference: { kind: "armor", id: "round-guard" } };
   const projection: Projection = {
     sheet: { equipment: { guard: { slot: "shield" } } },
@@ -155,7 +155,7 @@ void test("saved slots and older evidence render without a provider or catalog I
   };
   assert.equal(equipmentSlot(shield, {}, projection), "shield");
   assert.equal(equipmentSlot(shield, { guard: { slot: "armor" } }, projection), "armor");
-  const older: Projection = {
+  const withoutSlots: Projection = {
     sheet: {},
     explanations: {},
     evidence: [
@@ -169,9 +169,9 @@ void test("saved slots and older evidence render without a provider or catalog I
     ],
     issues: [],
   };
-  assert.equal(equipmentSlot(shield, {}, older), "shield");
-  required(older.evidence[0]).facts["armorType"] = "heavy";
-  assert.equal(equipmentSlot(shield, {}, older), "armor");
+  assert.equal(equipmentSlot(shield, {}, withoutSlots), "shield");
+  required(withoutSlots.evidence[0]).facts["armorType"] = "heavy";
+  assert.equal(equipmentSlot(shield, {}, withoutSlots), "armor");
   assert.equal(
     equipmentSlot({ ...shield, reference: { kind: "armor", id: "shield" } }, {}),
     "worn",

@@ -52,13 +52,12 @@ func TestGrantRepairKeepsValidSpellsAndRejectsNewInvalidInput(t *testing.T) {
 	}
 }
 
-func TestGrantRepairNeverAssignsAmbiguousAliasesOrResetsAvailableResource(t *testing.T) {
+func TestGrantRepairNeverResetsAvailableResource(t *testing.T) {
 	input := model.Blank()
-	input.Build.Spells.GrantChoices["old"] = []string{"saved"}
-	input.Play.ResourceUses["old"] = 1
+	input.Play.ResourceUses["pool"] = 1
 	before := raw(input)
-	evaluation := model.Result{SpellOptions: map[string]any{"pendingChoices": []any{map[string]any{"key": "a", "legacyKey": "old"}, map[string]any{"key": "b", "legacyKey": "old"}}}, Sheet: map[string]any{"resources": []any{map[string]any{"key": "old", "max": 0}}}, Issues: []model.Issue{{ID: "spell-grant:old"}, {ID: "resource:old"}}}
+	evaluation := model.Result{Sheet: map[string]any{"resources": []any{map[string]any{"key": "pool", "max": 0}}}, Issues: []model.Issue{{ID: "resource:pool"}}}
 	if repairGrantSelections(&input, input, evaluation) || string(before) != string(raw(input)) {
-		t.Fatal("rewrote ambiguous or still-present state")
+		t.Fatal("rewrote still-present state")
 	}
 }

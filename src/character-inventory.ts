@@ -130,8 +130,8 @@ export function equipmentSlot(
     object(guidance[item.id])["slot"] ??
     object(object(projection?.sheet["equipment"])[item.id])["slot"];
   if (slot === "armor" || slot === "shield" || slot === "worn") return slot;
-  // Older saved projections have source facts but no per-instance slot facts.
-  // Reading them must not depend on whichever live catalog is installed today.
+  // Without a per-instance slot, such as for an item added while rules are
+  // unavailable, use saved source facts rather than today's live catalog.
   const facts = item.reference
     ? projection?.evidence.find(
         (source) =>

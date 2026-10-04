@@ -3,7 +3,7 @@
   "packageFormat": 1,
   "id": "dnd-sheets",
   "name": "D&D Character Sheets",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Reversible character builds, tracked DM grants and explained rules.",
   "license": "MIT",
   "compatibility": {
