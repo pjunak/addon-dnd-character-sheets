@@ -48,7 +48,7 @@ friendly and the code clear. Old formats and extra hardening are low priority.
 npm run check:fast     # source guard, types, Oxlint, Prettier, fast Go checks
 npm run check          # build, TypeScript tests, all Go tests
 npm run package        # dist/dnd-sheets-<version>.zip
-go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-4.1.0.zip
+go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-<version>.zip
 ```
 
 The repository builds from a plain clone; the host SDK and Engine model are
