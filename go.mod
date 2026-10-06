@@ -3,12 +3,12 @@ module github.com/pjunak/addon-dnd-character-sheets
 go 1.27.1
 
 require (
-	github.com/pjunak/addon-dnd-engine v0.0.0-20261003221219-151087aca811
-	github.com/pjunak/ttrpg-codex v0.0.0-20261002110254-8463f4aa1e38
+	github.com/pjunak/addon-dnd-engine v0.0.0-20261004184610-9b5b3a69b8cc
+	github.com/pjunak/ttrpg-codex v0.0.0-20261004203802-55a115888be5
 )
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3 // indirect
-	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 )
