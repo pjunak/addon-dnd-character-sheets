@@ -77,11 +77,11 @@ type evaluated struct {
 	Policy          map[string]any `json:"policy"`
 }
 type preview struct {
-	Key, ActorID, Role, Generation, OperationID, Operation, Summary string
-	Revision                                                        int64
-	Expires                                                         time.Time
-	State                                                           State
-	Offline                                                         bool
+	Key, ActorID, Role, Generation, OperationID string
+	Revision                                    int64
+	Expires                                     time.Time
+	State                                       State
+	Offline                                     bool
 }
 
 func raw(value any) json.RawMessage { body, _ := json.Marshal(value); return body }

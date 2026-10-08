@@ -201,7 +201,7 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 		return nil, err
 	}
 	expires := c.now().Add(15 * time.Minute)
-	p := preview{Key: request.Key, ActorID: rpc.Meta.Actor.ID, Role: rpc.Meta.Actor.Role, Generation: rpc.Meta.Generation, OperationID: request.OperationID, Operation: request.Operation, Summary: request.Summary, Revision: revision, Expires: expires, State: next, Offline: offline}
+	p := preview{Key: request.Key, ActorID: rpc.Meta.Actor.ID, Role: rpc.Meta.Actor.Role, Generation: rpc.Meta.Generation, OperationID: request.OperationID, Revision: revision, Expires: expires, State: next, Offline: offline}
 	c.mu.Lock()
 	for key, value := range c.previews {
 		if !c.now().Before(value.Expires) {
@@ -416,10 +416,6 @@ func (c *Coordinator) commit(ctx context.Context, meta *workerrpc.Meta, r Reques
 	c.mu.Unlock()
 	if !ok || !c.now().Before(p.Expires) || p.ActorID != meta.Actor.ID || p.Role != meta.Actor.Role || p.Generation != meta.Generation || p.Key != r.Key || p.OperationID != r.OperationID {
 		return response, failure(workerrpc.KindConflict, "This review expired or belongs to another session. Review again.")
-	}
-	// A confirmed repeated commit returns the saved result without replaying it.
-	if response.State != nil && response.State.OperationID == p.OperationID {
-		return response, nil
 	}
 	if response.Revision != p.Revision || r.ExpectedRevision != p.Revision {
 		response.Status = "conflict"

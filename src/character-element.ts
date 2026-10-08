@@ -665,19 +665,6 @@ export function defineCharacterElement(
       this.#publish();
       return this.#saving;
     }
-    async #evaluate(render: boolean): Promise<void> {
-      if (this.#command) return;
-      if (this.#dirty) {
-        await this.#flush();
-        return;
-      }
-      const response = await this.#call("evaluate", {
-        ...this.#base("build"),
-        inputs: structuredClone(this.#input),
-      });
-      this.#evaluation = response.evaluation;
-      if (render) this.#render();
-    }
     #view(): BuildView {
       return {
         compact: this.#layout === "compact",
@@ -1353,7 +1340,7 @@ export function defineCharacterElement(
           () => {
             this.#changed();
             this.#render();
-            void this.#evaluate(true);
+            void this.#flush();
           },
           this.#context?.host.locale ?? "en",
         ),
@@ -1448,7 +1435,7 @@ export function defineCharacterElement(
               this.#input.build.spells.spellbook[id] = next;
               this.#changed();
               this.#render();
-              void this.#evaluate(true);
+              void this.#flush();
             };
             order.append(
               el(
