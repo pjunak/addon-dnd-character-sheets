@@ -139,6 +139,19 @@ void test("autosave rebases disjoint fields and rejects overlapping changes", ()
     acquisition: "Test",
     notes: "",
   });
+  // The browser appends containerId last; Go-encoded saved state puts it second.
+  const browserOrder = (item: Item): Item => ({ ...item, containerId: "bag" });
+  const goOrder = ({ id, ...rest }: Item): Item => ({ id, containerId: "bag", ...rest });
+  const savedBase = structuredClone(base);
+  savedBase.play.inventory = [goOrder(inventoryItem("sword"))];
+  const localEdit = structuredClone(savedBase);
+  localEdit.play.inventory = [browserOrder(inventoryItem("sword"))];
+  localEdit.notes = "Local notes";
+  const remoteSaved = structuredClone(savedBase);
+  remoteSaved.play.inventory.push(goOrder(inventoryItem("shield")));
+  const rebased = required(mergeCharacter(savedBase, localEdit, remoteSaved));
+  assert.equal(rebased.notes, "Local notes");
+  assert.equal(rebased.play.inventory.length, 2);
   local.play.inventory = [inventoryItem("local")];
   remote.notes = base.notes;
   remote.play.inventory = [inventoryItem("remote")];

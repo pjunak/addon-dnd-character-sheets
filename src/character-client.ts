@@ -176,10 +176,22 @@ export function parseCharacter(body: string): Inputs {
   return input as unknown as Inputs;
 }
 
+// Saved state and local edits can list the same object keys in different
+// orders (the worker uses Go field order), so compare values, not key order.
+function sameValue(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a, sortedKeys) === JSON.stringify(b, sortedKeys);
+}
+function sortedKeys(_key: string, value: unknown): unknown {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return value;
+  return Object.fromEntries(
+    Object.entries(value).sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0)),
+  );
+}
+
 // Rebase independent edits only. Arrays (ordered levels, choices, inventory) are
 // atomic so concurrent edits to the same collection never silently overwrite.
 export function mergeCharacter(base: Inputs, local: Inputs, remote: Inputs): Inputs | undefined {
-  const equal = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
+  const equal = sameValue;
   let conflict = false;
   const merge = (a: unknown, b: unknown, c: unknown): unknown => {
     if (equal(a, b)) return c;
@@ -219,7 +231,7 @@ export function reconcileCharacterChoices(
   const before = new Map(sent.map((choice) => [key(choice), choice])),
     accepted = new Map(saved.map((choice) => [key(choice), choice]));
   const result = current.flatMap((choice) => {
-    if (JSON.stringify(choice) !== JSON.stringify(before.get(key(choice)))) return [choice];
+    if (!sameValue(choice, before.get(key(choice)))) return [choice];
     const corrected = accepted.get(key(choice));
     return corrected ? [corrected] : [];
   });
@@ -234,7 +246,7 @@ export function reconcileCharacterMap<T>(
   current: Record<string, T>,
   saved: Record<string, T>,
 ): void {
-  const equal = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
+  const equal = sameValue;
   for (const key of Object.keys(current)) {
     if (!Object.hasOwn(sent, key) || !equal(current[key], sent[key])) continue;
     if (Object.hasOwn(saved, key)) current[key] = structuredClone(saved[key]!);
