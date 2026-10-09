@@ -222,25 +222,25 @@ export function abilityRail(view: SheetView): HTMLElement {
       dot.title = t(
         skill["expertise"] ? "Expertise" : skill["proficient"] ? "Proficient" : "Untrained",
       );
-      details.append(
+      const line = styled(
+        "div",
+        "dse-skill",
+        dot,
+        el(
+          "span",
+          savedRule(view.projection, t(label(id)), "skills." + id + ".total", {
+            kind: "skill",
+            id,
+          }),
+        ),
         styled(
-          "div",
-          "dse-skill",
-          dot,
-          el(
-            "span",
-            savedRule(view.projection, t(label(id)), "skills." + id + ".total", {
-              kind: "skill",
-              id,
-            }),
-          ),
-          styled(
-            "strong",
-            "dse-total",
-            savedRule(view.projection, signed(skill["total"]), "skills." + id + ".total"),
-          ),
+          "strong",
+          "dse-total",
+          savedRule(view.projection, signed(skill["total"]), "skills." + id + ".total"),
         ),
       );
+      line.dataset["trained"] = String(skill["proficient"] === true || skill["expertise"] === true);
+      details.append(line);
     }
     if (!skills.length) details.append(styled("span", "dse-empty", "—"));
     if (view.layout === "compact") card.append(title);

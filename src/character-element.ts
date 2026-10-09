@@ -10,8 +10,12 @@ import {
   compactEquipment,
   compactNavigation,
   compactSheet,
-  placementPicker,
+  compactSpellBar,
+  figureWindow,
+  restWindow,
+  type CompactActions,
 } from "./character-compact.js";
+import { floatWindow, type WindowGeometry } from "./character-window.js";
 import { backpackDialog, type BackpackState } from "./character-backpack.js";
 import { CompactFrame } from "./character-frame.js";
 import {
@@ -147,6 +151,8 @@ export function defineCharacterElement(
     #dialogContent: (() => Node[]) | undefined;
     #dialogBack: (() => void) | undefined;
     #details = new Map<string, boolean>();
+    #windows = new Map<string, WindowGeometry>();
+    #figurePlace: string | undefined;
     readonly #frame = new CompactFrame();
     #t = (key: string, values?: readonly unknown[]): string =>
       translator(this.#context?.host.locale ?? "en")(key, values);
@@ -163,6 +169,8 @@ export function defineCharacterElement(
         this.#pack = { query: "", container: "", sort: "name" };
         this.#packReturnFocus = "storage/open";
         this.#details.clear();
+        this.#windows.clear();
+        this.#figurePlace = undefined;
         this.#frame.reset();
       }
       if (this.isConnected && previous?.host.key !== value.host.key) {
@@ -856,31 +864,25 @@ export function defineCharacterElement(
     }
     #tabPanel(tab: Tab, navigation = this.#builderNav, pickers = this.#spellPickers): HTMLElement {
       const view = this.#sheetView(),
-        content = styled("div", "dnd-sheet-panel");
+        content = styled("div", "dnd-sheet-panel"),
+        actions: CompactActions = {
+          backpack: (container) => this.#backpack(container),
+          figure: (place) => this.#figure(place),
+          rest: (kind) => this.#rest(kind),
+          prepare: () => this.#prepare(),
+        };
       if (tab === "builder") content.append(this.#builder(navigation, pickers));
       else if (tab === "tools") content.append(this.#tools());
       else if (tab === "spells")
         content.append(
-          ...(this.#layout === "classic" ? [vitals(view)] : []),
+          this.#layout === "classic"
+            ? vitals(view)
+            : compactSpellBar(view, this.#response?.state ? actions.prepare : undefined),
           this.#spells(pickers),
         );
-      else if (tab === "equipment")
-        content.append(
-          compactEquipment(
-            view,
-            (container) => this.#backpack(container),
-            (place) => this.#placement(place),
-          ),
-        );
+      else if (tab === "equipment") content.append(compactEquipment(view, actions));
       else if (this.#layout === "compact")
-        content.append(
-          compactSheet(
-            view,
-            tab === "combat",
-            tab === "combat" ? this.#combat(false) : el("div"),
-            () => this.#backpack(),
-          ),
-        );
+        content.append(compactSheet(view, tab === "combat", actions));
       else {
         const main = styled("div", "dse-cols-main", vitals(view));
         if (!this.#response?.state)
@@ -1017,6 +1019,7 @@ export function defineCharacterElement(
         this.#t("Backpack"),
         () => [backpackDialog(this.#sheetView(), this.#pack, add)],
         this.#packReturnFocus,
+        "backpack",
       );
     }
     #equipmentFromBackpack(): void {
@@ -1049,18 +1052,78 @@ export function defineCharacterElement(
         ],
         "control",
         "pack/add",
+        "backpack",
       );
       this.#dialogBack = back;
     }
-    #placement(place: string): void {
+    #figure(place?: string): void {
+      if (place) this.#figurePlace = place;
       this.#openDynamic(
-        this.#t("Choose {0}", [this.#t(place === "other" ? "Other worn" : label(place))]),
-        () => [placementPicker(this.#sheetView(), place)],
-        "placement/" + place,
+        this.#t("Worn and held"),
+        () => [
+          figureWindow(this.#sheetView(), this.#figurePlace, (next) => {
+            this.#figurePlace = next;
+            this.#refreshDialog();
+          }),
+        ],
+        place ? "placement/" + place : "placement/open",
+        "figure",
       );
     }
-    #openDynamic(title: string, content: () => Node[], returnFocusKey: string): void {
-      this.#open(title, content(), "heading", returnFocusKey);
+    #rest(kind: "short" | "long"): void {
+      const recovery = (): HTMLElement | undefined => {
+        if (kind !== "short" || !this.#evaluation) return undefined;
+        const view = this.#sheetView(),
+          fields = el("fieldset");
+        fields.disabled = !view.canPlay;
+        fields.append(
+          playActions(
+            this.#input,
+            this.#evaluation,
+            this.#catalogs.get("spell") ?? [],
+            (change, summary) => view.act(change, summary),
+            view.locale,
+            "recovery",
+          ),
+        );
+        return fields;
+      };
+      this.#openDynamic(
+        this.#t(kind === "short" ? "Short rest" : "Long rest"),
+        () => [
+          restWindow(this.#sheetView(), kind, recovery(), async () => {
+            await this.#sheetView().act({ operation: "rest", rest: kind }, kind + " rest");
+            // A refused or uncertain rest keeps its window, where the note points.
+            if (!this.#command && !this.#ruleNotes.length) this.#dialog?.close();
+          }),
+        ],
+        "rest/" + kind,
+        "rest",
+      );
+    }
+    #prepare(): void {
+      this.#openDynamic(
+        this.#t("Change prepared spells"),
+        () => {
+          const fields = el("fieldset");
+          fields.disabled =
+            !this.#editable ||
+            this.#response?.status === "unavailable" ||
+            !!this.#response?.rulesChanged;
+          fields.append(this.#spellChoices(this.#spellPickers));
+          return [fields];
+        },
+        "spells/prepare",
+        "prepare",
+      );
+    }
+    #openDynamic(
+      title: string,
+      content: () => Node[],
+      returnFocusKey: string,
+      window?: string,
+    ): void {
+      this.#open(title, content(), "heading", returnFocusKey, window);
       this.#dialogContent = content;
     }
     #refreshDialog(): void {
@@ -1196,7 +1259,7 @@ export function defineCharacterElement(
         if (target) focusBuilderTarget(this, target);
       });
     }
-    #combat(includeDetails = true): HTMLElement {
+    #combat(): HTMLElement {
       const view = this.#sheetView(),
         root = styled("div", "dse-combat"),
         rest = styled("div", "dnd-rest-controls");
@@ -1209,7 +1272,7 @@ export function defineCharacterElement(
           ),
         );
       root.append(rest);
-      if (includeDetails) root.append(conditions(view), combatDetails(view));
+      root.append(conditions(view), combatDetails(view));
       if (this.#evaluation) {
         const recovery = el("fieldset");
         recovery.disabled = !view.canPlay;
@@ -1246,6 +1309,11 @@ export function defineCharacterElement(
       else {
         controls.disabled = false;
         controls.append(savedSpellBook(this.#input, view.projection, view.locale));
+      }
+      // Compact changes prepared spells in a window opened from the spell bar.
+      if (this.#layout === "compact") {
+        root.append(controls);
+        return root;
       }
       const choices = el("details", el("summary", this.#t("Manage spells"))),
         fields = el("fieldset");
@@ -1724,6 +1792,7 @@ export function defineCharacterElement(
       content: Node[],
       initialFocus: "control" | "heading" = "control",
       returnFocusKey?: string,
+      window?: string,
     ): void {
       const status = this.querySelector<HTMLElement>("[data-character-status]");
       this.#dialogContent = undefined;
@@ -1733,14 +1802,28 @@ export function defineCharacterElement(
       const body = el("div", ...content);
       body.dataset["dialogBody"] = "";
       const heading = el("h2", title),
-        dialog: HTMLDialogElement = el(
-          "dialog",
-          heading,
-          ...(status ? [status] : []),
-          body,
-          button(this.#t("Close"), () => (this.#dialogBack ? this.#dialogBack() : dialog.close())),
-        );
-      dialog.className = "character-dialog";
+        dismiss = (): void => (this.#dialogBack ? this.#dialogBack() : dialog.close()),
+        close = button(window ? "×" : this.#t("Close"), dismiss),
+        dialog: HTMLDialogElement = window
+          ? el(
+              "dialog",
+              styled("div", "character-window-head", heading, close),
+              ...(status ? [status] : []),
+              body,
+            )
+          : el("dialog", heading, ...(status ? [status] : []), body, close);
+      dialog.className = window ? "character-dialog character-window" : "character-dialog";
+      if (window) {
+        close.setAttribute("aria-label", this.#t("Close"));
+        close.className = "character-window-close";
+        dialog.dataset["window"] = window;
+        // Non-modal windows have no native cancel; Escape closes the window.
+        dialog.addEventListener("keydown", (event) => {
+          if (event.key !== "Escape") return;
+          event.preventDefault();
+          dismiss();
+        });
+      }
       dialog.dataset["uiDialog"] = "";
       heading.id = `character-dialog-${newId()}`;
       dialog.setAttribute("aria-labelledby", heading.id);
@@ -1777,7 +1860,19 @@ export function defineCharacterElement(
       });
       this.#dialog = dialog;
       this.append(dialog);
-      dialog.showModal();
+      if (window) {
+        floatWindow(
+          dialog,
+          dialog.querySelector<HTMLElement>(".character-window-head")!,
+          this.#windows,
+          window,
+        );
+        // show() does not move focus like showModal(); start where a modal would.
+        (initialFocus === "heading"
+          ? heading
+          : (body.querySelector<HTMLElement>("input,select,textarea,button") ?? heading)
+        ).focus();
+      } else dialog.showModal();
       this.#syncBusyButtons();
     }
     #import(): void {

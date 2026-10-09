@@ -41,15 +41,32 @@ required `ui.controls.v1` [shared UI contract](../ttrpg-codex/docs/reference/UI_
 The host supplies interaction and theme tokens; this package retains build/play
 semantics and automatic saving.
 
-Compact puts abilities and skills on the right. Sheet and Combat share the same
-HP, AC, Speed, Proficiency and Inspiration cards, with a numeric health bar and
-direct current/temporary HP fields. Combat has a short modifier/save row and
-separate saved casting-source details. Additional attacks, recovery and
-exploration details remain available through disclosure controls.
+Each Compact tab opens with a context bar holding only what that tab needs.
+Sheet and Combat share HP, temporary HP, AC, Speed, Proficiency and Inspiration;
+Combat adds Initiative. The HP field takes a value or `-7` (damage), `+5`
+(healing) or `=30` (set) followed by Enter; damage and healing go through the
+rules. A status row lists conditions with their levels and remove buttons, the
+separate D20 adjustment and Short/Long rest. Equipment shows AC, Speed and
+attunement; Spells shows casting numbers, spell-slot pips and **Change prepared
+spells**. Compact puts abilities and skills on the right, starting at the top;
+untrained skills are dimmed. **Limited uses** shows remaining uses as pips (a bar
+with steps for large pools) and each resource's short/long rest recharge. Combat
+keeps its attack list open, with casting sources beneath. Spell rows show casting
+time, range, concentration and ritual from the source record.
 
-**Equipment** owns all five currency denominations, the source-filtered body
-mannequin, Other worn, attunement and Storage. **Backpack** opens a searchable,
-sortable dialog with container filtering. Add Item returns to that same search
+Bigger editors open as floating windows: Backpack, the body figure, rests and
+prepared spells. Windows are not modal; the sheet stays usable behind them, the
+header moves them, the corner resizes them and Escape closes them. Their
+position is a view preference for the open character, not saved data. A rest
+window lists what each resource's recharge declares, offers hit-die spending on
+a short rest and applies the rest only when finished; a refused rest stays open
+beside its rule note.
+
+**Equipment** lists what is worn and held with Stow actions, the empty body
+places, mechanical equipment controls and all five currency denominations, with
+the Backpack summary at full height beside them. The source-filtered body figure
+opens in its window from a place or **Open figure**. **Backpack** opens a
+searchable, sortable window with container filtering. Add Item returns to that same search
 and compartment; it defaults to a new instance and offers explicit addition to
 a carried stack. Existing item names, notes, grants and equipped copies survive.
 The shared Add Item picker groups armor by its declared armor type, magic items
@@ -70,7 +87,7 @@ Compact navigation wraps whole labels into rows as space or text size changes.
 It uses the host's tab controls: Up/Down for the desktop rail, Left/Right for
 the narrow-screen rows, with the same selected tab and keyboard focus.
 
-**Conditions** in Combat use the same saved panel in both layouts. Select a
+**Conditions** use the Compact status row or the Classic Combat panel. Select a
 condition, adjust its source-defined level or remove it; changes save
 automatically. Speed includes supported condition restrictions. A separate D20
 roll adjustment is shown explicitly and is not folded into the displayed
@@ -93,8 +110,8 @@ Use **+** to add an eligible class and the class tab to add or remove levels.
 Point buy and granted ability increases show live used/remaining budgets with
 bounded steppers. Searchable dropdowns display descriptions while browsing and
 accept only offered options. The engine supplies class and feat eligibility;
-duplicate granted selections are excluded. Spell selectors in Builder and
-**Manage spells** share the same controls. Selecting or preparing spells preserves
+duplicate granted selections are excluded. Spell selectors in Builder,
+**Change prepared spells** (Compact) and **Manage spells** (Classic) share the same controls. Selecting or preparing spells preserves
 keyboard focus, expanded groups and search/level filters through automatic saves
 and tab changes. These view preferences belong to the open character, not its
 saved rules state.

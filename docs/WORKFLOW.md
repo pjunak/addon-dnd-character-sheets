@@ -86,12 +86,13 @@ provider-free reading, print and transfer preserve those identities. No turn or
 action costs are tracked. The controls use shared host fields, button styling,
 focus keys and saved-rule details in both layouts.
 
-Compact shares the same HP/AC/Speed/Proficiency/Inspiration geometry on Sheet
-and Combat. Current HP is directly rewritable; a short bar supplements the
-number. Temporary HP remains editable. Combat shows only ability modifiers and
-saves in its small ability row, with distinct casting sources in the reference
-panel. Additional attacks, rest/recovery, training, senses, feats and traits
-remain accessible through disclosures.
+Compact gives each tab a context bar. Sheet and Combat share the HP block;
+current HP is directly rewritable or takes `-N`, `+N` and `=N` instructions, and
+temporary HP remains editable. Conditions, the D20 adjustment and rests share
+the bar's status row. Combat shows ability modifiers and saves in its small row,
+its attacks open, and casting sources beneath them. Rests, the body figure,
+Backpack and prepared spells open as non-modal floating windows. Training,
+senses, feats and traits remain accessible through disclosures on Sheet.
 
 Inventory,
 equipment, currency, HP, spells and resources remain editable in their ordinary

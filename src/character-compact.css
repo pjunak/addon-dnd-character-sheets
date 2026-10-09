@@ -47,26 +47,8 @@
   pointer-events: none;
   contain: layout style;
 }
-.addon-dnd-character .dse-layout-compact .dnd-save-status {
-  margin-bottom: 0.5rem;
-}
 .addon-dnd-character .dse-layout-compact .dnd-sheet-panel {
   display: block;
-}
-.dsc-sheet,
-.dsc-top {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 17.25rem;
-  gap: var(--dsc-gap);
-  align-items: start;
-}
-.dsc-sheet-main,
-.dsc-combat,
-.dsc-equipment-column {
-  display: grid;
-  gap: var(--dsc-gap);
-  min-width: 0;
-  align-content: start;
 }
 .addon-dnd-character .dse-layout-compact .dse-cards {
   display: flex;
@@ -111,64 +93,130 @@
   flex-basis: 100%;
   text-align: center;
 }
-.dsc-vitals {
-  display: grid;
-  grid-template-columns:
-    minmax(9rem, 1.5fr) minmax(5.5rem, 1fr) minmax(4rem, 0.65fr) minmax(4.25rem, 0.7fr)
-    minmax(5.25rem, 0.85fr);
-  gap: 0.4rem;
-  align-items: stretch;
-  min-width: 0;
+/* Context bars: one compact row of values per tab, with a status row below. */
+.addon-dnd-character .dse-layout-compact .dnd-save-status {
+  justify-content: flex-end;
+  min-height: 1rem;
+  margin-bottom: 0.25rem;
 }
-.addon-dnd-character .dsc-stat {
-  background: var(--bg-surface);
+.addon-dnd-character .dse-layout-compact .dnd-save-status[data-ui-state="success"],
+.addon-dnd-character .character-window > .dnd-save-status[data-ui-state="success"] {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 0.72rem;
+}
+.dsc-bar {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
+  background: var(--bg-surface);
   min-width: 0;
-  padding: 0.55rem;
+}
+.dsc-vitals {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 0.2rem;
-  min-height: 7rem;
-  text-align: left;
+  flex-wrap: wrap;
+  align-items: stretch;
+  row-gap: 0.5rem;
+  min-width: 0;
+}
+.dsc-vitals > * {
+  display: grid;
+  align-content: center;
+  gap: 0.15rem;
+  min-width: 0;
+  padding-inline: 0.85rem;
+  border-left: 1px solid var(--border-subtle);
+}
+.dsc-vitals > :first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.dsc-vitals > .dsc-spacer {
+  flex: 1;
+  padding: 0;
+  border: 0;
+}
+.dsc-vitals > .dsc-spacer + * {
+  border-left: 0;
 }
 .dsc-stat-label {
-  font-size: 0.66rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  overflow-wrap: anywhere;
-}
-.dsc-stat > strong {
-  font-size: 1.6rem;
-  font-weight: 500;
-}
-.dsc-stat > small {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-}
-.dsc-hp-values {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 1.25rem;
-  min-width: 0;
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
-.addon-dnd-character .dsc-hp-values input {
-  width: 4rem;
-  max-width: 100%;
-  padding: 0.2rem 0.35rem;
-  font-size: 1.4rem;
-  min-height: 2.5rem;
+.dsc-cell-value {
+  display: flex;
+  align-items: baseline;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.dsc-cell-value small {
+  margin-left: 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.dsc-cell[data-stat="armorClass"] .dsc-cell-value {
+  color: var(--accent-gold);
+}
+.dsc-health {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 13rem;
+}
+.dsc-hp-hint {
+  margin-left: auto;
+  font-size: 0.66rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.dsc-hp-values {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+.addon-dnd-character .dsc-hp-values .dsc-hp-input {
+  width: 4ch;
+  min-height: 0;
+  padding: 0.05rem 0.25rem;
+  font-size: 1.45rem;
+  font-weight: 600;
+  text-align: right;
+}
+.dsc-temp {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.addon-dnd-character .dsc-temp input {
+  width: 3.5rem;
+  min-height: 0;
+  padding: 0.05rem 0.25rem;
+  font-size: 0.85rem;
 }
 .dsc-health-track {
-  width: min(100%, 10rem);
-  height: 0.65rem;
+  width: 100%;
+  height: 0.35rem;
   border-radius: 3px;
   background: var(--bg-raised);
   overflow: hidden;
-  margin-block: 0.2rem;
 }
 .dsc-health-track > span {
   display: block;
@@ -182,41 +230,28 @@
 .dsc-health-track[data-health="low"] > span {
   background: var(--color-danger);
 }
-.dsc-temp {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  font-size: 0.65rem;
-  color: var(--text-muted);
-}
-.addon-dnd-character .dsc-temp input {
-  width: 3rem;
-  min-height: 2rem;
-  padding: 0.1rem;
-  font-size: 0.8rem;
-}
-.addon-dnd-character .dsc-inspiration {
-  width: 100%;
-}
 .dsc-inspiration {
   position: relative;
   cursor: pointer;
+  justify-items: start;
 }
 .addon-dnd-character .dsc-inspiration > input {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  margin: 0;
   opacity: 0;
   cursor: inherit;
 }
-.dsc-inspiration > span:nth-child(3) {
+.dsc-star {
   font-size: 1.3rem;
+  line-height: 1;
+  color: var(--text-muted);
 }
-.addon-dnd-character .dsc-inspiration:has(:checked) {
-  background: var(--bg-raised);
-  border-color: var(--accent-gold);
+.dsc-inspiration:has(:checked) .dsc-star,
+.dsc-inspiration:has(:checked) .dsc-stat-label {
+  color: var(--accent-gold);
 }
 .addon-dnd-character .dsc-inspiration:has(:focus-visible) {
   outline: 2px solid var(--accent-gold);
@@ -225,6 +260,178 @@
 .addon-dnd-character .dsc-inspiration:has(:disabled) {
   cursor: default;
 }
+.dsc-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--border-subtle);
+}
+.dsc-spacer {
+  flex: 1;
+}
+.dsc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.1rem 0.25rem 0.1rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 45%, transparent);
+  border-radius: 999px;
+  color: var(--color-danger);
+  font-size: 0.78rem;
+}
+.dsc-chip[data-state="inactive"] {
+  opacity: 0.65;
+  border-style: dashed;
+}
+.dsc-chip[data-state="terminal"] {
+  border-width: 2px;
+}
+.dsc-adjustment {
+  border-style: dashed;
+  padding-right: 0.55rem;
+}
+.addon-dnd-character .dsc-chip button {
+  min-height: 0;
+  min-width: 0;
+  padding: 0 0.3rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  line-height: 1.2;
+}
+.dsc-chip-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+.addon-dnd-character .dsc-add-condition,
+.addon-dnd-character .dsc-rest {
+  width: auto;
+  min-height: 0;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.78rem;
+}
+.addon-dnd-character .dsc-add-condition {
+  border-style: dashed;
+  border-radius: 999px;
+}
+.dsc-spell-values .dse-casting {
+  display: flex;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+}
+.dsc-spell-values .dse-casting > small {
+  flex-basis: 100%;
+  text-align: left;
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* Limited uses: pips for small counts, a bar with steps for large pools. */
+.dsc-uses {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.45rem 0.6rem;
+}
+.dsc-use {
+  display: contents;
+}
+.dsc-use-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.4rem;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+.dsc-use-name small {
+  flex-basis: 100%;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+.dsc-use-count {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.dsc-recharge,
+.dsc-tag {
+  padding: 0.05rem 0.3rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.dsc-pips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+.addon-dnd-character .dsc-pip {
+  width: 0.95rem;
+  height: 0.95rem;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 1.5px solid var(--accent-gold);
+  border-radius: 50%;
+  background: transparent;
+  opacity: 0.85;
+}
+.addon-dnd-character .dsc-pip:is([aria-pressed="true"], [data-on="true"]) {
+  background: var(--accent-gold);
+  opacity: 1;
+}
+.addon-dnd-character .dsc-pip:not(:disabled):hover {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-gold) 35%, transparent);
+}
+.dsc-pool {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.dsc-pool-track {
+  width: 4.5rem;
+  height: 0.4rem;
+  border-radius: 3px;
+  background: var(--bg-raised);
+  overflow: hidden;
+}
+.dsc-pool-track > span {
+  display: block;
+  height: 100%;
+  width: var(--fill);
+  background: var(--accent-gold);
+}
+.addon-dnd-character .dsc-pool button {
+  min-height: 0;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.75rem;
+}
+
+/* Sheet and Combat */
+.dsc-sheet {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 17.25rem;
+  gap: var(--dsc-gap);
+  align-items: start;
+}
+.dsc-sheet-main,
+.dsc-combat,
+.dsc-column {
+  display: grid;
+  gap: var(--dsc-gap);
+  min-width: 0;
+  align-content: start;
+}
 .dsc-ready {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -232,14 +439,12 @@
   gap: var(--dsc-gap);
 }
 .addon-dnd-character .dse-layout-compact :is(.character-panel, .dse-section) {
+  margin: 0;
+  padding: 0.65rem;
+  min-width: 0;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
-  padding: 0.65rem;
   background: var(--bg-surface);
-  min-width: 0;
-}
-.addon-dnd-character .dse-layout-compact :is(.character-panel, .dse-section) {
-  margin: 0;
 }
 .addon-dnd-character .dse-layout-compact :is(.character-panel, .dse-section) h3 {
   font-family: var(--font-ui);
@@ -250,13 +455,11 @@
   gap: 0.5rem;
   margin: 0 0 0.5rem;
 }
-.addon-dnd-character .dse-layout-compact .dse-resource {
-  padding-block: 0.4rem;
-  border-bottom: 1px solid var(--border-subtle);
-  gap: 0.4rem;
+.addon-dnd-character .dse-layout-compact .dse-skill[data-trained="false"] {
+  color: var(--text-muted);
 }
-.addon-dnd-character .dse-layout-compact .dse-resource > span:first-child {
-  flex: 1 1 7rem;
+.addon-dnd-character .dse-layout-compact .dse-skill[data-trained="true"] {
+  font-weight: 600;
 }
 .addon-dnd-character .dse-layout-compact .dse-quick-use-name {
   flex: 1 1 8rem;
@@ -264,31 +467,9 @@
 .dsc-exploration > details {
   padding-block: 0.35rem;
 }
-.dsc-adjustments {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-.dsc-adjustments > div {
-  margin-top: 0.5rem;
-}
 .addon-dnd-character .dsc-exploration .dse-section {
   border: 0;
   padding: 0.5rem 0;
-}
-.dsc-reference {
-  padding: 0.55rem;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
-  background: var(--bg-surface);
-  min-width: 0;
-}
-.dsc-reference-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  padding-block: 0.25rem;
 }
 .dsc-combat-abilities {
   display: grid;
@@ -300,7 +481,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.55rem;
+  padding: 0.5rem 0.6rem;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
   background: var(--bg-surface);
@@ -312,12 +493,29 @@
 }
 .dsc-combat-ability > strong {
   font-weight: 500;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
 }
 .dsc-save {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
+}
+.dsc-casting {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+.dsc-casting .dse-casting {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+.dsc-casting .dse-casting > small {
+  flex-basis: auto;
+  color: var(--text-muted);
 }
 .addon-dnd-character .dse-layout-compact .dse-hands > button {
   max-width: 6rem;
@@ -330,24 +528,167 @@
   color: var(--text-muted);
   font-size: 0.7rem;
 }
-.dsc-equipment {
-  display: flex;
-  flex-direction: column;
-  gap: var(--dsc-gap);
-  min-height: 46rem;
+
+/* Spells */
+.dnd-spell-facts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.6rem;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
-.dsc-equipment-columns {
+.dnd-spell-tag {
+  padding: 0 0.3rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Equipment: context and worn items on the left, the backpack at full height. */
+.dsc-equipment {
   display: grid;
-  grid-template-columns: 1.05fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--dsc-gap);
-  align-items: start;
+  align-items: stretch;
+}
+.dsc-equipment > .dsc-column {
+  align-content: start;
+}
+.dsc-worn {
+  display: grid;
+}
+.dsc-worn-row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding-block: 0.4rem;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+}
+.addon-dnd-character .dsc-worn-place {
+  justify-self: start;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.64rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: left;
+}
+.dsc-worn-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.4rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dsc-worn-name small {
+  flex-basis: 100%;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.addon-dnd-character .dsc-worn-row > button:last-child {
+  min-height: 0;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+}
+.dsc-empty-places {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  padding-top: 0.5rem;
+}
+.addon-dnd-character .dsc-empty-places button {
+  min-height: 0;
+  padding: 0.05rem 0.55rem;
+  border-style: dashed;
+  border-radius: 999px;
+  font-size: 0.74rem;
+}
+.addon-dnd-character .dse-layout-compact .dsc-pack {
+  align-self: stretch;
+}
+.dsc-actions {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+.dsc-pack-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0.25rem;
+  font: 600 0.68rem var(--font-ui);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.addon-dnd-character .dsc-pack-group button {
+  margin-left: auto;
+  min-height: 0;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.72rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.dsc-pack-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.3rem;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+}
+.dsc-pack-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dsc-pack-quantity {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.addon-dnd-character .dsc-pin {
+  min-width: 0;
+  min-height: 0;
+  padding: 0 0.2rem;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+.addon-dnd-character .dsc-pin[aria-pressed="true"] {
+  color: var(--accent-gold);
+}
+.addon-dnd-character .dsc-currency .dse-coins {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.addon-dnd-character .dsc-currency .dse-coins input {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: 0.3rem 0.5rem;
+}
+
+/* The body figure, shown only in its window. */
+.dsc-figure {
+  display: grid;
+  gap: 0.75rem;
 }
 .dsc-mannequin {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 5rem minmax(0, 1fr);
-  grid-template-rows: repeat(5, minmax(4.5rem, auto));
-  gap: 0.75rem 0.2rem;
-  position: relative;
+  grid-template-rows: repeat(5, minmax(3.5rem, auto));
+  gap: 0.5rem 0.2rem;
   align-items: center;
 }
 .dsc-body {
@@ -360,10 +701,10 @@
   pointer-events: none;
 }
 .dsc-body svg {
-  width: 9rem;
+  width: 8rem;
   max-width: none;
   height: 100%;
-  max-height: 27rem;
+  max-height: 22rem;
   flex: none;
   fill: color-mix(in srgb, var(--text-muted) 25%, var(--bg-surface));
   stroke: var(--text-muted);
@@ -372,13 +713,13 @@
 .addon-dnd-character .dsc-body-slot {
   min-width: 0;
   width: 100%;
-  min-height: 3.75rem;
+  min-height: 3.25rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 0.25rem;
-  padding: 0.5rem;
+  gap: 0.2rem;
+  padding: 0.45rem;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background: var(--bg-surface);
@@ -386,16 +727,20 @@
   overflow-wrap: anywhere;
   z-index: 1;
 }
-.dsc-body-slot:nth-child(even) {
+.addon-dnd-character .dsc-body-slot[aria-pressed="true"] {
+  border-color: var(--accent-gold);
+  box-shadow: inset 0 0 0 1px var(--accent-gold);
+}
+.dsc-mannequin > .dsc-body-slot:nth-child(even) {
   grid-column: 1;
 }
-.dsc-body-slot:nth-child(odd) {
+.dsc-mannequin > .dsc-body-slot:nth-child(odd) {
   grid-column: 3;
 }
 .dsc-body-slot small {
   text-transform: uppercase;
   color: var(--text-muted);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
 }
 .dsc-body-slot span {
   font-size: 0.8rem;
@@ -406,62 +751,100 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-subtle);
-  padding-block: 0.5rem;
+  padding-block: 0.4rem;
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.dsc-container-cards {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-.addon-dnd-character .dsc-pack-open {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.35rem;
-  width: 100%;
-  text-align: left;
-  padding: 1rem;
-  background: var(--bg-raised);
-}
-.dsc-pack-open strong {
-  grid-column: 1/-1;
-  font-family: var(--font-ui);
-  font-size: 1.2rem;
-}
-.dsc-pack-open span {
-  font-size: 0.8rem;
-}
-.addon-dnd-character .dsc-currency {
-  margin-top: auto;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-}
-.addon-dnd-character .dsc-currency > h3 {
-  margin: 0;
-}
-.dsc-currency .dse-coins {
-  flex: 1 1 25rem;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-.addon-dnd-character .dsc-currency .dse-coins input {
-  width: 100%;
-  min-width: 0;
-  text-align: left;
-  padding: 0.3rem 0.5rem;
-}
 .dsc-placement-picker {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
-.character-dialog:has(.dsc-backpack-dialog) {
-  width: min(64rem, calc(100vw - 2rem));
-  max-width: calc(100vw - 2rem);
+.dsc-rest-list {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+.dsc-rest-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.3rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.dsc-rest-list li > span {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.dsc-rest-window h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* Floating windows: non-modal, moved by the header, resized at the corner. */
+.addon-dnd-character .character-window {
+  position: fixed;
+  inset: auto;
+  left: var(--window-x, 1rem);
+  top: var(--window-y, 4rem);
+  z-index: 40;
+  margin: 0;
+  padding: 0;
+  width: min(44rem, calc(100vw - 1rem));
+  max-width: calc(100vw - 1rem);
+  max-height: calc(100dvh - 1rem);
+  min-width: min(20rem, calc(100vw - 1rem));
+  min-height: 12rem;
+  overflow: hidden;
+  resize: both;
+  box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 55%);
+}
+.addon-dnd-character .character-window[open] {
+  display: flex;
+  flex-direction: column;
+}
+.addon-dnd-character .character-window[data-window="backpack"] {
+  width: min(60rem, calc(100vw - 1rem));
+  height: min(40rem, calc(100dvh - 2rem));
+}
+.addon-dnd-character .character-window[data-window="figure"] {
+  width: min(42rem, calc(100vw - 1rem));
+}
+.character-window-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-raised);
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+}
+.addon-dnd-character .character-window-head h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 1rem;
+}
+.addon-dnd-character .character-window-close {
+  margin: 0;
+  min-height: 0;
+  padding: 0.1rem 0.55rem;
+  border: 0;
+  background: none;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.character-window > .dnd-save-status {
+  padding: 0.35rem 1rem 0;
+}
+.character-window > [data-dialog-body] {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.75rem 1rem 1rem;
 }
 .dsc-pack-toolbar {
   display: flex;
@@ -492,45 +875,36 @@
 .dsc-backpack-dialog > details {
   margin-top: 1rem;
 }
+@media (max-width: 40rem) {
+  .addon-dnd-character .character-window,
+  .addon-dnd-character .character-window[data-window] {
+    left: 0.5rem;
+    top: 0.5rem;
+    width: calc(100vw - 1rem);
+    height: calc(100dvh - 1rem);
+    resize: none;
+  }
+  .character-window-head {
+    cursor: default;
+  }
+}
 @container sheet-workspace (max-width:54rem) {
-  .dsc-sheet,
-  .dsc-top {
+  .dsc-sheet {
     grid-template-columns: minmax(0, 1fr) 15rem;
   }
-  .dsc-vitals {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
   .dsc-health {
-    grid-column: 1/-1;
+    flex-basis: 100%;
+    padding-right: 0;
+    padding-bottom: 0.4rem;
   }
-  .addon-dnd-character .dsc-health {
-    display: grid;
-    grid-template-columns: auto 1fr;
-  }
-  .dsc-health .dsc-stat-label {
-    grid-column: 1;
-  }
-  .dsc-hp-values {
-    grid-column: 1;
-  }
-  .dsc-health-track {
-    grid-column: 2;
-    grid-row: 2;
-    justify-self: end;
-  }
-  .dsc-temp {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-  }
-  .dsc-stat {
-    min-height: 5.5rem;
+  .dsc-health + * {
+    padding-left: 0;
+    border-left: 0;
   }
 }
 @container sheet-workspace (max-width:48rem) {
   .dsc-sheet,
-  .dsc-top,
-  .dsc-equipment-columns {
+  .dsc-equipment {
     grid-template-columns: minmax(0, 1fr);
   }
   .addon-dnd-character .dse-layout-compact .dse-cards {
@@ -539,9 +913,6 @@
   }
   .dsc-combat-abilities {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .dsc-equipment {
-    min-height: 0;
   }
 }
 @container character-sheet (max-width:48rem) {
@@ -553,11 +924,8 @@
   .dsc-ready {
     grid-template-columns: minmax(0, 1fr);
   }
-  .dsc-vitals {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .addon-dnd-character .dsc-health {
-    display: flex;
+  .dsc-health {
+    min-width: 0;
   }
   .dsc-combat-abilities {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -565,18 +933,21 @@
   .addon-dnd-character .dse-layout-compact .dse-cards {
     display: flex;
   }
-  .dsc-mannequin {
-    grid-template-columns: minmax(0, 1fr) 1.5rem minmax(0, 1fr);
+  .dsc-uses {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
-  .dsc-body svg {
-    width: 7rem;
+  .dsc-use-count {
+    display: none;
   }
-  .dsc-currency .dse-coins {
+  .dsc-worn-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .dsc-worn-row > .dsc-worn-place {
+    grid-column: 1/-1;
+  }
+  .addon-dnd-character .dsc-currency .dse-coins {
     gap: 0.3rem;
     grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr));
-  }
-  .dsc-container-cards {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 @container character-sheet (max-width:24rem) {
@@ -606,12 +977,22 @@
   .addon-dnd-character[data-layout="compact"] .character-dialog :is(button, input, select) {
     min-height: 44px;
   }
+  .addon-dnd-character .dse-layout-compact .dsc-pip {
+    width: 1.6rem;
+    height: 1.6rem;
+    min-height: 0;
+  }
 }
 @media (forced-colors: active) {
-  .dsc-health-track {
+  .dsc-health-track,
+  .dsc-pool-track {
     border: 1px solid CanvasText;
   }
-  .dsc-health-track > span {
+  .dsc-health-track > span,
+  .dsc-pool-track > span {
+    background: Highlight;
+  }
+  .addon-dnd-character .dsc-pip[aria-pressed="true"] {
     background: Highlight;
   }
   .dsc-body svg {

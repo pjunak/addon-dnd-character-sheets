@@ -15,7 +15,11 @@ import {
 } from "./character-ui.js";
 import { rulesTarget } from "./character-rule-notes.js";
 
-function conditionName(row: Record<string, unknown>, locale: string, fallback: string): string {
+export function conditionName(
+  row: Record<string, unknown>,
+  locale: string,
+  fallback: string,
+): string {
   return typeof row["labelKey"] === "string" && row["labelKey"]
     ? translator(locale)(row["labelKey"])
     : text(row["name"], fallback);

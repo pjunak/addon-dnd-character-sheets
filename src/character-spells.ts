@@ -144,6 +144,31 @@ export function spellPicker(
   return builderTarget(key, details);
 }
 
+// Casting time, range, concentration and ritual come from the source record and
+// keep its original wording; without a catalog the row shows the name only.
+export function spellFacts(
+  catalog: CatalogRecord[],
+  id: string,
+  locale: string,
+): HTMLElement | undefined {
+  const spell = catalogRecord(catalog, id)?.value;
+  if (!spell) return undefined;
+  const t = translator(locale),
+    facts = styled("span", "dnd-spell-facts");
+  for (const value of [spell["castingTime"], spell["range"]])
+    if (typeof value === "string" && value) facts.append(el("span", value));
+  for (const [key, mark, title] of [
+    ["concentration", "C", "Concentration"],
+    ["ritual", "R", "Ritual"],
+  ] as const)
+    if (spell[key] === true) {
+      const tag = styled("abbr", "dnd-spell-tag", mark);
+      tag.title = t(title);
+      facts.append(tag);
+    }
+  return facts.children.length ? facts : undefined;
+}
+
 export function markSpellRow(row: HTMLElement, id: string, catalog: CatalogRecord[]): HTMLElement {
   const spell = catalogRecord(catalog, id);
   row.dataset["spellName"] = text(spell?.value["name"], id);

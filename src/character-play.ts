@@ -1,4 +1,4 @@
-import { markSpellRow, spellFilters, spellSourceLabel } from "./character-spells.js";
+import { markSpellRow, spellFacts, spellFilters, spellSourceLabel } from "./character-spells.js";
 import type { Inputs, Result } from "./character-model.js";
 import { translator } from "./character-locale.js";
 import {
@@ -85,7 +85,12 @@ export function playActions(
   root.append(filters.controls);
   const spellRow = (ref: string): HTMLElement =>
     markSpellRow(
-      styled("div", "dnd-spell-row", rule(spellName(ref), { kind: "spell", id: ref })),
+      styled(
+        "div",
+        "dnd-spell-row",
+        rule(spellName(ref), { kind: "spell", id: ref }),
+        spellFacts(catalog, ref, locale),
+      ),
       ref,
       catalog,
     );
