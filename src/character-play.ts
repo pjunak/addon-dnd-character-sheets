@@ -1,7 +1,15 @@
 import { markSpellRow, spellFilters, spellSourceLabel } from "./character-spells.js";
 import type { Inputs, Result } from "./character-model.js";
 import { translator } from "./character-locale.js";
-import { newId, object, rows, strings, text, type CatalogRecord } from "./character-client.js";
+import {
+  newId,
+  object,
+  rows,
+  strings,
+  text,
+  type CatalogRecord,
+  catalogRecord,
+} from "./character-client.js";
 import {
   button,
   el,
@@ -182,9 +190,7 @@ export function playActions(
           select(
             "",
             strings(caster["spellIds"])
-              .filter(
-                (id) => Number(catalog.find((record) => record.id === id)?.value["level"]) > 0,
-              )
+              .filter((id) => Number(catalogRecord(catalog, id)?.value["level"]) > 0)
               .map((id) => ({ id, label: spellName(id) })),
             (value) => {
               ref = value;

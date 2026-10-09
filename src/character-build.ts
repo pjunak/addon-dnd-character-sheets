@@ -9,6 +9,7 @@ import {
   strings,
   text,
   type CatalogRecord,
+  catalogRecord,
 } from "./character-client.js";
 import {
   builderTarget,
@@ -225,7 +226,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
       const source = field(t(label(kind)), choice);
       source.dataset["builderTarget"] = kind;
       origin.append(source);
-      const selected = records.find((record) => record.id === build[kind]);
+      const selected = catalogRecord(records, build[kind]);
       if (kind === "species" && selected && rows(selected.value["lineages"]).length)
         origin.append(
           builderTarget(
@@ -312,9 +313,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
     row.dataset["builderTarget"] = "class:" + level.classId;
     row.dataset["detailsKey"] = "level/" + level.id;
     const name = text(
-      (view.catalogs.get("class") ?? []).find((record) => record.id === level.classId)?.value[
-        "name"
-      ],
+      catalogRecord(view.catalogs.get("class"), level.classId)?.value["name"],
       level.classId,
     );
     row.append(

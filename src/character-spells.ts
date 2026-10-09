@@ -1,5 +1,5 @@
 import type { Inputs, Projection, Result } from "./character-model.js";
-import { object, rows, text, type CatalogRecord } from "./character-client.js";
+import { object, rows, text, type CatalogRecord, catalogRecord } from "./character-client.js";
 import { translator } from "./character-locale.js";
 import {
   builderTarget,
@@ -116,12 +116,12 @@ export function spellPicker(
     summary.textContent = t("{0} ({1} selected)", [title, selected.length]);
     list.replaceChildren(el("legend", title));
     const shown = [...new Set([...selected, ...ids])].filter((id) => {
-      const record = catalog.find((record) => record.id === id);
+      const record = catalogRecord(catalog, id);
       return filters.matches(text(record?.value["name"], id), record?.value["level"]);
     });
     filters.report(shown.length);
     for (const id of shown) {
-      const record = catalog.find((record) => record.id === id);
+      const record = catalogRecord(catalog, id);
       const choice = checkbox(text(record?.value["name"], id), selected.includes(id), (checked) => {
         if (checked && (selected.length >= maximum || !ids.includes(id))) return;
         selected = checked ? [...selected, id] : selected.filter((item) => item !== id);
@@ -145,7 +145,7 @@ export function spellPicker(
 }
 
 export function markSpellRow(row: HTMLElement, id: string, catalog: CatalogRecord[]): HTMLElement {
-  const spell = catalog.find((record) => record.id === id);
+  const spell = catalogRecord(catalog, id);
   row.dataset["spellName"] = text(spell?.value["name"], id);
   row.dataset["spellLevel"] = text(spell?.value["level"]);
   return row;

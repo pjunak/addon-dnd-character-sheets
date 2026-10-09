@@ -1,5 +1,5 @@
 import type { BuildView } from "./character-build.js";
-import { rows, text } from "./character-client.js";
+import { rows, text, catalogRecord } from "./character-client.js";
 import { builderLabel, translator } from "./character-locale.js";
 import { button, el, human, styled, tabStrip } from "./character-ui.js";
 
@@ -100,7 +100,7 @@ export function builderShell(
       ...classes.map((id) => ({
         id,
         label:
-          text(view.catalogs.get("class")?.find((record) => record.id === id)?.value["name"], id) +
+          text(catalogRecord(view.catalogs.get("class"), id)?.value["name"], id) +
           " " +
           view.input.build.levels.filter((level) => level.classId === id).length,
       })),

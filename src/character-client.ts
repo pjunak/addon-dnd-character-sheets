@@ -56,6 +56,27 @@ export interface CatalogRecord {
   id: string;
   value: Record<string, unknown>;
 }
+const catalogIndexes = new WeakMap<readonly CatalogRecord[], ReadonlyMap<string, CatalogRecord>>();
+
+/**
+ * A catalog record by ID. Each loaded catalog is indexed once, so lists that
+ * look up every row do not scan the whole catalog per row. Catalog arrays are
+ * replaced, never changed, when rules data reloads.
+ */
+export function catalogRecord(
+  catalog: readonly CatalogRecord[] | undefined,
+  id: string | undefined,
+): CatalogRecord | undefined {
+  if (!catalog || id === undefined) return undefined;
+  let index = catalogIndexes.get(catalog);
+  if (!index) {
+    const byId = new Map<string, CatalogRecord>();
+    for (const record of catalog) if (!byId.has(record.id)) byId.set(record.id, record);
+    catalogIndexes.set(catalog, (index = byId));
+  }
+  return index.get(id);
+}
+
 export class CharacterClient {
   private readonly service: ServiceHandle;
   private readonly providerId: string;

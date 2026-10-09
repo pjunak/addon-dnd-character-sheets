@@ -61,6 +61,7 @@ import {
   strings,
   text,
   type CatalogRecord,
+  catalogRecord,
 } from "./character-client.js";
 import { buildView, type BuildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
@@ -1401,9 +1402,7 @@ export function defineCharacterElement(
         const id = String(classOptions["classId"]),
           caster = rows(casting["perClass"]).find((row) => row["classId"] === id) ?? {},
           eligible = strings(classOptions["spellIds"]),
-          zero = eligible.filter(
-            (id) => Number(spells.find((record) => record.id === id)?.value["level"]) === 0,
-          ),
+          zero = eligible.filter((id) => Number(catalogRecord(spells, id)?.value["level"]) === 0),
           leveled = eligible.filter((id) => !zero.includes(id));
         root.append(
           picks(

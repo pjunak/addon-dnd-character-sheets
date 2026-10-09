@@ -15,7 +15,7 @@ import {
   type EquipmentSlot,
 } from "./character-inventory.js";
 import type { CatalogRecord } from "./character-client.js";
-import { abilities, object, rows, text } from "./character-client.js";
+import { abilities, object, rows, text, catalogRecord } from "./character-client.js";
 import { abilityNames, translator } from "./character-locale.js";
 import {
   button,
@@ -135,7 +135,7 @@ export function recordName(
   id: string,
 ): string {
   return text(
-    view.catalogs.get(kind)?.find((record) => record.id === id)?.value["name"],
+    catalogRecord(view.catalogs.get(kind), id)?.value["name"],
     view.projection?.evidence.find(
       (source) => source.reference.kind === kind && source.reference.id === id,
     )?.name ?? id,
