@@ -843,13 +843,15 @@ export function defineCharacterElement(
         this.#frame.connect(
           root,
           content,
+          // Re-measure inactive views when their structure can change, not
+          // after every save: the frame only grows, and the visible view is
+          // observed continuously.
           [
-            this.#baseRevision,
-            this.#changeVersion,
             this.lang,
             this.#catalogs.size,
             this.#response.status,
             this.#response.rulesChanged,
+            this.#input.build.levels.map((level) => level.classId).join(","),
           ].join("/"),
           () => this.#frameSamples(),
           this.#runtime.enhance,

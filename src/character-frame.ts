@@ -56,6 +56,9 @@ export class CompactFrame {
       workspace.append(surface);
       try {
         for (const sample of samples()) {
+          // One view per idle moment keeps typing and scrolling responsive.
+          // Nothing is mounted while waiting.
+          await idle();
           if (scope.signal.aborted) return;
           isolateSample(sample);
           // Nested enhancement owns only this disposable sample. The visible
@@ -141,6 +144,14 @@ export class CompactFrame {
     apply();
     measure();
   }
+}
+
+function idle(): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof requestIdleCallback === "function")
+      requestIdleCallback(() => resolve(), { timeout: 200 });
+    else setTimeout(resolve, 0);
+  });
 }
 
 function isolateSample(sample: HTMLElement): void {
