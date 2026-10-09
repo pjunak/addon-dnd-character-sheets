@@ -178,7 +178,6 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
 
 export function printCharacter(
   state: State,
-  _revision: number,
   name: string,
   options: { spells: boolean; equipment: boolean; provenance: boolean },
   locale = "en",

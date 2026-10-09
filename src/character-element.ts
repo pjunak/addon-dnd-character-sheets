@@ -1302,7 +1302,7 @@ export function defineCharacterElement(
           ),
           button(
             this.#t("Print / PDF"),
-            () => this.#print(this.#response!.state!, this.#response!.revision),
+            () => this.#print(this.#response!.state!),
             false,
             "print-character",
           ),
@@ -1896,7 +1896,7 @@ export function defineCharacterElement(
         "import-character",
       );
     }
-    #print(state: State, revision: number): void {
+    #print(state: State): void {
       const options = { spells: true, equipment: true, provenance: false };
       this.#open(this.#t("Print / PDF"), [
         el("p", this.#t("Choose Save as PDF in the browser print dialog for a PDF copy.")),
@@ -1907,7 +1907,7 @@ export function defineCharacterElement(
         ),
         button(this.#t("Open print preview"), () => {
           try {
-            printCharacter(state, revision, this.#name, options, this.#context?.host.locale);
+            printCharacter(state, this.#name, options, this.#context?.host.locale);
           } catch (error) {
             this.#message = error instanceof Error ? error.message : "Printing failed.";
             this.#status();
