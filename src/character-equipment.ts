@@ -1,4 +1,4 @@
-import { containerOptions } from "./character-inventory.js";
+import { canStackOnto, containerOptions } from "./character-inventory.js";
 import type { Container, Item } from "./character-model.js";
 import type { CatalogRecord } from "./character-client.js";
 import { newId, text } from "./character-client.js";
@@ -148,14 +148,8 @@ export function equipmentPicker(
       });
       remove.setAttribute("aria-label", t("Remove {0}", [name]));
       const row = styled("div", "dnd-picker-row", el("span", name), quantity, remove);
-      const stacks = inventory.filter(
-        (item) =>
-          item.reference?.kind === entry.record.kind &&
-          item.reference.id === entry.record.id &&
-          item.location === "carried" &&
-          !item.attuned &&
-          (item.containerId ?? "") === destination,
-      );
+      const reference = { kind: entry.record.kind, id: entry.record.id };
+      const stacks = inventory.filter((item) => canStackOnto(item, reference, destination));
       if (stacks.length) {
         const stack = select(
           entry.stack ?? "",

@@ -73,6 +73,25 @@ export function removeInventoryItem(input: Inputs, id: string): void {
   pinQuickUse(input, id, false);
 }
 
+/**
+ * Whether new copies of a catalog item may join an existing inventory entry:
+ * the same item, carried loose in the same place and not attuned, so the
+ * entry's notes, grants and identity apply to every copy.
+ */
+export function canStackOnto(
+  prior: Item,
+  reference: Item["reference"],
+  containerId: string | undefined,
+): boolean {
+  return (
+    prior.location === "carried" &&
+    !prior.attuned &&
+    (prior.containerId ?? "") === (containerId ?? "") &&
+    prior.reference?.kind === reference?.kind &&
+    prior.reference?.id === reference?.id
+  );
+}
+
 // The picker uses an existing ID only after an explicit stack choice. Preserve
 // that instance's notes, grants and identity; new copies remain separate.
 export function appendEquipment(
@@ -84,12 +103,7 @@ export function appendEquipment(
     items.some((item) => {
       const prior = input.play.inventory.find((row) => row.id === item.id);
       return stacks.includes(item.id)
-        ? !prior ||
-            prior.location !== "carried" ||
-            prior.attuned ||
-            prior.containerId !== item.containerId ||
-            prior.reference?.kind !== item.reference?.kind ||
-            prior.reference?.id !== item.reference?.id
+        ? !prior || !canStackOnto(prior, item.reference, item.containerId)
         : !!prior;
     })
   )
