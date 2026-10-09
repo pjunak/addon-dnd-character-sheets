@@ -796,7 +796,9 @@ export const catalogs = {
     "Against the rules": "Against the rules",
     "You are not allowed to make this change.": "You are not allowed to make this change.",
     "The character service refused this action. Nothing was saved.": "The character service refused this action. Nothing was saved.",
-    "This character changed in another session. The sheet now shows the saved character; repeat the action if it is still needed.": "This character changed in another session. The sheet now shows the saved character; repeat the action if it is still needed."
+    "This character changed in another session. The sheet now shows the saved character; repeat the action if it is still needed.": "This character changed in another session. The sheet now shows the saved character; repeat the action if it is still needed.",
+    "Increase": "Increase",
+    "Decrease": "Decrease"
   },
   "cs": {
     "Hands and grip": "Ruce a úchop",
@@ -1594,6 +1596,8 @@ export const catalogs = {
     "Against the rules": "Proti pravidlům",
     "You are not allowed to make this change.": "K této změně nemáte oprávnění.",
     "The character service refused this action. Nothing was saved.": "Služba postav tuto akci odmítla. Nic nebylo uloženo.",
-    "This character changed in another session. The sheet now shows the saved character; repeat the action if it is still needed.": "Postava se mezitím změnila v jiné relaci. List teď ukazuje uloženou postavu; pokud je akce stále potřeba, zopakujte ji."
+    "This character changed in another session. The sheet now shows the saved character; repeat the action if it is still needed.": "Postava se mezitím změnila v jiné relaci. List teď ukazuje uloženou postavu; pokud je akce stále potřeba, zopakujte ji.",
+    "Increase": "Zvýšit",
+    "Decrease": "Snížit"
   }
 } as const;

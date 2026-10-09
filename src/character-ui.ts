@@ -271,6 +271,7 @@ export function stepper(
   change: (value: number) => void,
   min: number | (() => number),
   max: number | (() => number),
+  t = translator("en"),
 ): HTMLElement {
   const root = styled("div", "character-stepper");
   root.dataset["stepper"] = "";
@@ -286,8 +287,8 @@ export function stepper(
   };
   const up = button("▴", () => update(value() + 1)),
     down = button("▾", () => update(value() - 1));
-  up.setAttribute("aria-label", "Increase");
-  down.setAttribute("aria-label", "Decrease");
+  up.setAttribute("aria-label", t("Increase"));
+  down.setAttribute("aria-label", t("Decrease"));
   const sync = (): void => {
     input.value = String(value());
     input.min = String(low());

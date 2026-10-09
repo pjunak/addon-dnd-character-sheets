@@ -139,6 +139,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
                 }),
               minimum,
               limit,
+              t,
             ),
           ),
         );
@@ -195,6 +196,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
                   }),
                 1,
                 Number(policy["rollSides"]),
+                t,
               ),
             ),
           ),
@@ -395,6 +397,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
                   }),
                 1,
                 Number(currentClass?.["hitDieMax"]),
+                t,
               ),
             ),
           );
@@ -464,6 +467,7 @@ function choiceView(
             },
             0,
             () => Math.min(limit, budget - spent() + Number(object(current(0))[ability] ?? 0)),
+            t,
           ),
         ),
       );

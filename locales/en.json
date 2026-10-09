@@ -794,5 +794,7 @@
   "Against the rules": "Against the rules",
   "You are not allowed to make this change.": "You are not allowed to make this change.",
   "The character service refused this action. Nothing was saved.": "The character service refused this action. Nothing was saved.",
-  "This character changed in another session. The sheet now shows the saved character; repeat the action if it is still needed.": "This character changed in another session. The sheet now shows the saved character; repeat the action if it is still needed."
+  "This character changed in another session. The sheet now shows the saved character; repeat the action if it is still needed.": "This character changed in another session. The sheet now shows the saved character; repeat the action if it is still needed.",
+  "Increase": "Increase",
+  "Decrease": "Decrease"
 }
