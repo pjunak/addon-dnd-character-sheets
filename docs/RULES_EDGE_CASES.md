@@ -543,7 +543,9 @@ part of inventory.
 
 Builder and play share one name/level filter with a live result count and explicit empty state. Class spells, rituals and granted spells participate; filtering does not edit selections. Grant labels include their acquisition, and host-enhanced controls keep stable field keys. Both locales and layouts use the same component.
 
-Spell choices, casting abilities, activations and counters follow Engine acquisition keys. Saved state whose source is no longer available has an explicit discard action in Builder. After a structural edit, the coordinator withdraws only Engine-rejected selections already present in the saved snapshot; it preserves valid sibling spells and counters, rejects newly invalid input, and does not reset an available counter. A save response applies corrections without resurrecting removed choices or overwriting subsequent edits.
+Spell choices, casting abilities, activations and counters follow Engine acquisition keys. Saved state whose source is no longer available has an explicit discard action in Builder. After a structural edit, the coordinator withdraws only Engine-rejected selections already present in the saved snapshot, including a subclass the Engine marks `subclass-level` and class spell lists it marks `spell-class` after a level is removed; it preserves valid sibling spells and counters, rejects newly invalid input, and does not reset an available counter. A save response applies corrections without resurrecting removed choices or overwriting subsequent edits.
+
+The spellbook picker's limit is the Engine's `spellbookCapacity` (granted plus copied spells).
 
 Combat displays saved damage type, versatile damage, mastery availability, sense units and conditional explanation terms. Saved details and print remain independent of a live rules provider. The browser performs no edition arithmetic.
 

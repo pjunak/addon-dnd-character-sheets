@@ -48,6 +48,30 @@ func repairGrantSelections(input *model.Inputs, previous model.Inputs, evaluatio
 			changed = true
 		}
 	}
+	// A removed class level can leave a subclass or class spell list behind;
+	// the Engine names exactly those.
+	for classID, subclass := range input.Build.Subclasses {
+		if old, saved := previous.Build.Subclasses[classID]; saved && subclass == old && issues["subclass-level:"+classID] {
+			delete(input.Build.Subclasses, classID)
+			changed = true
+		}
+	}
+	for _, list := range []struct {
+		name     string
+		current  map[string][]string
+		previous map[string][]string
+	}{
+		{"cantrips", input.Build.Spells.Cantrips, previous.Build.Spells.Cantrips},
+		{"spellbook", input.Build.Spells.Spellbook, previous.Build.Spells.Spellbook},
+		{"prepared", input.Play.PreparedSpells, previous.Play.PreparedSpells},
+	} {
+		for classID, ids := range list.current {
+			if old, saved := list.previous[classID]; saved && reflect.DeepEqual(ids, old) && issues["spell-class:"+list.name+":"+classID] {
+				delete(list.current, classID)
+				changed = true
+			}
+		}
+	}
 	resources := grantDescriptors(evaluation.Sheet["resources"])
 	for key, value := range input.Play.ResourceUses {
 		old, saved := previous.Play.ResourceUses[key]

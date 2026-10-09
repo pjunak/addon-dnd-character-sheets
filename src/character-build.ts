@@ -270,35 +270,11 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
       root.append(el("p", t("No additional classes meet the rules at this level.")));
     return root;
   }
+  // The Engine reports which saved choices, subclass and class spells the
+  // removed level made available; the worker withdraws exactly those on save.
   const remove = (index: number): void =>
     update(() => {
       build.levels.splice(index, 1);
-      const counts = new Map<string, number>();
-      for (const level of build.levels)
-        counts.set(level.classId, (counts.get(level.classId) ?? 0) + 1);
-      for (const descriptor of rows(plan["classChoices"]))
-        if (
-          Number(object(descriptor["source"])["level"] ?? descriptor["level"] ?? 1) >
-          (counts.get(String(descriptor["classId"])) ?? 0)
-        ) {
-          const id = String(descriptor["id"]);
-          build.choices = build.choices.filter(
-            (choice) => choice.id !== id && !choice.id.startsWith(id + ":"),
-          );
-        }
-      for (const id of Object.keys(build.subclasses))
-        if (
-          !counts.has(id) ||
-          (counts.get(id) ?? 0) <
-            Number(classes.find((row) => row["classId"] === id)?.["subclassLevel"])
-        )
-          delete build.subclasses[id];
-      for (const selections of [
-        build.spells.cantrips,
-        build.spells.spellbook,
-        input.play.preparedSpells,
-      ])
-        for (const id of Object.keys(selections)) if (!counts.has(id)) delete selections[id];
     }, true);
   const currentClass = classes.find((row) => row["classId"] === active),
     title = active === "levels" ? t("Levels") : text(currentClass?.["name"], active),

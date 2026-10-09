@@ -61,3 +61,42 @@ func TestGrantRepairNeverResetsAvailableResource(t *testing.T) {
 		t.Fatal("rewrote still-present state")
 	}
 }
+
+func TestLevelRemovalWithdrawsTheSubclassAndSpellsTheEngineNames(t *testing.T) {
+	c, data, engine, meta := fixture(t)
+	input := model.Blank()
+	input.Build.Subclasses = map[string]string{"fighter": "champion", "rogue": "thief"}
+	input.Build.Spells.Cantrips = map[string][]string{"wizard": {"spark"}, "cleric": {"light"}}
+	input.Play.PreparedSpells = map[string][]string{"wizard": {"ward"}}
+	saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "levels-original", Summary: "Levels", Inputs: &input})
+	if err != nil || saved.Status != "ready" {
+		t.Fatal(saved, err)
+	}
+	engine.inspect = func(next model.Inputs) []model.Issue {
+		issues := []model.Issue{}
+		if next.Build.Subclasses["fighter"] != "" {
+			issues = append(issues, model.Issue{ID: "subclass-level:fighter", Severity: "blocker"})
+		}
+		if len(next.Build.Spells.Cantrips["wizard"]) > 0 {
+			issues = append(issues, model.Issue{ID: "spell-class:cantrips:wizard", Severity: "blocker"})
+		}
+		if len(next.Play.PreparedSpells["wizard"]) > 0 {
+			issues = append(issues, model.Issue{ID: "spell-class:prepared:wizard", Severity: "blocker"})
+		}
+		return issues
+	}
+	input.Build.Levels = append(input.Build.Levels, model.Level{ID: "removed-elsewhere", ClassID: "rogue"})
+	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "levels-removed", Summary: "Remove level", Inputs: &input, ExpectedRevision: 1})
+	state := data.state.Inputs
+	if err != nil || saved.Status != "ready" || !reflect.DeepEqual(state.Build.Subclasses, map[string]string{"rogue": "thief"}) ||
+		!reflect.DeepEqual(state.Build.Spells.Cantrips, map[string][]string{"cleric": {"light"}}) || len(state.Play.PreparedSpells) != 0 {
+		t.Fatal("did not withdraw exactly the stranded selections", saved, err, state.Build, state.Play.PreparedSpells)
+	}
+	// A subclass newly chosen too early is rejected, not silently dropped.
+	input = cloneInputs(state)
+	input.Build.Subclasses["fighter"] = "champion"
+	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "levels-early", Summary: "Subclass", Inputs: &input, ExpectedRevision: 2})
+	if err != nil || saved.Status != "invalid" {
+		t.Fatal("silently discarded a new early subclass", saved, err)
+	}
+}

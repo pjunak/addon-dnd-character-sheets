@@ -615,26 +615,22 @@ export function defineCharacterElement(
             this.#input.build.choices,
             response.state.inputs.build.choices,
           );
-          reconcileCharacterMap(
-            inputs.build.spells.grantChoices,
-            this.#input.build.spells.grantChoices,
-            response.state.inputs.build.spells.grantChoices,
-          );
-          reconcileCharacterMap(
-            inputs.build.spells.castingAbilities,
-            this.#input.build.spells.castingAbilities,
-            response.state.inputs.build.spells.castingAbilities,
-          );
-          reconcileCharacterMap(
-            inputs.play.resourceUses,
-            this.#input.play.resourceUses,
-            response.state.inputs.play.resourceUses,
-          );
-          reconcileCharacterMap(
-            inputs.play.activeFeatures,
-            this.#input.play.activeFeatures,
-            response.state.inputs.play.activeFeatures,
-          );
+          // Maps the worker may withdraw entries from after a structural edit.
+          for (const select of [
+            (value: Inputs) => value.build.subclasses,
+            (value: Inputs) => value.build.spells.cantrips,
+            (value: Inputs) => value.build.spells.spellbook,
+            (value: Inputs) => value.build.spells.grantChoices,
+            (value: Inputs) => value.build.spells.castingAbilities,
+            (value: Inputs) => value.play.preparedSpells,
+            (value: Inputs) => value.play.resourceUses,
+            (value: Inputs) => value.play.activeFeatures,
+          ] as ((value: Inputs) => Record<string, unknown>)[])
+            reconcileCharacterMap(
+              select(inputs),
+              select(this.#input),
+              select(response.state.inputs),
+            );
           if (version === this.#changeVersion) {
             this.#dirty = false;
             this.#message = "Saved";
@@ -1431,8 +1427,7 @@ export function defineCharacterElement(
               (value) => {
                 this.#input.build.spells.spellbook[id] = value;
               },
-              Number(caster["spellbookKnown"]) +
-                this.#input.build.spells.acquisitions.filter((row) => row.classId === id).length,
+              Number(caster["spellbookCapacity"] ?? caster["spellbookKnown"]),
               "spellbook:" + id,
             ),
           );
