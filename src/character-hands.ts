@@ -4,6 +4,7 @@ import { savedRule } from "./character-sheet.js";
 import { object, rows, strings } from "./character-client.js";
 import { translator } from "./character-locale.js";
 import { button, el, field, human, panel, select, signed, styled } from "./character-ui.js";
+import { rulesTarget } from "./character-rule-notes.js";
 
 function restoreMessage(reason: unknown, locale: string): string {
   const t = translator(locale);
@@ -30,7 +31,7 @@ export function handsRead(
 ): HTMLElement {
   const t = translator(locale),
     hands = input.play.hands,
-    root = panel(t("Hands and grip"));
+    root = rulesTarget(panel(t("Hands and grip")), "hands");
   const name = (id: string | undefined): string =>
     id ? (input.play.inventory.find((item) => item.id === id)?.name ?? id) : t("Free hand");
   root.append(
@@ -58,7 +59,7 @@ export function handControls(view: SheetView, combat: boolean): HTMLElement {
   const t = translator(view.locale),
     hands = view.input.play.hands,
     two = hands?.grip === "two";
-  const root = panel(t("Hands and grip")),
+  const root = rulesTarget(panel(t("Hands and grip")), "hands"),
     joined = styled("div", "dse-hands"),
     options = rows(view.hands["options"]);
   root.dataset["hands"] = "";

@@ -371,3 +371,22 @@ func TestRetroactiveOriginEditWithdrawsOnlyPreviouslySavedChoices(t *testing.T) 
 		t.Fatal("new illegal choice was silently accepted", saved, err)
 	}
 }
+
+func TestRejectedPlayActionAnswersWithTheRulesReason(t *testing.T) {
+	c, data, engine, meta := fixture(t)
+	input := model.Blank()
+	saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "create-hero", Summary: "Create", Inputs: &input})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.engine = providerCall(func(ctx context.Context, meta *workerrpc.Meta, call workerrpc.ServiceCall) (workerrpc.ServiceResult, error) {
+		if call.Method == "character-play" {
+			return workerrpc.ServiceResult{}, failure(workerrpc.KindInvalidRequest, "No uses remain for this resource.")
+		}
+		return engine.Call(ctx, meta, call)
+	})
+	response, err := invoke(t, c, meta, "save", Request{Operation: "play", OperationID: "spend-resource", Summary: "Spend", ExpectedRevision: saved.Revision, Change: map[string]any{"operation": "rest", "rest": "short"}})
+	if err != nil || response.Status != "invalid" || response.Message != "No uses remain for this resource." || data.writes != 1 {
+		t.Fatalf("rejected play = %+v, %v, writes %d", response, err, data.writes)
+	}
+}

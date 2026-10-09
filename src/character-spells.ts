@@ -15,6 +15,7 @@ import {
   styled,
   textInput,
 } from "./character-ui.js";
+import { rulesTarget } from "./character-rule-notes.js";
 
 export function spellSourceLabel(sourceValue: unknown, locale = "en"): string {
   const source = object(sourceValue),
@@ -198,7 +199,7 @@ export function grantedSpellsRead(
   const grants = rows(object(projection?.sheet["spellcasting"])["granted"]),
     t = translator(locale);
   if (!grants.length) return;
-  const root = panel(t("Granted spells"));
+  const root = rulesTarget(panel(t("Granted spells")), "spells");
   for (const grant of grants) {
     const name = String(grant["name"] ?? grant["ref"]),
       row = el(

@@ -14,6 +14,7 @@ import {
   select,
   styled,
 } from "./character-ui.js";
+import { rulesTarget } from "./character-rule-notes.js";
 
 // Options and costs are engine results. This view only gathers command inputs.
 export function playActions(
@@ -25,7 +26,10 @@ export function playActions(
   section: "spells" | "recovery" = "spells",
 ): HTMLElement {
   const t = translator(locale);
-  const root = panel(t(section === "recovery" ? "Hit dice" : "Spellcasting")),
+  const root = rulesTarget(
+      panel(t(section === "recovery" ? "Hit dice" : "Spellcasting")),
+      section === "recovery" ? "resources" : "spells",
+    ),
     names = new Map(catalog.map((record) => [record.id, text(record.value["name"], record.id)]));
   const spellName = (id: string): string => names.get(id) ?? id;
   const slotName = (key: string): string => {

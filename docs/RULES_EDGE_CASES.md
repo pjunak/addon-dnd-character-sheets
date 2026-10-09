@@ -236,9 +236,12 @@ Direct play, grant/amend/revoke and rules-adoption commands also retain their
 exact request after an uncertain response. Reviewed imports retain the approved
 token, operation ID and expected revision; Retry never makes a new preview or
 bypasses review. Further mutations and background refresh pause until the outcome
-is resolved, and the host navigation guard remains active. A conflicting or
-rejected response requires checking saved state before deciding what to do next;
-commands never rebase automatically onto another editor's changes. An explicit
+is resolved, and the host navigation guard remains active. Any answer from the
+worker is definite: a refusal by the rules (`invalid`, with the engine's reason),
+unavailable rules, a rules change or a revision conflict saves nothing, so the
+command ends at once. A client error other than timeout, conflict or rate limit
+is equally definite. A conflict reloads the saved character; commands never
+rebase automatically onto another editor's changes. An explicit
 check ends the retry only after a successful load, without undoing a saved action.
 Lost acknowledgments can be recognized across worker restarts from the last
 accepted operation; older requests cannot overwrite a later revision.

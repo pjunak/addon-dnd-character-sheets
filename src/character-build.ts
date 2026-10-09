@@ -26,6 +26,7 @@ import {
   styled,
   type Option,
 } from "./character-ui.js";
+import { rulesTarget } from "./character-rule-notes.js";
 
 export interface BuildView {
   compact?: boolean;
@@ -67,7 +68,10 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
     if (render) view.refresh();
   };
   if (active === "character") {
-    const foundation = panel(t(view.compact ? "Ability scores" : "Character"));
+    const foundation = rulesTarget(
+      panel(t(view.compact ? "Ability scores" : "Character")),
+      "abilities",
+    );
     foundation.classList.add("character-foundation");
     const origin = view.compact ? panel(t("Origin")) : foundation;
     if (view.compact) origin.classList.add("character-foundation");
@@ -241,7 +245,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
     }
     if (view.compact) root.append(origin);
     root.append(foundation);
-    const choices = panel(t("Granted choices"));
+    const choices = rulesTarget(panel(t("Granted choices")), "choices", "build");
     for (const key of ["creationChoices", "creationAbilityChoices"])
       for (const descriptor of rows(plan[key]))
         choices.append(choiceView(descriptor, object(guidance[String(descriptor["id"])]), view));
@@ -295,7 +299,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
     }, true);
   const currentClass = classes.find((row) => row["classId"] === active),
     title = active === "levels" ? t("Levels") : text(currentClass?.["name"], active),
-    levels = panel(title);
+    levels = rulesTarget(panel(title), "levels");
   let classLevel = 0;
   build.levels.forEach((level, index) => {
     if (active !== "levels" && level.classId !== active) return;

@@ -23,6 +23,7 @@ import { quickUse } from "./character-quick-use.js";
 import { conditions } from "./character-conditions.js";
 import { abilityNames, translator } from "./character-locale.js";
 import { button, el, field, human, numberInput, panel, signed, styled } from "./character-ui.js";
+import { rulesTarget } from "./character-rule-notes.js";
 
 export function compactNavigation(nav: HTMLElement): void {
   const paths: Record<string, string> = {
@@ -49,10 +50,10 @@ export function compactVitals(view: SheetView): HTMLElement {
     derived = object(view.projection?.sheet["derived"]);
   const root = styled("div", "dsc-vitals");
   root.setAttribute("aria-label", t("Core character values"));
-  const hp = styled(
-    "section",
-    "dsc-stat dsc-health",
-    styled("span", "dsc-stat-label", t("Hit points")),
+  const hp = rulesTarget(
+    styled("section", "dsc-stat dsc-health", styled("span", "dsc-stat-label", t("Hit points"))),
+    "hp",
+    "temporaryHp",
   );
   const current = numberInput(
     view.input.play.hp,
@@ -361,7 +362,7 @@ export function compactEquipment(
   openPlacement: (place: string) => void,
 ): HTMLElement {
   const t = translator(view.locale),
-    worn = panel(t("Worn equipment")),
+    worn = rulesTarget(panel(t("Worn equipment")), "inventory"),
     doll = styled("div", "dsc-mannequin", mannequin());
   for (const place of bodyPlaces) {
     const items = view.input.play.inventory.filter(

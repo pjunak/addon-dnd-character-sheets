@@ -130,8 +130,13 @@ pause and the same navigation guard stays active. Retry sends the exact action
 again without duplicating its saved effect; imports keep their original approved
 review. **Check saved character** asks before ending the retry, then reloads the
 saved result without undoing any action. A failed check keeps recovery available.
-When another editor has already changed the character, check that result before
-deciding whether to repeat the action; commands do not merge automatically.
+When the rules refuse an action, nothing is saved and editing continues: the
+action's button is outlined in red with an **Against the rules** note whose
+reason shows on hover or keyboard focus, and the save status repeats the reason.
+A save blocked by the rules marks the affected sheet sections the same way.
+When another editor has already changed the character, the sheet reloads the
+saved character; repeat the action if it is still needed. Commands do not merge
+automatically.
 A retry receipt can confirm the saved action without returning an evaluation.
 In that case, **Saved** confirms persistence while a separate read restores
 current play guidance; mechanical controls stay disabled until it arrives.

@@ -13,6 +13,7 @@ import {
   signed,
   styled,
 } from "./character-ui.js";
+import { rulesTarget } from "./character-rule-notes.js";
 
 function conditionName(row: Record<string, unknown>, locale: string, fallback: string): string {
   return typeof row["labelKey"] === "string" && row["labelKey"]
@@ -26,7 +27,7 @@ export function conditionsRead(
   locale: string,
 ): HTMLElement {
   const t = translator(locale),
-    root = panel(t("Conditions"));
+    root = rulesTarget(panel(t("Conditions")), "conditions");
   root.className = "dse-section dse-conditions";
   root.setAttribute("aria-label", t("Conditions"));
   const heading = root.querySelector<HTMLElement>("h3")!;

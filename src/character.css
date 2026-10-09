@@ -2053,3 +2053,53 @@
   display: block;
   margin-block: var(--space-2);
 }
+
+/* Rules refusals outline their cause and float the reason beside it. */
+.addon-dnd-sheets [data-rule-issue] {
+  outline: 2px solid var(--color-danger);
+  outline-offset: 2px;
+}
+.addon-dnd-sheets .dnd-rule-note {
+  position: relative;
+  display: inline-flex;
+  align-self: center;
+  margin-inline-start: var(--space-2);
+  vertical-align: middle;
+}
+.addon-dnd-sheets .dnd-rule-note-label {
+  padding: 0.1rem var(--space-2);
+  line-height: 1.4;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-pill);
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  cursor: help;
+}
+.addon-dnd-sheets .dnd-rule-note-detail {
+  position: absolute;
+  z-index: 20;
+  inset-block-start: calc(100% + var(--space-1));
+  inset-inline-start: 0;
+  width: max-content;
+  max-width: min(22rem, 80vw);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  color: var(--text-light);
+  box-shadow: var(--shadow-md);
+  font-size: var(--text-sm);
+  white-space: normal;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.addon-dnd-sheets .dnd-rule-note:is(:hover, :focus-within) .dnd-rule-note-detail,
+.addon-dnd-sheets
+  [data-rule-issue]:is(:hover, :focus-visible)
+  + .dnd-rule-note
+  .dnd-rule-note-detail {
+  visibility: visible;
+  opacity: 1;
+}

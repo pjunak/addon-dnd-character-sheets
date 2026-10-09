@@ -32,6 +32,7 @@ import {
   styled,
   textInput,
 } from "./character-ui.js";
+import { rulesTarget } from "./character-rule-notes.js";
 
 export type Layout = "compact" | "classic";
 export interface SheetView {
@@ -275,7 +276,11 @@ export function vitals(view: SheetView): HTMLElement {
     sheet = view.projection?.sheet ?? {},
     derived = object(sheet["derived"]),
     band = styled("div", "dse-vitals");
-  const hp = styled("div", "codex-tile dse-hp", styled("span", "dse-stat-label", t("Hit points")));
+  const hp = rulesTarget(
+    styled("div", "codex-tile dse-hp", styled("span", "dse-stat-label", t("Hit points"))),
+    "hp",
+    "temporaryHp",
+  );
   const adjust = (operation: string, title: string, initial: number): void => {
     const area = styled("div", "dse-hp-adjust"),
       input = numberInput(
@@ -457,7 +462,7 @@ export function backpack(
   } = {},
 ): HTMLElement {
   const t = translator(view.locale),
-    pack = styled("section", "dse-backpack"),
+    pack = rulesTarget(styled("section", "dse-backpack"), "inventory", "hands"),
     head = styled("div", "dse-bp-head", styled("h3", "dse-bp-title", t("Backpack")));
   head
     .querySelector("h3")!
@@ -666,7 +671,7 @@ export function backpack(
   return pack;
 }
 export function currency(view: SheetView): HTMLElement {
-  const coins = styled("div", "dse-coins");
+  const coins = rulesTarget(styled("div", "dse-coins"), "currency");
   for (const coin of ["cp", "sp", "ep", "gp", "pp"]) {
     const value = view.input.play.currency[coin] ?? 0;
     const control = view.editing
@@ -745,7 +750,7 @@ export function attackDetails(view: SheetView): HTMLElement {
 export function resourceDetails(view: SheetView): HTMLElement {
   const t = translator(view.locale),
     sheet = view.projection?.sheet ?? {};
-  const resources = panel(t("Resources"));
+  const resources = rulesTarget(panel(t("Resources")), "resources");
   resources.className = "dse-section dse-resources";
   for (const resource of rows(sheet["resources"])) {
     const key = String(resource["key"]),
@@ -828,7 +833,7 @@ export function explorationDetails(view: SheetView): HTMLElement {
 
 export function senseDetails(projection: Projection | undefined, locale: string): HTMLElement {
   const t = translator(locale),
-    senses = panel(t("Senses"));
+    senses = rulesTarget(panel(t("Senses")), "senses");
   for (const [key, value] of Object.entries(object(projection?.sheet["senses"]))) {
     const path = "senses." + key,
       explanation = projection?.explanations[path];

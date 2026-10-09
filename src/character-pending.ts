@@ -7,6 +7,8 @@ export interface CommandAttempt {
   method: "save" | "commit";
   request: Omit<Request, "contractVersion">;
   retry: boolean;
+  /** The control that asked for the action, so a refusal can be shown beside it. */
+  focusKey?: string;
 }
 export interface SaveAttempt {
   request: Omit<Request, "contractVersion"> & { inputs: Inputs };

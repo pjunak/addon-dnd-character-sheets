@@ -103,9 +103,17 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 	}
 	if err != nil {
 		var rpcError *workerrpc.RPCError
+		rejected := method != "load" && errors.As(err, &rpcError) && rpcError.Data != nil && (rpcError.Data.Kind == workerrpc.KindInvalidRequest || rpcError.Data.Kind == workerrpc.KindValidationFailed)
+		// The rules refused this play action, so nothing is saved. Answer with
+		// the reason so the sheet can show it next to the action.
+		if rejected && request.Change != nil {
+			response.Status = "invalid"
+			response.Message = rpcError.Message
+			return response, nil
+		}
 		// Reading depends on our saved schema, not a replacement provider's
 		// contract. Edit validation must still reach the caller unchanged.
-		if method != "load" && errors.As(err, &rpcError) && rpcError.Data != nil && (rpcError.Data.Kind == workerrpc.KindInvalidRequest || rpcError.Data.Kind == workerrpc.KindValidationFailed) {
+		if rejected {
 			return nil, err
 		}
 		response.Status = "unavailable"
