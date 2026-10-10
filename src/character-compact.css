@@ -484,10 +484,12 @@
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.4rem;
 }
+/* The save wraps under the modifier when large text leaves no room beside it. */
 .dsc-combat-ability {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 0.3rem;
   padding: 0.5rem 0.6rem;
   border: 1px solid var(--border-subtle);
@@ -495,7 +497,7 @@
   background: var(--bg-surface);
 }
 .dsc-combat-ability > small {
-  grid-column: 1/-1;
+  flex-basis: 100%;
   color: var(--text-muted);
   font-size: 0.7rem;
 }
