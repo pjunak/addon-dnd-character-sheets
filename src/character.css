@@ -1,4 +1,4 @@
-/* Preserved v1 primitives, scoped until the host exposes them as shared styles. */
+/* Local primitives, scoped until the host exposes them as shared styles. */
 .addon-dnd-sheets {
   --space-1: 0.25rem;
   --space-5: 1.5rem;

@@ -139,11 +139,10 @@ names into narrow columns.
 The host owns the core profile, portrait and relationships. The native worker
 provides `dnd5e.character` 2.0.0 and is the only writer of the `dnd-sheets`
 schema-4 extension. Its `workerOnly` declaration preserves authorization without
-retaining character snapshots. Install the compatible updated host before this
-package. The optional Inspiration, quick-use, storage, body-placement and hand fields change the stored schema hash, so
-materialized installations need the host's [compatible schema review](docs/RULES_EDGE_CASES.md#inspiration-and-compatible-schema-upgrades)
-before activation. Existing schema-4 characters keep their exact inputs and
-saved projection; no reset or value conversion is required.
+retaining character snapshots. A package that adds optional fields changes the
+stored schema hash and goes through the host's
+[guided saved-data review](docs/RULES_EDGE_CASES.md#schema-updates); existing
+characters keep their exact inputs and saved projection.
 
 Autosave serializes requests and rebases disjoint concurrent edits. Rejected
 edits stay on the page with a reason; Retry confirms an uncertain save before

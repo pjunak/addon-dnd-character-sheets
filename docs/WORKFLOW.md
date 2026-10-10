@@ -97,7 +97,7 @@ senses, feats and traits remain accessible through disclosures on Sheet.
 Inventory,
 equipment, currency, HP, spells and resources remain editable in their ordinary
 tabs, without an edit-mode toggle. Character notes belong to the host profile and have no sheet tab or printed sheet section.
-Existing saved notes remain in the compatible stored schema and transfers.
+Saved notes remain in the stored schema and transfers.
 
 <a id="transfer-and-printing"></a>
 <a id="authoritative-mutation-path"></a>
@@ -171,15 +171,9 @@ a lost acknowledgment retries the exact adoption rather than a fresh save.
 
 ## Installation and validation
 
-Install the host with worker-only extension and compatible schema-review support
-before the updated sheet ZIP. The permanent namespace and schema version remain
-unchanged, but the optional authored play fields change the closed schema hash. Materialized
-installations use the host's guided update confirmation and **Heal and update**
-for the inspected package. The host preserves existing JSON and character
-revisions without adding defaults, and handles runtime restart automatically. See the
-[owning upgrade contract](RULES_EDGE_CASES.md#inspiration-and-compatible-schema-upgrades).
-Existing archived snapshots and prior installation backups are not erased,
-exposed by the character service, or extended by new character saves.
+A package that changes the closed schema hash installs through the host's
+guided update confirmation; choose **Heal and update** to keep existing
+characters unchanged ([schema updates](RULES_EDGE_CASES.md#schema-updates)).
 
 See the [sheet save contract](RULES_EDGE_CASES.md) and the Engine's
 [service contract](https://github.com/pjunak/addon-dnd-engine/blob/main/contract/README.md).

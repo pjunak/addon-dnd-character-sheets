@@ -1,8 +1,19 @@
 # Character saves and failure semantics
 
 The coordinator owns the current `dnd-sheets` extension for each core character
-lifetime. Schema 4.0.0 includes the optional authored
-Inspiration, quick-use, storage, body-placement, hand and condition fields; installing a changed schema requires the review below. The core profile, portrait and relationships are host-owned.
+lifetime. The stored schema is 4.0.0; its optional authored play fields are
+described below. The core profile, portrait and relationships are host-owned.
+
+## Schema updates
+
+New optional fields extend schema 4.0.0 without changing its version, but each
+changes the closed schema's hash. Installing such a package goes through the
+host's [guided update confirmation](https://github.com/pjunak/ttrpg-codex/blob/main/docs/SELF_HOSTING.md#add-on-installation):
+choose **Heal and update** to keep existing characters with their exact JSON
+and document revisions. Old characters do not gain default values. Removal is
+an explicit alternative that clears current sheet saves. Rolling a package back
+after new values are saved may be blocked if the older schema cannot represent
+them.
 
 ## Authored conditions
 
@@ -21,12 +32,7 @@ separate D20 adjustment must be applied once to rolls, without changing printed
 bonuses or save DCs. Other effects require table adjudication; see the
 [Engine contract](../../addon-dnd-engine/contract/README.md#authored-conditions).
 
-This optional closed field changes the schema hash without invalidating earlier
-schema-4 data. Use the existing guided **Heal and update** compatibility check;
-it preserves exact character JSON and document revisions. No data reset,
-manual disabling or bespoke migration is required.
-
-## Inspiration and compatible schema upgrades
+## Inspiration
 
 `inputs.play.inspiration` is an optional boolean. Absent means unavailable
 without adding a value to an existing character; explicit false records spending
@@ -36,21 +42,9 @@ Engine. It also works for legal unfinished builds. Recalculation, rest and other
 play operations preserve the value; no automatic awards or dice rerolls occur.
 
 The worker rejects an Engine result that drops or changes authored Inspiration.
-Older providers that reject the new input leave the saved character readable;
-provider-free display, print and export retain the allocation. Replacement
-imports carry explicit false and true values through the ordinary review.
-Concurrent disjoint fields may merge; conflicting explicit values remain pending.
-
-The extension namespace and schema version stay `dnd-sheets` / `4.0.0`, but the
-closed schema's hash changes. On a materialized installation, update the host
-first, then use its [guided update confirmation](https://github.com/pjunak/ttrpg-codex/blob/main/docs/SELF_HOSTING.md#add-on-installation).
-Choose **Heal and update** to preserve compatible characters; these optional
-fields do not require rewriting their values. The host owns the scoped backup,
-compatibility check, runtime restart and recovery. No separate manual disable
-or schema application is needed. Removal is an explicit alternative that clears
-current sheet saves, not a conversion of them.
-A package rollback after new values have been saved can require a separate
-review and may be blocked if the old schema cannot represent them.
+Provider-free display, print and export retain the value. Replacement imports
+carry explicit false and true values through the ordinary review. Concurrent
+disjoint fields may merge; conflicting explicit values remain pending.
 
 ## Quick-use identity and consumption
 
@@ -80,10 +74,9 @@ can merge, competing pin lists conflict, and a merge against a remotely deleted
 item remains pending for explicit unpinning; it cannot recreate the entry.
 
 The coordinator rejects an Engine response that drops, reorders or substitutes
-pins. Older/incompatible providers leave saved state readable. Print/export
+pins. Incompatible providers leave saved state readable. Print/export
 preserve pin order and depleted entries; reviewed replacement import validates
-references normally. Both pre-Inspiration and pre-quick-use schema-4 values pass
-the compatible schema review with exact JSON bytes and revisions preserved.
+references normally.
 
 ## Storage identity and membership
 
@@ -109,8 +102,6 @@ duplicate IDs and equipped assignments without normalization. Disjoint edits may
 merge; competing container or inventory arrays conflict. A concurrent removal can
 leave a merged assignment invalid: it remains pending for explicit unassignment,
 never a silent recreation. Reviewed replacement import uses the same validation.
-Optional fields preserve all three previous schema-4 generations through the
-host's saved-data review, with no JSON or document-revision rewrite.
 
 ## Body placement and source eligibility
 
@@ -122,7 +113,7 @@ the host UI. It does not infer compatibility from names, tags or a humanoid grid
 Multiple items may share a group. Armor/shield limits, supported mechanics and
 attunement are checked separately; custom items still need active DM authority.
 
-Unassigned old characters remain unchanged. The same instance retains notes,
+Characters without placements remain unchanged. The same instance retains notes,
 source, acquisition, quantity, grants and attunement when placement changes.
 Moving it to carried/stored, replacing its exclusive armor/shield slot, setting
 quantity to zero, or explicitly stowing/unattuning clears placement atomically.
@@ -135,8 +126,7 @@ cleared for repair; no default replacement is saved. Disjoint edits can merge,
 but competing inventory changes retain pending input for conflict resolution,
 including remote item deletion. Lost responses retry the exact request.
 Saved reading, print and replacement export/import retain placement without
-a provider. Schema-4 installations use the compatible review above; all four
-preceding schema generations preserve exact JSON bytes and revisions.
+a provider.
 
 ## Hands and suspended equipment
 
@@ -167,19 +157,14 @@ commands cannot rewrite the hand state. Conflicting revisions remain explicit;
 uncertain writes retain the exact command and operation ID for Retry.
 
 Provider-free saved reading, printing and reviewed replacement transfer keep
-main/off-hand, grip and suspended-instance identity. Old characters do not gain
-default fields. The hand-state release preserved all five preceding schema-4
-generations through compatible review, including **Heal and update** for the
-placement-enabled package. The later condition upgrade extends that coverage to
-six generations with exact saved JSON and document revisions. Compact now uses
-the shared cards, Equipment workspace and mannequin; both Combat layouts share
-conditions.
+main/off-hand, grip and suspended-instance identity. Characters without hand
+state do not gain default fields.
 
 ## Automatic saving
 
 `dnd5e.character` 2.0.0 exposes `load`, `evaluate`, `save`, `preview` and `commit`
-using `character.v2` / `character-response.v2`. History, revision lookup,
-comparison and restoration are removed. Transfers contain the current character
+using `character.v2` / `character-response.v2`. There is no history, revision
+lookup, comparison or restoration. Transfers contain the current character
 only; there is no browser draft or frozen-import store.
 
 The worker checks the current revision, authenticates grants, evaluates mechanics
@@ -299,9 +284,7 @@ must survive the provider response. Exact command retries, stale-revision
 rejection and saved-state recovery use the existing command coordinator.
 Imports retain consumed allowances with external origin. Older providers that
 drop the ledger are incompatible: the saved projection, reading and export
-remain available, while mechanical edits require compatible rules. Prior
-schema-4 documents omit this field and pass the host's reviewed compatible
-schema update without rewriting their JSON or revision.
+remain available, while mechanical edits require compatible rules.
 
 The shared spell picker uses the existing wrapping control layout to separate
 each checkbox label from its borrowed rule-details control. Builder and Manage
@@ -388,7 +371,6 @@ creates or approves a replacement preview automatically.
 Leaving the record, authority changes, disabling the add-on or closing/reloading
 the page clears the transient handoff. Unsubmitted dialog fields and import text
 that has not reached approved commit are not character input checkpoints.
-Older hosts without this optional handle retain ordinary in-place save recovery.
 
 ## Source-defined size
 
@@ -449,8 +431,7 @@ reference, item/grant IDs, acquisition and notes; it does not change other
 allocations. Focus returns to that item's Move control after the action
 disappears. Existing uncertain-save exact retry and concurrency protection
 apply to the complete transition. Ordinary Move and worn-slot removal still
-preserve attunement; zero-quantity cleanup remains atomic. No schema or service
-version changes are required. Custom item mechanics still require an
+preserve attunement; zero-quantity cleanup remains atomic. Custom item mechanics still require an
 authenticated active DM grant; the UI never infers authority.
 
 New projections retain slot facts for provider-free display. Older projections
@@ -525,19 +506,15 @@ currency denomination. Equipment and spell toggles do not hide currency or
 identity. Labels use saved source evidence and class levels use the saved Engine
 projection; printing never requires a provider, recalculates or writes a revision.
 
-The host must support worker-only extensions before this ZIP is activated.
-Changing retention preserves the existing worker-authority schema identity.
-Pre-existing retained archives and historical installation backups are left
-untouched; the character service no longer exposes them or creates new entries.
-Live installation and any archive deletion remain separate operational actions.
+Character history retained in the host database from earlier builds is left
+untouched; the character service neither exposes it nor creates new entries.
 
 ## Profile notes and presentation
 
-Character notes are edited through the host profile. The sheet no longer renders
-a character Notes tab, editor, or printed notes section. Existing schema-4 notes
-and the versioned service remain compatible for saved data and transfer; this UI
-change does not erase existing character content. Item-specific notes remain
-part of inventory.
+Character notes are edited through the host profile. The sheet has no Notes
+tab, notes editor or printed notes section. Existing schema-4 notes and the
+versioned notes service remain for saved data and transfer. Item-specific notes
+remain part of inventory.
 
 ## Spell ownership, filtering and saved Combat details
 
