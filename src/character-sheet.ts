@@ -705,8 +705,10 @@ export function attackDetails(view: SheetView): HTMLElement {
   const attacks = panel(t("Attacks"));
   attacks.className = "dse-section";
   rows(sheet["weapons"]).forEach((weapon, index) => {
+    // An unarmed strike comes from the ruleset and has no weapon record.
     const path = "weapons." + index,
-      reference = { kind: "weapon", id: String(weapon["ref"]) };
+      ref = text(weapon["ref"]),
+      reference = ref ? { kind: "weapon", id: ref } : undefined;
     const row = styled(
       "div",
       "dse-attack",
