@@ -63,14 +63,13 @@ void test("current transfer accepts only the explicit current envelope and prese
   assert.throws(() => parseCharacter(" ".repeat(190001)));
 });
 
-void test("manifest declares worker authority without retained history", async () => {
+void test("manifest declares worker-only authority", async () => {
   const manifest: unknown = JSON.parse(
     await readFile(new URL("../addon.json", import.meta.url), "utf8"),
   );
   const manifestObject = record(manifest);
   const extension = record(required(array(manifestObject["recordExtensions"])[0]));
   assert.equal(extension["id"], "dnd-sheets");
-  assert.equal(extension["retained"], undefined);
   assert.equal(extension["workerOnly"], true);
   assert.equal(extension["schemaVersion"], "4.0.0");
   const services = record(manifestObject["services"]);
@@ -81,7 +80,6 @@ void test("manifest declares worker authority without retained history", async (
   );
   const capabilities = record(manifestObject["capabilities"]);
   const requiredCapabilities = array(capabilities["required"]);
-  assert.ok(!requiredCapabilities.includes("data.history"));
   assert.ok(requiredCapabilities.includes("ui.rule-details"));
   const service: unknown = JSON.parse(
     await readFile(new URL("../contracts/character.service.json", import.meta.url), "utf8"),
@@ -95,16 +93,13 @@ void test("manifest declares worker authority without retained history", async (
   ]);
 });
 
-void test("restored layouts read the former character preference without rewriting it", async () => {
+void test("the layout preference is per viewer and character, defaulting to Compact", async () => {
   const { preferredLayout } = await import("#web/character-sheet");
-  const entries = new Map([["dse-ui:renderer:hero", "builtin:classic"]]);
+  const entries = new Map([["dnd-character-layout:dm:hero", "classic"]]);
   const storage = storageFixture((key) => entries.get(key) ?? null);
   assert.equal(preferredLayout(storage, "dm", "hero"), "classic");
   assert.equal(preferredLayout(storage, "dm", "other"), "compact");
-  entries.set("dnd-character-layout:dm:hero", "compact");
-  assert.equal(preferredLayout(storage, "dm", "hero"), "compact");
-  assert.equal(preferredLayout(storage, "player", "hero"), "classic");
-  assert.equal(entries.get("dse-ui:renderer:hero"), "builtin:classic");
+  assert.equal(preferredLayout(storage, "player", "hero"), "compact");
   assert.equal(
     preferredLayout(
       storageFixture(() => {

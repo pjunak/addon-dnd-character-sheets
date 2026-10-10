@@ -169,7 +169,7 @@ only; there is no browser draft or frozen-import store.
 
 The worker checks the current revision, authenticates grants, evaluates mechanics
 and writes the latest inputs/projection through the host's ordinary transaction.
-The extension declares `workerOnly: true` without retention or `data.history`.
+The extension declares `workerOnly: true`.
 Optimistic revision numbers and the last operation ID protect concurrency and
 lost-response retries; they are not a browsable history. Normal host transaction
 bookkeeping remains part of database integrity.

@@ -72,13 +72,8 @@ function icon(path: string): SVGSVGElement {
 }
 export function preferredLayout(storage: Storage | undefined, actor: string, key: string): Layout {
   try {
-    const value =
-      storage?.getItem("dnd-character-layout:" + actor + ":" + key) ??
-      storage?.getItem("dse-ui:renderer:" + key) ??
-      storage?.getItem("dse-ui:layout:" + key) ??
-      storage?.getItem("dse-ui:layout") ??
-      storage?.getItem("dnd-character-layout:" + actor);
-    return value === "classic" || value === "builtin:classic" ? "classic" : "compact";
+    const value = storage?.getItem("dnd-character-layout:" + actor + ":" + key);
+    return value === "classic" ? "classic" : "compact";
   } catch {
     return "compact";
   }
