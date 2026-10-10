@@ -747,11 +747,20 @@ export function attackDetails(view: SheetView): HTMLElement {
   if (attacks.children.length === 1) attacks.append(styled("p", "dse-empty", t("No attacks yet.")));
   return attacks;
 }
+/** Reached class table values (Rage Damage, Martial Arts, …) as label/value pairs. */
+export function classValueRows(projection: Projection | undefined): [string, string][] {
+  return rows(projection?.sheet["classValues"]).map((row) => [
+    text(row["name"], String(row["key"])),
+    typeof row["value"] === "number" ? signed(row["value"]) : human(row["value"]),
+  ]);
+}
 export function resourceDetails(view: SheetView): HTMLElement {
   const t = translator(view.locale),
     sheet = view.projection?.sheet ?? {};
   const resources = rulesTarget(panel(t("Resources")), "resources");
   resources.className = "dse-section dse-resources";
+  for (const [name, value] of classValueRows(view.projection))
+    resources.append(styled("div", "dse-resource", el("span", name), el("strong", value)));
   for (const resource of rows(sheet["resources"])) {
     const key = String(resource["key"]),
       name = text(resource["name"], key);

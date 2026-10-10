@@ -3,6 +3,7 @@ import {
   abilityRail,
   attackDetails,
   castingDetails,
+  classValueRows,
   currency,
   explorationDetails,
   savedRule,
@@ -473,6 +474,15 @@ export function limitedUses(view: SheetView): HTMLElement {
     root = rulesTarget(panel(t("Limited uses")), "resources"),
     list = styled("div", "dsc-uses");
   root.classList.add("dsc-uses-panel");
+  for (const [name, value] of classValueRows(view.projection))
+    list.append(
+      styled(
+        "div",
+        "dsc-use",
+        styled("span", "dsc-use-name", name),
+        styled("span", "dsc-use-value", value),
+      ),
+    );
   for (const resource of rows(sheet["resources"])) {
     const key = String(resource["key"]),
       name = text(resource["name"], key),
