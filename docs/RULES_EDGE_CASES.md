@@ -282,9 +282,9 @@ edits cannot add, erase or rewrite it; an authorized replacement changes only
 the selected feat/spell slot and appends one entry. Every other authored value
 must survive the provider response. Exact command retries, stale-revision
 rejection and saved-state recovery use the existing command coordinator.
-Imports retain consumed allowances with external origin. Older providers that
-drop the ledger are incompatible: the saved projection, reading and export
-remain available, while mechanical edits require compatible rules.
+Imports retain consumed allowances with external origin. A provider that drops
+the ledger is incompatible: the saved projection, reading and export remain
+available, while mechanical edits require compatible rules.
 
 The shared spell picker uses the existing wrapping control layout to separate
 each checkbox label from its borrowed rule-details control. Builder and Manage
@@ -434,9 +434,9 @@ apply to the complete transition. Ordinary Move and worn-slot removal still
 preserve attunement; zero-quantity cleanup remains atomic. Custom item mechanics still require an
 authenticated active DM grant; the UI never infers authority.
 
-New projections retain slot facts for provider-free display. Older projections
-fall back only to their saved `armorType` evidence, never a replacement live
-catalog or a special item ID. Unavailable/changed rules keep mechanical editing
+Projections retain slot facts for provider-free display. An item without a
+saved slot (for example one added while rules were unavailable) falls back only
+to its saved `armorType` evidence, never a live catalog or a special item ID. Unavailable/changed rules keep mechanical editing
 disabled until the existing recovery/adoption flow completes.
 
 Inventory controls use stable per-item focus keys. The shared dialog helper
@@ -453,8 +453,6 @@ stored; mechanical changes stay disabled. Spell, sheet and projection details sh
 one adapter for the host's closed saved-evidence contract. Stored metadata and
 spell facts stay in the projection; detail controls receive only their reference,
 name, summary and hash. This preserves readable spell labels without a provider.
-The versioned notes service remains
-compatible for existing clients, but the sheet offers no character notes editor.
 Loading never adopts changed rules. Tools provides explicit adoption.
 A malformed response, incompatible contract version or broker validation failure
 on load returns the unchanged saved state as unavailable. Provider validation
@@ -506,15 +504,12 @@ currency denomination. Equipment and spell toggles do not hide currency or
 identity. Labels use saved source evidence and class levels use the saved Engine
 projection; printing never requires a provider, recalculates or writes a revision.
 
-Character history retained in the host database from earlier builds is left
-untouched; the character service neither exposes it nor creates new entries.
-
 ## Profile notes and presentation
 
 Character notes are edited through the host profile. The sheet has no Notes
-tab, notes editor or printed notes section. Existing schema-4 notes and the
-versioned notes service remain for saved data and transfer. Item-specific notes
-remain part of inventory.
+tab, notes editor or printed notes section; the stored `inputs.notes` field
+stays in the schema and transfers unchanged. Item-specific notes remain part of
+inventory.
 
 ## Spell ownership, filtering and saved Combat details
 

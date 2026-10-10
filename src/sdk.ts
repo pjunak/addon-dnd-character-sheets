@@ -51,7 +51,7 @@ export interface AddonContext {
 
 export interface RecordContributionHostContext {
   readonly kind: "campaign-record";
-  readonly locale?: "en" | "cs";
+  readonly locale: "en" | "cs";
   readonly collection: string;
   readonly key: string;
   readonly revision: number;
