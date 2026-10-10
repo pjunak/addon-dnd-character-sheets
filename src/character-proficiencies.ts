@@ -19,7 +19,8 @@ const categoryNames: Record<string, Record<string, string>> = {
   weapon: {
     simple: "Simple weapons",
     martial: "Martial weapons",
-    "martial (finesse)": "Martial weapons (finesse)",
+    "martial-light": "Martial weapons with the Light property",
+    "martial-finesse-or-light": "Martial weapons with the Finesse or Light property",
   },
 };
 const abilityOrder = Object.keys(abilityNames);

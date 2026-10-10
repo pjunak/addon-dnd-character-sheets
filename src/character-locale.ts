@@ -14,7 +14,6 @@ export const armorCategoryLabels: Readonly<Record<string, string>> = {
   medium: "Medium armor",
   heavy: "Heavy armor",
   shield: "Shields",
-  shields: "Shields",
 };
 
 export function builderLabel(

@@ -26,7 +26,7 @@ void test("saved training shows only confirmed saves and skills and separates Ex
       history: "future-mode",
     },
     armor: ["light", "medium", "shield"],
-    weapons: ["simple", "martial (finesse)"],
+    weapons: ["simple", "martial-finesse-or-light"],
     tools: [],
     languages: ["common"],
   });
@@ -48,7 +48,7 @@ void test("saved training shows only confirmed saves and skills and separates Ex
   );
   assert.deepEqual(
     group(saved, "weapons").entries.map((row) => row.name),
-    ["Simple weapons", "Martial weapons (finesse)"],
+    ["Simple weapons", "Martial weapons with the Finesse or Light property"],
   );
   assert.equal(firstEntry(saved, "saves").path, "saves.STR.total");
   assert.equal(firstEntry(saved, "expertise").path, "skills.perception.total");
