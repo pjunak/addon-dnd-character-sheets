@@ -1,6 +1,6 @@
 module github.com/pjunak/addon-dnd-character-sheets
 
-go 1.27.1
+go 1.27.2
 
 require (
 	github.com/pjunak/addon-dnd-engine v0.0.0-20261004184610-9b5b3a69b8cc
