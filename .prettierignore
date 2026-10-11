@@ -4,3 +4,4 @@ web/
 worker/
 dist/
 node_modules/
+src/codex/

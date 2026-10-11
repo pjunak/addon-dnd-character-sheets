@@ -78,9 +78,15 @@ void test("manifest declares worker-only authority", async () => {
     required(consumes.find((service) => service["contract"] === "dnd5e.rules-engine"))["range"],
     "^5.0.0",
   );
+  // The UI reaches its own worker with services.own, not as a consumer.
+  assert.equal(
+    consumes.some((service) => service["contract"] === "dnd5e.character"),
+    false,
+  );
   const capabilities = record(manifestObject["capabilities"]);
   const requiredCapabilities = array(capabilities["required"]);
   assert.ok(requiredCapabilities.includes("ui.rule-details"));
+  assert.ok(requiredCapabilities.includes("services.own"));
   const service: unknown = JSON.parse(
     await readFile(new URL("../contracts/character.service.json", import.meta.url), "utf8"),
   );

@@ -3,7 +3,7 @@
   "packageFormat": 1,
   "id": "dnd-sheets",
   "name": "D&D Character Sheets",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Reversible character builds, tracked DM grants and explained rules.",
   "license": "MIT",
   "compatibility": {
@@ -16,7 +16,8 @@
       "ui.contributions",
       "ui.controls.v1",
       "worker.native",
-      "ui.rule-details"
+      "ui.rule-details",
+      "services.own"
     ],
     "optional": []
   },
@@ -78,13 +79,6 @@
         "cardinality": "one",
         "required": false,
         "selection": "operator"
-      },
-      {
-        "contract": "dnd5e.character",
-        "range": "^3.0.0",
-        "cardinality": "many",
-        "required": false,
-        "selection": "all-compatible"
       }
     ],
     "provides": [

@@ -76,21 +76,20 @@ export function catalogRecord(
   return index.get(id);
 }
 
+type Subscribe = NonNullable<AddonContext["data"]["subscribe"]>;
+
 export class CharacterClient {
   private readonly service: ServiceHandle;
-  private readonly providerId: string;
   private readonly engine: ServiceHandle;
   readonly signal: AbortSignal;
-  readonly subscribe: AddonContext["data"]["subscribe"];
+  readonly subscribe: Subscribe;
   constructor(
     service: ServiceHandle,
-    providerId: string,
     engine: ServiceHandle,
     signal: AbortSignal,
-    subscribe: AddonContext["data"]["subscribe"],
+    subscribe: Subscribe,
   ) {
     this.service = service;
-    this.providerId = providerId;
     this.engine = engine;
     this.signal = signal;
     this.subscribe = subscribe;
@@ -99,7 +98,7 @@ export class CharacterClient {
     const result = await this.service.call<Response>(
       method,
       { ...request, contractVersion: "character.v3" },
-      { providerAddonId: this.providerId, deadlineMs: 30000, signal: this.signal },
+      { deadlineMs: 30000, signal: this.signal },
     );
     if (result.contractVersion !== "character-response.v3" || result.key !== request.key)
       throw new Error("The character service returned an incompatible response.");
@@ -130,26 +129,21 @@ export class CharacterClient {
 }
 export async function connectCharacter(context: AddonContext): Promise<CharacterClient> {
   const [service, engine] = await Promise.all([
-    context.services.connect("dnd5e.character", {
-      range: "^3.0.0",
-      cardinality: "many",
-      includeOwn: true,
-      signal: context.signal,
-    }),
+    context.services.own("dnd5e.character", { signal: context.signal }),
     context.services.connect("dnd5e.rules-engine", {
       range: "^5.0.0",
       cardinality: "one",
       signal: context.signal,
     }),
   ]);
-  if (!service.providers.some((provider) => provider.addonId === context.addon.id))
-    throw new Error("The character worker is unavailable.");
+  if (!service.available) throw new Error("The character worker is unavailable.");
+  const subscribe = context.data.subscribe;
   return new CharacterClient(
     service,
-    context.addon.id,
     engine,
     context.signal,
-    (listener, options) => context.data.subscribe(listener, options),
+    // Without the host's live event stream, sheets refresh only when reopened.
+    subscribe ? (listener, options) => subscribe(listener, options) : () => () => undefined,
   );
 }
 
