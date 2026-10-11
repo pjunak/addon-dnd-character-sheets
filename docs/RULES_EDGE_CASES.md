@@ -15,6 +15,29 @@ an explicit alternative that clears current sheet saves. Rolling a package back
 after new values are saved may be blocked if the older schema cannot represent
 them.
 
+### Changing the stored format
+
+Renaming, removing or retyping a saved field must not clear players' sheets.
+Carry them forward instead:
+
+1. Copy the current `contracts/sheet-state.schema.json` to
+   `contracts/legacy/sheet-state-<old version>.schema.json`.
+2. In `internal/character/upgrade.go`, register an `Upgrade` keyed by the old
+   `schemaVersion` that turns an old JSON object into the new one and sets the
+   new `schemaVersion`.
+3. Change the Go types, bump `SchemaVersion` (and the manifest's
+   `schemaVersion`), then build. The generated stored schema accepts the
+   current format and every frozen legacy format.
+4. Install the update with **Heal and update**: existing sheets still validate,
+   so the host keeps them. The worker upgrades each sheet when it loads it and
+   saves it in the new format.
+5. Drop a legacy schema and its upgrade only once no saved sheet can still use
+   it (for example after every character has been opened and saved, or a later
+   release).
+
+Unknown formats still fail without partial normalization; `upgrade_test.go`
+covers chained upgrades and rejection.
+
 ## Authored conditions
 
 Optional `inputs.play.conditions` stores the Engine-owned `{id,level}` DTO.

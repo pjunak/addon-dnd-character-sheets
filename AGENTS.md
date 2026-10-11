@@ -24,7 +24,9 @@ friendly and the code clear. Old formats and extra hardening are low priority.
   `article-section` and never replaces the host article or reads host DOM.
 - `internal/character/model.go` and the Engine's public `character` types own
   the closed stored schema. Generate schemas and TypeScript types through the
-  build; unsupported formats fail without partial normalization.
+  build; unsupported formats fail without partial normalization. Never clear
+  saved sheets for a format change: add an upgrade instead
+  ([how](docs/RULES_EDGE_CASES.md#changing-the-stored-format)).
 - The native `internal/character` coordinator is the only writer. It
   authenticates DM commands and saves current state automatically, with
   optimistic revisions. Imports use exact replacement previews. There is no

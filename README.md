@@ -142,7 +142,9 @@ schema-5 extension. Its `workerOnly` declaration preserves authorization without
 retaining character snapshots. A package that adds optional fields changes the
 stored schema hash and goes through the host's
 [guided saved-data review](docs/RULES_EDGE_CASES.md#schema-updates); existing
-characters keep their exact inputs and saved projection.
+characters keep their exact inputs and saved projection. An incompatible format
+change keeps sheets too: the worker upgrades older saved formats when it loads
+them ([how](docs/RULES_EDGE_CASES.md#changing-the-stored-format)).
 
 Autosave serializes requests and rebases disjoint concurrent edits. Rejected
 edits stay on the page with a reason; Retry confirms an uncertain save before

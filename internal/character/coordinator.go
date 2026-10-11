@@ -225,8 +225,8 @@ func (c *Coordinator) load(ctx context.Context, meta *workerrpc.Meta, key string
 		}
 		return nil, 0, err
 	}
-	var state State
-	if decode(document.Value, &state) != nil || state.SchemaVersion != SchemaVersion {
+	state, err := decodeState(document.Value)
+	if err != nil {
 		return nil, 0, failure(workerrpc.KindValidationFailed, "This saved sheet uses an unsupported format and cannot be edited.")
 	}
 	return &state, document.Revision, nil
