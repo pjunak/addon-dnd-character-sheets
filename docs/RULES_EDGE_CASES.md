@@ -1,12 +1,12 @@
 # Character saves and failure semantics
 
 The coordinator owns the current `dnd-sheets` extension for each core character
-lifetime. The stored schema is 4.0.0; its optional authored play fields are
+lifetime. The stored schema is 5.0.0; its optional authored play fields are
 described below. The core profile, portrait and relationships are host-owned.
 
 ## Schema updates
 
-New optional fields extend schema 4.0.0 without changing its version, but each
+New optional fields extend schema 5.0.0 without changing its version, but each
 changes the closed schema's hash. Installing such a package goes through the
 host's [guided update confirmation](https://github.com/pjunak/ttrpg-codex/blob/main/docs/SELF_HOSTING.md#add-on-installation):
 choose **Heal and update** to keep existing characters with their exact JSON
@@ -162,8 +162,8 @@ state do not gain default fields.
 
 ## Automatic saving
 
-`dnd5e.character` 2.0.0 exposes `load`, `evaluate`, `save`, `preview` and `commit`
-using `character.v2` / `character-response.v2`. There is no history, revision
+`dnd5e.character` 3.0.0 exposes `load`, `evaluate`, `save`, `preview` and `commit`
+using `character.v3` / `character-response.v3`. There is no history, revision
 lookup, comparison or restoration. Transfers contain the current character
 only; there is no browser draft or frozen-import store.
 
@@ -260,7 +260,7 @@ changes, item rebinding, provider restarts and source-policy changes. A provider
 restart alone keeps the rules identity; a policy change requires explicit
 adoption. Replacing the engine with an incompatible service version or response
 schema leaves the saved state, including spent casts, untouched. A sheet-schema
-change is blocked before activation; worker-only writes and the exact schema-4
+change is blocked before activation; worker-only writes and the exact schema-5
 state stay protected, including in a portable backup.
 
 ## Class-granted choices and spell pickers
@@ -457,7 +457,6 @@ Loading never adopts changed rules. Tools provides explicit adoption.
 A malformed response, incompatible contract version or broker validation failure
 on load returns the unchanged saved state as unavailable. Provider validation
 errors on edits remain errors; they cannot masquerade as a successful save.
-Offline notes retain the exact accepted projection and rules identity.
 
 If an autosave discovers changed rules, its rejected response updates the rules
 status without replacing pending input or advancing the opening revision.
@@ -506,10 +505,8 @@ projection; printing never requires a provider, recalculates or writes a revisio
 
 ## Profile notes and presentation
 
-Character notes are edited through the host profile. The sheet has no Notes
-tab, notes editor or printed notes section; the stored `inputs.notes` field
-stays in the schema and transfers unchanged. Item-specific notes remain part of
-inventory.
+Character notes are edited through the host profile; the sheet stores no
+character-level notes. Item-specific notes remain part of inventory.
 
 ## Spell ownership, filtering and saved Combat details
 

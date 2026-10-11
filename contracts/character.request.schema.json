@@ -720,10 +720,6 @@
             "null"
           ]
         },
-        "notes": {
-          "maxLength": 30000,
-          "type": "string"
-        },
         "play": {
           "additionalProperties": false,
           "properties": {
@@ -1051,8 +1047,7 @@
       "required": [
         "build",
         "play",
-        "grants",
-        "notes"
+        "grants"
       ],
       "type": "object"
     },
@@ -1070,10 +1065,6 @@
     },
     "reauthorizeGrants": {
       "type": "boolean"
-    },
-    "summary": {
-      "maxLength": 30000,
-      "type": "string"
     },
     "token": {
       "maxLength": 30000,

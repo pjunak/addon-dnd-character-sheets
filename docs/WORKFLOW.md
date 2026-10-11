@@ -96,8 +96,8 @@ senses, feats and traits remain accessible through disclosures on Sheet.
 
 Inventory,
 equipment, currency, HP, spells and resources remain editable in their ordinary
-tabs, without an edit-mode toggle. Character notes belong to the host profile and have no sheet tab or printed sheet section.
-Saved notes remain in the stored schema and transfers.
+tabs, without an edit-mode toggle. Character notes belong to the host profile;
+the sheet neither stores nor prints them.
 
 <a id="transfer-and-printing"></a>
 <a id="authoritative-mutation-path"></a>
@@ -105,8 +105,8 @@ Saved notes remain in the stored schema and transfers.
 ## Saving and transfer
 
 There are no character history, undo, restore, draft, or manual save controls.
-The native worker provides `dnd5e.character` 2.0.0 and writes only current
-schema-4 state. The host's `workerOnly` extension policy keeps browsers from
+The native worker provides `dnd5e.character` 3.0.0 and writes only current
+schema-5 state. The host's `workerOnly` extension policy keeps browsers from
 bypassing authenticated commands without retaining snapshots.
 
 The engine remains stateless. `guidance.canSave` distinguishes a legal incomplete

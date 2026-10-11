@@ -46,13 +46,13 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 		return nil, failure(workerrpc.KindUnauthorized, "An authenticated character editor is required.")
 	}
 	var request Request
-	if len(rpc.Params) > 190000 || decode(rpc.Params, &request) != nil || request.ContractVersion != "character.v2" || request.Key == "" || len(request.Key) > 200 || request.ExpectedRevision < 0 {
+	if len(rpc.Params) > 190000 || decode(rpc.Params, &request) != nil || request.ContractVersion != "character.v3" || request.Key == "" || len(request.Key) > 200 || request.ExpectedRevision < 0 {
 		return nil, failure(workerrpc.KindInvalidRequest, "Character request is invalid.")
 	}
 	if request.Change != nil && request.Operation != "play" {
 		return nil, failure(workerrpc.KindInvalidRequest, "Play commands require a play operation.")
 	}
-	response := Response{ContractVersion: "character-response.v2", Status: "ready", Key: request.Key, ActorID: rpc.Meta.Actor.ID, Role: rpc.Meta.Actor.Role}
+	response := Response{ContractVersion: "character-response.v3", Status: "ready", Key: request.Key, ActorID: rpc.Meta.Actor.ID, Role: rpc.Meta.Actor.Role}
 	method := strings.TrimPrefix(rpc.Method, "service/"+Contract+"/")
 	switch method {
 	case "load", "evaluate", "preview", "commit", "save":
@@ -89,18 +89,7 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 	if method != "load" || input.Play.AsOf == "" {
 		input.Play.AsOf = c.now().UTC().Format(time.RFC3339)
 	}
-	// Notes have no mechanical dependency. Retain the exact accepted projection
-	// and rules identity even when its provider has been disabled or replaced.
-	offline := request.Operation == "notes" && state != nil
-	var evaluation evaluated
-	var rules RulesContext
-	if offline {
-		input.Play.AsOf = state.Inputs.Play.AsOf
-		evaluation.Evaluation = model.Result{ContractVersion: model.ContractVersion, Inputs: input, Sheet: state.Projection.Sheet, Explanations: state.Projection.Explanations, Evidence: state.Projection.Evidence, Issues: state.Projection.Issues, Ready: true}
-		rules = state.Rules
-	} else {
-		evaluation, rules, err = c.evaluate(ctx, rpc.Meta, input, request.Change)
-	}
+	evaluation, rules, err := c.evaluate(ctx, rpc.Meta, input, request.Change)
 	if err != nil {
 		var rpcError *workerrpc.RPCError
 		rejected := method != "load" && errors.As(err, &rpcError) && rpcError.Data != nil && (rpcError.Data.Kind == workerrpc.KindInvalidRequest || rpcError.Data.Kind == workerrpc.KindValidationFailed)
@@ -176,8 +165,8 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 	if method == "load" || method == "evaluate" {
 		return response, nil
 	}
-	if !operationPattern.MatchString(request.OperationID) || strings.TrimSpace(request.Summary) == "" || len(request.Summary) > 1000 {
-		return nil, failure(workerrpc.KindInvalidRequest, "A change ID and a brief description are required.")
+	if !operationPattern.MatchString(request.OperationID) {
+		return nil, failure(workerrpc.KindInvalidRequest, "A change ID is required.")
 	}
 	next := State{SchemaVersion: SchemaVersion, Inputs: evaluation.Evaluation.Inputs, Projection: Projection{Sheet: evaluation.Evaluation.Sheet, Explanations: evaluation.Evaluation.Explanations, Evidence: evaluation.Evaluation.Evidence, Issues: evaluation.Evaluation.Issues}, Rules: rules, OperationID: request.OperationID}
 	// Document limits include the saved explanation/evidence, not the transient
@@ -209,7 +198,7 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 		return nil, err
 	}
 	expires := c.now().Add(15 * time.Minute)
-	p := preview{Key: request.Key, ActorID: rpc.Meta.Actor.ID, Role: rpc.Meta.Actor.Role, Generation: rpc.Meta.Generation, OperationID: request.OperationID, Revision: revision, Expires: expires, State: next, Offline: offline}
+	p := preview{Key: request.Key, ActorID: rpc.Meta.Actor.ID, Role: rpc.Meta.Actor.Role, Generation: rpc.Meta.Generation, OperationID: request.OperationID, Revision: revision, Expires: expires, State: next}
 	c.mu.Lock()
 	for key, value := range c.previews {
 		if !c.now().Before(value.Expires) {
@@ -251,15 +240,6 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 		r.Inputs = &proposed
 	}
 	switch r.Operation {
-	case "notes":
-		if r.Inputs != nil {
-			proposed := *r.Inputs
-			proposed.Notes = input.Notes
-			if !bytes.Equal(raw(proposed), raw(input)) {
-				return input, failure(workerrpc.KindInvalidRequest, "Save build or play changes separately from notes.")
-			}
-			input.Notes = r.Inputs.Notes
-		}
 	case "build", "inventory", "spells", "adopt-rules":
 		if r.Inputs != nil {
 			input = *r.Inputs
@@ -390,7 +370,7 @@ func (c *Coordinator) evaluate(ctx context.Context, meta *workerrpc.Meta, input 
 		return evaluated{}, RulesContext{}, err
 	}
 	var value evaluated
-	if decode(result.Result, &value) != nil || value.ContractVersion != "rules-character-response.v1" || value.Evaluation.ContractVersion != model.ContractVersion || !reflect.DeepEqual(input.Play.Inspiration, value.Evaluation.Inputs.Play.Inspiration) || !slices.Equal(input.Play.Conditions, value.Evaluation.Inputs.Play.Conditions) || !slices.Equal(input.Play.QuickUse, value.Evaluation.Inputs.Play.QuickUse) || !preservesEquipment(input.Play, value.Evaluation.Inputs.Play, change) || !preservesClassReplacements(input, value.Evaluation.Inputs, change) {
+	if decode(result.Result, &value) != nil || value.ContractVersion != "rules-character-response.v2" || value.Evaluation.ContractVersion != model.ContractVersion || !reflect.DeepEqual(input.Play.Inspiration, value.Evaluation.Inputs.Play.Inspiration) || !slices.Equal(input.Play.Conditions, value.Evaluation.Inputs.Play.Conditions) || !slices.Equal(input.Play.QuickUse, value.Evaluation.Inputs.Play.QuickUse) || !preservesEquipment(input.Play, value.Evaluation.Inputs.Play, change) || !preservesClassReplacements(input, value.Evaluation.Inputs, change) {
 		return value, RulesContext{}, failure(workerrpc.KindValidationFailed, "Rules returned an incompatible character result.")
 	}
 	return value, RulesContext{EngineID: result.ProviderAddonID, EngineVersion: result.ProviderContractVersion, EngineGeneration: result.ProviderGeneration, Identity: value.Identity}, nil
@@ -438,16 +418,14 @@ func (c *Coordinator) commit(ctx context.Context, meta *workerrpc.Meta, r Reques
 			}
 		}
 	}
-	if !p.Offline {
-		evaluation, rules, err := c.evaluate(ctx, meta, p.State.Inputs, nil)
-		if err != nil {
-			return response, err
-		}
-		if !reflect.DeepEqual(rules, p.State.Rules) || !saveable(evaluation.Evaluation) || !reflect.DeepEqual(raw(evaluation.Evaluation.Sheet), raw(p.State.Projection.Sheet)) {
-			response.Status = "rules-changed"
-			response.Message = "Rules changed during review. Review the character again."
-			return response, nil
-		}
+	evaluation, rules, err := c.evaluate(ctx, meta, p.State.Inputs, nil)
+	if err != nil {
+		return response, err
+	}
+	if !reflect.DeepEqual(rules, p.State.Rules) || !saveable(evaluation.Evaluation) || !reflect.DeepEqual(raw(evaluation.Evaluation.Sheet), raw(p.State.Projection.Sheet)) {
+		response.Status = "rules-changed"
+		response.Message = "Rules changed during review. Review the character again."
+		return response, nil
 	}
 	return c.persist(ctx, meta, p.Key, p.Revision, p.State, response)
 }

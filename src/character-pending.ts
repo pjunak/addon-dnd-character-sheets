@@ -40,7 +40,7 @@ export function readCharacterPending(value: unknown): CharacterPending {
   const integer = (v: unknown): boolean => Number.isSafeInteger(v) && Number(v) >= 0;
   const input = (v: unknown): void => {
     parseCharacter(
-      JSON.stringify({ format: "dnd-character.v1", schemaVersion: "4.0.0", inputs: v }),
+      JSON.stringify({ format: "dnd-character.v2", schemaVersion: "5.0.0", inputs: v }),
     );
   };
   const request = (v: unknown): void => {

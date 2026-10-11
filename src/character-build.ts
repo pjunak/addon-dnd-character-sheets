@@ -39,7 +39,7 @@ export interface BuildView {
   changed(): void;
   refresh(): void;
   navigate?(tab: string): void;
-  act?(change: Record<string, unknown>, summary: string): Promise<void>;
+  act?(change: Record<string, unknown>): Promise<void>;
 }
 const options = (records: readonly CatalogRecord[]): Option[] =>
   records.map((record) => ({

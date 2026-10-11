@@ -21,7 +21,7 @@ void test("provider option labels translate only explicit UI keys", async () => 
 
 void test("current transfer accepts only the explicit current envelope and preserves authored inputs", () => {
   const inputs = blank();
-  inputs.notes = "Mira — a new beginning";
+  inputs.play.currency.gp = 12;
   inputs.play.inspiration = false;
   inputs.play.rolls = [
     { id: "roll-one", resource: "hit-dice-d10", die: 10, result: 6, at: "2026-09-11T00:00:00Z" },
@@ -41,11 +41,11 @@ void test("current transfer accepts only the explicit current envelope and prese
   inputs.play.containers = [{ id: "pack", name: "Bag" }];
   required(inputs.play.inventory[0]).containerId = "pack";
   const state = {
-    schemaVersion: "4.0.0",
+    schemaVersion: "5.0.0",
     inputs,
     rules: {
       engineId: "rules",
-      engineVersion: "4.0.0",
+      engineVersion: "5.0.0",
       engineGeneration: "generation",
       identity: {},
     },
@@ -56,8 +56,8 @@ void test("current transfer accepts only the explicit current envelope and prese
   for (const value of [
     inputs,
     { v: 3 },
-    { format: "dnd-character.v1", schemaVersion: "3.0.0", inputs },
-    { format: "dnd-character.v1", schemaVersion: "4.0.0", inputs, admin: true },
+    { format: "dnd-character.v1", schemaVersion: "4.0.0", inputs },
+    { format: "dnd-character.v2", schemaVersion: "5.0.0", inputs, admin: true },
   ])
     assert.throws(() => parseCharacter(JSON.stringify(value)));
   assert.throws(() => parseCharacter(" ".repeat(190001)));
@@ -71,12 +71,12 @@ void test("manifest declares worker-only authority", async () => {
   const extension = record(required(array(manifestObject["recordExtensions"])[0]));
   assert.equal(extension["id"], "dnd-sheets");
   assert.equal(extension["workerOnly"], true);
-  assert.equal(extension["schemaVersion"], "4.0.0");
+  assert.equal(extension["schemaVersion"], "5.0.0");
   const services = record(manifestObject["services"]);
   const consumes = array(services["consumes"]).map(record);
   assert.equal(
     required(consumes.find((service) => service["contract"] === "dnd5e.rules-engine"))["range"],
-    "^4.0.0",
+    "^5.0.0",
   );
   const capabilities = record(manifestObject["capabilities"]);
   const requiredCapabilities = array(capabilities["required"]);
@@ -116,12 +116,12 @@ void test("autosave rebases disjoint fields and rejects overlapping changes", ()
   const base = blank(),
     local = structuredClone(base),
     remote = structuredClone(base);
-  local.notes = "Local notes";
+  local.play.currency.gp = 7;
   remote.play.hp = 5;
   const merged = mergeCharacter(base, local, remote);
-  assert.equal(required(merged).notes, "Local notes");
+  assert.equal(required(merged).play.currency.gp, 7);
   assert.equal(required(merged).play.hp, 5);
-  remote.notes = "Remote notes";
+  remote.play.currency.gp = 9;
   assert.equal(mergeCharacter(base, local, remote), undefined);
   const same = mergeCharacter(base, local, local);
   assert.deepEqual(same, local);
@@ -141,14 +141,14 @@ void test("autosave rebases disjoint fields and rejects overlapping changes", ()
   savedBase.play.inventory = [goOrder(inventoryItem("sword"))];
   const localEdit = structuredClone(savedBase);
   localEdit.play.inventory = [browserOrder(inventoryItem("sword"))];
-  localEdit.notes = "Local notes";
+  localEdit.play.currency.gp = 7;
   const remoteSaved = structuredClone(savedBase);
   remoteSaved.play.inventory.push(goOrder(inventoryItem("shield")));
   const rebased = required(mergeCharacter(savedBase, localEdit, remoteSaved));
-  assert.equal(rebased.notes, "Local notes");
+  assert.equal(rebased.play.currency.gp, 7);
   assert.equal(rebased.play.inventory.length, 2);
   local.play.inventory = [inventoryItem("local")];
-  remote.notes = base.notes;
+  delete remote.play.currency.gp;
   remote.play.inventory = [inventoryItem("remote")];
   assert.equal(mergeCharacter(base, local, remote), undefined);
 });
@@ -171,7 +171,7 @@ void test("quick-use order merges only disjoint edits and never merges competing
     removed = structuredClone(pinned),
     other = structuredClone(pinned);
   delete removed.play.quickUse;
-  other.notes = "Keep this";
+  other.play.currency.gp = 3;
   assert.equal(
     Object.hasOwn(required(mergeCharacter(pinned, removed, other)).play, "quickUse"),
     false,
@@ -196,19 +196,19 @@ void test("Inspiration merges disjoint edits and preserves explicit false versus
     spent = structuredClone(authored),
     other = structuredClone(authored);
   spent.play.inspiration = false;
-  other.notes = "Keep this";
+  other.play.currency.gp = 3;
   assert.equal(required(mergeCharacter(authored, spent, other)).play.inspiration, false);
 });
 
-void test("condition edits rebase independent notes and never merge competing condition lists", () => {
+void test("condition edits rebase independent fields and never merge competing condition lists", () => {
   const base = blank(),
     local = structuredClone(base),
     remote = structuredClone(base);
   local.play.conditions = [{ id: "fatigue", level: 2 }];
-  remote.notes = "Other editor";
+  remote.play.currency.gp = 4;
   const merged = mergeCharacter(base, local, remote);
   assert.deepEqual(required(merged).play.conditions, local.play.conditions);
-  assert.equal(required(merged).notes, remote.notes);
+  assert.equal(required(merged).play.currency.gp, 4);
   remote.play.conditions = [{ id: "held", level: 1 }];
   assert.equal(mergeCharacter(base, local, remote), undefined);
   remote.play.conditions = structuredClone(local.play.conditions);

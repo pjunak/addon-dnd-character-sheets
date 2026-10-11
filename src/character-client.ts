@@ -48,7 +48,6 @@ export function blank(): Inputs {
       asOf: "",
     },
     grants: [],
-    notes: "",
   };
 }
 export interface CatalogRecord {
@@ -99,10 +98,10 @@ export class CharacterClient {
   async call(method: string, request: Omit<Request, "contractVersion">): Promise<Response> {
     const result = await this.service.call<Response>(
       method,
-      { ...request, contractVersion: "character.v2" },
+      { ...request, contractVersion: "character.v3" },
       { providerAddonId: this.providerId, deadlineMs: 30000, signal: this.signal },
     );
-    if (result.contractVersion !== "character-response.v2" || result.key !== request.key)
+    if (result.contractVersion !== "character-response.v3" || result.key !== request.key)
       throw new Error("The character service returned an incompatible response.");
     return result;
   }
@@ -132,13 +131,13 @@ export class CharacterClient {
 export async function connectCharacter(context: AddonContext): Promise<CharacterClient> {
   const [service, engine] = await Promise.all([
     context.services.connect("dnd5e.character", {
-      range: "^2.0.0",
+      range: "^3.0.0",
       cardinality: "many",
       includeOwn: true,
       signal: context.signal,
     }),
     context.services.connect("dnd5e.rules-engine", {
-      range: "^4.0.0",
+      range: "^5.0.0",
       cardinality: "one",
       signal: context.signal,
     }),
@@ -158,8 +157,8 @@ const transferLimit = 1000000;
 export function exportCharacter(state: State): string {
   const body = JSON.stringify(
     {
-      format: "dnd-character.v1",
-      schemaVersion: "4.0.0",
+      format: "dnd-character.v2",
+      schemaVersion: "5.0.0",
       inputs: state.inputs,
       savedRules: state.rules,
       savedProjection: state.projection,
@@ -176,21 +175,16 @@ export function parseCharacter(body: string): Inputs {
     throw new Error("This character file exceeds the import limit.");
   const envelope = object(JSON.parse(body));
   if (
-    envelope["format"] !== "dnd-character.v1" ||
-    envelope["schemaVersion"] !== "4.0.0" ||
+    envelope["format"] !== "dnd-character.v2" ||
+    envelope["schemaVersion"] !== "5.0.0" ||
     Object.keys(envelope).some(
       (key) =>
         !["format", "schemaVersion", "inputs", "savedRules", "savedProjection"].includes(key),
     )
   )
-    throw new Error("Choose a current character export without history.");
+    throw new Error("Choose a current character export.");
   const input = object(envelope["inputs"]);
-  if (
-    !input["build"] ||
-    !input["play"] ||
-    !Array.isArray(input["grants"]) ||
-    typeof input["notes"] !== "string"
-  )
+  if (!input["build"] || !input["play"] || !Array.isArray(input["grants"]))
     throw new Error("The character export is incomplete.");
   if (new TextEncoder().encode(JSON.stringify(input)).length > 180000)
     throw new Error("The character inputs exceed the import limit.");

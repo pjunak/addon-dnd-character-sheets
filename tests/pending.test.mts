@@ -6,7 +6,7 @@ import { readCharacterPending } from "#web/character-pending";
 function pending() {
   const inputs = blank(),
     base = blank();
-  inputs.notes = "Unconfirmed";
+  inputs.play.currency.gp = 1;
   return {
     version: "character-pending.v1",
     key: "hero",
@@ -36,9 +36,9 @@ void test("pending input keeps its base, queued version and original uncertain r
   const original = pending(),
     value = readCharacterPending(original);
   assert.deepEqual(value, original);
-  value.inputs.notes = "Newer";
-  value.attempt.request.inputs.notes = "Changed";
-  assert.equal(original.inputs.notes, "Unconfirmed");
+  value.inputs.play.currency.gp = 2;
+  value.attempt.request.inputs.play.currency.gp = 3;
+  assert.equal(original.inputs.play.currency.gp, 1);
   assert.equal(original.attempt.request.expectedRevision, 7);
   const command = {
     ...pending(),
@@ -60,7 +60,7 @@ void test("pending recovery rejects incompatible versions, identities, requests 
       attempt: { ...pending().attempt, request: { ...pending().attempt.request, key: "another" } },
     },
     { command: { method: "preview", retry: true, request: pending().attempt.request } },
-    { inputs: { ...blank(), notes: "x".repeat(180001) } },
+    { inputs: { ...blank(), grants: ["x".repeat(180001)] } },
   ])
     assert.throws(
       () => readCharacterPending({ ...pending(), ...change }),

@@ -148,10 +148,7 @@ function hitPoints(view: SheetView): HTMLElement {
     if (entry?.kind === "set") {
       if (!setHp(entry.amount)) return;
     } else if (entry && entry.amount > 0 && view.canPlay)
-      void view.act(
-        { operation: entry.kind, amount: entry.amount },
-        t(entry.kind === "damage" ? "Damage" : "Heal"),
-      );
+      void view.act({ operation: entry.kind, amount: entry.amount });
     current.setCustomValidity("");
     current.value = String(view.input.play.hp);
   };
@@ -515,10 +512,11 @@ export function limitedUses(view: SheetView): HTMLElement {
       button(
         t("{0} {1}", [t(view.input.play.activeFeatures[key] ? "End" : "Activate"), name]),
         () =>
-          view.act(
-            { operation: "toggle-feature", key, enabled: !view.input.play.activeFeatures[key] },
-            name,
-          ),
+          view.act({
+            operation: "toggle-feature",
+            key,
+            enabled: !view.input.play.activeFeatures[key],
+          }),
         !view.canPlay,
       ),
     );

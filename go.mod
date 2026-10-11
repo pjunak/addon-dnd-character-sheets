@@ -3,7 +3,7 @@ module github.com/pjunak/addon-dnd-character-sheets
 go 1.27.2
 
 require (
-	github.com/pjunak/addon-dnd-engine v0.0.0-20261004184610-9b5b3a69b8cc
+	github.com/pjunak/addon-dnd-engine v0.0.0-20261011102150-aa9ce28e5a76
 	github.com/pjunak/ttrpg-codex v0.0.0-20261004203802-55a115888be5
 )
 

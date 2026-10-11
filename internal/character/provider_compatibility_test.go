@@ -21,7 +21,6 @@ func TestIncompatibleProviderPreservesSavedReadingAndRejectsEdits(t *testing.T) 
 		t.Run(scenario, func(t *testing.T) {
 			c, data, engine, meta := fixture(t)
 			input := model.Blank()
-			input.Notes = "Keep this character"
 			inspiration := true
 			input.Play.Inspiration = &inspiration
 			input.Play.Conditions = []model.Condition{{ID: "fatigue", Level: 2}}
@@ -31,7 +30,7 @@ func TestIncompatibleProviderPreservesSavedReadingAndRejectsEdits(t *testing.T) 
 			input.Play.Inventory[0].ContainerID = "pack"
 			input.Play.Inventory[1].Location = "equipped"
 			input.Play.Inventory[1].BodyPlacement = "neck"
-			saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "initial-character", Summary: "Create", Inputs: &input})
+			saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "initial-character", Inputs: &input})
 			if err != nil || saved.Status != "ready" {
 				t.Fatalf("seed: %+v %v", saved, err)
 			}
@@ -91,7 +90,7 @@ func TestIncompatibleProviderPreservesSavedReadingAndRejectsEdits(t *testing.T) 
 				t.Fatalf("incompatible provider hid or changed the saved character: %+v %v", loaded, err)
 			}
 			for _, method := range []string{"evaluate", "preview", "save"} {
-				_, err := invoke(t, c, meta, method, Request{Operation: "build", OperationID: "rejected-character", Summary: "Edit", ExpectedRevision: saved.Revision, Inputs: &input})
+				_, err := invoke(t, c, meta, method, Request{Operation: "build", OperationID: "rejected-character", ExpectedRevision: saved.Revision, Inputs: &input})
 				var rpcError *workerrpc.RPCError
 				if !errors.As(err, &rpcError) || rpcError.Data == nil ||
 					(rpcError.Data.Kind != workerrpc.KindValidationFailed && rpcError.Data.Kind != workerrpc.KindInvalidRequest) {
@@ -100,14 +99,6 @@ func TestIncompatibleProviderPreservesSavedReadingAndRejectsEdits(t *testing.T) 
 			}
 			if data.writes != 1 || data.revision != saved.Revision || !bytes.Equal(raw(data.state), before) {
 				t.Fatal("read or rejected edits changed persisted state")
-			}
-			notes := saved.State.Inputs
-			notes.Notes = "Offline session notes"
-			updated, err := invoke(t, c, meta, "save", Request{Operation: "notes", OperationID: "offline-notes", Summary: "Session notes", ExpectedRevision: saved.Revision, Inputs: &notes})
-			if err != nil || updated.Status != "ready" || updated.State.Inputs.Notes != notes.Notes ||
-				!bytes.Equal(raw(updated.State.Projection), raw(saved.State.Projection)) ||
-				!bytes.Equal(raw(updated.State.Rules), raw(saved.State.Rules)) || data.writes != 2 {
-				t.Fatalf("offline notes did not preserve accepted mechanics: %+v %v", updated, err)
 			}
 		})
 	}

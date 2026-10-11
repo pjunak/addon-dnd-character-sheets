@@ -46,10 +46,7 @@ export function classReplacements(view: BuildView, classId: string): HTMLElement
         t("Replace class choice"),
         async () => {
           if (out && ref && out !== ref)
-            await view.act!(
-              { operation: "replace-class-choice", kind, key, out, ref },
-              `Replace class choice ${out} with ${ref}`,
-            );
+            await view.act!({ operation: "replace-class-choice", kind, key, out, ref });
         },
         true,
       );

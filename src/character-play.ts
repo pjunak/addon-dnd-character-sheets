@@ -29,7 +29,7 @@ export function playActions(
   input: Inputs,
   evaluation: Result,
   catalog: CatalogRecord[],
-  act: (change: Record<string, unknown>, summary: string) => Promise<void>,
+  act: (change: Record<string, unknown>) => Promise<void>,
   locale = "en",
   section: "spells" | "recovery" = "spells",
 ): HTMLElement {
@@ -65,10 +65,7 @@ export function playActions(
         ),
         button(t("Spend recorded hit die"), async () => {
           if (result !== undefined)
-            await act(
-              { operation: "spend-hit-die", key, result, rollId: newId() },
-              `Spend ${human(resource["die"])}: recorded ${result}`,
-            );
+            await act({ operation: "spend-hit-die", key, result, rollId: newId() });
         }),
       );
     }
@@ -115,19 +112,13 @@ export function playActions(
             ),
           ),
         );
-      row.append(
-        button(t("Cast"), () =>
-          act({ operation: "cast-spell", classId, ref, slot }, `Cast ${spellName(ref)}`),
-        ),
-      );
+      row.append(button(t("Cast"), () => act({ operation: "cast-spell", classId, ref, slot })));
       group.append(row);
     }
     for (const ref of strings(caster["ritualIds"])) {
       const row = spellRow(ref);
       row.append(
-        button(t("Cast as ritual"), () =>
-          act({ operation: "cast-ritual", classId, ref }, "Ritual: " + spellName(ref)),
-        ),
+        button(t("Cast as ritual"), () => act({ operation: "cast-ritual", classId, ref })),
       );
       group.append(row);
     }
@@ -168,10 +159,7 @@ export function playActions(
         ),
         button(t("Copy spell"), async () => {
           if (ref)
-            await act(
-              { operation: "copy-spell", classId, ref, scrollId, acquisitionId: newId() },
-              `Copy ${spellName(ref)} for ${human(costs[ref])} GP`,
-            );
+            await act({ operation: "copy-spell", classId, ref, scrollId, acquisitionId: newId() });
         }),
       );
     }
@@ -204,11 +192,7 @@ export function playActions(
           ),
         ),
         button(t("Replace spell"), async () => {
-          if (out && ref)
-            await act(
-              { operation: "swap-spell", classId, out, ref },
-              `Replace ${spellName(out)} with ${spellName(ref)}`,
-            );
+          if (out && ref) await act({ operation: "swap-spell", classId, out, ref });
         }),
       );
     }
@@ -240,9 +224,7 @@ export function playActions(
         ),
       );
     row.append(
-      button(t("Cast granted spell"), () =>
-        act({ operation: "cast-granted-spell", key, slot }, `Cast granted ${spellName(ref)}`),
-      ),
+      button(t("Cast granted spell"), () => act({ operation: "cast-granted-spell", key, slot })),
     );
     root.append(row);
   }

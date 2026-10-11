@@ -10,8 +10,8 @@ import (
 )
 
 const Contract = "dnd5e.character"
-const Version = "2.0.0"
-const SchemaVersion = "4.0.0"
+const Version = "3.0.0"
+const SchemaVersion = "5.0.0"
 
 var reference = workerrpc.AddonDataReference{Kind: workerrpc.AddonDataRecordExtension, DataID: "dnd-sheets"}
 
@@ -40,7 +40,6 @@ type Request struct {
 	ExpectedRevision  int64          `json:"expectedRevision,omitempty"`
 	Operation         string         `json:"operation,omitempty"`
 	OperationID       string         `json:"operationId,omitempty"`
-	Summary           string         `json:"summary,omitempty"`
 	Inputs            *model.Inputs  `json:"inputs,omitempty"`
 	Change            map[string]any `json:"change,omitempty"`
 	Grant             *model.Grant   `json:"grant,omitempty"`
@@ -81,7 +80,6 @@ type preview struct {
 	Revision                                    int64
 	Expires                                     time.Time
 	State                                       State
-	Offline                                     bool
 }
 
 func raw(value any) json.RawMessage { body, _ := json.Marshal(value); return body }

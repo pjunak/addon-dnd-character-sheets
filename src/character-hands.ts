@@ -89,7 +89,7 @@ export function handControls(view: SheetView, combat: boolean): HTMLElement {
     const control = select(
       chosen,
       choices,
-      (itemId) => view.act({ operation: "set-hand", hand, itemId }, t("Change hand item")),
+      (itemId) => view.act({ operation: "set-hand", hand, itemId }),
       t,
     );
     control.options[0]!.textContent = t("Free hand");
@@ -130,7 +130,7 @@ export function handControls(view: SheetView, combat: boolean): HTMLElement {
   };
   const grip = button(
     t("Two-handed grip"),
-    () => view.act({ operation: "set-grip", grip: two ? "one" : "two" }, t("Change grip")),
+    () => view.act({ operation: "set-grip", grip: two ? "one" : "two" }),
     view.hands[two ? "canRelease" : "canTwo"] !== true,
   );
   grip.dataset["focusKey"] = "hands/grip";

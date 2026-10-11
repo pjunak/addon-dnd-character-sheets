@@ -13,7 +13,7 @@ func TestGrantRepairKeepsValidSpellsAndRejectsNewInvalidInput(t *testing.T) {
 	input.Build.Spells.CastingAbilities = map[string]string{"first": "INT"}
 	input.Play.ResourceUses = map[string]int{"first": 1, "second": 1}
 	input.Play.ActiveFeatures = map[string]bool{"first": true}
-	saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "spell-original", Summary: "Spells", Inputs: &input})
+	saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "spell-original", Inputs: &input})
 	if err != nil || saved.Status != "ready" {
 		t.Fatal(saved, err)
 	}
@@ -41,12 +41,12 @@ func TestGrantRepairKeepsValidSpellsAndRejectsNewInvalidInput(t *testing.T) {
 		return issues
 	}
 	input.Build.Species = "new"
-	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "spell-withdraw", Summary: "Origin", Inputs: &input, ExpectedRevision: 1})
+	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "spell-withdraw", Inputs: &input, ExpectedRevision: 1})
 	if err != nil || saved.Status != "ready" || !reflect.DeepEqual(data.state.Inputs.Build.Spells.GrantChoices, map[string][]string{"first": {"kept"}, "second": {"other"}}) || data.state.Inputs.Play.ResourceUses["second"] != 1 || data.state.Inputs.Play.ResourceUses["first"] != 0 || len(data.state.Inputs.Build.Spells.CastingAbilities) != 0 || len(data.state.Inputs.Play.ActiveFeatures) != 0 {
 		t.Fatal(saved, err, data.state.Inputs)
 	}
 	input.Build.Spells.GrantChoices["first"] = []string{"new-illegal"}
-	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "spell-illegal", Summary: "Spell", Inputs: &input, ExpectedRevision: 2})
+	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "spell-illegal", Inputs: &input, ExpectedRevision: 2})
 	if err != nil || saved.Status != "invalid" || data.writes != 2 {
 		t.Fatal("silently discarded new invalid spell", saved, err)
 	}
@@ -68,7 +68,7 @@ func TestLevelRemovalWithdrawsTheSubclassAndSpellsTheEngineNames(t *testing.T) {
 	input.Build.Subclasses = map[string]string{"fighter": "champion", "rogue": "thief"}
 	input.Build.Spells.Cantrips = map[string][]string{"wizard": {"spark"}, "cleric": {"light"}}
 	input.Play.PreparedSpells = map[string][]string{"wizard": {"ward"}}
-	saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "levels-original", Summary: "Levels", Inputs: &input})
+	saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "levels-original", Inputs: &input})
 	if err != nil || saved.Status != "ready" {
 		t.Fatal(saved, err)
 	}
@@ -86,7 +86,7 @@ func TestLevelRemovalWithdrawsTheSubclassAndSpellsTheEngineNames(t *testing.T) {
 		return issues
 	}
 	input.Build.Levels = append(input.Build.Levels, model.Level{ID: "removed-elsewhere", ClassID: "rogue"})
-	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "levels-removed", Summary: "Remove level", Inputs: &input, ExpectedRevision: 1})
+	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "levels-removed", Inputs: &input, ExpectedRevision: 1})
 	state := data.state.Inputs
 	if err != nil || saved.Status != "ready" || !reflect.DeepEqual(state.Build.Subclasses, map[string]string{"rogue": "thief"}) ||
 		!reflect.DeepEqual(state.Build.Spells.Cantrips, map[string][]string{"cleric": {"light"}}) || len(state.Play.PreparedSpells) != 0 {
@@ -95,7 +95,7 @@ func TestLevelRemovalWithdrawsTheSubclassAndSpellsTheEngineNames(t *testing.T) {
 	// A subclass newly chosen too early is rejected, not silently dropped.
 	input = cloneInputs(state)
 	input.Build.Subclasses["fighter"] = "champion"
-	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "levels-early", Summary: "Subclass", Inputs: &input, ExpectedRevision: 2})
+	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "levels-early", Inputs: &input, ExpectedRevision: 2})
 	if err != nil || saved.Status != "invalid" {
 		t.Fatal("silently discarded a new early subclass", saved, err)
 	}

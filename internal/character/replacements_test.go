@@ -13,7 +13,7 @@ func replacementState() (model.Inputs, model.Inputs, map[string]any) {
 	before := model.Blank()
 	before.Build.Levels = []model.Level{{ID: "one", ClassID: "martial"}, {ID: "two", ClassID: "martial"}}
 	before.Build.Choices = []model.Choice{{ID: "training", Value: raw("first")}}
-	before.Notes = "Keep authored notes"
+	before.Play.Currency = map[string]float64{"gp": 3}
 	after := cloneInputs(before)
 	after.Build.Choices[0].Value = raw("second")
 	after.Build.Replacements = []model.ClassReplacement{{Origin: "recorded", Source: model.Reference{Kind: "feature", ID: "training"}, ClassID: "martial", ClassLevel: 2, Kind: "feat", Key: "training", Out: "first", In: "second"}}
@@ -26,7 +26,7 @@ func TestReplacementProviderCanOnlyChangeTheExactChoiceAndAppendOneEntry(t *test
 		t.Fatal("bounded replacement rejected")
 	}
 	for name, mutate := range map[string]func(*model.Inputs){
-		"notes":          func(i *model.Inputs) { i.Notes = "Rewritten" },
+		"currency":       func(i *model.Inputs) { i.Play.Currency["gp"] = 4 },
 		"play":           func(i *model.Inputs) { i.Play.HP = 7 },
 		"levels":         func(i *model.Inputs) { i.Build.Levels[0].ID = "Rewritten" },
 		"missing choice": func(i *model.Inputs) { i.Build.Choices = nil },
@@ -77,10 +77,10 @@ func TestReplacementProviderPreservesSiblingSpellSelections(t *testing.T) {
 func TestReplacementSaveProtectsHistoryAndRetriesAcrossWorkerRestart(t *testing.T) {
 	c, data, engine, meta := fixture(t)
 	before, after, command := replacementState()
-	if _, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "forged-ledger", Summary: "Forge history", Inputs: &after}); err == nil {
+	if _, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "forged-ledger", Inputs: &after}); err == nil {
 		t.Fatal("ordinary creation accepted a forged replacement")
 	}
-	saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "initial-character", Summary: "Create character", Inputs: &before})
+	saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "initial-character", Inputs: &before})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func TestReplacementSaveProtectsHistoryAndRetriesAcrossWorkerRestart(t *testing.
 		}
 		return result, err
 	})
-	request := Request{Operation: "play", OperationID: "replace-training", Summary: "Replace training", ExpectedRevision: saved.Revision, Change: command}
+	request := Request{Operation: "play", OperationID: "replace-training", ExpectedRevision: saved.Revision, Change: command}
 	saved, err = invoke(t, c, meta, "save", request)
 	if err != nil || saved.Revision != 2 {
 		t.Fatalf("save: %+v %v", saved, err)
@@ -109,7 +109,7 @@ func TestReplacementSaveProtectsHistoryAndRetriesAcrossWorkerRestart(t *testing.
 	for name, ledger := range map[string][]model.ClassReplacement{"drop": nil, "rewrite": {{Origin: "recorded", Kind: "feat", Key: "other"}}} {
 		changed := cloneInputs(saved.State.Inputs)
 		changed.Build.Replacements = ledger
-		if _, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "edit-" + name, Summary: "Edit history", ExpectedRevision: 2, Inputs: &changed}); err == nil {
+		if _, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "edit-" + name, ExpectedRevision: 2, Inputs: &changed}); err == nil {
 			t.Fatal("Builder changed replacement history", name)
 		}
 	}

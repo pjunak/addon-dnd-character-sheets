@@ -36,12 +36,12 @@ func TestCommandRetryAfterLostCommitAndWorkerRestart(t *testing.T) {
 			input.Play.QuickUse = []string{"supplies"}
 			input.Play.Containers = []model.Container{{ID: "pack", Name: "Pack"}}
 			input.Play.Inventory[0].ContainerID = "pack"
-			if _, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "initial-character", Summary: "Create", Inputs: &input}); err != nil {
+			if _, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "initial-character", Inputs: &input}); err != nil {
 				t.Fatal(err)
 			}
 			loss := &lostReplyData{memoryData: data}
 			c.data = loss
-			command := Request{Operation: operation, OperationID: "uncertain-command", ExpectedRevision: data.revision, Summary: "Apply action"}
+			command := Request{Operation: operation, OperationID: "uncertain-command", ExpectedRevision: data.revision}
 			method := "save"
 			switch operation {
 			case "build":
@@ -54,7 +54,7 @@ func TestCommandRetryAfterLostCommitAndWorkerRestart(t *testing.T) {
 			case "grant":
 				command.Grant = &model.Grant{Name: "Reward", Reason: "Completed quest", Active: true, EffectiveLevel: 1, Condition: "always", Effects: []model.Effect{}, Waivers: []string{}}
 			case "import":
-				input.Notes = "Reviewed replacement"
+				input.Play.Currency = map[string]float64{"gp": 20}
 				command.Inputs = &input
 				preview := review(t, c, meta, command)
 				command = Request{Token: preview.Token, OperationID: command.OperationID, ExpectedRevision: preview.Revision}
@@ -84,8 +84,8 @@ func TestCommandRetryAfterLostCommitAndWorkerRestart(t *testing.T) {
 			}
 			engine.unavailable = false
 			newer := data.state.Inputs
-			newer.Notes = "Another editor's later input"
-			if _, err := invoke(t, restarted, meta, "save", Request{Operation: "build", OperationID: "later-editor-save", Summary: "Later edit", ExpectedRevision: 2, Inputs: &newer}); err != nil {
+			newer.Play.Currency = map[string]float64{"gp": 31}
+			if _, err := invoke(t, restarted, meta, "save", Request{Operation: "build", OperationID: "later-editor-save", ExpectedRevision: 2, Inputs: &newer}); err != nil {
 				t.Fatal(err)
 			}
 			current := raw(data.state)

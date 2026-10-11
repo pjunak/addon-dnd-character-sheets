@@ -105,7 +105,6 @@ export interface Inputs {
   build: Build;
   play: Play;
   grants: Array<Grant>;
-  notes: string;
 }
 
 export interface Issue {
@@ -181,7 +180,6 @@ export interface Request {
   expectedRevision?: number;
   operation?: string;
   operationId?: string;
-  summary?: string;
   inputs?: Inputs;
   change?: Record<string, unknown>;
   grant?: Grant;

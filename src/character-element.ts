@@ -232,7 +232,6 @@ export function defineCharacterElement(
         expectedRevision: this.#baseRevision,
         operation,
         operationId: newId(),
-        summary: `Update character ${this.#t(label(operation)).toLowerCase()}`,
       };
     }
     async #call(method: string, request: Omit<Request, "contractVersion">): Promise<Response> {
@@ -692,7 +691,7 @@ export function defineCharacterElement(
           this.#builderNav.tab = tab;
         },
         refresh: () => this.#render(),
-        act: (change, summary) => this.#perform({ ...this.#base("play"), change, summary }),
+        act: (change) => this.#perform({ ...this.#base("play"), change }),
       };
     }
     #render(): void {
@@ -981,7 +980,7 @@ export function defineCharacterElement(
         refresh: () => this.#render(),
         addItem: () => this.#equipment(),
         fillSlot: (slot) => this.#slot(slot),
-        act: (change, summary) => this.#perform({ ...this.#base("play"), change, summary }),
+        act: (change) => this.#perform({ ...this.#base("play"), change }),
       };
     }
     #equipment(): void {
@@ -1081,7 +1080,7 @@ export function defineCharacterElement(
             this.#input,
             this.#evaluation,
             this.#catalogs.get("spell") ?? [],
-            (change, summary) => view.act(change, summary),
+            (change) => view.act(change),
             view.locale,
             "recovery",
           ),
@@ -1092,7 +1091,7 @@ export function defineCharacterElement(
         this.#t(kind === "short" ? "Short rest" : "Long rest"),
         () => [
           restWindow(this.#sheetView(), kind, recovery(), async () => {
-            await this.#sheetView().act({ operation: "rest", rest: kind }, kind + " rest");
+            await this.#sheetView().act({ operation: "rest", rest: kind });
             // A refused or uncertain rest keeps its window, where the note points.
             if (!this.#command && !this.#ruleNotes.length) this.#dialog?.close();
           }),
@@ -1267,7 +1266,7 @@ export function defineCharacterElement(
         rest.append(
           button(
             this.#t("{0} rest", [this.#t(label(value))]),
-            () => view.act({ operation: "rest", rest: value }, value + " rest"),
+            () => view.act({ operation: "rest", rest: value }),
             !view.canPlay,
           ),
         );
@@ -1281,7 +1280,7 @@ export function defineCharacterElement(
             this.#input,
             this.#evaluation,
             this.#catalogs.get("spell") ?? [],
-            (change, summary) => view.act(change, summary),
+            (change) => view.act(change),
             view.locale,
             "recovery",
           ),
@@ -1301,7 +1300,7 @@ export function defineCharacterElement(
             this.#input,
             this.#evaluation,
             this.#catalogs.get("spell") ?? [],
-            (change, summary) => view.act(change, summary),
+            (change) => view.act(change),
             view.locale,
             "spells",
           ),
@@ -1616,7 +1615,6 @@ export function defineCharacterElement(
                   ...this.#base("revoke-grant"),
                   grantId: grant.id,
                   inputs: structuredClone(this.#input),
-                  summary: `Revoke DM grant: ${grant.name}`,
                 }),
               !this.#editable,
             ),
@@ -1641,7 +1639,6 @@ export function defineCharacterElement(
               inputs: structuredClone(this.#input),
               grant,
               ...(previous ? { grantId: previous.id } : {}),
-              summary: `DM given: ${grant.name} — ${grant.reason}`,
             });
           },
           this.#context?.host.locale,

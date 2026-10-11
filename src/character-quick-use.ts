@@ -69,8 +69,7 @@ export function quickUse(view: SheetView): HTMLElement {
     const controls = styled("div", "dnd-workflow-controls");
     const use = button(
       t("Use one"),
-      () =>
-        view.act({ operation: "consume-item", itemId: id }, t("Use one: {0}", [item?.name ?? id])),
+      () => view.act({ operation: "consume-item", itemId: id }),
       !view.canPlay || eligibility["canUse"] !== true,
       "quick-use/" + id + "/use",
     );

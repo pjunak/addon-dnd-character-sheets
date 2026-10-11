@@ -59,7 +59,7 @@ export interface SheetView {
   refresh(): void;
   addItem(): void;
   fillSlot(slot: EquipmentSlot): void;
-  act(change: Record<string, unknown>, summary: string): Promise<void>;
+  act(change: Record<string, unknown>): Promise<void>;
 }
 function icon(path: string): SVGSVGElement {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"),
@@ -287,8 +287,7 @@ export function vitals(view: SheetView): HTMLElement {
     area.append(
       field(t("Amount"), input),
       button(title, async () => {
-        if (input.reportValidity())
-          await view.act({ operation, amount: input.valueAsNumber }, title);
+        if (input.reportValidity()) await view.act({ operation, amount: input.valueAsNumber });
       }),
     );
     hp.querySelector(".dse-hp-adjust")?.remove();
@@ -791,10 +790,11 @@ export function resourceDetails(view: SheetView): HTMLElement {
       button(
         t("{0} {1}", [t(view.input.play.activeFeatures[key] ? "End" : "Activate"), name]),
         () =>
-          view.act(
-            { operation: "toggle-feature", key, enabled: !view.input.play.activeFeatures[key] },
-            name,
-          ),
+          view.act({
+            operation: "toggle-feature",
+            key,
+            enabled: !view.input.play.activeFeatures[key],
+          }),
         !view.canPlay,
       ),
     );

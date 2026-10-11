@@ -24,7 +24,7 @@ func (engine largeProjectionEngine) Call(ctx context.Context, meta *workerrpc.Me
 	}
 	fields := map[string]any{}
 	for i := 0; i < 600; i++ {
-		fields[fmt.Sprintf("stat-%03d", i)] = len(result.Evaluation.Inputs.Notes)
+		fields[fmt.Sprintf("stat-%03d", i)] = result.Evaluation.Inputs.Play.Currency["gp"]
 	}
 	result.Evaluation.Sheet["derived"] = fields
 	response.Result = raw(result)
@@ -36,12 +36,12 @@ func TestLargeProjectionSaveAcknowledgesWithoutReviewDiff(t *testing.T) {
 	c := New(data, largeProjectionEngine{engine})
 	c.now = original.now
 	input := model.Blank()
-	request := Request{Operation: "build", OperationID: "large-initial", Summary: "Create", Inputs: &input}
+	request := Request{Operation: "build", OperationID: "large-initial", Inputs: &input}
 	first, err := invoke(t, c, meta, "save", request)
 	if err != nil || first.Status != "ready" {
 		t.Fatalf("initial: %+v %v", first, err)
 	}
-	input.Notes = "Keep every value"
+	input.Play.Currency = map[string]float64{"gp": 16}
 	request.OperationID = "large-change"
 	request.ExpectedRevision = first.Revision
 	saved, err := invoke(t, c, meta, "save", request)
@@ -52,8 +52,8 @@ func TestLargeProjectionSaveAcknowledgesWithoutReviewDiff(t *testing.T) {
 	if err != nil || retry.Revision != saved.Revision || data.writes != 2 || !reflect.DeepEqual(raw(retry.State), raw(saved.State)) {
 		t.Fatal("large save retry changed state", err)
 	}
-	input.Notes = "Reviewed import with different generated results"
-	preview := review(t, c, meta, Request{Operation: "import", OperationID: "large-import", Summary: "Replace after review", ExpectedRevision: saved.Revision, Inputs: &input})
+	input.Play.Currency = map[string]float64{"gp": 49}
+	preview := review(t, c, meta, Request{Operation: "import", OperationID: "large-import", ExpectedRevision: saved.Revision, Inputs: &input})
 	if len(preview.Changes) == 0 || len(preview.Changes) > 500 || data.writes != 2 {
 		t.Fatal("review missing, oversized or wrote state")
 	}
@@ -70,7 +70,7 @@ func TestLargeProjectionSaveAcknowledgesWithoutReviewDiff(t *testing.T) {
 		t.Fatal("large projection changes must remain reviewable")
 	}
 	committed, err := invoke(t, c, meta, "commit", Request{Token: preview.Token, OperationID: "large-import", ExpectedRevision: saved.Revision})
-	if err != nil || committed.State.Inputs.Notes != input.Notes || data.writes != 3 {
+	if err != nil || committed.State.Inputs.Play.Currency["gp"] != input.Play.Currency["gp"] || data.writes != 3 {
 		t.Fatal("review did not commit its exact state", err)
 	}
 }

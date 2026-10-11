@@ -15,7 +15,7 @@ func TestEarlierEditPreservesUnaffectedChoiceSlots(t *testing.T) {
 			input := model.Blank()
 			input.Build.Species = "old-origin"
 			input.Build.Choices = []model.Choice{{ID: "training", Slot: 0, Value: raw("retained")}, {ID: "training", Slot: 1, Value: raw("withdrawn")}}
-			saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "original-training", Summary: "Training", Inputs: &input})
+			saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "original-training", Inputs: &input})
 			if err != nil || saved.Status != "ready" {
 				t.Fatal(saved, err)
 			}
@@ -28,7 +28,7 @@ func TestEarlierEditPreservesUnaffectedChoiceSlots(t *testing.T) {
 				return nil
 			}
 			input.Build.Species = "new-origin"
-			saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "changed-training", Summary: "Origin", Inputs: &input, ExpectedRevision: 1})
+			saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "changed-training", Inputs: &input, ExpectedRevision: 1})
 			if err != nil || saved.Status != "ready" || !reflect.DeepEqual(data.state.Inputs.Build.Choices, input.Build.Choices[:1]) {
 				t.Fatal("repair lost a valid sibling slot or retained an unavailable slot", saved, data.state.Inputs.Build.Choices, err)
 			}
@@ -36,7 +36,7 @@ func TestEarlierEditPreservesUnaffectedChoiceSlots(t *testing.T) {
 				t.Fatal("repair mutated the supplied request")
 			}
 			input.Build.Choices[1].Value = raw("new-illegal-option")
-			saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "illegal-training", Summary: "Training", Inputs: &input, ExpectedRevision: 2})
+			saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "illegal-training", Inputs: &input, ExpectedRevision: 2})
 			if err != nil || saved.Status != "invalid" || data.writes != 2 {
 				t.Fatal("repair accepted a newly invalid slot", saved, err)
 			}
@@ -50,14 +50,14 @@ func TestDMGrantChangesWithdrawOnlyTheirSavedChoices(t *testing.T) {
 			c, data, engine, meta := fixture(t)
 			meta.Actor.Role = "dm"
 			grant := model.Grant{Name: "Training", Reason: "Study", Condition: "always", EffectiveLevel: 1, Feat: &model.Reference{Kind: "feat", ID: "training"}}
-			added, err := invoke(t, c, meta, "save", Request{Operation: "grant", OperationID: "training-reward", Summary: "Training", Grant: &grant})
+			added, err := invoke(t, c, meta, "save", Request{Operation: "grant", OperationID: "training-reward", Grant: &grant})
 			if err != nil || added.Status != "ready" {
 				t.Fatal(added, err)
 			}
 			input := added.State.Inputs
-			input.Notes = "Preserve these notes"
+			input.Play.Currency = map[string]float64{"gp": 8}
 			input.Build.Choices = []model.Choice{{ID: "origin-training", Value: raw("kept")}, {ID: "reward-training", Value: raw("withdrawn")}}
-			saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "training-selections", Summary: "Choices", Inputs: &input, ExpectedRevision: 1})
+			saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "training-selections", Inputs: &input, ExpectedRevision: 1})
 			if err != nil || saved.Status != "ready" {
 				t.Fatal(saved, err)
 			}
@@ -71,8 +71,8 @@ func TestDMGrantChangesWithdrawOnlyTheirSavedChoices(t *testing.T) {
 				return nil
 			}
 			grant.Feat = &model.Reference{Kind: "feat", ID: "replacement"}
-			changed, err := invoke(t, c, meta, "save", Request{Operation: operation, OperationID: "changed-reward", Summary: "Change reward", GrantID: added.State.Inputs.Grants[0].ID, Grant: &grant, ExpectedRevision: 2})
-			if err != nil || changed.Status != "ready" || data.writes != 3 || !reflect.DeepEqual(data.state.Inputs.Build.Choices, input.Build.Choices[:1]) || data.state.Inputs.Notes != input.Notes {
+			changed, err := invoke(t, c, meta, "save", Request{Operation: operation, OperationID: "changed-reward", GrantID: added.State.Inputs.Grants[0].ID, Grant: &grant, ExpectedRevision: 2})
+			if err != nil || changed.Status != "ready" || data.writes != 3 || !reflect.DeepEqual(data.state.Inputs.Build.Choices, input.Build.Choices[:1]) || data.state.Inputs.Play.Currency["gp"] != input.Play.Currency["gp"] {
 				t.Fatal("grant change lost unrelated input or could not withdraw its own choices", changed, err)
 			}
 		})
@@ -86,7 +86,7 @@ func TestEarlierEditRepairsTheFullWithdrawnDependencyChain(t *testing.T) {
 	for index := 0; index < 6; index++ {
 		input.Build.Choices = append(input.Build.Choices, model.Choice{ID: fmt.Sprintf("grant-%d", index), Value: raw("selection")})
 	}
-	if saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "original-chain", Summary: "Grants", Inputs: &input}); err != nil || saved.Status != "ready" {
+	if saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "original-chain", Inputs: &input}); err != nil || saved.Status != "ready" {
 		t.Fatal(saved, err)
 	}
 	engine.inspect = func(input model.Inputs) []model.Issue {
@@ -97,7 +97,7 @@ func TestEarlierEditRepairsTheFullWithdrawnDependencyChain(t *testing.T) {
 		return nil
 	}
 	input.Build.Species = "new-origin"
-	saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "changed-chain", Summary: "Origin", Inputs: &input, ExpectedRevision: 1})
+	saved, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "changed-chain", Inputs: &input, ExpectedRevision: 1})
 	if err != nil || saved.Status != "ready" || len(data.state.Inputs.Build.Choices) != 0 || data.writes != 2 {
 		t.Fatal("dependent withdrawals were only partly repaired", saved, err)
 	}

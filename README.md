@@ -34,7 +34,7 @@ Changed or missing items leave the hand free with an explanation. Combat shows
 saved attack/damage details; Sheet omits those numbers. Saved reading, print and
 transfer retain the selected and suspended identities without a provider.
 Character notes belong to the core
-profile; the sheet has no Notes tab or notes section in print.
+profile; the sheet stores none and prints none.
 
 Common fields, searchable choices, actions, tabs and modal focus use the host's
 required `ui.controls.v1` [shared UI contract](../ttrpg-codex/docs/reference/UI_FOUNDATIONS.md).
@@ -122,7 +122,7 @@ remain usable without a rules provider; missing data stays distinct from an
 empty group. Saving-throw shields show and name their saved training state.
 
 **Tools** owns export, reviewed replacement import, printing, layout and rules
-status. Transfers use `dnd-character.v1` / schema 4.0.0 and contain the current
+status. Transfers use `dnd-character.v2` / schema 5.0.0 and contain the current
 character only. Changed installed rules require explicit adoption. If an
 autosave discovers changed rules, **Review changed rules** opens Tools; explicit
 adoption can save the pending edits together with the new rules. Conflicts and
@@ -137,8 +137,8 @@ score and skill list when the available width would squeeze enlarged skill
 names into narrow columns.
 
 The host owns the core profile, portrait and relationships. The native worker
-provides `dnd5e.character` 2.0.0 and is the only writer of the `dnd-sheets`
-schema-4 extension. Its `workerOnly` declaration preserves authorization without
+provides `dnd5e.character` 3.0.0 and is the only writer of the `dnd-sheets`
+schema-5 extension. Its `workerOnly` declaration preserves authorization without
 retaining character snapshots. A package that adds optional fields changes the
 stored schema hash and goes through the host's
 [guided saved-data review](docs/RULES_EDGE_CASES.md#schema-updates); existing
@@ -197,7 +197,7 @@ Use `npm run check:workflows` and `npm run check:vulnerabilities` to run the
 matching workflow and reachable Go vulnerability checks locally.
 
 Inspect the resulting ZIP with the host's inspector:
-`go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-4.2.0.zip`.
+`go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-5.0.0.zip`.
 The package command rebuilds web assets and native workers from source, including
 when neither output directory exists. `web/`, `worker/` and `dist/` are ignored
 build artifacts; public schemas and generated TypeScript models remain versioned.

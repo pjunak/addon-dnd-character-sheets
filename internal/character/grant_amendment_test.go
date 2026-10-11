@@ -14,7 +14,7 @@ func TestGrantAmendmentPreservesOrderAndClearsOnlyItsOldItemLinks(t *testing.T) 
 			c, data, _, meta := fixture(t)
 			meta.Actor.Role = "dm"
 			input := model.Blank()
-			input.Notes = "Keep authored notes"
+			input.Play.Currency = map[string]float64{"gp": 12}
 			input.Grants = []model.Grant{
 				{ID: "first", Name: "First", ActorID: "dm", Reason: "Quest", Active: true, EffectiveLevel: 1, Condition: "always", ItemID: "old", Effects: []model.Effect{{Target: "initiative", Mode: "add", Value: 1}}},
 				{ID: "second", Name: "Second", ActorID: "dm", Reason: "Study", Active: true, EffectiveLevel: 1, Condition: "always", ItemID: "other"},
@@ -58,7 +58,7 @@ func TestGrantAmendmentPreservesOrderAndClearsOnlyItsOldItemLinks(t *testing.T) 
 			expected = append([]model.Item(nil), expected...)
 			expected[0].GrantID = ""
 			expected[1].GrantID = wantNew
-			if !reflect.DeepEqual(next.Play.Inventory, expected) || next.Notes != input.Notes {
+			if !reflect.DeepEqual(next.Play.Inventory, expected) || next.Play.Currency["gp"] != input.Play.Currency["gp"] {
 				t.Fatal("unrelated authored input changed")
 			}
 			if operation == "revoke" {
@@ -83,7 +83,7 @@ func TestRejectedGrantAmendmentReturnsTheUnchangedSavedSnapshot(t *testing.T) {
 			c, data, engine, meta := fixture(t)
 			meta.Actor.Role = "dm"
 			grant := model.Grant{Name: "Original", Reason: "Quest", Condition: "always", EffectiveLevel: 1}
-			added, err := invoke(t, c, meta, "save", Request{Operation: "grant", OperationID: "original-reward", Summary: "Reward", Grant: &grant})
+			added, err := invoke(t, c, meta, "save", Request{Operation: "grant", OperationID: "original-reward", Grant: &grant})
 			if err != nil || added.Status != "ready" {
 				t.Fatal(added, err)
 			}
@@ -92,7 +92,7 @@ func TestRejectedGrantAmendmentReturnsTheUnchangedSavedSnapshot(t *testing.T) {
 			grant.Reason = "New reason"
 			engine.invalid = !unavailable
 			engine.unavailable = unavailable
-			changed, err := invoke(t, c, meta, "save", Request{Operation: "amend-grant", OperationID: "rejected-amendment", Summary: "Amend", GrantID: added.State.Inputs.Grants[0].ID, Grant: &grant, ExpectedRevision: added.Revision})
+			changed, err := invoke(t, c, meta, "save", Request{Operation: "amend-grant", OperationID: "rejected-amendment", GrantID: added.State.Inputs.Grants[0].ID, Grant: &grant, ExpectedRevision: added.Revision})
 			if err != nil || changed.Status != map[bool]string{false: "invalid", true: "unavailable"}[unavailable] {
 				t.Fatal(changed, err)
 			}
