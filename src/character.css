@@ -1403,9 +1403,35 @@
 .addon-dnd-character .character-panel > .character-panel {
   padding: 0.75rem;
 }
+/* One line per spell: name and facts on the left, slot and action aligned in columns. */
 .addon-dnd-character .dnd-spell-row {
-  grid-template-columns: minmax(10rem, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "name slot action"
+    "facts slot action"
+    "source slot action";
   align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.15rem;
+}
+.addon-dnd-character .dnd-spell-row > .dnd-spell-source {
+  grid-area: source;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.addon-dnd-character .dnd-spell-row > :first-child {
+  grid-area: name;
+  justify-self: start;
+}
+.addon-dnd-character .dnd-spell-row > .dnd-spell-facts {
+  grid-area: facts;
+}
+.addon-dnd-character .dnd-spell-row > .character-field {
+  grid-area: slot;
+}
+.addon-dnd-character .dnd-spell-row > button {
+  grid-area: action;
+  min-width: 6rem;
 }
 .addon-dnd-character .dnd-spell-row[hidden] {
   display: none;
@@ -1413,8 +1439,14 @@
 .addon-dnd-character .dnd-spell-row .character-field {
   margin: 0;
 }
+/* Every row spends a slot; the chosen slot names itself, so the label is for assistive technology. */
 .addon-dnd-character .dnd-spell-row .character-field > label {
-  font-size: 0.75rem;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .addon-dnd-character .dse-layout-classic .dse-cards {
   flex-basis: 20rem;
@@ -1467,7 +1499,12 @@
     grid-template-columns: 1fr;
   }
   .addon-dnd-character .dnd-spell-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name name"
+      "facts facts"
+      "source source"
+      "slot action";
   }
   .addon-dnd-character .character-build .character-stats {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
@@ -1832,8 +1869,13 @@
   .dse-coins {
     grid-template-columns: repeat(auto-fit, minmax(4rem, 1fr));
   }
-  .dnd-spell-row {
-    grid-template-columns: 1fr;
+  .addon-dnd-character .dnd-spell-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name name"
+      "facts facts"
+      "source source"
+      "slot action";
   }
 }
 @container sheet-workspace (max-width:24rem) {

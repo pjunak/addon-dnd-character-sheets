@@ -12,7 +12,6 @@ import {
 } from "./character-client.js";
 import {
   button,
-  el,
   field,
   human,
   label,
@@ -206,8 +205,16 @@ export function playActions(
     const row = spellRow(ref);
     row.dataset["spellGrant"] = key;
     row.append(
-      el("span", spellSourceLabel(grant["source"], locale)),
-      el("span", human(grant["castingAbility"])),
+      styled(
+        "span",
+        "dnd-spell-source",
+        [
+          spellSourceLabel(grant["source"], locale),
+          grant["castingAbility"] ? human(grant["castingAbility"]) : "",
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      ),
     );
     if (slots.length)
       row.append(
