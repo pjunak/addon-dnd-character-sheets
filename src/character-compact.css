@@ -9,9 +9,10 @@
   grid-template-columns: 7.5rem minmax(0, 1fr);
   gap: 0.75rem;
 }
+/* The rail follows the reader, so Builder and Tools at its foot stay in reach on tall tabs. */
 .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs {
-  position: static;
-  height: auto;
+  align-self: start;
+  height: min(100%, calc(100dvh - 2rem));
   min-height: 0;
   padding-right: 0.4rem;
 }
@@ -965,6 +966,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs {
+    position: static;
+    height: auto;
     flex-direction: row;
     flex-wrap: wrap;
     border-right: 0;
