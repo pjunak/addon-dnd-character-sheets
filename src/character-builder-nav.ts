@@ -77,9 +77,9 @@ export function builderShell(
     for (const issue of rows(section["issues"]))
       step.append(
         button(
-          (issue["repair"]
+          issue["repair"]
             ? t("Review choice: {0}", [builderLabel(issue, view.locale)])
-            : builderLabel(issue, view.locale)) + " →",
+            : builderLabel(issue, view.locale),
           () => navigate(String(issue["tab"]), String(issue["id"])),
         ),
       );
@@ -104,7 +104,7 @@ export function builderShell(
           " " +
           view.input.build.levels.filter((level) => level.classId === id).length,
       })),
-      { id: "add-class", label: "+" },
+      { id: "add-class", label: t("Add class") },
       { id: "spells", label: t("Spells") },
       { id: "dm-given", label: t("DM given") },
     ];
@@ -116,7 +116,6 @@ export function builderShell(
     "dnd-builder",
   );
   nav.classList.add("dnd-builder-tabs");
-  nav.querySelector("#dnd-builder-tab-add-class")?.setAttribute("aria-label", t("Add class"));
   body.id = "dnd-builder-panel-" + state.tab;
   body.setAttribute("role", "tabpanel");
   body.setAttribute("aria-labelledby", "dnd-builder-tab-" + state.tab);

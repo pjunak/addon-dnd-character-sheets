@@ -35,8 +35,8 @@ owns persistence and the remaining table-adjudication boundary.
 The Builder is the character's ordered progression. Character contains origin,
 base abilities and origin choices. Compact puts Origin before ability scores.
 Classic retains a separate Levels view. Each class
-has its own tab for its levels and granted choices; the + tab offers additional
-classes allowed by the rules. Earlier decisions can be changed later. DM given
+has its own tab for its levels and granted choices; the Add class tab offers
+additional classes allowed by the rules. Earlier decisions can be changed later. DM given
 has its own Builder tab. Progress starts expanded on the left; narrow screens
 stack it above the form to preserve usable control widths.
 
