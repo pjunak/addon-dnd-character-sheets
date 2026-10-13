@@ -195,7 +195,9 @@ and writes the latest inputs/projection through the host's ordinary transaction.
 The extension declares `workerOnly: true`.
 Optimistic revision numbers and the last operation ID protect concurrency and
 lost-response retries; they are not a browsable history. Normal host transaction
-bookkeeping remains part of database integrity.
+bookkeeping remains part of database integrity. A character whose sheet was
+removed loads empty at the host's deleted revision, so the next save or import
+recreates it instead of conflicting forever.
 
 Ordinary saves return the accepted current state and evaluation without an
 import-review comparison. This keeps a large successful write from failing its

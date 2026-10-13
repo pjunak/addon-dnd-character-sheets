@@ -4,7 +4,7 @@ go 1.27.2
 
 require (
 	github.com/pjunak/addon-dnd-engine v0.0.0-20261011102150-aa9ce28e5a76
-	github.com/pjunak/ttrpg-codex v0.0.0-20261011124025-639dab299e92
+	github.com/pjunak/ttrpg-codex v0.0.0-20261013201843-5ac53b541bad
 )
 
 require (

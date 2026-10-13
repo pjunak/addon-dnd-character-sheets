@@ -221,7 +221,9 @@ func (c *Coordinator) load(ctx context.Context, meta *workerrpc.Meta, key string
 	if err != nil {
 		var rpc *workerrpc.RPCError
 		if errors.As(err, &rpc) && rpc.Data != nil && rpc.Data.Kind == workerrpc.KindNotFound {
-			return nil, 0, nil
+			// A removed sheet keeps its revision; the next save must expect it.
+			revision, _ := workerrpc.DeletedRevision(err)
+			return nil, revision, nil
 		}
 		return nil, 0, err
 	}

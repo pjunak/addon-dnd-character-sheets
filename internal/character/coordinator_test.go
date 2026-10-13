@@ -20,6 +20,10 @@ func (data *memoryData) Get(_ context.Context, _ *workerrpc.Meta, _ workerrpc.Ad
 	if data.forbidden {
 		return workerrpc.AddonDataDocument{}, failure(workerrpc.KindUnauthorized, "hidden character")
 	}
+	if data.state == nil && data.revision > 0 {
+		// Like the host, a removed document keeps its revision as a tombstone.
+		return workerrpc.AddonDataDocument{}, workerrpc.NewRPCError(workerrpc.JSONRPCApplication, workerrpc.KindNotFound, "deleted", false, map[string]int64{"deletedRevision": data.revision})
+	}
 	if data.state == nil {
 		return workerrpc.AddonDataDocument{}, failure(workerrpc.KindNotFound, "missing")
 	}
@@ -159,6 +163,27 @@ func TestGenericEditsCannotForgeDMGrants(t *testing.T) {
 		t.Fatal("player could grant")
 	}
 }
+func TestRemovedSheetCanBeImportedAndEditedAgain(t *testing.T) {
+	c, data, _, meta := fixture(t)
+	data.revision = 30
+	loaded, err := invoke(t, c, meta, "load", Request{})
+	if err != nil || loaded.State != nil || loaded.Revision != 30 {
+		t.Fatalf("load of a removed sheet: %+v %v", loaded, err)
+	}
+	input := model.Blank()
+	input.Play.Currency = map[string]float64{"gp": 2}
+	p := review(t, c, meta, Request{Operation: "import", OperationID: "import-removed", ExpectedRevision: loaded.Revision, Inputs: &input})
+	saved, err := invoke(t, c, meta, "commit", Request{Token: p.Token, OperationID: "import-removed", ExpectedRevision: p.Revision})
+	if err != nil || saved.Status != "ready" || saved.Revision != 31 || data.state == nil {
+		t.Fatalf("import over a removed sheet: %+v %v", saved, err)
+	}
+	input.Play.Currency["gp"] = 3
+	edited, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "edit-after-import", ExpectedRevision: saved.Revision, Inputs: &input})
+	if err != nil || edited.Status != "ready" || edited.Revision != 32 {
+		t.Fatalf("edit after import: %+v %v", edited, err)
+	}
+}
+
 func TestDMGrantIsStampedByCoordinatorAndImportNeedsReauthorization(t *testing.T) {
 	c, _, _, meta := fixture(t)
 	meta.Actor.Role = "dm"
