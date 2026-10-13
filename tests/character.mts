@@ -19,6 +19,19 @@ void test("provider option labels translate only explicit UI keys", async () => 
   );
 });
 
+void test("option descriptions read as plain text without Markdown markup", async () => {
+  const { plainDescription } = await import("#web/character-ui");
+  assert.equal(
+    plainDescription(
+      "Mortals with a spark.\r\n\r\n\r\n# Aasimar Traits\n\n**Creature Type:** Humanoid\n- *Celestial Resistance*\n- See [Light](rules/light) and __Darkvision__.",
+    ),
+    "Mortals with a spark.\n\nAasimar Traits\n\nCreature Type: Humanoid\n• Celestial Resistance\n• See Light and Darkvision.",
+  );
+  assert.equal(plainDescription("snake_case and 2*3*4 stay"), "snake_case and 2*3*4 stay");
+  const long = plainDescription("word ".repeat(400));
+  assert.ok(long.length <= 1501 && long.endsWith("word…"));
+});
+
 void test("current transfer accepts only the explicit current envelope and preserves authored inputs", () => {
   const inputs = blank();
   inputs.play.currency.gp = 12;

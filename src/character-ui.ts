@@ -115,6 +115,26 @@ export interface Option {
   description?: string;
   disabled?: boolean;
 }
+const descriptionLimit = 1500;
+/**
+ * Rules text arrives as Markdown; option descriptions are plain text, so keep
+ * its words and line breaks without the markup, cut at a word if it is long.
+ */
+export function plainDescription(markdown = ""): string {
+  const plain = markdown
+    .replace(/\r\n?/gu, "\n")
+    .replace(/^#{1,6}[ \t]+/gmu, "")
+    .replace(/^[ \t]*[-*+][ \t]+/gmu, "• ")
+    .replace(/\[([^\]]+)\]\([^)]*\)/gu, "$1")
+    .replace(/(\*\*|__)(.+?)\1/gu, "$2")
+    .replace(/(^|[^\p{L}\p{N}])([*_])(\S(?:[^*_\n]*\S)?)\2(?![\p{L}\p{N}])/gu, "$1$3")
+    .replace(/[ \t]+\n/gu, "\n")
+    .replace(/\n{3,}/gu, "\n\n")
+    .trim();
+  if (plain.length <= descriptionLimit) return plain;
+  const cut = plain.slice(0, descriptionLimit);
+  return cut.slice(0, Math.max(cut.lastIndexOf(" "), descriptionLimit / 2)).trimEnd() + "…";
+}
 export function select(
   value: string,
   options: readonly Option[],
@@ -128,7 +148,7 @@ export function select(
   for (const option of options) {
     const row = el("option", option.label);
     row.value = option.id;
-    row.title = option.description ?? "";
+    row.title = plainDescription(option.description);
     row.disabled = option.disabled ?? false;
     node.append(row);
   }

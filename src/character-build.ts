@@ -45,7 +45,7 @@ const options = (records: readonly CatalogRecord[]): Option[] =>
   records.map((record) => ({
     id: record.id,
     label: text(record.value["name"], record.id),
-    description: text(record.value["summary"] ?? record.value["text"]).slice(0, 1200),
+    description: text(record.value["summary"] ?? record.value["text"]),
   }));
 export const guidanceOptions = (value: unknown, locale = "en"): Option[] =>
   rows(value).map((row) => ({
