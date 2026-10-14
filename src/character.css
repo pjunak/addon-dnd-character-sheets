@@ -1382,6 +1382,34 @@
   line-height: 1.4;
   color: var(--text-muted);
 }
+/* "Saving…" and "Saved" share one quiet line above the tab in both layouts, so
+   saving never moves the sheet; only errors, which need attention and actions,
+   take more room. */
+.addon-dnd-character .dnd-sheet-workspace > .dnd-save-status {
+  justify-content: flex-end;
+  min-height: 1rem;
+  margin-bottom: 0.25rem;
+}
+/* A modal is about its own task; only pending work and errors follow into it. */
+.addon-dnd-character
+  .character-dialog:not(.character-window)
+  > .dnd-save-status[data-ui-state="success"] {
+  display: none;
+}
+.addon-dnd-character
+  .dnd-sheet-workspace
+  > .dnd-save-status:is([data-ui-state="success"], [data-ui-state="loading"]),
+.addon-dnd-character
+  .character-window
+  > .dnd-save-status:is([data-ui-state="success"], [data-ui-state="loading"]) {
+  min-height: 1rem;
+  line-height: 1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 0.72rem;
+}
 .addon-dnd-character .dse-build-step p {
   padding: 0.5rem;
 }

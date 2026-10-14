@@ -94,27 +94,6 @@
   flex-basis: 100%;
   text-align: center;
 }
-/* Context bars: one compact row of values per tab, with a status row below. */
-.addon-dnd-character .dse-layout-compact .dnd-save-status {
-  justify-content: flex-end;
-  min-height: 1rem;
-  margin-bottom: 0.25rem;
-}
-/* A modal is about its own task; only pending work and errors follow into it. */
-.addon-dnd-character
-  .character-dialog:not(.character-window)
-  > .dnd-save-status[data-ui-state="success"] {
-  display: none;
-}
-.addon-dnd-character .dse-layout-compact .dnd-save-status[data-ui-state="success"],
-.addon-dnd-character .character-window > .dnd-save-status[data-ui-state="success"] {
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  box-shadow: none;
-  font-size: 0.72rem;
-}
 .dsc-bar {
   display: grid;
   gap: 0.5rem;
