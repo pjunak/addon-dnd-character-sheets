@@ -3,16 +3,20 @@
 .addon-dnd-character[data-layout="compact"] {
   max-width: 85rem;
 }
+/* On desktop the frame fills the viewport below the host's header and each tab
+   scrolls inside it, so switching tabs never changes the page height and the
+   rail, with Builder and Tools at its foot, stays in view. */
 .addon-dnd-character .dse-layout-compact {
   --dsc-gap: 0.65rem;
   align-items: stretch;
   grid-template-columns: 7.5rem minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: 0.75rem;
+  height: max(30rem, calc(100dvh - var(--dsc-frame-top, 0px) - 1.5rem));
 }
-/* The rail follows the reader, so Builder and Tools at its foot stay in reach on tall tabs. */
 .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs {
-  align-self: start;
-  height: min(100%, calc(100dvh - 2rem));
+  position: static;
+  height: auto;
   min-height: 0;
   padding-right: 0.4rem;
 }
@@ -34,22 +38,22 @@
   stroke-linejoin: round;
 }
 .addon-dnd-character .dse-layout-compact .dnd-sheet-workspace {
-  display: block;
+  display: flex;
+  flex-direction: column;
   position: relative;
-  min-height: max(48rem, var(--dsc-content-height, 0px));
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
-.dnd-frame-measure {
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 0;
-  overflow: hidden;
-  visibility: hidden;
-  pointer-events: none;
-  contain: layout style;
-}
+/* The panel fills the frame, so full-height columns such as Backpack reach its foot. */
 .addon-dnd-character .dse-layout-compact .dnd-sheet-panel {
-  display: block;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+}
+.addon-dnd-character .dse-layout-compact .dnd-sheet-panel > .dsc-equipment {
+  flex: 1 0 auto;
 }
 .addon-dnd-character .dse-layout-compact .dse-cards {
   display: flex;
@@ -911,9 +915,14 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+/* Narrow screens keep normal page flow. */
 @container character-sheet (max-width:48rem) {
+  .addon-dnd-character .dse-layout-compact {
+    grid-template-rows: none;
+    height: auto;
+  }
   .addon-dnd-character .dse-layout-compact .dnd-sheet-workspace {
-    min-height: 0;
+    overflow-y: visible;
   }
 }
 @container sheet-workspace (max-width:30rem) {

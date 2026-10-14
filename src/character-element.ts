@@ -718,9 +718,6 @@ export function defineCharacterElement(
           ? { start: focused.selectionStart, end: focused.selectionEnd }
           : undefined;
       const root = styled("section", "dnd-sheet-shell dse-layout-" + this.#layout);
-      // Preserve document height while replacing a tab, before enhancement or
-      // focus restoration can flush the shorter panel's layout and clamp scroll.
-      if (this.#layout === "compact") this.#frame.restoreHeight(root);
       this.dataset["layout"] = this.#layout;
       if (!this.#response) {
         const status = el("p", this.#feedback(this.#message || "Loading character…"));
@@ -843,25 +840,9 @@ export function defineCharacterElement(
       )
         restore.setSelectionRange(selection.start, selection.end);
       showRuleNotes(this, this.#ruleNotes, this.#t("Against the rules"), this.#feedback);
-      if (this.#layout === "compact")
-        this.#frame.connect(
-          root,
-          content,
-          // Re-measure inactive views when their structure can change, not
-          // after every save: the frame only grows, and the visible view is
-          // observed continuously.
-          [
-            this.lang,
-            this.#catalogs.size,
-            this.#response.status,
-            this.#response.rulesChanged,
-            this.#input.build.levels.map((level) => level.classId).join(","),
-          ].join("/"),
-          () => this.#frameSamples(),
-          this.#runtime.enhance,
-        );
+      if (this.#layout === "compact") this.#frame.connect(root, this.#tab);
     }
-    #tabPanel(tab: Tab, navigation = this.#builderNav, pickers = this.#spellPickers): HTMLElement {
+    #tabPanel(tab: Tab): HTMLElement {
       const view = this.#sheetView(),
         content = styled("div", "dnd-sheet-panel"),
         actions: CompactActions = {
@@ -870,14 +851,14 @@ export function defineCharacterElement(
           rest: (kind) => this.#rest(kind),
           prepare: () => this.#prepare(),
         };
-      if (tab === "builder") content.append(this.#builder(navigation, pickers));
+      if (tab === "builder") content.append(this.#builder());
       else if (tab === "tools") content.append(this.#tools());
       else if (tab === "spells")
         content.append(
           this.#layout === "classic"
             ? vitals(view)
             : compactSpellBar(view, this.#response?.state ? actions.prepare : undefined),
-          this.#spells(pickers),
+          this.#spells(),
         );
       else if (tab === "equipment") content.append(compactEquipment(view, actions));
       else if (this.#layout === "compact")
@@ -903,35 +884,6 @@ export function defineCharacterElement(
         content.append(styled("div", "dse-cols", abilityRail(view), main));
       }
       return content;
-    }
-    *#frameSamples(): Iterable<HTMLElement> {
-      const tabs: Tab[] = ["sheet", "combat", "equipment", "spells", "tools"],
-        destinations = [
-          "character",
-          ...new Set(this.#input.build.levels.map((level) => level.classId)),
-          "add-class",
-          "spells",
-          "dm-given",
-        ];
-      const views = [
-        ...tabs.map((tab) => ({ tab, builder: this.#builderNav.tab })),
-        ...destinations.map((builder) => ({ tab: "builder" as const, builder })),
-      ];
-      for (const { tab, builder } of views) {
-        const navigation = {
-            ...this.#builderNav,
-            tab: builder,
-            target: "",
-          },
-          pickers = new Map([...this.#spellPickers].map(([key, state]) => [key, { ...state }])),
-          sample = this.#tabPanel(tab, navigation, pickers);
-        for (const details of sample.querySelectorAll<HTMLDetailsElement>(
-          "details[data-details-key]",
-        ))
-          if (this.#details.has(details.dataset["detailsKey"]!))
-            details.open = this.#details.get(details.dataset["detailsKey"]!)!;
-        yield sample;
-      }
     }
     #sheetView(): SheetView {
       const editing =

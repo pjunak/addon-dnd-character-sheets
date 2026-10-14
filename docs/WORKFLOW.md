@@ -10,11 +10,9 @@ character heading is not repeated. When
 space is too narrow relative to text size, the vertical navigation stacks above
 the sheet so enlarged text and recovery controls remain readable.
 
-The Compact desktop frame measures every tab and current Builder section before
-first visits, reusing that height during navigation and growing for expanded
-content. Width, font and saved-data changes refresh the measurements. Temporary
-inert samples borrow the same host controls and are removed immediately; they
-cannot edit saved data or resolve rule links. The visible panel stays mounted
+The Compact desktop frame fills the viewport below the host's header. Each tab
+scrolls inside it and keeps its scroll position across saves and tab changes,
+so the page height never changes with the tab. The visible panel stays mounted
 during resize, preserving focus and native input state. Narrow screens use normal
 document flow.
 
