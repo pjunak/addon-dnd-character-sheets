@@ -140,11 +140,15 @@ export function select(
   options: readonly Option[],
   change: (value: string) => void | Promise<void>,
   t = translator("en"),
+  { required = false }: { readonly required?: boolean } = {},
 ): HTMLSelectElement {
   const node = el("select");
-  const blank = el("option", t("Choose…"));
-  blank.value = "";
-  node.append(blank);
+  // A field that always has a value offers no empty "Choose…" entry.
+  if (!required) {
+    const blank = el("option", t("Choose…"));
+    blank.value = "";
+    node.append(blank);
+  }
   for (const option of options) {
     const row = el("option", option.label);
     row.value = option.id;
@@ -305,8 +309,8 @@ export function stepper(
     if (next !== value()) change(next);
     sync();
   };
-  const up = button("▴", () => update(value() + 1)),
-    down = button("▾", () => update(value() - 1));
+  const up = button("+", () => update(value() + 1)),
+    down = button("−", () => update(value() - 1));
   up.setAttribute("aria-label", t("Increase"));
   down.setAttribute("aria-label", t("Decrease"));
   const sync = (): void => {
@@ -327,7 +331,7 @@ export function stepper(
           : value() + (event.key === "ArrowUp" ? 1 : -1),
     );
   });
-  root.append(input, styled("div", "character-stepper-arrows", up, down));
+  root.append(down, input, up);
   steppers.set(root, sync);
   sync();
   return root;

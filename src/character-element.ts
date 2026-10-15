@@ -1305,6 +1305,7 @@ export function defineCharacterElement(
               this.#render();
             },
             this.#t,
+            { required: true },
           ),
         ),
       );

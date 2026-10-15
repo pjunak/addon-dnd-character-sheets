@@ -1657,36 +1657,39 @@
 .character-foundation > .dnd-builder-progress {
   grid-column: 1/-1;
 }
+/* − value +: full-height buttons on either side keep both targets easy to hit. */
 .character-stepper {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   min-width: 0;
   align-items: stretch;
 }
 .character-stepper input {
-  flex: 1 1 0;
-  width: 0;
+  width: 100%;
   min-width: 0;
   text-align: center;
   font-size: 1.25rem;
   appearance: textfield !important;
-  border-radius: 4px 0 0 4px;
+  border-radius: 0;
 }
 .character-stepper input::-webkit-inner-spin-button {
   appearance: none;
 }
-.character-stepper-arrows {
-  display: grid;
-  flex: 0 0 auto;
-}
-.character-stepper-arrows button {
-  min-height: 1.5rem;
-  padding: 0 0.65rem;
-  border-radius: 0;
-  line-height: 1;
-  background: var(--bg-raised);
+.character-stepper > button {
+  min-width: var(--ui-target, 2.25rem);
+  padding: 0;
   border: 1px solid var(--border-subtle);
+  background: var(--bg-raised);
+  font-size: 1.1rem;
+  line-height: 1;
 }
-.character-stepper-arrows button:disabled {
+.character-stepper > button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+.character-stepper > button:last-child {
+  border-radius: 0 4px 4px 0;
+}
+.character-stepper > button:disabled {
   opacity: 0.35;
 }
 .character-field > label {
@@ -1700,10 +1703,6 @@
 @media (max-width: 550px) {
   .character-foundation {
     grid-template-columns: 1fr;
-  }
-  .character-stepper-arrows button {
-    min-height: 1.7rem;
-    padding: 0 0.8rem;
   }
 }
 
@@ -1971,9 +1970,6 @@
   }
   .addon-dnd-character .character-build > .character-panel {
     padding: 0.6rem;
-  }
-  .addon-dnd-character .character-stepper-arrows button {
-    padding-inline: 0.5rem;
   }
 }
 /* Keep enlarged text readable when a side rail would leave a narrow column. */
