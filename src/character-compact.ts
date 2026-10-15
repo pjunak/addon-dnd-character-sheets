@@ -634,7 +634,10 @@ export function compactSheet(
         styled(
           "div",
           "dsc-casting",
-          ...casters.map((caster, index) => castingDetails(view, caster, index)),
+          ...casters.map((caster, index) => {
+            const { source, numbers } = castingDetails(view, caster, index);
+            return styled("div", "dse-casting", el("small", source), numbers);
+          }),
         ),
       );
     return styled(
@@ -667,9 +670,10 @@ export function compactSpellBar(view: SheetView, prepare?: () => void): HTMLElem
     values = styled("div", "dsc-vitals dsc-spell-values");
   root.setAttribute("aria-label", t("Spellcasting"));
   values.append(characterName(view));
-  rows(object(sheet["spellcasting"])["perClass"]).forEach((caster, index) =>
-    values.append(styled("div", "dsc-cell", castingDetails(view, caster, index))),
-  );
+  rows(object(sheet["spellcasting"])["perClass"]).forEach((caster, index) => {
+    const { source, numbers } = castingDetails(view, caster, index);
+    values.append(cell(source, numbers, "casting"));
+  });
   for (const resource of rows(sheet["resources"]).filter((row) => row["kind"] === "slot")) {
     const key = String(resource["key"]),
       maximum = Math.max(0, Number(resource["max"] ?? 0)),

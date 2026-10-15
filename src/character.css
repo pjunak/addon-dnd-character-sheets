@@ -289,12 +289,6 @@
   white-space: nowrap;
   letter-spacing: 0.03em;
 }
-.dse-casting {
-  display: flex;
-  justify-content: center;
-  margin-bottom: var(--space-1);
-  white-space: normal;
-}
 .addon-dnd-sheets .dse-caster {
   border-color: rgba(var(--accent-gold-rgb), 0.35);
 }

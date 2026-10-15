@@ -220,7 +220,11 @@ export function abilityRail(view: SheetView): HTMLElement {
     for (const [index, caster] of rows(object(sheet["spellcasting"])["perClass"]).entries())
       if (view.layout === "compact" && caster["ability"] === ability) {
         card.classList.add("dse-caster");
-        dock.append(castingDetails(view, caster, index, true));
+        // Beside Init and Passive, the class name moves to the tooltip.
+        const { source, numbers } = castingDetails(view, caster, index),
+          chip = styled("span", "dse-dock", numbers);
+        chip.title = source;
+        dock.append(chip);
       }
     const skills = Object.entries(object(sheet["skills"])).filter(
       ([, raw]) => object(raw)["ability"] === ability,
@@ -258,31 +262,32 @@ export function abilityRail(view: SheetView): HTMLElement {
   }
   return rail;
 }
-// Docked in an ability card heading, beside Init and Passive, the class name
-// moves to the tooltip.
+// One caster's numbers as a single "DC 13 · Attack +5" line, with the class or
+// source that grants them for the caller to label it.
 export function castingDetails(
   view: SheetView,
   caster: Record<string, unknown>,
   index: number,
-  docked = false,
-): HTMLElement {
+): { source: string; numbers: HTMLElement } {
   const t = translator(view.locale),
     path = "spellcasting.perClass." + index;
   const source = caster["source"]
     ? spellSourceLabel(caster["source"], view.locale)
     : recordName(view, "class", text(caster["classId"]));
-  const dc = savedRule(view.projection, t("DC {0}", [human(caster["saveDC"])]), path + ".saveDC"),
-    attack = savedRule(
+  const dot = el("span", "·");
+  dot.setAttribute("aria-hidden", "true");
+  const numbers = styled(
+    "span",
+    "dse-casting-numbers",
+    savedRule(view.projection, t("DC {0}", [human(caster["saveDC"])]), path + ".saveDC"),
+    dot,
+    savedRule(
       view.projection,
       t("Attack {0}", [signed(caster["spellAttack"])]),
       path + ".spellAttack",
-    );
-  if (!docked) return styled("div", "dse-dock dse-casting", el("small", source), dc, attack);
-  const dot = el("span", "·");
-  dot.setAttribute("aria-hidden", "true");
-  const chip = styled("span", "dse-dock", dc, dot, attack);
-  chip.title = source;
-  return chip;
+    ),
+  );
+  return { source, numbers };
 }
 export function vitals(view: SheetView): HTMLElement {
   const t = translator(view.locale),
