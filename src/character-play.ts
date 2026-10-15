@@ -45,6 +45,29 @@ export function playActions(
       ? t("{0} · {1}/{2}", [resource["name"], resource["remaining"], resource["max"]])
       : key;
   };
+  // An empty slot key means the spell costs nothing (a cantrip), so there is
+  // nothing to pick. Otherwise the first resource is preselected.
+  const slotPicker = (
+    name: string,
+    slots: readonly string[],
+    change: (value: string) => void,
+  ): HTMLElement[] => {
+    const resources = slots.filter(Boolean);
+    return resources.length
+      ? [
+          field(
+            name,
+            select(
+              slots[0] ?? "",
+              resources.map((id) => ({ id, label: slotName(id) })),
+              change,
+              t,
+              { required: true },
+            ),
+          ),
+        ]
+      : [];
+  };
   if (section === "recovery")
     for (const resource of rows(evaluation.sheet["resources"]).filter(
       (row) => row["kind"] === "hitdice",
@@ -97,20 +120,11 @@ export function playActions(
       const slots = strings(rawSlots);
       let slot = slots[0] ?? "";
       const row = spellRow(ref);
-      if (slots.length)
-        row.append(
-          field(
-            t("Spend slot"),
-            select(
-              slot,
-              slots.map((id) => ({ id, label: slotName(id) })),
-              (value) => {
-                slot = value;
-              },
-              t,
-            ),
-          ),
-        );
+      row.append(
+        ...slotPicker(t("Spend slot"), slots, (value) => {
+          slot = value;
+        }),
+      );
       row.append(button(t("Cast"), () => act({ operation: "cast-spell", classId, ref, slot })));
       group.append(row);
     }
@@ -216,20 +230,11 @@ export function playActions(
           .join(" · "),
       ),
     );
-    if (slots.length)
-      row.append(
-        field(
-          t("Granted cast resource"),
-          select(
-            slot,
-            slots.map((id) => ({ id, label: slotName(id) })),
-            (value) => {
-              slot = value;
-            },
-            t,
-          ),
-        ),
-      );
+    row.append(
+      ...slotPicker(t("Granted cast resource"), slots, (value) => {
+        slot = value;
+      }),
+    );
     row.append(
       button(t("Cast granted spell"), () => act({ operation: "cast-granted-spell", key, slot })),
     );
