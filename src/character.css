@@ -1235,6 +1235,18 @@
 .character-dialog details {
   margin-block: 0.7rem;
 }
+/* Import review: one line per short change, the new value at the end. */
+.dnd-change {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.15rem 1rem;
+  margin: 0.35rem 0;
+}
+.dnd-change-values,
+.dnd-change-count {
+  color: var(--text-muted);
+}
 .character-dialog summary {
   cursor: pointer;
   min-height: 32px;

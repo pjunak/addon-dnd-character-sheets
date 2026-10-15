@@ -1,6 +1,17 @@
 import type { Difference, Projection } from "./character-model.js";
 import { translator } from "./character-locale.js";
-import { el, human, label, rule } from "./character-ui.js";
+import { el, human, label, rule, styled } from "./character-ui.js";
+
+/** Stored keys such as "feat:magic-initiate@background%3Aguide:mi-spell" read as their last part. */
+function pathPart(value: string): string {
+  let decoded = value;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    // A malformed escape is shown as stored.
+  }
+  return label(decoded.split(/[:@]/u).at(-1) || decoded);
+}
 
 /** Render complete change groups from the coordinator's reviewed import. */
 export function comparisonView(
@@ -27,26 +38,41 @@ export function comparisonView(
     groups.set(group, [...(groups.get(group) ?? []), change]);
   }
   for (const [group, entries] of groups) {
-    const section = el("details", el("summary", t(label(group))));
-    section.open = true;
+    // Calculated values follow from the decisions above, so they start folded.
+    const section = el(
+      "details",
+      el("summary", t(label(group)), " ", styled("span", "dnd-change-count", entries.length)),
+    );
+    section.open = group !== "calculated values";
     for (const change of entries) {
       const path = change.path.replace(/^\/(inputs|projection\/sheet|rules)(?:\/|$)/u, "");
       const explanation = change.path.startsWith("/projection/sheet/")
         ? projection?.explanations[path.replaceAll("/", ".")]
         : undefined;
-      const title = path
-        ? path
-            .split("/")
-            .map((part) => t(label(part)))
-            .join(" › ")
+      // Inside "Build" or "Play" the heading already names the first part.
+      const parts = path.split("/").filter(Boolean);
+      if (change.path.startsWith("/inputs/")) parts.shift();
+      const title = parts.length
+        ? parts.map((part) => t(pathPart(part))).join(" › ")
         : t(label(group));
+      const heading = explanation ? rule(title, undefined, explanation) : el("span", title),
+        before = human(change.before),
+        after = human(change.after);
+      // Short values read best on the same line; long ones open on demand.
       section.append(
-        el(
-          "details",
-          el("summary", explanation ? rule(title, undefined, explanation) : title),
-          el("p", t("Before: {0}", [human(change.before)])),
-          el("p", t("After: {0}", [human(change.after)])),
-        ),
+        before.length <= 40 && after.length <= 40
+          ? styled(
+              "p",
+              "dnd-change",
+              heading,
+              styled("span", "dnd-change-values", t("{0} → {1}", [before, after])),
+            )
+          : el(
+              "details",
+              el("summary", heading),
+              el("p", t("Before: {0}", [before])),
+              el("p", t("After: {0}", [after])),
+            ),
       );
     }
     root.append(section);
