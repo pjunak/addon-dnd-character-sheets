@@ -235,9 +235,7 @@ export function playActions(
         slot = value;
       }),
     );
-    row.append(
-      button(t("Cast granted spell"), () => act({ operation: "cast-granted-spell", key, slot })),
-    );
+    row.append(button(t("Cast"), () => act({ operation: "cast-granted-spell", key, slot })));
     root.append(row);
   }
   filter();
