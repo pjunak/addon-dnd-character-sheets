@@ -1484,8 +1484,11 @@
 .addon-dnd-character .dnd-spell-row .character-field {
   margin: 0;
 }
-/* Every row spends a slot; the chosen slot names itself, so the label is for assistive technology. */
-.addon-dnd-character .dnd-spell-row .character-field > label {
+/* Labels kept for assistive technology where the context already names the
+   field: every spell row spends a slot, and a single builder pick sits under
+   its own panel heading. */
+.addon-dnd-character .dnd-spell-row .character-field > label,
+.addon-dnd-character .character-field.is-label-hidden > label {
   position: absolute;
   width: 1px;
   height: 1px;

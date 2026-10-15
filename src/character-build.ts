@@ -399,7 +399,8 @@ function choiceView(
   const t = translator(view.locale),
     id = String(descriptor["id"]),
     kind = String(descriptor["kind"]),
-    root = panel(builderLabel(guidance, view.locale, text(descriptor["name"], id)));
+    heading = builderLabel(guidance, view.locale, text(descriptor["name"], id)),
+    root = panel(heading);
   root.id = `character-choice-${encodeURIComponent(id)}`;
   const current = (slot: number): unknown =>
     view.input.build.choices.find((choice) => choice.id === id && choice.slot === slot)?.value;
@@ -483,10 +484,12 @@ function choiceView(
         root.append(choiceView({ ...ability, kind: "abilityBudget" }, {}, view));
     }
   } else {
-    const choices = guidanceOptions(guidance["options"], view.locale);
-    for (let slot = 0; slot < Number(descriptor["count"] ?? 1); slot++) {
+    const choices = guidanceOptions(guidance["options"], view.locale),
+      count = Number(descriptor["count"] ?? 1);
+    for (let slot = 0; slot < count; slot++) {
+      // A single pick is named by the panel heading; several are numbered.
       const selection = field(
-        t("Selection {0}", [slot + 1]),
+        count > 1 ? t("{0} of {1}", [slot + 1, count]) : heading,
         combo(
           text(current(slot)),
           () =>
@@ -504,6 +507,7 @@ function choiceView(
           t,
         ),
       );
+      if (count === 1) selection.classList.add("is-label-hidden");
       if (!choices.some((option) => option.id === current(slot)))
         selection.dataset["builderPending"] = "";
       root.append(selection);
