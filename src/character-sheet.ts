@@ -38,6 +38,8 @@ export type Layout = "compact" | "classic";
 export interface SheetView {
   locale: string;
   layout: Layout;
+  /** The host record's name, which the sheet shows instead of the host. */
+  name: string;
   input: Inputs;
   projection: Projection | undefined;
   catalogs: Map<string, CatalogRecord[]>;
@@ -77,6 +79,18 @@ export function preferredLayout(storage: Storage | undefined, actor: string, key
   } catch {
     return "compact";
   }
+}
+// The host leaves the name to the sheet. It leads each tab's top row in at most
+// two lines, sized by its longest line: its longest word or half the name.
+export function characterName(view: Pick<SheetView, "name">): HTMLElement {
+  const node = styled("div", "dnd-sheet-name", view.name),
+    words = view.name.split(/\s+/).map((word) => word.length);
+  node.style.setProperty(
+    "--name-chars",
+    String(Math.max(...words, Math.ceil(view.name.length / 2))),
+  );
+  node.title = view.name;
+  return node;
 }
 export function savedRule(
   projection: Projection | undefined,
@@ -206,7 +220,7 @@ export function abilityRail(view: SheetView): HTMLElement {
     for (const [index, caster] of rows(object(sheet["spellcasting"])["perClass"]).entries())
       if (view.layout === "compact" && caster["ability"] === ability) {
         card.classList.add("dse-caster");
-        details.append(castingDetails(view, caster, index));
+        dock.append(castingDetails(view, caster, index, true));
       }
     const skills = Object.entries(object(sheet["skills"])).filter(
       ([, raw]) => object(raw)["ability"] === ability,
@@ -244,27 +258,31 @@ export function abilityRail(view: SheetView): HTMLElement {
   }
   return rail;
 }
+// Docked in an ability card heading, beside Init and Passive, the class name
+// moves to the tooltip.
 export function castingDetails(
   view: SheetView,
   caster: Record<string, unknown>,
   index: number,
+  docked = false,
 ): HTMLElement {
   const t = translator(view.locale),
     path = "spellcasting.perClass." + index;
   const source = caster["source"]
     ? spellSourceLabel(caster["source"], view.locale)
     : recordName(view, "class", text(caster["classId"]));
-  return styled(
-    "div",
-    "dse-dock dse-casting",
-    el("small", source),
-    savedRule(view.projection, t("DC {0}", [human(caster["saveDC"])]), path + ".saveDC"),
-    savedRule(
+  const dc = savedRule(view.projection, t("DC {0}", [human(caster["saveDC"])]), path + ".saveDC"),
+    attack = savedRule(
       view.projection,
       t("Attack {0}", [signed(caster["spellAttack"])]),
       path + ".spellAttack",
-    ),
-  );
+    );
+  if (!docked) return styled("div", "dse-dock dse-casting", el("small", source), dc, attack);
+  const dot = el("span", "·");
+  dot.setAttribute("aria-hidden", "true");
+  const chip = styled("span", "dse-dock", dc, dot, attack);
+  chip.title = source;
+  return chip;
 }
 export function vitals(view: SheetView): HTMLElement {
   const t = translator(view.locale),

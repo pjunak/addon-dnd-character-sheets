@@ -41,7 +41,8 @@ required `ui.controls.v1` [shared UI contract](../ttrpg-codex/docs/reference/UI_
 The host supplies interaction and theme tokens; this package retains build/play
 semantics and automatic saving.
 
-Each Compact tab opens with a context bar holding only what that tab needs.
+Each Compact tab opens with a context bar holding only what that tab needs,
+led by the character's name in at most two lines that shrink as it grows.
 Sheet and Combat share HP, temporary HP, AC, Speed, Proficiency and Inspiration;
 Combat adds Initiative. The HP field takes a value or `-7` (damage), `+5`
 (healing) or `=30` (set) followed by Enter; damage and healing go through the
@@ -79,9 +80,10 @@ focus on another control if the user has already moved there.
 
 On desktop the frame fills the viewport below the host's header: the rail stays
 in view and each tab scrolls inside the frame, keeping its own scroll position,
-so switching tabs never changes the page height. "Saving…" and "Saved" share one
-quiet line above the tab; only errors take more room. Only the selected editable
-view is mounted. Small screens use normal document flow.
+so switching tabs never changes the page height. "Saving…" and "Saved" float
+above the sheet's top-right corner and take no room; notices and errors take a
+line above the tab. Only the selected editable view is mounted. Small screens
+use normal document flow.
 Compact navigation wraps whole labels into rows as space or text size changes.
 It uses the host's tab controls: Up/Down for the desktop rail, Left/Right for
 the narrow-screen rows, with the same selected tab and keyboard focus.
@@ -128,12 +130,13 @@ adoption can save the pending edits together with the new rules. Conflicts and
 uncertain requests retain their recovery guards. Without compatible rules,
 saved values, export and printing remain usable.
 
-The sheet is limited to 1,120 px and has no duplicate character heading. Compact
-uses tighter ability cards and places currency directly below inventory. When
-enlarged text leaves too little room beside navigation, the rail stacks above
-the sheet and keeps its vertical keyboard behavior. Ability cards stack their
-score and skill list when the available width would squeeze enlarged skill
-names into narrow columns.
+The sheet is limited to 1,120 px. The host shows no visible character heading;
+the sheet shows the name in each tab's top row. Compact uses tighter ability
+cards, with the spell save DC and attack beside the casting ability's name, and
+places currency directly below inventory. When enlarged text leaves too little
+room beside navigation, the rail stacks above the sheet and keeps its vertical
+keyboard behavior. Ability cards stack their score and skill list when the
+available width would squeeze enlarged skill names into narrow columns.
 
 The host owns the core profile, portrait and relationships. The native worker
 provides `dnd5e.character` 3.0.0, which the add-on's own UI reaches through the

@@ -3,6 +3,7 @@ import {
   abilityRail,
   attackDetails,
   castingDetails,
+  characterName,
   classValueRows,
   currency,
   explorationDetails,
@@ -373,6 +374,7 @@ export function compactVitals(
     values = styled("div", "dsc-vitals");
   root.setAttribute("aria-label", t("Core character values"));
   values.append(
+    characterName(view),
     hitPoints(view),
     derivedCell(view, "Armor class", "armorClass"),
     derivedCell(view, "Speed", "speed"),
@@ -664,6 +666,7 @@ export function compactSpellBar(view: SheetView, prepare?: () => void): HTMLElem
     root = styled("section", "dsc-bar"),
     values = styled("div", "dsc-vitals dsc-spell-values");
   root.setAttribute("aria-label", t("Spellcasting"));
+  values.append(characterName(view));
   rows(object(sheet["spellcasting"])["perClass"]).forEach((caster, index) =>
     values.append(styled("div", "dsc-cell", castingDetails(view, caster, index))),
   );
@@ -708,6 +711,7 @@ function equipmentBar(view: SheetView): HTMLElement {
     values = styled("div", "dsc-vitals");
   root.setAttribute("aria-label", t("Equipment effects"));
   values.append(
+    characterName(view),
     derivedCell(view, "Armor class", "armorClass"),
     derivedCell(view, "Speed", "speed"),
   );

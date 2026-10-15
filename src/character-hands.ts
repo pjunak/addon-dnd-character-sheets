@@ -155,6 +155,10 @@ export function handControls(view: SheetView, combat: boolean): HTMLElement {
     view.locale,
   );
   if (reason) root.append(el("p", reason));
-  root.append(el("small", t("Equipment changes do not track turn or action costs.")));
+  const note = styled("span", "dse-hint", "ⓘ");
+  note.title = t("Equipment changes do not track turn or action costs.");
+  note.setAttribute("role", "img");
+  note.setAttribute("aria-label", note.title);
+  root.querySelector("h3")!.append(note);
   return root;
 }

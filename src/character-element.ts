@@ -21,6 +21,7 @@ import { CompactFrame } from "./character-frame.js";
 import {
   abilityRail,
   backpack,
+  characterName,
   combatDetails,
   preferredLayout,
   vitals,
@@ -447,7 +448,19 @@ export function defineCharacterElement(
     };
     #status(): void {
       const node = this.querySelector<HTMLElement>("[data-character-status]");
-      if (node) this.#saveFeedback(node);
+      if (!node) return;
+      this.#saveFeedback(node);
+      const shell = this.querySelector<HTMLElement>(":scope > .dnd-sheet-shell");
+      if (shell && !node.closest(".character-dialog")) this.#placeStatus(node, shell);
+    }
+    // "Saving…" and "Saved" float above the sheet's top corner and take no room;
+    // anything that needs reading or a decision takes the line above the tab.
+    // A floating status leaves the workspace, which scrolls and clips.
+    #placeStatus(node: HTMLElement, shell: HTMLElement): void {
+      const workspace = shell.querySelector<HTMLElement>(".dnd-sheet-workspace")!;
+      if (node.dataset["quiet"] === "true") {
+        if (node.parentElement !== shell) shell.append(node);
+      } else if (node.parentElement !== workspace) workspace.prepend(node);
     }
     #saveFeedback(node: HTMLElement): void {
       node.replaceChildren(el("span", this.#feedback(this.#message)));
@@ -516,6 +529,11 @@ export function defineCharacterElement(
         if (this.#tab !== "tools")
           node.append(button(this.#t("Review changed rules"), () => this.#reviewRules()));
       }
+      node.dataset["quiet"] = String(
+        node.childElementCount === 1 &&
+          ["", "Saved", "Saving…"].includes(this.#message) &&
+          ["success", "loading"].includes(node.dataset["uiState"]),
+      );
     }
     #reviewRules(): void {
       this.#dialog?.close();
@@ -782,11 +800,11 @@ export function defineCharacterElement(
       content.id = "dnd-panel-" + this.#tab;
       content.setAttribute("role", "tabpanel");
       content.setAttribute("aria-labelledby", "dnd-tab-" + this.#tab);
-      root.append(nav, styled("div", "dnd-sheet-workspace", ...(dialog ? [] : [status]), content));
+      root.append(nav, styled("div", "dnd-sheet-workspace", content));
       if (dialog) {
         dialog.querySelector("[data-character-status]")?.remove();
         dialog.insertBefore(status, dialog.querySelector("[data-dialog-body]"));
-      }
+      } else this.#placeStatus(status, root);
       for (const field of root.querySelectorAll<HTMLElement>(".character-field")) {
         const scope = field.closest<HTMLElement>(
           "[id^=character-choice-], [data-item], [data-builder-target]",
@@ -891,6 +909,9 @@ export function defineCharacterElement(
         );
         content.append(styled("div", "dse-cols", abilityRail(view), main));
       }
+      // Tabs without a compact top bar give the name a line of its own.
+      if (this.#layout === "classic" || tab === "builder" || tab === "tools")
+        content.prepend(characterName(view));
       return content;
     }
     #sheetView(): SheetView {
@@ -900,6 +921,7 @@ export function defineCharacterElement(
       return {
         locale: this.#context?.host.locale ?? "en",
         layout: this.#layout,
+        name: this.#name,
         input: this.#input,
         projection: this.#response?.state?.projection,
         catalogs: this.#catalogs,

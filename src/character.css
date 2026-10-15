@@ -1394,9 +1394,20 @@
   line-height: 1.4;
   color: var(--text-muted);
 }
-/* "Saving…" and "Saved" share one quiet, right-aligned line above the tab in
-   both layouts, so saving never moves the sheet; only errors and notices that
-   need attention or actions take more room. */
+/* "Saving…" and "Saved" float above the sheet's top-right corner, in the gap
+   under the host's tabs, so saving never moves or covers the sheet. Notices,
+   errors and actions take a line above the tab instead. */
+.addon-dnd-character .dnd-sheet-shell {
+  position: relative;
+}
+.addon-dnd-character .dnd-sheet-shell > .dnd-save-status {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  margin-bottom: 0.3rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
 .addon-dnd-character .dnd-sheet-workspace > .dnd-save-status {
   min-height: 1rem;
   margin-bottom: 0.25rem;
@@ -1408,7 +1419,7 @@
   display: none;
 }
 .addon-dnd-character
-  .dnd-sheet-workspace
+  :is(.dnd-sheet-shell, .dnd-sheet-workspace)
   > .dnd-save-status:is([data-ui-state="success"], [data-ui-state="loading"]),
 .addon-dnd-character
   .character-window
@@ -1760,6 +1771,25 @@
 .dnd-sheet-panel {
   align-content: start;
 }
+/* The name leads each tab's top row: two lines at most, sized by
+   characterName from its longest line. */
+.addon-dnd-character .dnd-sheet-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  align-self: center;
+  overflow: hidden;
+  max-width: 10rem;
+  color: var(--accent-gold);
+  font: 600 clamp(0.9rem, calc(13rem / var(--name-chars)), 1.6rem) / 1.1 var(--font-title);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.addon-dnd-character .dnd-sheet-panel > .dnd-sheet-name {
+  align-self: start;
+  max-width: none;
+  margin-bottom: 0.5rem;
+}
 .addon-dnd-character .dnd-save-status {
   font-size: 0.75rem;
   min-height: 1.1rem;
@@ -2106,6 +2136,15 @@
 }
 .dse-hands :is(p, small) {
   overflow-wrap: anywhere;
+}
+/* A side note kept to a hover hint at the end of a panel heading. */
+.addon-dnd-character .dse-hint {
+  margin-left: auto;
+  padding-left: 0.3rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 400;
+  cursor: help;
 }
 @container character-sheet (max-width:42rem) {
   .dse-hands {

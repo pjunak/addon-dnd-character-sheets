@@ -6,7 +6,7 @@ Sheet, Combat, Equipment, Spells, Builder and Tools in a left rail. Tools sits
 at the bottom, with Builder just above it. Compact fits up to 1,360 px within the
 host article; Classic retains its 1,120 px, five-tab arrangement. Compact places
 attributes/skills on the right and inventory/currency in Equipment. The host
-character heading is not repeated. When
+shows no visible character heading; the sheet shows the name instead. When
 space is too narrow relative to text size, the vertical navigation stacks above
 the sheet so enlarged text and recovery controls remain readable.
 
@@ -84,9 +84,10 @@ provider-free reading, print and transfer preserve those identities. No turn or
 action costs are tracked. The controls use shared host fields, button styling,
 focus keys and saved-rule details in both layouts.
 
-Compact gives each tab a context bar. Sheet and Combat share the HP block;
-current HP is directly rewritable or takes `-N`, `+N` and `=N` instructions, and
-temporary HP remains editable. Conditions, the D20 adjustment and rests share
+Compact gives each tab a context bar led by the character's name; Builder,
+Tools and Classic give the name a line of its own. Sheet and Combat share the
+HP block; current HP is directly rewritable or takes `-N`, `+N` and `=N`
+instructions, and temporary HP remains editable. Conditions, the D20 adjustment and rests share
 the bar's status row. Combat shows ability modifiers and saves in its small row,
 its attacks open, and casting sources beneath them. Rests, the body figure,
 Backpack and prepared spells open as non-modal floating windows. Training,

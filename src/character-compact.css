@@ -90,6 +90,14 @@
   white-space: normal;
   font-size: 0.65rem;
 }
+/* Heading chips stay whole and wrap below the ability name when narrow. */
+.addon-dnd-character .dse-layout-compact .dse-dock-slot {
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.addon-dnd-character .dse-layout-compact .dse-dock-slot > .dse-dock {
+  white-space: nowrap;
+}
 .dse-casting {
   flex-wrap: wrap;
   gap: 0.3rem;
@@ -119,12 +127,15 @@
   align-content: center;
   gap: 0.15rem;
   min-width: 0;
-  padding-inline: 0.85rem;
+  padding-inline: 0.6rem;
   border-left: 1px solid var(--border-subtle);
 }
 .dsc-vitals > :first-child {
   padding-left: 0;
   border-left: 0;
+}
+.dsc-vitals > :last-child {
+  padding-right: 0;
 }
 .dsc-vitals > .dsc-spacer {
   flex: 1;
@@ -216,7 +227,7 @@
   color: var(--text-muted);
 }
 .addon-dnd-character .dsc-temp input {
-  width: 3.5rem;
+  width: 3rem;
   min-height: 0;
   padding: 0.05rem 0.25rem;
   font-size: 0.85rem;
@@ -541,12 +552,6 @@
   max-width: 6rem;
   font-size: 0.72rem;
   padding: 0.4rem;
-}
-.addon-dnd-character .dse-layout-compact [data-hands] > small {
-  display: block;
-  margin-top: 0.35rem;
-  color: var(--text-muted);
-  font-size: 0.7rem;
 }
 
 /* Spells */
@@ -921,6 +926,13 @@
     padding-left: 0;
     border-left: 0;
   }
+  /* The name shares the hit point row; the other values wrap below. */
+  .addon-dnd-character .dsc-vitals > .dnd-sheet-name {
+    flex: 0 0 10rem;
+  }
+  .dnd-sheet-name + .dsc-health {
+    flex-basis: calc(100% - 10rem);
+  }
 }
 @container sheet-workspace (max-width:48rem) {
   .dsc-sheet,
@@ -951,6 +963,17 @@
   }
   .dsc-health {
     min-width: 0;
+  }
+  .addon-dnd-character .dsc-vitals > .dnd-sheet-name {
+    flex-basis: 100%;
+    max-width: none;
+  }
+  .dnd-sheet-name + * {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .dnd-sheet-name + .dsc-health {
+    flex-basis: 100%;
   }
   .dsc-combat-abilities {
     grid-template-columns: repeat(2, minmax(0, 1fr));
