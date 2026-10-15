@@ -1394,11 +1394,10 @@
   line-height: 1.4;
   color: var(--text-muted);
 }
-/* "Saving…" and "Saved" share one quiet line above the tab in both layouts, so
-   saving never moves the sheet; only errors, which need attention and actions,
-   take more room. */
+/* "Saving…" and "Saved" share one quiet, right-aligned line above the tab in
+   both layouts, so saving never moves the sheet; only errors and notices that
+   need attention or actions take more room. */
 .addon-dnd-character .dnd-sheet-workspace > .dnd-save-status {
-  justify-content: flex-end;
   min-height: 1rem;
   margin-bottom: 0.25rem;
 }
@@ -1414,6 +1413,7 @@
 .addon-dnd-character
   .character-window
   > .dnd-save-status:is([data-ui-state="success"], [data-ui-state="loading"]) {
+  justify-content: flex-end;
   min-height: 1rem;
   line-height: 1rem;
   padding: 0;

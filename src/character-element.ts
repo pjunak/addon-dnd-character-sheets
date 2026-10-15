@@ -497,14 +497,7 @@ export function defineCharacterElement(
             el("ul", ...this.#saveIssues.map((message) => el("li", this.#feedback(message)))),
           );
         if (this.#response?.rulesChanged && !this.#attempt)
-          node.append(
-            button(this.#t("Review changed rules"), () => {
-              this.#dialog?.close();
-              this.#tab = "tools";
-              this.#render();
-              this.querySelector<HTMLElement>('[data-focus-key="adopt-rules"]')?.focus();
-            }),
-          );
+          node.append(button(this.#t("Review changed rules"), () => this.#reviewRules()));
         else
           node.append(
             button(this.#t("Retry"), () => {
@@ -513,7 +506,22 @@ export function defineCharacterElement(
             }),
           );
         node.append(button(this.#t("Reload saved character"), () => this.#reloadSaved()));
+      } else if (this.#response?.rulesChanged && this.#editable) {
+        // Every play control waits for the new rules; say so on every tab,
+        // not only in Tools where they are adopted.
+        node.dataset["uiState"] = "info";
+        node.replaceChildren(
+          el("span", this.#t("The rules changed. Adopt them to continue editing.")),
+        );
+        if (this.#tab !== "tools")
+          node.append(button(this.#t("Review changed rules"), () => this.#reviewRules()));
       }
+    }
+    #reviewRules(): void {
+      this.#dialog?.close();
+      this.#tab = "tools";
+      this.#render();
+      this.querySelector<HTMLElement>('[data-focus-key="adopt-rules"]')?.focus();
     }
     async #reloadSaved(): Promise<void> {
       if (this.#busy || this.#saving) return;
