@@ -101,9 +101,12 @@ function hitPoints(view: SheetView): HTMLElement {
   current.disabled = !view.canEditHP;
   current.setAttribute("aria-label", t("Current HP"));
   current.dataset["focusKey"] = "vitals/current-hp";
-  const hint = styled("span", "dsc-hp-hint", t("−7 · +5 · =30"));
+  const hint = styled(
+    "span",
+    "dsc-hp-hint",
+    t("Type −7 for damage, +5 to heal or a number to set hit points, then press Enter."),
+  );
   hint.id = "dsc-hp-hint-" + crypto.randomUUID();
-  hint.title = t("Type −7 for damage, +5 to heal or a number to set hit points, then press Enter.");
   current.setAttribute("aria-describedby", hint.id);
   const bar = styled("div", "dsc-health-track", el("span"));
   bar.setAttribute("role", "meter");

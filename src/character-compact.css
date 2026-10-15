@@ -161,15 +161,35 @@
   color: var(--accent-gold);
 }
 .dsc-health {
+  position: relative;
   display: grid;
   gap: 0.2rem;
   min-width: 13rem;
 }
+/* How to enter damage or healing appears while hit points are being edited,
+   over the bar below, so it never moves the sheet. */
 .dsc-hp-hint {
-  margin-left: auto;
-  font-size: 0.66rem;
+  position: absolute;
+  z-index: 5;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.25rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-parchment);
+  font-size: 0.72rem;
   letter-spacing: 0;
+  line-height: 1.4;
   text-transform: none;
+  white-space: normal;
+  display: none;
+}
+.dsc-health:focus-within .dsc-hp-hint {
+  display: block;
 }
 .dsc-hp-values {
   display: flex;
