@@ -20,11 +20,14 @@ export function builderDestination(view: BuildView, tab: string, target = ""): s
     ? owner
     : (view.input.build.levels[0]?.classId ?? "add-class");
 }
+// The rail's summary opens with the character's name; the rail keeps "Builder
+// progress" as its accessible name.
 export function builderShell(
   view: BuildView,
   state: BuilderNavigation,
   body: HTMLElement,
   navigate: (tab: string, target?: string) => void,
+  name: HTMLElement,
 ): HTMLElement {
   const t = translator(view.locale),
     guidance = view.evaluation?.guidance ?? {},
@@ -42,7 +45,7 @@ export function builderShell(
     styled(
       "summary",
       "dse-build-progress-head",
-      el("span", t("Builder progress")),
+      name,
       progress,
       el(
         "strong",

@@ -909,8 +909,9 @@ export function defineCharacterElement(
         );
         content.append(styled("div", "dse-cols", abilityRail(view), main));
       }
-      // Tabs without a compact top bar give the name a line of its own.
-      if (this.#layout === "classic" || tab === "builder" || tab === "tools")
+      // Builder and Tools lead their own first row with the name; Classic tabs
+      // have no top bar, so the name gets a line of its own.
+      if (this.#layout === "classic" && tab !== "builder" && tab !== "tools")
         content.prepend(characterName(view));
       return content;
     }
@@ -1233,12 +1234,18 @@ export function defineCharacterElement(
       if (navigation.tab === "dm-given") body.append(this.#grants());
       else if (navigation.tab === "spells") body.append(this.#spellChoices(pickers));
       else body.append(buildView(view, navigation.tab));
-      return builderShell(view, navigation, body, (tab, target = "") => {
-        this.#builderNav.tab = builderDestination(view, tab, target);
-        this.#builderNav.target = target;
-        this.#render();
-        if (target) focusBuilderTarget(this, target);
-      });
+      return builderShell(
+        view,
+        navigation,
+        body,
+        (tab, target = "") => {
+          this.#builderNav.tab = builderDestination(view, tab, target);
+          this.#builderNav.target = target;
+          this.#render();
+          if (target) focusBuilderTarget(this, target);
+        },
+        characterName({ name: this.#name }),
+      );
     }
     #combat(): HTMLElement {
       const view = this.#sheetView(),
@@ -1313,6 +1320,7 @@ export function defineCharacterElement(
       const tools = styled(
         "div",
         "character-toolbar",
+        characterName({ name: this.#name }),
         field(
           this.#t("Sheet layout"),
           select(

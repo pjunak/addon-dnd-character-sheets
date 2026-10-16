@@ -84,11 +84,12 @@ provider-free reading, print and transfer preserve those identities. No turn or
 action costs are tracked. The controls use shared host fields, button styling,
 focus keys and saved-rule details in both layouts.
 
-Compact gives each tab a context bar led by the character's name; Builder,
-Tools and Classic give the name a line of its own. Sheet and Combat share the
-HP block; current HP is directly rewritable or takes `-N`, `+N` and `=N`
-instructions, and temporary HP remains editable. Conditions, the D20 adjustment and rests share
-the bar's status row. Combat shows ability modifiers and saves in its small row,
+Compact gives each tab a context bar led by the character's name; Builder
+shows the name atop its progress card, Tools leads its toolbar with it and
+Classic gives it a line of its own. Sheet and Combat share the HP block;
+current HP is directly rewritable or takes `-N`, `+N` and `=N` instructions,
+and temporary HP remains editable. Conditions, the D20 adjustment and rests
+share the bar's status row. Combat shows ability modifiers and saves in its small row,
 its attacks open, and casting sources beneath them. Rests, the body figure,
 Backpack and prepared spells open as non-modal floating windows. Training,
 senses, feats and traits remain accessible through disclosures on Sheet.
