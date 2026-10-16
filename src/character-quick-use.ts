@@ -3,7 +3,7 @@ import type { SheetView } from "./character-sheet.js";
 import { object } from "./character-client.js";
 import { pinQuickUse, quickUseReason } from "./character-inventory.js";
 import { translator } from "./character-locale.js";
-import { button, el, label, panel, rule, styled } from "./character-ui.js";
+import { button, el, hint, label, panel, rule, styled } from "./character-ui.js";
 
 function pinRow(
   input: Inputs,
@@ -20,13 +20,16 @@ function pinRow(
     row.append(el("p", quickUseReason("missing", locale)));
     return row;
   }
+  const quantity = styled("span", "dse-quick-use-quantity", "×" + item.quantity);
+  quantity.title = t("Quantity: {0}", [item.quantity]);
   row.append(
     styled(
       "div",
       "dse-quick-use-name",
       rule(item.name, item.reference, undefined, undefined, projection),
-      el("span", t("Quantity: {0}", [item.quantity]) + " · " + t(label(item.location))),
+      el("small", t(label(item.location))),
     ),
+    quantity,
   );
   if (item.notes)
     row.append(
@@ -56,10 +59,9 @@ export function quickUse(view: SheetView): HTMLElement {
   const t = translator(view.locale),
     root = quickUseRead(view.input, view.projection, view.locale);
   if (view.input.play.quickUse?.length)
-    root.insertBefore(
-      el("p", t("Using one records the quantity spent. Apply its effects separately.")),
-      root.children[1] ?? null,
-    );
+    root
+      .querySelector("h3")!
+      .append(hint(t("Using one records the quantity spent. Apply its effects separately.")));
   for (const row of root.querySelectorAll<HTMLElement>("[data-quick-use-item]")) {
     const id = row.dataset["quickUseItem"]!,
       item = view.input.play.inventory.find((item) => item.id === id),
@@ -77,8 +79,9 @@ export function quickUse(view: SheetView): HTMLElement {
     if (reason) use.setAttribute("aria-description", reason);
     controls.append(use);
     if (view.canEditQuickUse) {
+      // The filled star unpins, matching the pin stars in the backpack.
       const unpin = button(
-        t("Unpin"),
+        "★",
         () => {
           const rows = [...root.querySelectorAll<HTMLElement>("[data-quick-use-item]")],
             index = rows.indexOf(row);
@@ -96,7 +99,9 @@ export function quickUse(view: SheetView): HTMLElement {
         "quick-use/" + id + "/unpin",
       );
       unpin.dataset["quickUseUnpin"] = "";
+      unpin.className = "dse-unpin";
       unpin.setAttribute("aria-label", t("Unpin {0}", [item?.name ?? id]));
+      unpin.title = unpin.getAttribute("aria-label")!;
       controls.append(unpin);
     }
     row.insertBefore(

@@ -15,8 +15,8 @@ capacity. **Stow & unattune** moves an item to Stored and releases its allocatio
 in one automatic save. Ordinary moves preserve attunement.
 **Quick use** pins existing inventory entries in a shared Sheet/Combat panel.
 **Use one** spends from the real quantity without applying item effects.
-Stored/depleted pins and item notes stay visible; unpinning keeps the item,
-and deleting an item removes its pin in the same save.
+Stored/depleted pins and item notes stay visible; the ★ beside a pin unpins it
+and keeps the item, and deleting an item removes its pin in the same save.
 **Storage containers** organize carried/stored inventory into named groups.
 Create, rename or remove a group and choose destinations in inventory or the
 item picker. Removing a container leaves its items intact; equipping an item
@@ -50,10 +50,18 @@ rules. A status row lists conditions with their levels and remove buttons, the
 separate D20 adjustment and Short/Long rest. Equipment shows AC, Speed and
 attunement; Spells shows casting numbers, spell-slot pips and **Change prepared
 spells**. Compact puts abilities and skills on the right, starting at the top;
-untrained skills are dimmed. **Limited uses** shows remaining uses as pips (a bar
-with steps for large pools) and each resource's short/long rest recharge. Combat
-keeps its attack list open, with casting sources beneath. Spell rows show casting
-time, range, concentration and ritual from the source record.
+untrained skills are dimmed. **Limited uses** shows remaining uses as pips (round
+for spell slots and hit dice, diamonds for feature uses, a bar with steps for
+large pools) and each resource's short/long rest recharge. Sheet lists features
+and feats in a grid with short summaries, and armor, weapon, tool and language
+training, senses and size in one list. Combat lists weapons in a table (to hit,
+damage, mastery) with casting numbers beneath. Spells sort by level under
+headings with the remaining slots; each row shows casting time as an A, BA or R
+tag, range, concentration and ritual from the source record.
+
+Panels follow the approved mockup: small-capital headings, editable values as
+gold-underlined fields, and computed values as gold-tinted text that highlights
+on hover and explains itself in a rule popover. Short side notes are ⓘ hints.
 
 Bigger editors open as floating windows: Backpack, the body figure, rests and
 prepared spells. Windows are not modal; the sheet stays usable behind them, the

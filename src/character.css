@@ -1402,6 +1402,23 @@
   white-space: nowrap;
   pointer-events: none;
 }
+/* A dot shows the state: green once saved, gold while saving. */
+.addon-dnd-character .dnd-sheet-shell > .dnd-save-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.addon-dnd-character .dnd-sheet-shell > .dnd-save-status[data-ui-state="success"] {
+  color: var(--color-success);
+}
+.addon-dnd-character .dnd-sheet-shell > .dnd-save-status[data-ui-state="loading"] {
+  color: var(--accent-gold);
+}
+.addon-dnd-character .dnd-sheet-shell > .dnd-save-status:has(> span:only-child:empty) {
+  display: none;
+}
 .addon-dnd-character .dnd-sheet-workspace > .dnd-save-status {
   min-height: 1rem;
   margin-bottom: 0.25rem;

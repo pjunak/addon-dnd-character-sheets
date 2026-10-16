@@ -1,4 +1,10 @@
-import { markSpellRow, spellFacts, spellFilters, spellSourceLabel } from "./character-spells.js";
+import {
+  markSpellRow,
+  slotLabel,
+  spellFacts,
+  spellFilters,
+  spellSourceLabel,
+} from "./character-spells.js";
 import type { Inputs, Result } from "./character-model.js";
 import { translator } from "./character-locale.js";
 import {
@@ -39,11 +45,42 @@ export function playActions(
     ),
     names = new Map(catalog.map((record) => [record.id, text(record.value["name"], record.id)]));
   const spellName = (id: string): string => names.get(id) ?? id;
+  const resources = rows(evaluation.sheet["resources"]);
   const slotName = (key: string): string => {
-    const resource = rows(evaluation.sheet["resources"]).find((row) => row["key"] === key);
-    return resource
-      ? t("{0} · {1}/{2}", [resource["name"], resource["remaining"], resource["max"]])
-      : key;
+    const resource = resources.find((row) => row["key"] === key);
+    if (!resource) return key;
+    return resource["kind"] === "slot"
+      ? slotLabel(resource, resource["remaining"], resource["max"], locale)
+      : t("{0} · {1}/{2}", [resource["name"], resource["remaining"], resource["max"]]);
+  };
+  // Spells sort by level under a heading that shows the level's remaining slots.
+  const byLevel = (group: HTMLElement, spellRows: HTMLElement[]): void => {
+    let current: string | undefined;
+    for (const row of spellRows.sort(
+      (left, right) =>
+        Number(left.dataset["spellLevel"] || 0) - Number(right.dataset["spellLevel"] || 0) ||
+        left.dataset["spellName"]!.localeCompare(right.dataset["spellName"]!),
+    )) {
+      const level = row.dataset["spellLevel"] || "0";
+      if (level !== current) {
+        current = level;
+        const slot = resources.find(
+          (resource) => resource["kind"] === "slot" && String(resource["level"]) === level,
+        );
+        const heading = styled(
+          "h4",
+          "dnd-spell-level",
+          level === "0"
+            ? t("Cantrips")
+            : slot
+              ? t("Level {0} · {1} / {2}", [level, slot["remaining"], slot["max"]])
+              : t("Level {0}", [level]),
+        );
+        heading.dataset["spellLevelHeading"] = level;
+        group.append(heading);
+      }
+      group.append(row);
+    }
   };
   // An empty slot key means the spell costs nothing (a cantrip), so there is
   // nothing to pick. Otherwise the first resource is preselected.
@@ -99,6 +136,14 @@ export function playActions(
       row.hidden = !filters.matches(row.dataset["spellName"]!, row.dataset["spellLevel"]);
       if (!row.hidden) shown++;
     }
+    for (const heading of root.querySelectorAll<HTMLElement>("[data-spell-level-heading]"))
+      heading.hidden = ![...(heading.parentElement?.children ?? [])].some(
+        (row) =>
+          row instanceof HTMLElement &&
+          !row.hidden &&
+          row.dataset["spellName"] !== undefined &&
+          (row.dataset["spellLevel"] || "0") === heading.dataset["spellLevelHeading"],
+      );
     filters.report(shown);
   };
   root.append(filters.controls);
@@ -115,7 +160,8 @@ export function playActions(
     );
   for (const caster of rows(evaluation.spellOptions["classes"])) {
     const classId = String(caster["classId"]),
-      group = panel(t("{0} spells", [label(classId)]));
+      group = panel(t("{0} spells", [label(classId)])),
+      spellRows: HTMLElement[] = [];
     for (const [ref, rawSlots] of Object.entries(object(caster["castSlots"]))) {
       const slots = strings(rawSlots);
       let slot = slots[0] ?? "";
@@ -126,15 +172,16 @@ export function playActions(
         }),
       );
       row.append(button(t("Cast"), () => act({ operation: "cast-spell", classId, ref, slot })));
-      group.append(row);
+      spellRows.push(row);
     }
     for (const ref of strings(caster["ritualIds"])) {
       const row = spellRow(ref);
       row.append(
         button(t("Cast as ritual"), () => act({ operation: "cast-ritual", classId, ref })),
       );
-      group.append(row);
+      spellRows.push(row);
     }
+    byLevel(group, spellRows);
     const costs = object(caster["copyCosts"]),
       copyOptions = Object.keys(costs).filter(
         (id) => !input.build.spells.spellbook[classId]?.includes(id),
@@ -211,6 +258,8 @@ export function playActions(
     }
     root.append(group);
   }
+  const granted = panel(t("Granted spells")),
+    grantedRows: HTMLElement[] = [];
   for (const grant of rows(evaluation.spellOptions["granted"])) {
     const ref = String(grant["ref"]),
       key = String(grant["key"]),
@@ -236,7 +285,11 @@ export function playActions(
       }),
     );
     row.append(button(t("Cast"), () => act({ operation: "cast-granted-spell", key, slot })));
-    root.append(row);
+    grantedRows.push(row);
+  }
+  if (grantedRows.length) {
+    byLevel(granted, grantedRows);
+    root.append(granted);
   }
   filter();
   return root;

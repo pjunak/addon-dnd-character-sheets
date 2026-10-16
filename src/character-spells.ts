@@ -29,6 +29,19 @@ export function spellSourceLabel(sourceValue: unknown, locale = "en"): string {
   return [name, owner, t("Level {0}", [acquired["level"]])].join(" · ");
 }
 
+/** "Level 1 · 3 / 4" for a slot resource; without a level, its own name. */
+export function slotLabel(
+  resource: Record<string, unknown>,
+  remaining: unknown,
+  maximum: unknown,
+  locale = "en",
+): string {
+  const t = translator(locale);
+  return typeof resource["level"] === "number"
+    ? t("Level {0} · {1} / {2}", [resource["level"], remaining, maximum])
+    : t("{0} · {1}/{2}", [text(resource["name"], text(resource["key"])), remaining, maximum]);
+}
+
 // Every spell surface uses the same two native controls, enhanced by the host.
 // Filtering is local presentation and never changes an authored selection.
 export interface SpellFilterState {
@@ -155,14 +168,24 @@ export function spellFacts(
   if (!spell) return undefined;
   const t = translator(locale),
     facts = styled("span", "dnd-spell-facts");
-  for (const value of [spell["castingTime"], spell["range"]])
-    if (typeof value === "string" && value) facts.append(el("span", value));
+  // Common casting times read as tags (A, BA, R); the source's wording is the title.
+  const time = text(spell["castingTime"]),
+    mark = { action: "A", "bonus action": "BA", reaction: "R" }[time.toLowerCase()];
+  if (mark) {
+    const tag = styled("abbr", "dnd-spell-tag", mark);
+    tag.dataset["time"] = mark;
+    tag.title = time;
+    facts.append(tag);
+  } else if (time) facts.append(el("span", time));
+  if (typeof spell["range"] === "string" && spell["range"])
+    facts.append(styled("span", "dnd-spell-range", spell["range"]));
   for (const [key, mark, title] of [
     ["concentration", "C", "Concentration"],
     ["ritual", "R", "Ritual"],
   ] as const)
     if (spell[key] === true) {
       const tag = styled("abbr", "dnd-spell-tag", mark);
+      tag.dataset["tag"] = key;
       tag.title = t(title);
       facts.append(tag);
     }

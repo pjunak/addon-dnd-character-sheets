@@ -89,10 +89,11 @@ shows the name atop its progress card, Tools leads its toolbar with it and
 Classic gives it a line of its own. Sheet and Combat share the HP block;
 current HP is directly rewritable or takes `-N`, `+N` and `=N` instructions,
 and temporary HP remains editable. Conditions, the D20 adjustment and rests
-share the bar's status row. Combat shows ability modifiers and saves in its small row,
-its attacks open, and casting sources beneath them. Rests, the body figure,
-Backpack and prepared spells open as non-modal floating windows. Training,
-senses, feats and traits remain accessible through disclosures on Sheet.
+share the bar's status row. Combat shows ability modifiers and saves in its
+small row, its weapons as a table, and casting numbers beneath them. Rests, the
+body figure, Backpack and prepared spells open as non-modal floating windows
+(their buttons carry ⤢). Sheet shows features and feats with short summaries,
+and training, senses and size as one list.
 
 Inventory,
 equipment, currency, HP, spells and resources remain editable in their ordinary

@@ -1,12 +1,12 @@
 import type { SheetView } from "./character-sheet.js";
 import {
   abilityRail,
-  attackDetails,
+  casterSource,
   castingDetails,
   characterName,
   classValueRows,
   currency,
-  explorationDetails,
+  recordName,
   savedRule,
   sizeDetails,
   wornEquipment,
@@ -25,14 +25,18 @@ import { quickUse } from "./character-quick-use.js";
 import { conditionName } from "./character-conditions.js";
 import { parseHpEntry } from "./character-hp.js";
 import { abilityNames, translator } from "./character-locale.js";
+import type { Reference } from "./character-model.js";
+import { proficiencyGroups } from "./character-proficiencies.js";
 import { rulesTarget } from "./character-rule-notes.js";
-import { spellSourceLabel } from "./character-spells.js";
+import { slotLabel, spellSourceLabel } from "./character-spells.js";
 import {
   button,
   el,
   human,
+  label,
   numberInput,
   panel,
+  plainDescription,
   rule,
   select,
   signed,
@@ -65,6 +69,14 @@ export function compactNavigation(nav: HTMLElement): void {
     svg.append(path);
     control.prepend(svg);
   }
+}
+
+// Buttons that open a floating window carry the window mark.
+function opens(control: HTMLButtonElement): HTMLButtonElement {
+  const mark = styled("span", "dsc-opens", "⤢");
+  mark.setAttribute("aria-hidden", "true");
+  control.append(mark);
+  return control;
 }
 
 function cell(label: string, value: Node, stat: string, unit?: string): HTMLElement {
@@ -376,10 +388,10 @@ export function compactVitals(
   values.append(
     characterName(view),
     hitPoints(view),
-    derivedCell(view, "Armor class", "armorClass"),
+    derivedCell(view, "AC", "armorClass"),
     derivedCell(view, "Speed", "speed"),
-    ...(combat ? [derivedCell(view, "Initiative", "initiative", true)] : []),
-    derivedCell(view, "Proficiency", "proficiencyBonus", true),
+    ...(combat ? [derivedCell(view, "Init", "initiative", true)] : []),
+    derivedCell(view, "Prof", "proficiencyBonus", true),
     inspiration(view),
   );
   root.append(values);
@@ -434,6 +446,10 @@ function usesControl(
   };
   if (maximum <= 12) {
     const group = styled("span", "dsc-pips");
+    // Spell slots and hit dice are round; feature uses such as Channel Divinity are diamonds.
+    group.dataset["shape"] = ["slot", "hitdice"].includes(text(resource["kind"]))
+      ? "round"
+      : "diamond";
     group.setAttribute("role", "group");
     group.setAttribute("aria-label", t("{0}: {1} of {2} left", [name, remaining, maximum]));
     for (let index = 0; index < maximum; index++) {
@@ -580,21 +596,187 @@ function combatAbilities(view: SheetView): HTMLElement {
   return root;
 }
 
-function exploration(view: SheetView): HTMLElement {
+// Combat lists weapons as a table: name, to hit, damage (versatile beneath) and mastery.
+function attackTable(view: SheetView): HTMLElement {
   const t = translator(view.locale),
-    root = panel(t("Exploration")),
-    contents = explorationDetails(view);
-  root.classList.add("dsc-exploration");
-  if (Object.hasOwn(object(view.projection?.sheet["derived"]), "size"))
-    root.append(
-      styled("p", "dsc-size", styled("span", "dse-stat-label", t("Size")), " ", sizeDetails(view)),
-    );
-  for (const [index, section] of [...contents.children].entries()) {
-    const title = section.querySelector("h3")?.textContent ?? t("Details");
-    const details = el("details", el("summary", title), section);
-    details.dataset["detailsKey"] = "exploration/" + index;
-    root.append(details);
+    root = panel(t("Attacks")),
+    weapons = rows(view.projection?.sheet["weapons"]);
+  root.classList.add("dsc-attacks");
+  if (!weapons.length) {
+    root.append(styled("p", "dse-empty", t("No attacks yet.")));
+    return root;
   }
+  const body = el("tbody");
+  weapons.forEach((weapon, index) => {
+    // An unarmed strike comes from the ruleset and has no weapon record.
+    const path = "weapons." + index,
+      ref = text(weapon["ref"]),
+      reference = ref ? { kind: "weapon", id: ref } : undefined,
+      item = view.input.play.inventory.find((entry) => entry.id === weapon["itemId"]);
+    const damage = el(
+      "td",
+      savedRule(view.projection, human(weapon["damage"]), path + ".damage"),
+      " ",
+      styled("span", "dsc-muted", t(label(text(weapon["damageType"])))),
+    );
+    if (weapon["versatileDamage"])
+      damage.append(
+        el(
+          "small",
+          t("Versatile damage") + ": ",
+          savedRule(view.projection, human(weapon["versatileDamage"]), path + ".versatileDamage"),
+        ),
+      );
+    const mastery = el("td");
+    if (weapon["mastery"]) {
+      const tag = styled(
+        "span",
+        "dsc-tag",
+        savedRule(view.projection, t(label(text(weapon["mastery"]))), undefined, reference),
+      );
+      tag.dataset["active"] = String(weapon["masteryActive"] === true);
+      tag.title = t(weapon["masteryActive"] === true ? "Active" : "Inactive");
+      mastery.append(tag);
+    }
+    body.append(
+      el(
+        "tr",
+        el(
+          "th",
+          savedRule(view.projection, text(weapon["name"], ref), undefined, reference),
+          ...(item && item.quantity > 1 ? [el("small", " ×" + item.quantity)] : []),
+        ),
+        styled(
+          "td",
+          "dsc-hit",
+          savedRule(view.projection, signed(weapon["attackBonus"]), path + ".attackBonus"),
+        ),
+        damage,
+        mastery,
+      ),
+    );
+  });
+  const head = el(
+    "tr",
+    ...["Weapon", "To hit", "Damage", "Mastery"].map((name) => {
+      const cell = el("th", t(name));
+      cell.scope = "col";
+      return cell;
+    }),
+  );
+  root.append(styled("table", "dsc-attack-table", el("thead", head), body));
+  return root;
+}
+
+// "Paladin 2", "Oath of Devotion", "Human": where a feature comes from.
+function featureSource(view: SheetView, value: unknown): string {
+  const source = object(value),
+    id = text(source["id"]),
+    name = id ? recordName(view, text(source["type"]), id) : "";
+  return [name === id ? label(id) : name, human(source["level"] ?? "")]
+    .filter((part) => part && part !== "—")
+    .join(" ");
+}
+
+// Features and feats read as a grid of short entries; each name opens its full text.
+function features(view: SheetView): HTMLElement {
+  const t = translator(view.locale),
+    sheet = view.projection?.sheet ?? {},
+    root = panel(t("Features and traits")),
+    grid = styled("div", "dsc-feats");
+  root.classList.add("dsc-features");
+  const entry = (name: string, reference: Reference, source: string): HTMLElement => {
+    const summary = view.projection?.evidence.find(
+      (row) => row.reference.kind === reference.kind && row.reference.id === reference.id,
+    )?.summary;
+    return styled(
+      "div",
+      "dsc-feat",
+      styled(
+        "div",
+        "dsc-feat-head",
+        savedRule(view.projection, name, undefined, reference),
+        ...(source ? [el("small", source)] : []),
+      ),
+      ...(summary ? [el("p", plainDescription(summary))] : []),
+    );
+  };
+  for (const feature of rows(sheet["features"])) {
+    const id = String(feature["id"]);
+    grid.append(
+      entry(
+        text(feature["name"], id),
+        { kind: "feature", id },
+        featureSource(view, feature["source"]),
+      ),
+    );
+  }
+  for (const feat of rows(sheet["feats"])) {
+    const id = String(feat["id"]),
+      count = Number(feat["count"] ?? 1);
+    grid.append(
+      entry(
+        text(feat["name"], id) + (count > 1 ? " × " + count : ""),
+        { kind: "feat", id },
+        t("Feat"),
+      ),
+    );
+  }
+  root.append(grid.children.length ? grid : el("p", t("None recorded")));
+  return root;
+}
+
+// Armor, weapon, tool and language training with senses and size as one list;
+// saves and skills are already on the ability cards.
+function training(view: SheetView): HTMLElement {
+  const t = translator(view.locale),
+    sheet = view.projection?.sheet ?? {},
+    root = rulesTarget(panel(t("Training and senses")), "senses"),
+    list = styled("dl", "dsc-training");
+  const row = (name: string, ...value: (Node | string)[]): HTMLElement => {
+    const entry = el("dd", ...value);
+    list.append(el("dt", name), entry);
+    return entry;
+  };
+  const none = (key: string): HTMLElement => styled("span", "dsc-none", t(key));
+  for (const group of proficiencyGroups(view.projection, view.locale))
+    if (["armor", "weapons", "tools", "languages"].includes(group.id) && group.available)
+      row(
+        group.name,
+        ...(group.entries.length
+          ? group.entries.flatMap((entry, index) => [
+              ...(index ? [", "] : []),
+              entry.reference
+                ? rule(entry.name, entry.reference, undefined, undefined, view.projection)
+                : entry.name,
+            ])
+          : [none("None recorded")]),
+      );
+  const senses = Object.entries(object(sheet["senses"]));
+  row(
+    t("Senses"),
+    ...(senses.length
+      ? senses.flatMap(([key, value], index) => [
+          ...(index ? [", "] : []),
+          savedRule(
+            view.projection,
+            t(label(key)) +
+              " " +
+              human(value) +
+              " " +
+              (view.projection?.explanations["senses." + key]?.unit ?? ""),
+            "senses." + key,
+          ),
+        ])
+      : [none("No additional senses.")]),
+  );
+  if (Object.hasOwn(object(sheet["derived"]), "size"))
+    row(t("Size"), sizeDetails(view)).classList.add("dsc-size");
+  for (const key of ["resistances", "damageImmunities", "conditionImmunities"]) {
+    const value = human(sheet[key]);
+    if (sheet[key] !== undefined && value && value !== "—") row(t(label(key)), value);
+  }
+  root.append(list);
   return root;
 }
 
@@ -603,7 +785,7 @@ function ready(view: SheetView, actions: CompactActions, combat: boolean): HTMLE
     pins = quickUse(view);
   pins
     .querySelector("h3")
-    ?.append(button(t("Arrange"), () => actions.backpack(), false, "quick-use/arrange"));
+    ?.append(opens(button(t("Arrange"), () => actions.backpack(), false, "quick-use/arrange")));
   // Sheet gives the hand selectors the full width; Combat keeps them beside
   // the limited uses, where its attack line fits.
   return combat
@@ -627,7 +809,7 @@ export function compactSheet(
   actions: CompactActions,
 ): HTMLElement {
   if (combat) {
-    const attacks = attackDetails(view),
+    const attacks = attackTable(view),
       casters = rows(object(view.projection?.sheet["spellcasting"])["perClass"]);
     if (casters.length)
       attacks.append(
@@ -657,7 +839,8 @@ export function compactSheet(
       "dsc-sheet-main",
       compactVitals(view, false, actions.rest),
       ready(view, actions, false),
-      exploration(view),
+      features(view),
+      training(view),
     ),
     abilityRail(view),
   );
@@ -670,9 +853,25 @@ export function compactSpellBar(view: SheetView, prepare?: () => void): HTMLElem
     values = styled("div", "dsc-vitals dsc-spell-values");
   root.setAttribute("aria-label", t("Spellcasting"));
   values.append(characterName(view));
-  rows(object(sheet["spellcasting"])["perClass"]).forEach((caster, index) => {
-    const { source, numbers } = castingDetails(view, caster, index);
-    values.append(cell(source, numbers, "casting"));
+  // Save DC and spell attack read like AC: big numbers. Several casters name their class.
+  const casters = rows(object(sheet["spellcasting"])["perClass"]);
+  casters.forEach((caster, index) => {
+    const source = casterSource(view, caster),
+      path = "spellcasting.perClass." + index,
+      named = (name: string): string => (casters.length > 1 ? source + " · " + t(name) : t(name)),
+      who = t("{0} · {1}", [source, t(abilityNames[text(caster["ability"])] ?? "")]);
+    const dc = cell(
+        named("Save DC"),
+        savedRule(view.projection, human(caster["saveDC"]), path + ".saveDC"),
+        "saveDC",
+      ),
+      attack = cell(
+        named("Attack"),
+        savedRule(view.projection, signed(caster["spellAttack"]), path + ".spellAttack"),
+        "spellAttack",
+      );
+    dc.title = attack.title = who;
+    values.append(dc, attack);
   });
   for (const resource of rows(sheet["resources"]).filter((row) => row["kind"] === "slot")) {
     const key = String(resource["key"]),
@@ -682,11 +881,7 @@ export function compactSpellBar(view: SheetView, prepare?: () => void): HTMLElem
     const slots = styled(
       "div",
       "dsc-cell",
-      styled(
-        "span",
-        "dsc-stat-label",
-        t("Level {0} · {1} / {2}", [resource["level"], maximum - spent, maximum]),
-      ),
+      styled("span", "dsc-stat-label", slotLabel(resource, maximum - spent, maximum, view.locale)),
       usesControl(view, resource, name),
     );
     slots.dataset["resource"] = key;
@@ -698,7 +893,7 @@ export function compactSpellBar(view: SheetView, prepare?: () => void): HTMLElem
       styled(
         "div",
         "dsc-cell",
-        button(t("Change prepared spells"), prepare, false, "spells/prepare"),
+        opens(button(t("Change prepared spells"), prepare, false, "spells/prepare")),
       ),
     );
   }
@@ -791,7 +986,7 @@ function wornList(view: SheetView, figure: (place?: string) => void): HTMLElemen
   root.classList.add("dsc-worn-panel");
   root
     .querySelector("h3")
-    ?.append(button(t("Open figure"), () => figure(), false, "placement/open"));
+    ?.append(opens(button(t("Open figure"), () => figure(), false, "placement/open")));
   const named = (id: string | undefined): string | undefined =>
     id ? (view.input.play.inventory.find((item) => item.id === id)?.name ?? id) : undefined;
   const held = [named(hands?.main), named(hands?.off)].filter(Boolean);
@@ -874,7 +1069,7 @@ function backpackSummary(view: SheetView, open: (container?: string) => void): H
       "span",
       "dsc-actions",
       button(t("Add item"), () => view.addItem(), !view.editing, "equipment/add"),
-      button(t("Open"), () => open(), false, "storage/open"),
+      opens(button(t("Open"), () => open(), false, "storage/open")),
     ),
   );
   const pinned = new Set(view.input.play.quickUse ?? []);
@@ -882,11 +1077,8 @@ function backpackSummary(view: SheetView, open: (container?: string) => void): H
     if (!members.length && !container) return;
     const head = styled("h4", "dsc-pack-group", title, el("small", String(members.length)));
     if (container) {
-      const openGroup = button(
-        t("Open"),
-        () => open(container),
-        false,
-        "storage/open/" + container,
+      const openGroup = opens(
+        button(t("Open"), () => open(container), false, "storage/open/" + container),
       );
       openGroup.setAttribute("aria-label", t("Open {0}", [title]));
       head.append(openGroup);

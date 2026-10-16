@@ -843,7 +843,14 @@ export const catalogs = {
     "Finish short rest": "Finish short rest",
     "Finish long rest": "Finish long rest",
     "Concentration": "Concentration",
-    "Ritual": "Ritual"
+    "Ritual": "Ritual",
+    "AC": "AC",
+    "Prof": "Prof",
+    "Init": "Init",
+    "Training and senses": "Training and senses",
+    "To hit": "To hit",
+    "Save DC": "Save DC",
+    "Attack": "Attack"
   },
   "cs": {
     "Hands and grip": "Ruce a úchop",
@@ -1688,6 +1695,13 @@ export const catalogs = {
     "Finish short rest": "Dokončit krátký odpočinek",
     "Finish long rest": "Dokončit dlouhý odpočinek",
     "Concentration": "Soustředění",
-    "Ritual": "Rituál"
+    "Ritual": "Rituál",
+    "AC": "OČ",
+    "Prof": "Zdatnost",
+    "Init": "Iniciativa",
+    "Training and senses": "Výcvik a smysly",
+    "To hit": "Zásah",
+    "Save DC": "SO záchrany",
+    "Attack": "Útok"
   }
 } as const;

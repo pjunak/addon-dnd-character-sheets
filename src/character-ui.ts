@@ -182,6 +182,14 @@ export function checkbox(
   input.addEventListener("change", () => change(input.checked));
   return el("label", input, label);
 }
+/** A side note kept to a hover hint, usually at the end of a panel heading. */
+export function hint(text: string): HTMLElement {
+  const note = styled("span", "dse-hint", "ⓘ");
+  note.title = text;
+  note.setAttribute("role", "img");
+  note.setAttribute("aria-label", text);
+  return note;
+}
 export function panel(title: string, ...children: Child[]): HTMLElement {
   const node = el("section", el("h3", title), ...children);
   node.className = "character-panel";

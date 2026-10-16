@@ -197,7 +197,12 @@ export function abilityRail(view: SheetView): HTMLElement {
     proficiency.setAttribute("role", "img");
     proficiency.setAttribute("aria-label", proficiency.title);
     title.append(
-      el("span", t(abilityNames[ability]!)),
+      ...(view.layout === "compact"
+        ? [
+            styled("span", "dse-ability-key", ability),
+            styled("span", "dse-ability-name", t(abilityNames[ability]!)),
+          ]
+        : [el("span", t(abilityNames[ability]!))]),
       dock,
       proficiency,
       savedRule(view.projection, signed(save["total"]), "saves." + ability + ".total"),
@@ -239,6 +244,11 @@ export function abilityRail(view: SheetView): HTMLElement {
       dot.title = t(
         skill["expertise"] ? "Expertise" : skill["proficient"] ? "Proficient" : "Untrained",
       );
+      dot.dataset["training"] = skill["expertise"]
+        ? "expertise"
+        : skill["proficient"]
+          ? "proficient"
+          : "none";
       const line = styled(
         "div",
         "dse-skill",
@@ -266,6 +276,15 @@ export function abilityRail(view: SheetView): HTMLElement {
   }
   return rail;
 }
+/** The class or grant that casts: "Paladin", "Magic Initiate · Sage · Level 1". */
+export function casterSource(
+  view: Pick<SheetView, "catalogs" | "locale" | "projection">,
+  caster: Record<string, unknown>,
+): string {
+  return caster["source"]
+    ? spellSourceLabel(caster["source"], view.locale)
+    : recordName(view, "class", text(caster["classId"]));
+}
 // One caster's numbers as a single "DC 13 · Attack +5" line ("DC 13 · +5" when
 // short), with the class or source that grants them for the caller to label it.
 export function castingDetails(
@@ -276,9 +295,7 @@ export function castingDetails(
 ): { source: string; numbers: HTMLElement } {
   const t = translator(view.locale),
     path = "spellcasting.perClass." + index;
-  const source = caster["source"]
-    ? spellSourceLabel(caster["source"], view.locale)
-    : recordName(view, "class", text(caster["classId"]));
+  const source = casterSource(view, caster);
   const dot = el("span", "·");
   dot.setAttribute("aria-hidden", "true");
   const numbers = styled(
@@ -708,7 +725,9 @@ export function currency(view: SheetView): HTMLElement {
       : el("span", value);
     control.className = "dse-number";
     control.setAttribute("aria-label", coin.toUpperCase());
-    coins.append(el("label", el("span", coin.toUpperCase()), control));
+    const entry = el("label", el("span", coin.toUpperCase()), control);
+    entry.dataset["coin"] = coin;
+    coins.append(entry);
   }
   return coins;
 }

@@ -8,6 +8,10 @@
    rail, with Builder and Tools at its foot, stays in view. */
 .addon-dnd-character .dse-layout-compact {
   --dsc-gap: 0.65rem;
+  /* Mockup shades derived from host tokens, so skins carry over. */
+  --dsc-field: color-mix(in srgb, var(--bg-raised) 92%, var(--text-parchment));
+  --dsc-faint: color-mix(in srgb, var(--text-muted) 65%, var(--bg-surface));
+  --dsc-gold-soft: rgba(var(--accent-gold-rgb), 0.13);
   align-items: stretch;
   grid-template-columns: 7.5rem minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
@@ -26,6 +30,18 @@
   align-items: center;
   gap: 0.4rem;
   padding-inline: 0.4rem;
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--text-light);
+}
+.addon-dnd-character .dse-layout-compact .dnd-sheet-tabs .codex-tab:hover {
+  background: var(--bg-surface);
+  color: var(--text-parchment);
+}
+.addon-dnd-character .dse-layout-compact .dnd-sheet-tabs .codex-tab.is-active {
+  background: var(--dsc-gold-soft);
+  color: var(--accent-gold);
+  box-shadow: inset 2px 0 0 var(--accent-gold);
 }
 .dse-layout-compact .dnd-sheet-tabs svg {
   width: 1rem;
@@ -62,9 +78,24 @@
 }
 .addon-dnd-character .dse-layout-compact .dse-ability-title {
   border: 0;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
+  font-weight: 400;
   letter-spacing: 0;
   flex-wrap: wrap;
+  color: var(--text-muted);
+}
+/* "STR Strength": the abbreviation in small capitals, the name beside it. */
+.dse-ability-key {
+  font: 700 0.74rem/1 var(--font-title);
+  letter-spacing: 0.1em;
+  color: var(--text-light);
+}
+.addon-dnd-character
+  .dse-layout-compact
+  .dse-ability-title:has(.dse-shield[data-proficient="true"])
+  > codex-addon-rule-details {
+  color: var(--accent-gold);
+  font-weight: 600;
 }
 .addon-dnd-character .dse-layout-compact .dse-ability-body {
   gap: 0.4rem;
@@ -79,20 +110,32 @@
   gap: 0.3rem;
 }
 .addon-dnd-character .dse-layout-compact .dse-score {
+  padding: 0.25rem 0 0.2rem;
+  border: 1px solid var(--border-subtle);
   background: var(--bg-raised);
-  border: 0;
+}
+.addon-dnd-character .dse-layout-compact .dse-score > strong {
+  font-size: 1.35rem;
+  font-weight: 600;
 }
 .addon-dnd-character .dse-layout-compact .dse-score .dse-number {
-  background: transparent;
+  width: 70%;
+  margin-top: 2px;
+  padding-top: 1px;
   border: 0;
+  border-top: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.7rem;
 }
 .addon-dnd-character .dse-layout-compact .dse-dock {
   white-space: normal;
   font-size: 0.65rem;
 }
-/* Heading chips stay whole and wrap below the ability name when narrow. */
+/* Heading chips sit beside the save, stay whole and wrap below the name when narrow. */
 .addon-dnd-character .dse-layout-compact .dse-dock-slot {
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 0.25rem;
 }
 .addon-dnd-character .dse-layout-compact .dse-dock-slot > .dse-dock {
@@ -173,7 +216,8 @@
   font-weight: 400;
   color: var(--text-muted);
 }
-.dsc-cell[data-stat="armorClass"] .dsc-cell-value {
+.dsc-cell:is([data-stat="armorClass"], [data-stat="saveDC"], [data-stat="spellAttack"])
+  .dsc-cell-value {
   color: var(--accent-gold);
 }
 .dsc-health {
@@ -229,13 +273,17 @@
   gap: 0.25rem;
   margin-left: 0.5rem;
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: var(--color-info);
 }
 .addon-dnd-character .dsc-temp input {
   width: 3rem;
   min-height: 0;
   padding: 0.05rem 0.25rem;
   font-size: 0.85rem;
+  color: var(--color-info);
+}
+.addon-dnd-character .dse-layout-compact .dsc-temp input.ui-control {
+  border-bottom-color: color-mix(in srgb, var(--color-info) 45%, transparent);
 }
 .dsc-health-track {
   width: 100%;
@@ -343,14 +391,11 @@
   border-style: dashed;
   border-radius: 999px;
 }
-.dsc-cell[data-stat="casting"] .dsc-cell-value {
-  font-size: 1.05rem;
-}
 
 /* Limited uses: pips for small counts, a bar with steps for large pools. */
 .dsc-uses {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(min(8.5rem, 100%), 1fr) auto auto;
   align-items: center;
   gap: 0.45rem 0.6rem;
 }
@@ -375,6 +420,7 @@
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   text-align: right;
+  white-space: nowrap;
 }
 /* A class table value (Rage Damage, Martial Arts) fills the control and count columns. */
 .dsc-use-value {
@@ -406,14 +452,22 @@
   min-width: 0;
   min-height: 0;
   padding: 0;
-  border: 1.5px solid var(--accent-gold);
+  border: 1.5px solid var(--accent-gold-dim);
   border-radius: 50%;
   background: transparent;
-  opacity: 0.85;
 }
 .addon-dnd-character .dsc-pip:is([aria-pressed="true"], [data-on="true"]) {
+  border-color: var(--accent-gold);
   background: var(--accent-gold);
-  opacity: 1;
+  box-shadow: inset 0 0 0 2px rgb(0 0 0 / 18%);
+}
+/* Feature uses such as Channel Divinity are diamonds; slots and hit dice stay round. */
+.addon-dnd-character .dsc-pips[data-shape="diamond"] .dsc-pip {
+  width: 0.75rem;
+  height: 0.75rem;
+  margin: 0 0.1rem;
+  border-radius: 2px;
+  transform: rotate(45deg);
 }
 .addon-dnd-character .dsc-pip:not(:disabled):hover {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-gold) 35%, transparent);
@@ -424,7 +478,7 @@
   gap: 0.3rem;
 }
 .dsc-pool-track {
-  width: 4.5rem;
+  width: 4rem;
   height: 0.4rem;
   border-radius: 3px;
   background: var(--bg-raised);
@@ -440,6 +494,7 @@
   min-height: 0;
   padding: 0.05rem 0.4rem;
   font-size: 0.75rem;
+  white-space: nowrap;
 }
 
 /* Sheet and Combat */
@@ -457,9 +512,10 @@
   min-width: 0;
   align-content: start;
 }
+/* Limited uses take the larger share: their names, pips and counts need the room. */
 .dsc-ready {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
   align-items: start;
   gap: var(--dsc-gap);
 }
@@ -471,56 +527,114 @@
   border-radius: var(--radius);
   background: var(--bg-surface);
 }
+/* Panel headings in small capitals; heading buttons follow the heading's type. */
 .addon-dnd-character .dse-layout-compact :is(.character-panel, .dse-section) h3 {
-  font-family: var(--font-ui);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
   margin: 0 0 0.5rem;
+  font: 600 0.74rem/1.2 var(--font-title);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+.addon-dnd-character .dse-layout-compact :is(.character-panel, .dse-section) h3 button {
+  font: inherit;
+  letter-spacing: inherit;
+}
+/* Editable values are fields with a gold underline; computed values are text. */
+.addon-dnd-character
+  .dse-layout-compact
+  :is(
+    input.ui-control:not([type="checkbox"], [type="radio"]),
+    select.ui-control:not(.dsc-add-condition)
+  ) {
+  border: 1px solid transparent;
+  border-bottom: 2px solid var(--accent-gold-dim);
+  border-radius: 4px 4px 2px 2px;
+  background: var(--dsc-field);
+}
+.addon-dnd-character
+  .dse-layout-compact
+  :is(
+    input.ui-control:not([type="checkbox"], [type="radio"]),
+    select.ui-control:not(.dsc-add-condition)
+  ):hover {
+  background: color-mix(in srgb, var(--dsc-field) 85%, var(--text-parchment));
+}
+.addon-dnd-character
+  .dse-layout-compact
+  :is(
+    input.ui-control:not([type="checkbox"], [type="radio"]),
+    select.ui-control:not(.dsc-add-condition)
+  ):focus {
+  border-color: var(--accent-gold);
+}
+/* Small buttons by default; :where keeps pips, chips and steppers in charge of their own size. */
+@media (pointer: fine) {
+  :where(.addon-dnd-character .dse-layout-compact) button.ui-button {
+    min-height: 0;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.78rem;
+  }
+}
+.dsc-opens {
+  margin-left: 0.35em;
 }
 .addon-dnd-character .dse-layout-compact .dse-skill[data-trained="false"] {
-  color: var(--text-muted);
+  color: var(--dsc-faint);
+}
+.addon-dnd-character .dse-layout-compact .dse-skill > .dse-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border: 1.3px solid var(--dsc-faint);
+  border-radius: 50%;
+  font-size: 0;
+}
+.addon-dnd-character .dse-layout-compact .dse-skill > .dse-dot:not([data-training="none"]) {
+  border-color: var(--accent-gold);
+  background: var(--accent-gold);
+}
+.addon-dnd-character .dse-layout-compact .dse-skill > .dse-dot[data-training="expertise"] {
+  border-radius: 1px;
+  transform: rotate(45deg);
 }
 .addon-dnd-character .dse-layout-compact .dse-skill[data-trained="true"] {
   font-weight: 600;
-}
-.addon-dnd-character .dse-layout-compact .dse-quick-use-name {
-  flex: 1 1 8rem;
-}
-.dsc-exploration > details {
-  padding-block: 0.35rem;
-}
-.addon-dnd-character .dsc-exploration .dse-section {
-  border: 0;
-  padding: 0.5rem 0;
 }
 .dsc-combat-abilities {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.4rem;
 }
-/* The save wraps under the modifier when large text leaves no room beside it. */
+/* The abbreviation over its save on the left, the modifier on the right. */
 .dsc-combat-ability {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 0.3rem;
-  padding: 0.5rem 0.6rem;
+  gap: 0.15rem 0.5rem;
+  padding: 0.4rem 0.6rem;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
   background: var(--bg-surface);
 }
 .dsc-combat-ability > small {
-  flex-basis: 100%;
-  color: var(--text-muted);
-  font-size: 0.7rem;
+  font: 700 0.72rem/1 var(--font-title);
+  letter-spacing: 0.1em;
+  color: var(--text-light);
 }
 .dsc-combat-ability > strong {
-  font-weight: 500;
-  font-size: 1.3rem;
+  grid-row: span 2;
+  justify-self: end;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.dsc-combat-ability > .dsc-save {
+  font-size: 0.72rem;
+  color: var(--text-muted);
 }
 .dsc-save {
   display: inline-flex;
@@ -532,8 +646,7 @@
   flex-wrap: wrap;
   gap: 0.5rem 1.5rem;
   margin-top: 0.6rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
 }
 .dsc-casting .dse-casting {
   display: flex;
@@ -543,10 +656,225 @@
 .dsc-casting .dse-casting > small {
   color: var(--text-muted);
 }
+
+/* Hands on one line: Main hand, Off hand, then the two-handed grip as a checkbox. */
+.addon-dnd-character .dse-layout-compact .dse-hands {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.1rem;
+}
+.addon-dnd-character .dse-layout-compact .dse-hands > .character-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  order: 1;
+}
+.addon-dnd-character .dse-layout-compact .dse-hands > .character-field:last-child {
+  order: 2;
+}
+.addon-dnd-character .dse-layout-compact .dse-hands > .character-field > label {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-parchment);
+}
+.addon-dnd-character .dse-layout-compact .dse-hands select {
+  width: auto;
+  min-width: 7.5rem;
+}
+.addon-dnd-character .dse-layout-compact .dse-hands > .character-field > :is(p, small) {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
 .addon-dnd-character .dse-layout-compact .dse-hands > button {
-  max-width: 6rem;
+  order: 3;
+  max-width: none;
+  flex-direction: row;
+  gap: 0.45rem;
+  padding: 0.15rem 0.2rem;
+  border: 0;
+  background: none;
+  color: var(--text-parchment);
+  font: 400 0.84rem var(--font-ui);
+}
+.addon-dnd-character .dse-layout-compact .dse-hands > button svg {
+  display: none;
+}
+.addon-dnd-character .dse-layout-compact .dse-hands > button::before {
+  content: "";
+  display: grid;
+  place-items: center;
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 1.5px solid var(--text-muted);
+  border-radius: 3px;
+  background: var(--dsc-field);
+  color: var(--color-on-accent);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+.addon-dnd-character .dse-layout-compact .dse-hands > button[aria-pressed="true"]::before {
+  content: "✓";
+  border-color: var(--accent-gold);
+  background: var(--accent-gold);
+}
+.addon-dnd-character .dse-layout-compact .dse-hands > button:disabled {
+  opacity: 0.5;
+}
+
+/* Quick use: name and place, quantity, Use one and the pin star. */
+.addon-dnd-character .dse-layout-compact .dse-quick-use-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.2rem 0.6rem;
+  padding: 0.3rem 0;
+  border-top: 1px solid var(--border-subtle);
+}
+.addon-dnd-character .dse-layout-compact .dse-quick-use-name {
+  display: grid;
+  min-width: 0;
+  font-size: 0.84rem;
+}
+.addon-dnd-character .dse-layout-compact .dse-quick-use-name > small {
+  color: var(--text-muted);
   font-size: 0.72rem;
-  padding: 0.4rem;
+}
+.dse-quick-use-quantity {
+  color: var(--text-light);
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+}
+.addon-dnd-character .dse-layout-compact .dse-quick-use-item > .dnd-workflow-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+}
+.addon-dnd-character .dse-layout-compact .dse-quick-use-item > :is(p, .dse-quick-use-notes) {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.76rem;
+}
+.addon-dnd-character button.dse-unpin {
+  min-width: 0;
+  min-height: 0;
+  padding: 0 0.15rem;
+  border: 0;
+  background: none;
+  color: var(--accent-gold);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Features and traits: a two-column grid of names, sources and short summaries. */
+.dsc-feats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1rem;
+}
+.dsc-feat {
+  min-width: 0;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.dsc-feat-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.4rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.dsc-feat-head > small {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 400;
+}
+.addon-dnd-character .dsc-feat > p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 0.1rem 0 0;
+  color: var(--text-light);
+  font-size: 0.78rem;
+}
+.dsc-training {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.25rem 0.9rem;
+  margin: 0;
+  font-size: 0.82rem;
+}
+.dsc-training dt {
+  color: var(--text-muted);
+}
+.dsc-training dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.dsc-none,
+.dsc-muted {
+  color: var(--text-muted);
+}
+
+/* Attacks: one row per weapon with to hit, damage and mastery in columns. */
+.dsc-attack-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.dsc-attack-table thead th {
+  padding: 0.25rem 0.5rem 0.4rem;
+  border-bottom: 1px solid var(--addon-border);
+  color: var(--text-muted);
+  font: 600 0.64rem/1 var(--font-ui);
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.dsc-attack-table tbody :is(th, td) {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: middle;
+}
+.dsc-attack-table tbody th {
+  font-weight: 600;
+}
+.dsc-attack-table td small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+.dsc-attack-table th small {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.dsc-hit {
+  color: var(--accent-gold);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.dsc-tag {
+  text-transform: uppercase;
+}
+.dsc-tag codex-addon-rule-details::part(trigger) {
+  min-height: 0;
+  padding: 0;
+  text-transform: inherit;
+}
+.dsc-attack-table .dsc-tag {
+  border-color: var(--addon-border);
+  color: var(--text-light);
+}
+.dsc-tag[data-active="true"] {
+  border-color: var(--accent-gold-dim);
+  color: var(--accent-gold);
 }
 
 /* Spells */
@@ -558,13 +886,84 @@
   font-size: 0.75rem;
   color: var(--text-muted);
 }
+.dnd-spell-facts > :first-child {
+  min-width: 2.2rem;
+}
+.dnd-spell-range {
+  min-width: 4.5rem;
+}
 .dnd-spell-tag {
-  padding: 0 0.3rem;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  font-size: 0.65rem;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid var(--addon-border);
+  border-radius: 3px;
+  color: var(--text-muted);
+  font-size: 0.62rem;
   font-weight: 600;
+  letter-spacing: 0.05em;
+  text-align: center;
   text-decoration: none;
+}
+.dnd-spell-tag[data-time="A"] {
+  border-color: var(--accent-gold-dim);
+  color: var(--accent-gold);
+}
+.dnd-spell-tag[data-time="BA"] {
+  border-color: color-mix(in srgb, var(--color-info) 40%, transparent);
+  color: var(--color-info);
+}
+.dnd-spell-tag[data-time="R"] {
+  border-color: color-mix(in srgb, var(--color-success) 40%, transparent);
+  color: var(--color-success);
+}
+.dnd-spell-tag[data-tag="concentration"] {
+  border-color: color-mix(in srgb, var(--color-mystery) 45%, transparent);
+  color: var(--color-mystery);
+}
+/* One line per spell under its level: prepared diamond, name, facts, slot and Cast.
+   Granted spells have a dotted diamond and their source under the name. */
+.addon-dnd-character .dse-layout-compact .dnd-spell-row {
+  grid-template-columns: 1rem minmax(0, 1.4fr) minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "mark name facts slot action"
+    "mark source facts slot action";
+  row-gap: 0;
+  padding: 0.3rem 0.1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.addon-dnd-character .dse-layout-compact .dnd-spell-row::before {
+  content: "";
+  grid-area: mark;
+  justify-self: center;
+  width: 0.6rem;
+  height: 0.6rem;
+  border: 1.5px solid var(--accent-gold);
+  border-radius: 2px;
+  background: var(--accent-gold);
+  transform: rotate(45deg);
+}
+.addon-dnd-character .dse-layout-compact .dnd-spell-row[data-spell-grant]::before {
+  border-style: dotted;
+  border-color: var(--accent-gold-dim);
+  background: var(--accent-gold-dim);
+}
+.addon-dnd-character .dse-layout-compact .dnd-spell-row > button {
+  min-width: 0;
+}
+.addon-dnd-character .dse-layout-compact .dnd-spell-row select {
+  padding-block: 0.1rem;
+  font-size: 0.76rem;
+}
+.addon-dnd-character .dnd-sheet-shell .dnd-spell-level {
+  margin: 0.7rem 0 0.1rem;
+  padding: 0 0.1rem 0.3rem;
+  border-bottom: 1px solid var(--addon-border);
+  color: var(--text-light);
+  font: 600 0.8rem/1 var(--font-title);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.dnd-spell-level[hidden] {
+  display: none;
 }
 
 /* Equipment: context and worn items on the left, the backpack at full height. */
@@ -692,11 +1091,32 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.5rem;
 }
+/* Coins: the label above an underlined field, gold for GP, no spin arrows. */
+.addon-dnd-character .dsc-currency .dse-coins label {
+  display: grid;
+  justify-items: stretch;
+  gap: 3px;
+  color: var(--text-muted);
+  font: 600 0.66rem/1.2 var(--font-ui);
+  letter-spacing: 0.09em;
+}
+.addon-dnd-character .dsc-currency .dse-coins label[data-coin="gp"] > span {
+  color: var(--accent-gold);
+}
 .addon-dnd-character .dsc-currency .dse-coins input {
   width: 100%;
   min-width: 0;
+  padding: 0.2rem 0.4rem;
+  color: var(--text-parchment);
+  font: 400 1rem var(--font-ui);
+  letter-spacing: 0;
   text-align: left;
-  padding: 0.3rem 0.5rem;
+  appearance: textfield;
+}
+.addon-dnd-character .dsc-currency .dse-coins input::-webkit-inner-spin-button,
+.addon-dnd-character .dsc-currency .dse-coins input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
 }
 
 /* The body figure, shown only in its window. */
@@ -937,6 +1357,46 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+/* Narrow workspaces stack the ready panels, features, attacks and spell rows. */
+@container sheet-workspace (max-width:40rem) {
+  .dsc-ready {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dsc-feats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .addon-dnd-character .dse-layout-compact .dnd-spell-row {
+    grid-template-columns: 1rem minmax(0, 1fr) auto;
+    grid-template-areas:
+      "mark name name"
+      "mark source source"
+      "mark facts facts"
+      "mark slot action";
+    row-gap: 0.2rem;
+  }
+  .dsc-attack-table thead {
+    display: none;
+  }
+  .dsc-attack-table,
+  .dsc-attack-table tbody {
+    display: block;
+  }
+  .dsc-attack-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.15rem 0.5rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .dsc-attack-table tbody :is(th, td) {
+    display: block;
+    padding: 0;
+    border: 0;
+  }
+  .dsc-attack-table td:nth-child(n + 3) {
+    grid-column: 1 / -1;
+  }
+}
 /* Narrow screens keep normal page flow. */
 @container character-sheet (max-width:48rem) {
   .addon-dnd-character .dse-layout-compact {
@@ -948,9 +1408,6 @@
   }
 }
 @container sheet-workspace (max-width:30rem) {
-  .dsc-ready {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .dsc-health {
     min-width: 0;
   }

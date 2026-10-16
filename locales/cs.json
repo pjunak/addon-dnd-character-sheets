@@ -841,5 +841,12 @@
   "Finish short rest": "Dokončit krátký odpočinek",
   "Finish long rest": "Dokončit dlouhý odpočinek",
   "Concentration": "Soustředění",
-  "Ritual": "Rituál"
+  "Ritual": "Rituál",
+  "AC": "OČ",
+  "Prof": "Zdatnost",
+  "Init": "Iniciativa",
+  "Training and senses": "Výcvik a smysly",
+  "To hit": "Zásah",
+  "Save DC": "SO záchrany",
+  "Attack": "Útok"
 }

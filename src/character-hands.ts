@@ -3,7 +3,7 @@ import type { SheetView } from "./character-sheet.js";
 import { savedRule } from "./character-sheet.js";
 import { object, rows, strings } from "./character-client.js";
 import { translator } from "./character-locale.js";
-import { button, el, field, human, panel, select, signed, styled } from "./character-ui.js";
+import { button, el, field, hint, human, panel, select, signed, styled } from "./character-ui.js";
 import { rulesTarget } from "./character-rule-notes.js";
 
 function restoreMessage(reason: unknown, locale: string): string {
@@ -155,10 +155,6 @@ export function handControls(view: SheetView, combat: boolean): HTMLElement {
     view.locale,
   );
   if (reason) root.append(el("p", reason));
-  const note = styled("span", "dse-hint", "ⓘ");
-  note.title = t("Equipment changes do not track turn or action costs.");
-  note.setAttribute("role", "img");
-  note.setAttribute("aria-label", note.title);
-  root.querySelector("h3")!.append(note);
+  root.querySelector("h3")!.append(hint(t("Equipment changes do not track turn or action costs.")));
   return root;
 }

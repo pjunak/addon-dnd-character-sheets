@@ -841,5 +841,12 @@
   "Finish short rest": "Finish short rest",
   "Finish long rest": "Finish long rest",
   "Concentration": "Concentration",
-  "Ritual": "Ritual"
+  "Ritual": "Ritual",
+  "AC": "AC",
+  "Prof": "Prof",
+  "Init": "Init",
+  "Training and senses": "Training and senses",
+  "To hit": "To hit",
+  "Save DC": "Save DC",
+  "Attack": "Attack"
 }
