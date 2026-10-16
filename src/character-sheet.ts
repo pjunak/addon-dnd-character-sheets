@@ -220,10 +220,14 @@ export function abilityRail(view: SheetView): HTMLElement {
     for (const [index, caster] of rows(object(sheet["spellcasting"])["perClass"]).entries())
       if (view.layout === "compact" && caster["ability"] === ability) {
         card.classList.add("dse-caster");
-        // Beside Init and Passive, the class name moves to the tooltip.
-        const { source, numbers } = castingDetails(view, caster, index),
+        // Beside Init and Passive the chip reads "DC 13 · +5" so both fit one
+        // line; the tooltip names the class and spells the numbers out.
+        const { source, numbers } = castingDetails(view, caster, index, true),
           chip = styled("span", "dse-dock", numbers);
-        chip.title = source;
+        chip.title =
+          source +
+          ": " +
+          t("DC {0} · Attack {1}", [human(caster["saveDC"]), signed(caster["spellAttack"])]);
         dock.append(chip);
       }
     const skills = Object.entries(object(sheet["skills"])).filter(
@@ -262,12 +266,13 @@ export function abilityRail(view: SheetView): HTMLElement {
   }
   return rail;
 }
-// One caster's numbers as a single "DC 13 · Attack +5" line, with the class or
-// source that grants them for the caller to label it.
+// One caster's numbers as a single "DC 13 · Attack +5" line ("DC 13 · +5" when
+// short), with the class or source that grants them for the caller to label it.
 export function castingDetails(
   view: SheetView,
   caster: Record<string, unknown>,
   index: number,
+  short = false,
 ): { source: string; numbers: HTMLElement } {
   const t = translator(view.locale),
     path = "spellcasting.perClass." + index;
@@ -283,7 +288,7 @@ export function castingDetails(
     dot,
     savedRule(
       view.projection,
-      t("Attack {0}", [signed(caster["spellAttack"])]),
+      short ? signed(caster["spellAttack"]) : t("Attack {0}", [signed(caster["spellAttack"])]),
       path + ".spellAttack",
     ),
   );

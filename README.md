@@ -132,8 +132,9 @@ saved values, export and printing remain usable.
 
 The sheet is limited to 1,120 px. The host shows no visible character heading;
 the sheet shows the name in each tab's top row. Compact uses tighter ability
-cards, with the spell save DC and attack beside the casting ability's name, and
-places currency directly below inventory. When enlarged text leaves too little
+cards, with the spell save DC and attack (`DC 13 · +5`, spelled out on hover)
+beside the casting ability's name, and places currency directly below
+inventory. When enlarged text leaves too little
 room beside navigation, the rail stacks above the sheet and keeps its vertical
 keyboard behavior. Ability cards stack their score and skill list when the
 available width would squeeze enlarged skill names into narrow columns.
