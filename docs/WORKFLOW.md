@@ -92,8 +92,10 @@ and temporary HP remains editable. Conditions, the D20 adjustment and rests
 share the bar's status row. Combat shows ability modifiers and saves in its
 small row, its weapons as a table, and casting numbers beneath them. Rests, the
 body figure, Backpack and prepared spells open as non-modal floating windows
-(their buttons carry ⤢). Sheet shows features and feats with short summaries,
-and training, senses and size as one list.
+(their buttons carry ⤢). Sheet shows features, chosen options, feats and class
+choices with short summaries, and training, senses, size, defenses and
+Advantage as one list. Granted spells cast at will, as rituals only, or by
+spending their feature's uses where the Engine says so.
 
 Inventory,
 equipment, currency, HP, spells and resources remain editable in their ordinary

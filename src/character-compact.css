@@ -872,6 +872,10 @@
   border-color: var(--addon-border);
   color: var(--text-light);
 }
+.dsc-attack-table .dsc-crit {
+  display: block;
+  color: var(--text-muted);
+}
 .dsc-tag[data-active="true"] {
   border-color: var(--accent-gold-dim);
   color: var(--accent-gold);

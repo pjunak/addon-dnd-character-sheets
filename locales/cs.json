@@ -862,5 +862,20 @@
   "Range": "Dosah",
   "Thrown": "Vrhem",
   "Save DC": "SO záchrany",
-  "Attack": "Útok"
+  "Attack": "Útok",
+  "Fly {0}": "Létání {0}",
+  "Swim {0}": "Plavání {0}",
+  "Climb {0}": "Šplhání {0}",
+  "Burrow {0}": "Hrabání {0}",
+  "Advantage": "Výhoda",
+  "{0} saves": "Záchranné hody na {0}",
+  "All saves": "Všechny záchranné hody",
+  "{0} checks": "Ověření {0}",
+  "All checks": "Všechna ověření",
+  "Death saves": "Záchranné hody proti smrti",
+  "{0} ({1})": "{0} ({1})",
+  "Critical hit {0}–20": "Kritický zásah {0}–20",
+  "Crit {0}–20": "Krit. {0}–20",
+  "At will": "Libovolně",
+  "Ritual only": "Jen jako rituál"
 }

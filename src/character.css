@@ -309,6 +309,25 @@
   color: var(--text-parchment);
   font-variant-numeric: tabular-nums;
 }
+/* A roll the character has Advantage on; special movement beside Speed. */
+.dnd-advantage {
+  display: inline-block;
+  margin-left: var(--space-1);
+  padding: 0 0.25rem;
+  border: 1px solid var(--accent-gold-dim);
+  border-radius: var(--radius-sm);
+  font-size: 0.6rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--accent-gold);
+  vertical-align: middle;
+}
+.dnd-movement {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
 .addon-dnd-sheets .dse-dot {
   display: inline-flex;
   align-items: center;

@@ -53,10 +53,15 @@ its prepared spells, then casting numbers, spell-slot pips and the prepared
 count beside **Change**. Compact puts abilities and skills on the right,
 starting at the top; untrained skills are dimmed. **Limited uses** shows remaining uses as pips (round
 for spell slots and hit dice, diamonds for feature uses, a bar with steps for
-large pools) and each resource's short/long rest recharge. Sheet lists features
-and feats in a grid with short summaries, and armor, weapon, tool and language
-training, senses and size in one list. Combat lists weapons in a table (to hit,
-damage, reach or range, mastery) with casting numbers beneath. Spells sort by
+large pools) and each resource's short/long rest recharge, after the class
+table values and feature save DCs (a Monk's Focus, maneuvers). Sheet lists
+features, chosen invocations and other options, feats and class choices (Divine
+Order, Wild Shape forms) in a grid with short summaries, and armor, weapon, tool
+and language training, senses, size, defenses and what the character has
+Advantage on in one list. Fly, swim and climb speeds sit under Speed, and an
+**A** marks saves, skills and Initiative with Advantage. Combat lists weapons
+and feature attacks in a table (to hit, damage, reach or range, mastery, a
+lowered critical range) with casting numbers beneath. Spells sort by
 level under headings with the remaining slots; each row shows casting time as an A, BA or R
 tag, range, concentration and ritual from the source record. Chips above the
 list narrow it to Action, Bonus action or Concentration spells, and the chosen

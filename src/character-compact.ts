@@ -1,13 +1,18 @@
 import type { SheetView } from "./character-sheet.js";
 import {
   abilityRail,
+  advantageMark,
+  advantageNames,
   casterSource,
   castingDetails,
   characterName,
   classValueRows,
   currency,
+  featureDCRows,
+  movementDetails,
   recordName,
   savedRule,
+  selectionEntries,
   sizeDetails,
   wornEquipment,
 } from "./character-sheet.js";
@@ -385,11 +390,14 @@ export function compactVitals(
     root = rulesTarget(styled("section", "dsc-bar"), "hp", "temporaryHp"),
     values = styled("div", "dsc-vitals");
   root.setAttribute("aria-label", t("Core character values"));
+  const speed = derivedCell(view, "Speed", "speed"),
+    movement = movementDetails(view.projection, view.locale);
+  if (movement) speed.append(movement);
   values.append(
     characterName(view),
     hitPoints(view),
     derivedCell(view, "AC", "armorClass"),
-    derivedCell(view, "Speed", "speed"),
+    speed,
     ...(combat ? [derivedCell(view, "Init", "initiative", true)] : []),
     derivedCell(view, "Prof", "proficiencyBonus", true),
     inspiration(view),
@@ -492,7 +500,10 @@ export function limitedUses(view: SheetView): HTMLElement {
     root = rulesTarget(panel(t("Limited uses")), "resources"),
     list = styled("div", "dsc-uses");
   root.classList.add("dsc-uses-panel");
-  for (const [name, value] of classValueRows(view.projection))
+  for (const [name, value] of [
+    ...classValueRows(view.projection),
+    ...featureDCRows(view.projection, view.locale),
+  ])
     list.append(
       styled(
         "div",
@@ -589,6 +600,7 @@ function combatAbilities(view: SheetView): HTMLElement {
           "dsc-save",
           shield,
           savedRule(view.projection, signed(save["total"]), "saves." + ability + ".total"),
+          ...(save["advantage"] === true ? [advantageMark(view.locale)] : []),
         ),
       ),
     );
@@ -668,8 +680,16 @@ function attackTable(view: SheetView): HTMLElement {
         "tr",
         el(
           "th",
-          savedRule(view.projection, text(weapon["name"], ref), undefined, reference),
+          savedRule(
+            view.projection,
+            text(weapon["name"], ref),
+            undefined,
+            reference ?? featureReference(weapon),
+          ),
           ...(item && item.quantity > 1 ? [el("small", " ×" + item.quantity)] : []),
+          ...(typeof weapon["criticalRange"] === "number"
+            ? [styled("small", "dsc-crit", t("Crit {0}–20", [weapon["criticalRange"]]))]
+            : []),
         ),
         styled(
           "td",
@@ -692,6 +712,14 @@ function attackTable(view: SheetView): HTMLElement {
   );
   root.append(styled("table", "dsc-attack-table", el("thead", head), body));
   return root;
+}
+
+// A feature attack (Psychic Blade) links to the feature that creates it.
+function featureReference(weapon: Record<string, unknown>): Reference | undefined {
+  const source = object(weapon["source"]);
+  return weapon["featureAttack"] && text(source["id"])
+    ? { kind: text(source["type"]), id: text(source["id"]) }
+    : undefined;
 }
 
 // "Paladin 2", "Oath of Devotion", "Human": where a feature comes from.
@@ -728,15 +756,33 @@ function features(view: SheetView): HTMLElement {
     );
   };
   for (const feature of rows(sheet["features"])) {
-    const id = String(feature["id"]);
+    const id = String(feature["id"]),
+      count = Number(feature["count"] ?? 1);
     grid.append(
       entry(
-        text(feature["name"], id),
+        text(feature["name"], id) + (count > 1 ? " × " + count : ""),
         { kind: "feature", id },
         featureSource(view, feature["source"]),
       ),
     );
   }
+  for (const selection of selectionEntries(view.projection, view.locale))
+    grid.append(
+      styled(
+        "div",
+        "dsc-feat",
+        styled("div", "dsc-feat-head", el("strong", selection.name)),
+        el(
+          "p",
+          ...selection.values.flatMap((value, index) => [
+            ...(index ? [", "] : []),
+            value.reference
+              ? savedRule(view.projection, value.name, undefined, value.reference)
+              : value.name,
+          ]),
+        ),
+      ),
+    );
   for (const feat of rows(sheet["feats"])) {
     const id = String(feat["id"]),
       count = Number(feat["count"] ?? 1);
@@ -802,6 +848,13 @@ function training(view: SheetView): HTMLElement {
     const value = human(sheet[key]);
     if (sheet[key] !== undefined && value && value !== "—") row(t(label(key)), value);
   }
+  const advantages = advantageNames(view.projection, view.locale);
+  if (advantages.length) row(t("Advantage"), advantages.join("; "));
+  if (Number(sheet["concentrationSaveBonus"] ?? 0) !== 0)
+    row(
+      t("Concentration"),
+      savedRule(view.projection, signed(sheet["concentrationSaveBonus"]), "concentrationSaveBonus"),
+    );
   root.append(list);
   return root;
 }

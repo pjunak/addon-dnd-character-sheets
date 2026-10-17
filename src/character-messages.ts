@@ -864,7 +864,22 @@ export const catalogs = {
     "Range": "Range",
     "Thrown": "Thrown",
     "Save DC": "Save DC",
-    "Attack": "Attack"
+    "Attack": "Attack",
+    "Fly {0}": "Fly {0}",
+    "Swim {0}": "Swim {0}",
+    "Climb {0}": "Climb {0}",
+    "Burrow {0}": "Burrow {0}",
+    "Advantage": "Advantage",
+    "{0} saves": "{0} saves",
+    "All saves": "All saves",
+    "{0} checks": "{0} checks",
+    "All checks": "All checks",
+    "Death saves": "Death saves",
+    "{0} ({1})": "{0} ({1})",
+    "Critical hit {0}–20": "Critical hit {0}–20",
+    "Crit {0}–20": "Crit {0}–20",
+    "At will": "At will",
+    "Ritual only": "Ritual only"
   },
   "cs": {
     "Hands and grip": "Ruce a úchop",
@@ -1730,6 +1745,21 @@ export const catalogs = {
     "Range": "Dosah",
     "Thrown": "Vrhem",
     "Save DC": "SO záchrany",
-    "Attack": "Útok"
+    "Attack": "Útok",
+    "Fly {0}": "Létání {0}",
+    "Swim {0}": "Plavání {0}",
+    "Climb {0}": "Šplhání {0}",
+    "Burrow {0}": "Hrabání {0}",
+    "Advantage": "Výhoda",
+    "{0} saves": "Záchranné hody na {0}",
+    "All saves": "Všechny záchranné hody",
+    "{0} checks": "Ověření {0}",
+    "All checks": "Všechna ověření",
+    "Death saves": "Záchranné hody proti smrti",
+    "{0} ({1})": "{0} ({1})",
+    "Critical hit {0}–20": "Kritický zásah {0}–20",
+    "Crit {0}–20": "Krit. {0}–20",
+    "At will": "Libovolně",
+    "Ritual only": "Jen jako rituál"
   }
 } as const;

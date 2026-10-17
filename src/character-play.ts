@@ -84,8 +84,9 @@ export function playActions(
       group.append(row);
     }
   };
-  // An empty slot key means the spell costs nothing (a cantrip), so there is
-  // nothing to pick. Otherwise the first resource is preselected.
+  // An empty slot key means the spell costs nothing (a cantrip, or an at-will
+  // grant beside the slots that upcast it). Alone there is nothing to pick;
+  // otherwise the first entry is preselected.
   const slotPicker = (
     name: string,
     slots: readonly string[],
@@ -98,7 +99,10 @@ export function playActions(
             name,
             select(
               slots[0] ?? "",
-              resources.map((id) => ({ id, label: slotName(id) })),
+              [
+                ...(slots.includes("") ? [{ id: "", label: t("At will") }] : []),
+                ...resources.map((id) => ({ id, label: slotName(id) })),
+              ],
               change,
               t,
               { required: true },
@@ -306,6 +310,8 @@ export function playActions(
         [
           spellSourceLabel(grant["source"], locale),
           grant["castingAbility"] ? human(grant["castingAbility"]) : "",
+          grant["atWill"] === true ? t("At will") : "",
+          grant["ritualOnly"] === true ? t("Ritual only") : "",
         ]
           .filter(Boolean)
           .join(" · "),
@@ -316,7 +322,11 @@ export function playActions(
         slot = value;
       }),
     );
-    row.append(button(t("Cast"), () => act({ operation: "cast-granted-spell", key, slot })));
+    row.append(
+      button(t(grant["ritualOnly"] === true ? "Cast as ritual" : "Cast"), () =>
+        act({ operation: "cast-granted-spell", key, slot }),
+      ),
+    );
     grantedRows.push(row);
   }
   if (grantedRows.length) {

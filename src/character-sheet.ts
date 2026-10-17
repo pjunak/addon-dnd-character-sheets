@@ -15,8 +15,8 @@ import {
   type EquipmentSlot,
 } from "./character-inventory.js";
 import type { CatalogRecord } from "./character-client.js";
-import { abilities, object, rows, text, catalogRecord } from "./character-client.js";
-import { abilityNames, translator } from "./character-locale.js";
+import { abilities, object, rows, strings, text, catalogRecord } from "./character-client.js";
+import { abilityNames, builderLabel, translator } from "./character-locale.js";
 import {
   button,
   checkbox,
@@ -26,6 +26,7 @@ import {
   label,
   numberInput,
   panel,
+  plainDescription,
   rule,
   select,
   signed,
@@ -132,7 +133,7 @@ export function featDetails(
       el(
         "details",
         el("summary", savedRule(projection, heading, undefined, reference)),
-        el("p", evidence?.summary ?? ""),
+        el("p", plainDescription(evidence?.summary)),
       ),
     );
   }
@@ -171,6 +172,7 @@ export function abilityRail(view: SheetView): HTMLElement {
             t("Init {0}", [signed(derived["initiative"])]),
             "derived.initiative",
           ),
+          ...(sheet["initiativeAdvantage"] === true ? [advantageMark(view.locale)] : []),
         ),
       );
     if (view.layout === "compact" && ability === "WIS")
@@ -206,6 +208,7 @@ export function abilityRail(view: SheetView): HTMLElement {
       dock,
       proficiency,
       savedRule(view.projection, signed(save["total"]), "saves." + ability + ".total"),
+      ...(save["advantage"] === true ? [advantageMark(view.locale)] : []),
     );
     const tile = styled(
       "div",
@@ -264,6 +267,7 @@ export function abilityRail(view: SheetView): HTMLElement {
           "strong",
           "dse-total",
           savedRule(view.projection, signed(skill["total"]), "skills." + id + ".total"),
+          ...(skill["advantage"] === true ? [advantageMark(view.locale)] : []),
         ),
       );
       line.dataset["trained"] = String(skill["proficient"] === true || skill["expertise"] === true);
@@ -392,10 +396,13 @@ export function vitals(view: SheetView): HTMLElement {
   const ac = tile("Armor class", "armorClass");
   ac.classList.add("dse-ac");
   band.append(ac);
+  const speed = tile("Speed", "speed"),
+    movement = movementDetails(view.projection, view.locale);
+  if (movement) speed.append(movement);
   const stats = styled(
     "div",
     "dse-vitals-grid",
-    tile("Speed", "speed"),
+    speed,
     tile("Proficiency", "proficiencyBonus", true),
   );
   if (Object.hasOwn(derived, "size"))
@@ -407,11 +414,11 @@ export function vitals(view: SheetView): HTMLElement {
         el("strong", sizeDetails(view)),
       ),
     );
-  if (view.layout === "classic")
-    stats.append(
-      tile("Initiative", "initiative", true),
-      tile("Passive perception", "passivePerception"),
-    );
+  if (view.layout === "classic") {
+    const initiative = tile("Initiative", "initiative", true);
+    if (sheet["initiativeAdvantage"] === true) initiative.append(advantageMark(view.locale));
+    stats.append(initiative, tile("Passive perception", "passivePerception"));
+  }
   const inspiration = checkbox(t("Inspiration"), view.input.play.inspiration === true, (value) => {
     view.input.play.inspiration = value;
     view.change();
@@ -775,6 +782,8 @@ export function attackDetails(view: SheetView): HTMLElement {
           savedRule(view.projection, human(weapon["versatileDamage"]), path + ".versatileDamage"),
         ),
       );
+    if (typeof weapon["criticalRange"] === "number")
+      row.append(el("span", t("Critical hit {0}–20", [weapon["criticalRange"]])));
     if (weapon["mastery"])
       row.append(
         el(
@@ -797,12 +806,95 @@ export function classValueRows(projection: Projection | undefined): [string, str
     typeof row["value"] === "number" ? signed(row["value"]) : human(row["value"]),
   ]);
 }
+/** Save DCs features set for their own effects (a Monk's Focus) as label/value pairs. */
+export function featureDCRows(
+  projection: Projection | undefined,
+  locale: string,
+): [string, string][] {
+  const t = translator(locale);
+  return rows(projection?.sheet["saveDCs"]).map((row) => [
+    text(row["name"]),
+    t("DC {0}", [human(row["value"])]),
+  ]);
+}
+const movementModes = [
+  ["flySpeed", "Fly {0}"],
+  ["swimSpeed", "Swim {0}"],
+  ["climbSpeed", "Climb {0}"],
+  ["burrowSpeed", "Burrow {0}"],
+] as const;
+/** Special movement beside Speed ("Fly 60 · Swim 30"), when the Engine reports any. */
+export function movementDetails(
+  projection: Projection | undefined,
+  locale: string,
+): HTMLElement | undefined {
+  const t = translator(locale),
+    sheet = projection?.sheet ?? {},
+    root = styled("small", "dnd-movement");
+  for (const [key, template] of movementModes)
+    if (Number(sheet[key] ?? 0) > 0) {
+      if (root.childElementCount) root.append(" · ");
+      root.append(savedRule(projection, t(template, [human(sheet[key])]), key));
+    }
+  return root.childElementCount ? root : undefined;
+}
+/** A small mark on a roll the character has Advantage on. */
+export function advantageMark(locale: string): HTMLElement {
+  const mark = styled("span", "dnd-advantage", "A");
+  mark.title = translator(locale)("Advantage");
+  mark.setAttribute("aria-label", mark.title);
+  return mark;
+}
+/** The rolls features give Advantage on, situational ones with their condition. */
+export function advantageNames(projection: Projection | undefined, locale: string): string[] {
+  const t = translator(locale),
+    names: string[] = [];
+  for (const entry of rows(projection?.sheet["advantages"])) {
+    const scope = [
+      ...strings(entry["abilities"]),
+      ...strings(entry["skills"]).map((skill) => t(label(skill))),
+    ].join(", ");
+    const roll =
+      entry["on"] === "save"
+        ? scope
+          ? t("{0} saves", [scope])
+          : t("All saves")
+        : entry["on"] === "check"
+          ? scope
+            ? t("{0} checks", [scope])
+            : t("All checks")
+          : entry["on"] === "initiative"
+            ? t("Initiative")
+            : entry["on"] === "concentration"
+              ? t("Concentration")
+              : t("Death saves");
+    const name = entry["when"] ? t("{0} ({1})", [roll, text(entry["when"])]) : roll;
+    if (!names.includes(name)) names.push(name);
+  }
+  return names;
+}
+/** Class choices whose picks have no feature of their own (Divine Order, Wild Shape forms). */
+export function selectionEntries(
+  projection: Projection | undefined,
+  locale: string,
+): { name: string; values: { name: string; reference?: Reference }[] }[] {
+  return rows(projection?.sheet["selections"]).map((row) => ({
+    name: builderLabel(row, locale, text(row["id"])),
+    values: rows(row["values"]).map((value) => ({
+      name: text(value["label"], text(value["id"])),
+      ...(value["kind"] ? { reference: { kind: text(value["kind"]), id: text(value["id"]) } } : {}),
+    })),
+  }));
+}
 export function resourceDetails(view: SheetView): HTMLElement {
   const t = translator(view.locale),
     sheet = view.projection?.sheet ?? {};
   const resources = rulesTarget(panel(t("Resources")), "resources");
   resources.className = "dse-section dse-resources";
-  for (const [name, value] of classValueRows(view.projection))
+  for (const [name, value] of [
+    ...classValueRows(view.projection),
+    ...featureDCRows(view.projection, view.locale),
+  ])
     resources.append(styled("div", "dse-resource", el("span", name), el("strong", value)));
   for (const resource of rows(sheet["resources"])) {
     const key = String(resource["key"]),
@@ -856,7 +948,8 @@ export function explorationDetails(view: SheetView): HTMLElement {
   const traits = panel(t("Features and traits"));
   traits.className = "dse-section";
   for (const feature of rows(sheet["features"])) {
-    const id = String(feature["id"]);
+    const id = String(feature["id"]),
+      count = Number(feature["count"] ?? 1);
     traits.append(
       el(
         "details",
@@ -866,14 +959,36 @@ export function explorationDetails(view: SheetView): HTMLElement {
             kind: "feature",
             id,
           }),
+          ...(count > 1 ? [" × " + count] : []),
         ),
-        el("p", view.projection?.evidence.find((row) => row.reference.id === id)?.summary ?? ""),
+        el(
+          "p",
+          plainDescription(
+            view.projection?.evidence.find((row) => row.reference.id === id)?.summary,
+          ),
+        ),
       ),
     );
   }
+  for (const selection of selectionEntries(view.projection, view.locale))
+    traits.append(
+      el(
+        "p",
+        el("strong", selection.name + ": "),
+        ...selection.values.flatMap((value, index) => [
+          ...(index ? [", "] : []),
+          value.reference
+            ? savedRule(view.projection, value.name, undefined, value.reference)
+            : value.name,
+        ]),
+      ),
+    );
   for (const key of ["resistances", "damageImmunities", "conditionImmunities"])
     if (sheet[key] !== undefined)
       traits.append(el("p", el("strong", t(label(key)) + ": "), human(sheet[key])));
+  const advantages = advantageNames(view.projection, view.locale);
+  if (advantages.length)
+    traits.append(el("p", el("strong", t("Advantage") + ": "), advantages.join("; ")));
   root.append(
     proficiencyDetails(view.projection, view.locale),
     senseDetails(view.projection, view.locale),
