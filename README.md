@@ -57,7 +57,9 @@ and feats in a grid with short summaries, and armor, weapon, tool and language
 training, senses and size in one list. Combat lists weapons in a table (to hit,
 damage, mastery) with casting numbers beneath. Spells sort by level under
 headings with the remaining slots; each row shows casting time as an A, BA or R
-tag, range, concentration and ritual from the source record.
+tag, range, concentration and ritual from the source record. Chips above the
+list narrow it to Action, Bonus action or Concentration spells, and the chosen
+filters survive saves while the character stays open.
 
 Panels follow the approved mockup: small-capital headings, editable values as
 gold-underlined fields, and computed values as gold-tinted text that highlights

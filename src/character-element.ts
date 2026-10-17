@@ -50,6 +50,7 @@ import {
   spellSourceLabel,
   unassignedSpellState,
   savedSpellBook,
+  type PlayFilterState,
   type SpellPickerState,
 } from "./character-spells.js";
 import {
@@ -146,6 +147,7 @@ export function defineCharacterElement(
     #layout: Layout = "compact";
     #builderNav: BuilderNavigation = { tab: "character", target: "", open: true };
     #spellPickers = new Map<string, SpellPickerState>();
+    #playFilter: PlayFilterState = { query: "", level: "", kind: "" };
     #spellManagementOpen = false;
     #pack: BackpackState = { query: "", container: "", sort: "name" };
     #packReturnFocus = "storage/open";
@@ -166,6 +168,7 @@ export function defineCharacterElement(
       this.#context = value;
       if (previous?.host.key !== value.host.key) {
         this.#spellPickers.clear();
+        this.#playFilter = { query: "", level: "", kind: "" };
         this.#spellManagementOpen = false;
         this.#pack = { query: "", container: "", sort: "name" };
         this.#packReturnFocus = "storage/open";
@@ -1292,6 +1295,7 @@ export function defineCharacterElement(
             (change) => view.act(change),
             view.locale,
             "spells",
+            this.#playFilter,
           ),
         );
       else {

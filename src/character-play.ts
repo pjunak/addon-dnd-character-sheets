@@ -4,6 +4,7 @@ import {
   spellFacts,
   spellFilters,
   spellSourceLabel,
+  type PlayFilterState,
 } from "./character-spells.js";
 import type { Inputs, Result } from "./character-model.js";
 import { translator } from "./character-locale.js";
@@ -37,6 +38,7 @@ export function playActions(
   act: (change: Record<string, unknown>) => Promise<void>,
   locale = "en",
   section: "spells" | "recovery" = "spells",
+  filterState: PlayFilterState = { query: "", level: "", kind: "" },
 ): HTMLElement {
   const t = translator(locale);
   const root = rulesTarget(
@@ -129,11 +131,41 @@ export function playActions(
       );
     }
   if (section === "recovery") return root;
-  const filters = spellFilters("play-spells", locale, () => filter());
+  const filters = spellFilters("play-spells", locale, () => filter(), filterState);
+  // Casting-time and concentration chips narrow the list beside the name and level filters.
+  const chips = styled("div", "dnd-spell-chips");
+  chips.setAttribute("role", "group");
+  chips.setAttribute("aria-label", t("Filter spells"));
+  for (const [kind, name] of [
+    ["", "All"],
+    ["A", "Action"],
+    ["BA", "Bonus action"],
+    ["concentration", "Concentration"],
+  ] as const) {
+    const chip = button(
+      t(name),
+      () => {
+        filterState.kind = kind;
+        for (const other of chips.children)
+          other.setAttribute("aria-pressed", String(other === chip));
+        filter();
+      },
+      false,
+      "play-spells/kind/" + (kind || "all"),
+    );
+    chip.setAttribute("aria-pressed", String(filterState.kind === kind));
+    chips.append(chip);
+  }
+  const kindMatches = (row: HTMLElement): boolean =>
+    !filterState.kind ||
+    (filterState.kind === "concentration"
+      ? row.dataset["spellConcentration"] !== undefined
+      : row.dataset["spellTime"] === filterState.kind);
   const filter = (): void => {
     let shown = 0;
     for (const row of root.querySelectorAll<HTMLElement>("[data-spell-name]")) {
-      row.hidden = !filters.matches(row.dataset["spellName"]!, row.dataset["spellLevel"]);
+      row.hidden =
+        !filters.matches(row.dataset["spellName"]!, row.dataset["spellLevel"]) || !kindMatches(row);
       if (!row.hidden) shown++;
     }
     for (const heading of root.querySelectorAll<HTMLElement>("[data-spell-level-heading]"))
@@ -146,7 +178,7 @@ export function playActions(
       );
     filters.report(shown);
   };
-  root.append(filters.controls);
+  root.append(chips, filters.controls);
   const spellRow = (ref: string): HTMLElement =>
     markSpellRow(
       styled(

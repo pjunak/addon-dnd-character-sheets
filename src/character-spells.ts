@@ -51,6 +51,10 @@ export interface SpellFilterState {
 export interface SpellPickerState extends SpellFilterState {
   open: boolean;
 }
+/** The play list adds a casting-time or concentration chip: "", "A", "BA" or "concentration". */
+export interface PlayFilterState extends SpellFilterState {
+  kind: string;
+}
 export function spellFilters(
   key: string,
   locale: string,
@@ -170,7 +174,7 @@ export function spellFacts(
     facts = styled("span", "dnd-spell-facts");
   // Common casting times read as tags (A, BA, R); the source's wording is the title.
   const time = text(spell["castingTime"]),
-    mark = { action: "A", "bonus action": "BA", reaction: "R" }[time.toLowerCase()];
+    mark = castingMark(time);
   if (mark) {
     const tag = styled("abbr", "dnd-spell-tag", mark);
     tag.dataset["time"] = mark;
@@ -192,10 +196,18 @@ export function spellFacts(
   return facts.children.length ? facts : undefined;
 }
 
+const castingMarks: Record<string, string> = { action: "A", "bonus action": "BA", reaction: "R" };
+/** "A", "BA" or "R" for the common casting times, "" for any other wording. */
+export function castingMark(time: unknown): string {
+  return castingMarks[text(time).toLowerCase()] ?? "";
+}
+
 export function markSpellRow(row: HTMLElement, id: string, catalog: CatalogRecord[]): HTMLElement {
   const spell = catalogRecord(catalog, id);
   row.dataset["spellName"] = text(spell?.value["name"], id);
   row.dataset["spellLevel"] = text(spell?.value["level"]);
+  row.dataset["spellTime"] = castingMark(spell?.value["castingTime"]);
+  if (spell?.value["concentration"] === true) row.dataset["spellConcentration"] = "";
   return row;
 }
 
