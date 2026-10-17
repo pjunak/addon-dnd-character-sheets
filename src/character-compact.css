@@ -878,6 +878,15 @@
 }
 
 /* Spells */
+.dsc-caster .dsc-muted {
+  font-size: 0.84rem;
+}
+/* The last prepared count sits beside the button that changes it. */
+.dsc-prepared {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .dnd-spell-facts {
   display: inline-flex;
   flex-wrap: wrap;
@@ -1085,6 +1094,26 @@
 }
 .addon-dnd-character .dsc-pin[aria-pressed="true"] {
   color: var(--accent-gold);
+}
+/* Coins on the left, their worth in gold at the right; it wraps below when narrow. */
+.dsc-coin-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.5rem 1.2rem;
+}
+.dsc-coin-row > .dse-coins {
+  flex: 1 1 18rem;
+}
+.dsc-worth {
+  display: grid;
+  justify-items: end;
+  gap: 3px;
+  margin-left: auto;
+}
+.dsc-worth .dsc-cell-value {
+  color: var(--accent-gold);
+  font-size: 1.2rem;
 }
 .addon-dnd-character .dsc-currency .dse-coins {
   display: grid;

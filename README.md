@@ -48,15 +48,16 @@ Combat adds Initiative. The HP field takes a value or `-7` (damage), `+5`
 (healing) or `=30` (set) followed by Enter; damage and healing go through the
 rules. A status row lists conditions with their levels and remove buttons, the
 separate D20 adjustment and Short/Long rest. Equipment shows AC, Speed and
-attunement; Spells shows casting numbers, spell-slot pips and **Change prepared
-spells**. Compact puts abilities and skills on the right, starting at the top;
-untrained skills are dimmed. **Limited uses** shows remaining uses as pips (round
+attunement; Spells names each caster's class and ability with when it may change
+its prepared spells, then casting numbers, spell-slot pips and the prepared
+count beside **Change**. Compact puts abilities and skills on the right,
+starting at the top; untrained skills are dimmed. **Limited uses** shows remaining uses as pips (round
 for spell slots and hit dice, diamonds for feature uses, a bar with steps for
 large pools) and each resource's short/long rest recharge. Sheet lists features
 and feats in a grid with short summaries, and armor, weapon, tool and language
 training, senses and size in one list. Combat lists weapons in a table (to hit,
-damage, mastery) with casting numbers beneath. Spells sort by level under
-headings with the remaining slots; each row shows casting time as an A, BA or R
+damage, reach or range, mastery) with casting numbers beneath. Spells sort by
+level under headings with the remaining slots; each row shows casting time as an A, BA or R
 tag, range, concentration and ritual from the source record. Chips above the
 list narrow it to Action, Bonus action or Concentration spells, and the chosen
 filters survive saves while the character stays open.
@@ -64,6 +65,8 @@ filters survive saves while the character stays open.
 Panels follow the approved mockup: small-capital headings, editable values as
 gold-underlined fields, and computed values as gold-tinted text that highlights
 on hover and explains itself in a rule popover. Short side notes are ⓘ hints.
+Range, preparation timing, prepared counts and coin worth come from the Engine;
+an older Engine leaves them out.
 
 Bigger editors open as floating windows: Backpack, the body figure, rests and
 prepared spells. Windows are not modal; the sheet stays usable behind them, the
@@ -74,9 +77,9 @@ a short rest and applies the rest only when finished; a refused rest stays open
 beside its rule note.
 
 **Equipment** lists what is worn and held with Stow actions, the empty body
-places, mechanical equipment controls and all five currency denominations, with
-the Backpack summary at full height beside them. The source-filtered body figure
-opens in its window from a place or **Open figure**. **Backpack** opens a
+places, mechanical equipment controls and all five currency denominations with
+their worth in gold, and the Backpack summary at full height beside them. The
+source-filtered body figure opens in its window from a place or **Open figure**. **Backpack** opens a
 searchable, sortable window with container filtering. Add Item returns to that same search
 and compartment; it defaults to a new instance and offers explicit addition to
 a carried stack. Existing item names, notes, grants and equipped copies survive.

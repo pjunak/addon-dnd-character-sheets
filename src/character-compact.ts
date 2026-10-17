@@ -596,11 +596,36 @@ function combatAbilities(view: SheetView): HTMLElement {
   return root;
 }
 
-// Combat lists weapons as a table: name, to hit, damage (versatile beneath) and mastery.
+// Reach for melee attacks and normal / long range for ranged and thrown ones,
+// in the ruleset's distance unit; a thrown melee weapon shows both.
+function attackRange(view: SheetView, weapon: Record<string, unknown>, path: string): HTMLElement {
+  const t = translator(view.locale),
+    distance = object(weapon["range"]),
+    cell = el("td");
+  const value = (shown: string, key: string): HTMLElement => {
+    const unit = view.projection?.explanations[path + "." + key]?.unit;
+    return savedRule(view.projection, unit ? shown + " " + unit : shown, path + "." + key);
+  };
+  if (typeof weapon["reach"] === "number") cell.append(value(String(weapon["reach"]), "reach"));
+  if (typeof distance["normal"] === "number") {
+    const range = value(`${human(distance["normal"])} / ${human(distance["long"])}`, "range"),
+      thrown = distance["thrown"] === true;
+    if (cell.childElementCount) cell.append(el("small", thrown ? t("Thrown") + " " : "", range));
+    else cell.append(range, ...(thrown ? [el("small", t("Thrown"))] : []));
+  }
+  return cell;
+}
+
+// Combat lists weapons as a table: name, to hit, damage (versatile beneath),
+// range and mastery. Without reach or range from the Engine the column is left out.
 function attackTable(view: SheetView): HTMLElement {
   const t = translator(view.locale),
     root = panel(t("Attacks")),
-    weapons = rows(view.projection?.sheet["weapons"]);
+    weapons = rows(view.projection?.sheet["weapons"]),
+    ranged = weapons.some(
+      (weapon) =>
+        typeof weapon["reach"] === "number" || object(weapon["range"])["normal"] !== undefined,
+    );
   root.classList.add("dsc-attacks");
   if (!weapons.length) {
     root.append(styled("p", "dse-empty", t("No attacks yet.")));
@@ -652,13 +677,14 @@ function attackTable(view: SheetView): HTMLElement {
           savedRule(view.projection, signed(weapon["attackBonus"]), path + ".attackBonus"),
         ),
         damage,
+        ...(ranged ? [attackRange(view, weapon, path)] : []),
         mastery,
       ),
     );
   });
   const head = el(
     "tr",
-    ...["Weapon", "To hit", "Damage", "Mastery"].map((name) => {
+    ...["Weapon", "To hit", "Damage", ...(ranged ? ["Range"] : []), "Mastery"].map((name) => {
       const cell = el("th", t(name));
       cell.scope = "col";
       return cell;
@@ -846,6 +872,23 @@ export function compactSheet(
   );
 }
 
+// When the Engine says a caster may change its prepared list.
+function preparationTiming(preparation: unknown, locale: string): string {
+  const t = translator(locale),
+    { on, count } = object(preparation);
+  if (on === "longRest" && count === "all") return t("Prepares after a long rest");
+  if (typeof count !== "number") return "";
+  if (on === "longRest")
+    return count === 1
+      ? t("Replaces one spell after a long rest")
+      : t("Replaces {0} spells after a long rest", [count]);
+  if (on === "classLevel")
+    return count === 1
+      ? t("Replaces one spell on gaining a level")
+      : t("Replaces {0} spells on gaining a level", [count]);
+  return "";
+}
+
 export function compactSpellBar(view: SheetView, prepare?: () => void): HTMLElement {
   const t = translator(view.locale),
     sheet = view.projection?.sheet ?? {},
@@ -853,13 +896,37 @@ export function compactSpellBar(view: SheetView, prepare?: () => void): HTMLElem
     values = styled("div", "dsc-vitals dsc-spell-values");
   root.setAttribute("aria-label", t("Spellcasting"));
   values.append(characterName(view));
-  // Save DC and spell attack read like AC: big numbers. Several casters name their class.
-  const casters = rows(object(sheet["spellcasting"])["perClass"]);
+  // Each caster leads with its class, ability and when it may change its
+  // prepared spells; save DC and spell attack read like AC: big numbers.
+  // Several casters name their class on every value.
+  const casters = rows(object(sheet["spellcasting"])["perClass"]),
+    prepared: HTMLElement[] = [];
   casters.forEach((caster, index) => {
     const source = casterSource(view, caster),
       path = "spellcasting.perClass." + index,
       named = (name: string): string => (casters.length > 1 ? source + " · " + t(name) : t(name)),
-      who = t("{0} · {1}", [source, t(abilityNames[text(caster["ability"])] ?? "")]);
+      who = t("{0} · {1}", [source, t(abilityNames[text(caster["ability"])] ?? "")]),
+      timing = preparationTiming(caster["preparation"], view.locale);
+    values.append(
+      styled(
+        "div",
+        "dsc-cell dsc-caster",
+        styled("span", "dsc-stat-label", who),
+        ...(timing ? [styled("span", "dsc-muted", timing)] : []),
+      ),
+    );
+    if (typeof caster["preparedCount"] === "number" && typeof caster["preparedLimit"] === "number")
+      prepared.push(
+        cell(
+          named("Prepared"),
+          savedRule(
+            view.projection,
+            caster["preparedCount"] + " / " + caster["preparedLimit"],
+            path + ".preparedLimit",
+          ),
+          "prepared",
+        ),
+      );
     const dc = cell(
         named("Save DC"),
         savedRule(view.projection, human(caster["saveDC"]), path + ".saveDC"),
@@ -870,7 +937,6 @@ export function compactSpellBar(view: SheetView, prepare?: () => void): HTMLElem
         savedRule(view.projection, signed(caster["spellAttack"]), path + ".spellAttack"),
         "spellAttack",
       );
-    dc.title = attack.title = who;
     values.append(dc, attack);
   });
   for (const resource of rows(sheet["resources"]).filter((row) => row["kind"] === "slot")) {
@@ -887,15 +953,19 @@ export function compactSpellBar(view: SheetView, prepare?: () => void): HTMLElem
     slots.dataset["resource"] = key;
     values.append(slots);
   }
+  // The prepared counts sit at the end, the last beside the button that changes them.
+  if (prepare || prepared.length) values.append(styled("span", "dsc-spacer"), ...prepared);
   if (prepare) {
-    values.append(styled("span", "dsc-spacer"));
-    values.append(
-      styled(
-        "div",
-        "dsc-cell",
-        opens(button(t("Change prepared spells"), prepare, false, "spells/prepare")),
-      ),
-    );
+    const count = prepared.at(-1)?.querySelector(".dsc-cell-value"),
+      change = opens(
+        button(count ? t("Change") : t("Change prepared spells"), prepare, false, "spells/prepare"),
+      );
+    change.setAttribute("aria-label", t("Change prepared spells"));
+    if (count) {
+      const pair = styled("span", "dsc-prepared");
+      count.replaceWith(pair);
+      pair.append(count, change);
+    } else values.append(styled("div", "dsc-cell", change));
   }
   root.append(values);
   const status = statusRow(view);
@@ -1133,6 +1203,35 @@ function backpackSummary(view: SheetView, open: (container?: string) => void): H
   return root;
 }
 
+// The coins' total worth, converted by the Engine from the ruleset's coin values.
+function currencyWorth(view: SheetView): HTMLElement[] {
+  const t = translator(view.locale),
+    worth = object(view.projection?.sheet["currencyWorth"]),
+    value = worth["value"],
+    coin = text(worth["coin"]);
+  if (typeof value !== "number" || !coin) return [];
+  const amount = new Intl.NumberFormat(view.locale, {
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+  return [
+    styled(
+      "div",
+      "dsc-worth",
+      styled(
+        "span",
+        "dsc-stat-label",
+        coin === "gp" ? t("Worth in gold") : t("Worth in {0}", [coin.toUpperCase()]),
+      ),
+      styled(
+        "strong",
+        "dsc-cell-value",
+        savedRule(view.projection, amount + " " + coin, "currencyWorth.value"),
+      ),
+    ),
+  ];
+}
+
 export function compactEquipment(view: SheetView, actions: CompactActions): HTMLElement {
   const t = translator(view.locale);
   const controls = el(
@@ -1141,7 +1240,10 @@ export function compactEquipment(view: SheetView, actions: CompactActions): HTML
     wornEquipment(view, ["armor", "shield", "worn", "attuned"]),
   );
   controls.dataset["detailsKey"] = "equipment/controls";
-  const coins = panel(t("Currency"), currency(view));
+  const coins = panel(
+    t("Currency"),
+    styled("div", "dsc-coin-row", currency(view), ...currencyWorth(view)),
+  );
   coins.classList.add("dsc-currency");
   return styled(
     "div",
