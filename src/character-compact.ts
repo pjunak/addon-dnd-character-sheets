@@ -525,7 +525,9 @@ export function limitedUses(view: SheetView): HTMLElement {
     const recharge = rechargeTag(resource, view.locale);
     if (recharge) label.append(recharge);
     if (object(resource["source"])["acquisition"])
-      label.append(el("small", spellSourceLabel(resource["source"], view.locale)));
+      label.append(
+        el("small", spellSourceLabel(resource["source"], view.locale, view.projection?.evidence)),
+      );
     const row = styled(
       "div",
       "dsc-use",

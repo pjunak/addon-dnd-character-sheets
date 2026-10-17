@@ -308,7 +308,7 @@ export function playActions(
         "span",
         "dnd-spell-source",
         [
-          spellSourceLabel(grant["source"], locale),
+          spellSourceLabel(grant["source"], locale, evaluation.evidence),
           grant["castingAbility"] ? human(grant["castingAbility"]) : "",
           grant["atWill"] === true ? t("At will") : "",
           grant["ritualOnly"] === true ? t("Ritual only") : "",

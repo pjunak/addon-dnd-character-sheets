@@ -1,4 +1,4 @@
-import type { Inputs, Projection, Result } from "./character-model.js";
+import type { Evidence, Inputs, Projection, Result } from "./character-model.js";
 import { object, rows, text, type CatalogRecord, catalogRecord } from "./character-client.js";
 import { translator } from "./character-locale.js";
 import {
@@ -17,11 +17,19 @@ import {
 } from "./character-ui.js";
 import { rulesTarget } from "./character-rule-notes.js";
 
-export function spellSourceLabel(sourceValue: unknown, locale = "en"): string {
+/** A grant's source by its record name from `evidence`, with who acquired it. */
+export function spellSourceLabel(
+  sourceValue: unknown,
+  locale = "en",
+  evidence: readonly Evidence[] = [],
+): string {
   const source = object(sourceValue),
     acquired = object(source["acquisition"]),
     t = translator(locale);
-  const name = text(source["name"], label(text(source["id"] ?? source["type"])));
+  const named = evidence.find(
+    (row) => row.reference.kind === source["type"] && row.reference.id === source["id"],
+  )?.name;
+  const name = text(source["name"], named ?? label(text(source["id"] ?? source["type"])));
   if (!acquired["id"]) return name;
   const owner = acquired["classId"]
     ? t(label(text(acquired["classId"])))
@@ -266,7 +274,7 @@ export function grantedSpellsRead(
         "p",
         savedSpellRule(projection, String(grant["ref"]), name),
         " · ",
-        spellSourceLabel(grant["source"], locale),
+        spellSourceLabel(grant["source"], locale, projection?.evidence),
         " · ",
         human(grant["castingAbility"]),
       );

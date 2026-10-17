@@ -23,3 +23,17 @@ void test("grant labels identify acquisitions and translate only UI terms", () =
   assert.equal(spellSourceLabel(source, "en"), "Recorded Spell · Fighter · Level 6");
   assert.equal(spellSourceLabel(source, "cs"), "Recorded Spell · Fighter · Úroveň 6");
 });
+void test("grant labels name an unnamed source from its evidence record", () => {
+  const source = { type: "feature", id: "invocation-armor-of-shadows" };
+  const evidence = [
+    {
+      reference: { kind: "feature", id: "invocation-armor-of-shadows" },
+      name: "Armor of Shadows",
+      hash: "h",
+      summary: "",
+      facts: {},
+    },
+  ];
+  assert.equal(spellSourceLabel(source, "en", evidence), "Armor of Shadows");
+  assert.equal(spellSourceLabel(source, "en"), "Invocation armor of shadows");
+});

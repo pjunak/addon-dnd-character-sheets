@@ -1559,7 +1559,11 @@ export function defineCharacterElement(
         const key = String(choice["key"]);
         root.append(
           picks(
-            spellSourceLabel(choice["source"], this.#context?.host.locale) +
+            spellSourceLabel(
+              choice["source"],
+              this.#context?.host.locale,
+              this.#evaluation?.evidence,
+            ) +
               " · " +
               this.#t("Granted spells · choose {0}", [choice["choose"]]),
             strings(choice["eligibleSpellIds"]),
@@ -1578,7 +1582,11 @@ export function defineCharacterElement(
           builderTarget(
             key,
             field(
-              spellSourceLabel(choice["source"], this.#context?.host.locale) +
+              spellSourceLabel(
+                choice["source"],
+                this.#context?.host.locale,
+                this.#evaluation?.evidence,
+              ) +
                 " · " +
                 this.#t("Granted spellcasting ability"),
               select(

@@ -286,7 +286,7 @@ export function casterSource(
   caster: Record<string, unknown>,
 ): string {
   return caster["source"]
-    ? spellSourceLabel(caster["source"], view.locale)
+    ? spellSourceLabel(caster["source"], view.locale, view.projection?.evidence)
     : recordName(view, "class", text(caster["classId"]));
 }
 // One caster's numbers as a single "DC 13 · Attack +5" line ("DC 13 · +5" when
@@ -906,7 +906,9 @@ export function resourceDetails(view: SheetView): HTMLElement {
       el("strong", human(resource["remaining"]) + " / " + human(resource["max"])),
     );
     if (object(resource["source"])["acquisition"])
-      row.append(el("small", spellSourceLabel(resource["source"], view.locale)));
+      row.append(
+        el("small", spellSourceLabel(resource["source"], view.locale, view.projection?.evidence)),
+      );
     if (view.editing) {
       const spent = numberInput(
         view.input.play.resourceUses[key] ?? 0,
