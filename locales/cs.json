@@ -877,5 +877,18 @@
   "Critical hit {0}–20": "Kritický zásah {0}–20",
   "Crit {0}–20": "Krit. {0}–20",
   "At will": "Libovolně",
-  "Ritual only": "Jen jako rituál"
+  "Ritual only": "Jen jako rituál",
+  "Bludgeoning": "Drtivé",
+  "Piercing": "Bodné",
+  "Slashing": "Sečné",
+  "Acid": "Kyselinové",
+  "Cold": "Chladné",
+  "Fire": "Ohnivé",
+  "Force": "Silové",
+  "Lightning": "Bleskové",
+  "Necrotic": "Nekrotické",
+  "Poison": "Jedové",
+  "Psychic": "Psychické",
+  "Radiant": "Zářivé",
+  "Thunder": "Hromové"
 }

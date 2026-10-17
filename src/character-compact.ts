@@ -3,6 +3,7 @@ import {
   abilityRail,
   advantageMark,
   advantageNames,
+  defenseNames,
   casterSource,
   castingDetails,
   characterName,
@@ -847,8 +848,8 @@ function training(view: SheetView): HTMLElement {
   if (Object.hasOwn(object(sheet["derived"]), "size"))
     row(t("Size"), sizeDetails(view)).classList.add("dsc-size");
   for (const key of ["resistances", "damageImmunities", "conditionImmunities"]) {
-    const value = human(sheet[key]);
-    if (sheet[key] !== undefined && value && value !== "—") row(t(label(key)), value);
+    const value = defenseNames(sheet[key], view.locale);
+    if (value) row(t(label(key)), value);
   }
   const advantages = advantageNames(view.projection, view.locale);
   if (advantages.length) row(t("Advantage"), advantages.join("; "));

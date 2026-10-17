@@ -845,6 +845,13 @@ export function advantageMark(locale: string): HTMLElement {
   mark.setAttribute("aria-label", mark.title);
   return mark;
 }
+/** Damage types or conditions in the UI language: "Ohnivé, Jedové". */
+export function defenseNames(value: unknown, locale: string): string {
+  const t = translator(locale);
+  return strings(value)
+    .map((id) => t(label(id)))
+    .join(", ");
+}
 /** The rolls features give Advantage on, situational ones with their condition. */
 export function advantageNames(projection: Projection | undefined, locale: string): string[] {
   const t = translator(locale),
@@ -985,9 +992,10 @@ export function explorationDetails(view: SheetView): HTMLElement {
         ]),
       ),
     );
-  for (const key of ["resistances", "damageImmunities", "conditionImmunities"])
-    if (sheet[key] !== undefined)
-      traits.append(el("p", el("strong", t(label(key)) + ": "), human(sheet[key])));
+  for (const key of ["resistances", "damageImmunities", "conditionImmunities"]) {
+    const value = defenseNames(sheet[key], view.locale);
+    if (value) traits.append(el("p", el("strong", t(label(key)) + ": "), value));
+  }
   const advantages = advantageNames(view.projection, view.locale);
   if (advantages.length)
     traits.append(el("p", el("strong", t("Advantage") + ": "), advantages.join("; ")));

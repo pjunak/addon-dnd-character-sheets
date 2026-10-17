@@ -879,7 +879,20 @@ export const catalogs = {
     "Critical hit {0}–20": "Critical hit {0}–20",
     "Crit {0}–20": "Crit {0}–20",
     "At will": "At will",
-    "Ritual only": "Ritual only"
+    "Ritual only": "Ritual only",
+    "Bludgeoning": "Bludgeoning",
+    "Piercing": "Piercing",
+    "Slashing": "Slashing",
+    "Acid": "Acid",
+    "Cold": "Cold",
+    "Fire": "Fire",
+    "Force": "Force",
+    "Lightning": "Lightning",
+    "Necrotic": "Necrotic",
+    "Poison": "Poison",
+    "Psychic": "Psychic",
+    "Radiant": "Radiant",
+    "Thunder": "Thunder"
   },
   "cs": {
     "Hands and grip": "Ruce a úchop",
@@ -1760,6 +1773,19 @@ export const catalogs = {
     "Critical hit {0}–20": "Kritický zásah {0}–20",
     "Crit {0}–20": "Krit. {0}–20",
     "At will": "Libovolně",
-    "Ritual only": "Jen jako rituál"
+    "Ritual only": "Jen jako rituál",
+    "Bludgeoning": "Drtivé",
+    "Piercing": "Bodné",
+    "Slashing": "Sečné",
+    "Acid": "Kyselinové",
+    "Cold": "Chladné",
+    "Fire": "Ohnivé",
+    "Force": "Silové",
+    "Lightning": "Bleskové",
+    "Necrotic": "Nekrotické",
+    "Poison": "Jedové",
+    "Psychic": "Psychické",
+    "Radiant": "Zářivé",
+    "Thunder": "Hromové"
   }
 } as const;

@@ -32,6 +32,13 @@ void test("option descriptions read as plain text without Markdown markup", asyn
   assert.ok(long.length <= 1501 && long.endsWith("word…"));
 });
 
+void test("resistances and immunities read in the UI language", async () => {
+  const { defenseNames } = await import("#web/character-sheet");
+  assert.equal(defenseNames(["fire", "poison", "poisoned"], "cs"), "Ohnivé, Jedové, Otrava");
+  assert.equal(defenseNames(["fire", "poison"], "en"), "Fire, Poison");
+  assert.equal(defenseNames(undefined, "cs"), "");
+});
+
 void test("current transfer accepts only the explicit current envelope and preserves authored inputs", () => {
   const inputs = blank();
   inputs.play.currency.gp = 12;

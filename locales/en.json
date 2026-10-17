@@ -877,5 +877,18 @@
   "Critical hit {0}–20": "Critical hit {0}–20",
   "Crit {0}–20": "Crit {0}–20",
   "At will": "At will",
-  "Ritual only": "Ritual only"
+  "Ritual only": "Ritual only",
+  "Bludgeoning": "Bludgeoning",
+  "Piercing": "Piercing",
+  "Slashing": "Slashing",
+  "Acid": "Acid",
+  "Cold": "Cold",
+  "Fire": "Fire",
+  "Force": "Force",
+  "Lightning": "Lightning",
+  "Necrotic": "Necrotic",
+  "Poison": "Poison",
+  "Psychic": "Psychic",
+  "Radiant": "Radiant",
+  "Thunder": "Thunder"
 }
