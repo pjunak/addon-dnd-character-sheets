@@ -105,13 +105,23 @@ references normally.
 
 Optional `inputs.play.containers` holds flat named groups; an item's optional
 `containerId` refers to one group. These organize owned instances without
-creating backpack items, changing carried/stored location or imposing capacity.
+creating backpack items or changing carried/stored location. A group's optional
+`itemId` links it to the inventory entry that is the container; the Engine then
+reports its capacity and whether its contents count (`sheet.carrying`), but
+nothing is enforced. Deleting that entry clears the link in the same edit.
 Names may repeat; IDs distinguish the groups. Equipped items cannot be assigned,
 and explicit equipping removes the selected item's membership atomically.
 Depleted entries, quick-use pins, grants, notes and existing attunement survive.
 
-The shared Backpack editor creates, renames and removes containers and assigns
-inventory entries. The existing item picker offers the same destination list
+An item's optional `weightLb` is an authored weight per unit for custom items
+and items whose rules give none; `play.coinWeight: false` leaves coins out of
+carried weight. Optional `play.concentration` (`{ref, saveDC?}`) changes only
+through Engine play commands: casting, damage, `keep-concentration` and
+`end-concentration`. All are optional: existing sheets stay valid, and a
+version that adds optional fields installs with Heal and update.
+
+The Backpack window and Classic's backpack create, rename and remove containers
+and edit inventory entries with the same item controls. The existing item picker offers the same destination list
 for catalog and narrative additions; additions remain separate instances.
 Removing a group unassigns only its members without deleting inventory.
 Native labelled fields/actions use `ui.controls.v1`, semantic tokens and stable
