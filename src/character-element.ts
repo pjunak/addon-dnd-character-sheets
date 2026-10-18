@@ -17,7 +17,7 @@ import {
   type CompactActions,
 } from "./character-compact.js";
 import { floatWindow, type WindowGeometry } from "./character-window.js";
-import { backpackDialog, type BackpackState } from "./character-backpack.js";
+import { backpackDialog, newBackpackState, type BackpackState } from "./character-backpack.js";
 import { CompactFrame } from "./character-frame.js";
 import {
   abilityRail,
@@ -151,7 +151,7 @@ export function defineCharacterElement(
     #spellPickers = new Map<string, SpellPickerState>();
     #playFilter: PlayFilterState = { query: "", level: "", kind: "" };
     #spellManagementOpen = false;
-    #pack: BackpackState = { query: "", container: "", sort: "name" };
+    #pack: BackpackState = newBackpackState();
     #packReturnFocus = "storage/open";
     #dialogContent: (() => Node[]) | undefined;
     #dialogBack: (() => void) | undefined;
@@ -172,7 +172,7 @@ export function defineCharacterElement(
         this.#spellPickers.clear();
         this.#playFilter = { query: "", level: "", kind: "" };
         this.#spellManagementOpen = false;
-        this.#pack = { query: "", container: "", sort: "name" };
+        this.#pack = newBackpackState();
         this.#packReturnFocus = "storage/open";
         this.#details.clear();
         this.#windows.clear();
@@ -1028,6 +1028,8 @@ export function defineCharacterElement(
                 this.#status();
                 return;
               }
+              // The first added entry opens in the window's editor.
+              if (items[0]) this.#pack.selected = items[0].id;
               this.#changed();
               back();
               this.#render();

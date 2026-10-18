@@ -111,7 +111,7 @@ export function storage(view: SheetView): HTMLElement {
 
 // The item a container is, such as a Backpack, from the items whose rules
 // declare a container. Its capacity and weightless contents come from the Engine.
-function containerItem(view: SheetView, container: Container): HTMLElement | undefined {
+export function containerItem(view: SheetView, container: Container): HTMLElement | undefined {
   const t = translator(view.locale),
     linked = new Set(
       (view.input.play.containers ?? [])

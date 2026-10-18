@@ -94,9 +94,16 @@ beside its rule note.
 places, mechanical equipment controls and all five currency denominations with
 their worth in gold, and the Backpack summary at full height beside them. The
 source-filtered body figure opens in its window from a place or **Open figure**. **Backpack** opens a
-searchable, sortable window with container filtering. Add Item returns to that same search
-and compartment; it defaults to a new instance and offers explicit addition to
-a carried stack. Existing item names, notes, grants and equipped copies survive.
+window with every entry in a list beside an editor for the selected one. Search
+covers names and notes; chips filter to equipped, loose or one container; the
+list sorts by container, name, quantity or weight, with ★ pins and − + steppers
+in each row. Selecting a container chip lets you rename it, link it to its item
+or remove it, and **+ Container** adds one. The editor holds the item's name,
+quantity, weight, acquisition, notes, location, attunement, body place and
+container, with Quick use, Stow & unattune and Delete; Classic's inline rows
+use the same controls. Add Item opens the catalog picker and returns to the
+window with the new entry selected; it defaults to a new instance and offers
+explicit addition to a carried stack. Existing item names, notes, grants and equipped copies survive.
 The shared Add Item picker groups armor by its declared armor type, magic items
 by their source item type and weapons by their source category. Unclassified
 gear stays under Other; browse grouping never grants equipment eligibility.

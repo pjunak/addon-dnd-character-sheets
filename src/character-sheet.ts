@@ -1,18 +1,22 @@
 import { itemBodyPlacement } from "./character-placement.js";
 import { itemContainer, storage } from "./character-storage.js";
+import {
+  attuneControl,
+  itemFields,
+  itemReasons,
+  locationSelect,
+  quantityInput,
+  quickUseButton,
+  removeButton,
+  stowButton,
+} from "./character-item-editor.js";
 import { spellSourceLabel } from "./character-spells.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
 import type { Inputs, Item, Projection, Reference } from "./character-model.js";
 import {
   attuneEquipment,
-  attunementChoice,
-  equipmentReason,
   equipmentSlot,
   moveEquipment,
-  pinQuickUse,
-  removeInventoryItem,
-  stowAndUnattune,
-  weightText,
   type EquipmentSlot,
 } from "./character-inventory.js";
 import type { CatalogRecord } from "./character-client.js";
@@ -29,10 +33,8 @@ import {
   panel,
   plainDescription,
   rule,
-  select,
   signed,
   styled,
-  textInput,
 } from "./character-ui.js";
 import { rulesTarget } from "./character-rule-notes.js";
 
@@ -551,163 +553,16 @@ export function backpack(
         ),
       );
       if (view.editing) {
-        const quantity = numberInput(
-          item.quantity,
-          (value) => {
-            item.quantity = value ?? 0;
-            if (item.quantity === 0) {
-              delete item.bodyPlacement;
-              item.attuned = false;
-              if (item.location === "equipped") item.location = "carried";
-            }
-            view.change();
-          },
-          0,
-        );
-        quantity.className = "dse-number";
-        quantity.setAttribute("aria-label", t("{0} quantity", [item.name]));
-        const eligibility = object(view.equipment[item.id]),
-          choice = attunementChoice(item, view.equipment);
-        const attune = button(
-          item.attuned ? "★" : "☆",
-          () => {
-            if (attuneEquipment(item, !item.attuned, view.equipment)) {
-              view.change();
-              view.refresh();
-            }
-          },
-          !item.attuned && !choice.allowed,
-        );
-        attune.setAttribute("aria-label", t("Attune {0}", [item.name]));
-        attune.setAttribute("aria-pressed", String(item.attuned));
-        const reason = equipmentReason(
-          item.attuned ? eligibility["attuneReason"] : choice.reason,
-          view.locale,
-        );
-        if (reason) {
-          attune.title = reason;
-          attune.setAttribute("aria-description", reason);
-        }
-        const move = select(
-          item.location,
-          ["equipped", "carried", "stored"].map((id) => ({
-            id,
-            label: t(label(id)),
-            disabled: id === "equipped" && eligibility["canEquip"] !== true,
-          })),
-          (value) => {
-            if (
-              value &&
-              moveEquipment(
-                view.input.play.inventory,
-                item.id,
-                value,
-                view.equipment,
-                view.projection,
-              )
-            ) {
-              view.change();
-              view.refresh();
-            }
-          },
-          t,
-        );
-        move.className = "dse-item-location";
-        move.setAttribute("aria-label", t("Move {0}", [item.name]));
-        const remove = button("×", () => {
-          removeInventoryItem(view.input, item.id);
-          view.change();
-          view.refresh();
-        });
-        remove.setAttribute("aria-label", t("Remove {0}", [item.name]));
-        for (const [action, control] of Object.entries({ quantity, attune, move, remove }))
-          control.dataset["focusKey"] = "inventory/" + item.id + "/" + action;
-        row.append(quantity, attune, move, remove);
-        const pin = button(
-          t("Quick use"),
-          () => {
-            if (
-              pinQuickUse(view.input, item.id, !(view.input.play.quickUse ?? []).includes(item.id))
-            ) {
-              view.change();
-              view.refresh();
-            }
-          },
-          !view.canEditQuickUse,
-          "inventory/" + item.id + "/quick-use",
-        );
-        pin.setAttribute("aria-label", t("Quick use: {0}", [item.name]));
-        pin.setAttribute(
-          "aria-pressed",
-          String((view.input.play.quickUse ?? []).includes(item.id)),
-        );
-        row.append(styled("div", "dse-item-actions", pin));
-        if (item.attuned) {
-          const stow = button(
-            t("Stow & unattune"),
-            () => {
-              if (stowAndUnattune(item)) {
-                move.focus();
-                view.change();
-                view.refresh();
-              }
-            },
-            false,
-            "inventory/" + item.id + "/stow",
-          );
-          stow.setAttribute("aria-label", t("Stow & unattune {0}", [item.name]));
-          row.append(styled("div", "dse-attunement-actions", stow));
-        }
+        const quantity = quantityInput(view, item),
+          attune = attuneControl(view, item),
+          move = locationSelect(view, item);
+        row.append(quantity, attune.control, move, removeButton(view, item));
+        row.append(styled("div", "dse-item-actions", quickUseButton(view, item)));
+        const stow = stowButton(view, item, move);
+        if (stow) row.append(styled("div", "dse-attunement-actions", stow));
         const details = styled("details", "dse-item-notes", el("summary", t("Details")));
         details.dataset["detailsKey"] = "inventory/" + item.id + "/notes";
-        details.append(
-          field(
-            t("Name"),
-            textInput(item.name, (value) => {
-              item.name = value;
-              view.change();
-            }),
-          ),
-          field(
-            t("Acquired from"),
-            textInput(item.acquisition, (value) => {
-              item.acquisition = value;
-              view.change();
-            }),
-          ),
-          field(
-            t("Notes"),
-            textInput(
-              item.notes,
-              (value) => {
-                item.notes = value;
-                view.change();
-              },
-              true,
-            ),
-          ),
-          field(
-            t("Scroll spell (optional)"),
-            select(
-              item.spellId ?? "",
-              (view.catalogs.get("spell") ?? []).map((row) => ({
-                id: row.id,
-                label: text(row.value["name"], row.id),
-              })),
-              (value) => {
-                if (value) item.spellId = value;
-                else delete item.spellId;
-                view.change();
-              },
-              t,
-            ),
-          ),
-        );
-        details.append(itemWeight(view, item));
-        if (reason) details.append(el("p", t("Attunement") + ": " + reason));
-        const equipReason = equipmentReason(eligibility["equipReason"], view.locale);
-        if (equipReason && equipReason !== reason)
-          details.append(el("p", t("Equipment") + ": " + equipReason));
+        details.append(...itemFields(view, item), ...itemReasons(view, item, attune.reason));
         row.append(details);
       } else {
         row.append(el("span", "× " + item.quantity + (item.attuned ? " ★" : "")));
@@ -729,27 +584,6 @@ export function backpack(
   pack.append(split);
   if (options.coins !== false) pack.append(currency(view));
   return pack;
-}
-// Rules items show their weight; custom items, and items the rules give no
-// weight, take one in pounds for each unit.
-export function itemWeight(view: SheetView, item: Item): HTMLElement {
-  const t = translator(view.locale),
-    known = object(object(object(view.projection?.sheet["carrying"])["items"])[item.id]);
-  if (item.reference && known["custom"] === false && item.weightLb === undefined)
-    return el("p", t("Weight: {0} each", [weightText(known["eachLb"], view.locale)]));
-  const control = numberInput(
-    item.weightLb,
-    (value) => {
-      if (value === undefined) delete item.weightLb;
-      else item.weightLb = value;
-      view.change();
-    },
-    0,
-    100000,
-  );
-  control.step = "any";
-  control.dataset["focusKey"] = "inventory/" + item.id + "/weight";
-  return field(t("Weight in lb, each"), control);
 }
 export function currency(view: SheetView): HTMLElement {
   const coins = rulesTarget(styled("div", "dse-coins"), "currency");

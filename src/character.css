@@ -1519,14 +1519,14 @@
 .addon-dnd-character .character-panel > .character-panel {
   padding: 0.75rem;
 }
-/* Casting-time and concentration filters as pill chips above the spell list. */
-.dnd-spell-chips {
+/* Filter chips: spell casting times and concentration, backpack containers. */
+.dnd-filter-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
   margin-bottom: 0.5rem;
 }
-.addon-dnd-character .dnd-spell-chips button {
+.addon-dnd-character .dnd-filter-chips button {
   min-height: 0;
   padding: 0.2rem 0.7rem;
   border: 1px solid var(--addon-border);
@@ -1535,7 +1535,7 @@
   color: var(--text-light);
   font-size: 0.78rem;
 }
-.addon-dnd-character .dnd-spell-chips button[aria-pressed="true"] {
+.addon-dnd-character .dnd-filter-chips button[aria-pressed="true"] {
   border-color: var(--accent-gold-dim);
   background: rgba(var(--accent-gold-rgb), 0.13);
   color: var(--accent-gold);

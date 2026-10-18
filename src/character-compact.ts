@@ -24,13 +24,14 @@ import type { Item } from "./character-model.js";
 import {
   assignBodyPlacement,
   moveEquipment,
-  pinQuickUse,
   stowAndUnattune,
   weightText,
 } from "./character-inventory.js";
 import { bodyPlacementLabel } from "./character-placement.js";
 import { handControls } from "./character-hands.js";
 import { quickUse } from "./character-quick-use.js";
+import { packWeight } from "./character-backpack.js";
+import { pinStar } from "./character-item-editor.js";
 import { conditionName } from "./character-conditions.js";
 import { parseHpEntry } from "./character-hp.js";
 import { abilityNames, translator } from "./character-locale.js";
@@ -1172,49 +1173,6 @@ function carryingCell(view: SheetView): HTMLElement | undefined {
   return node;
 }
 
-// A backpack group's weight: a container's load against its capacity, or what
-// its contents weigh when they are stored or inside a weightless container.
-function packWeight(view: SheetView, members: Item[], container?: string): HTMLElement | undefined {
-  const t = translator(view.locale),
-    carrying = object(view.projection?.sheet["carrying"]);
-  if (!Object.keys(carrying).length) return undefined;
-  const weights = object(carrying["items"]),
-    load = container
-      ? object(object(carrying["containers"])[container])
-      : {
-          loadLb: members.reduce(
-            (total, item) => total + Number(object(weights[item.id])["totalLb"] ?? 0),
-            0,
-          ),
-        },
-    pounds = Number(load["loadLb"] ?? 0),
-    capacity = Number(load["capacityLb"] ?? 0),
-    node = styled("span", "dsc-pack-weight");
-  if (load["stored"] === true)
-    node.textContent = t("{0} · not carried", [weightText(pounds, view.locale)]);
-  else if (load["weightless"] === true) {
-    node.dataset["state"] = "weightless";
-    node.textContent = t("{0} inside · counts as 0", [weightText(pounds, view.locale)]);
-  } else if (capacity > 0) {
-    const meter = styled("span", "dsc-meter", el("span"));
-    meter.style.setProperty("--fill", Math.min(100, (pounds / capacity) * 100) + "%");
-    const amount = t("{0} / {1}", [
-      new Intl.NumberFormat(view.locale, { maximumFractionDigits: 2 }).format(pounds),
-      weightText(capacity, view.locale),
-    ]);
-    if (pounds > capacity) node.dataset["state"] = "over";
-    node.append(
-      meter,
-      pounds > capacity
-        ? t("{0} · over by {1}", [amount, weightText(pounds - capacity, view.locale)])
-        : pounds === capacity
-          ? t("{0} · full", [amount])
-          : amount,
-    );
-  } else node.textContent = weightText(pounds, view.locale);
-  return node;
-}
-
 const bodyPlaces = [
   "head",
   "face",
@@ -1350,7 +1308,6 @@ function backpackSummary(view: SheetView, open: (container?: string) => void): H
       opens(button(t("Open"), () => open(), false, "storage/open")),
     ),
   );
-  const pinned = new Set(view.input.play.quickUse ?? []);
   const group = (title: string, members: Item[], container?: string): void => {
     if (!members.length && !container) return;
     const head = styled("h4", "dsc-pack-group", title, el("small", String(members.length)));
@@ -1377,21 +1334,7 @@ function backpackSummary(view: SheetView, open: (container?: string) => void): H
       );
       if (item.location === "stored" && container)
         line.append(styled("span", "dsc-tag", t("Stored")));
-      const pin = button(
-        pinned.has(item.id) ? "★" : "☆",
-        () => {
-          if (pinQuickUse(view.input, item.id, !pinned.has(item.id))) {
-            view.change();
-            view.refresh();
-          }
-        },
-        !view.canEditQuickUse,
-        "pack/" + item.id + "/pin",
-      );
-      pin.className = "dsc-pin";
-      pin.setAttribute("aria-label", t("Quick use: {0}", [item.name]));
-      pin.setAttribute("aria-pressed", String(pinned.has(item.id)));
-      line.append(pin);
+      line.append(pinStar(view, item));
       root.append(line);
     }
   };

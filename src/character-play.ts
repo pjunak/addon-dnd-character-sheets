@@ -137,7 +137,7 @@ export function playActions(
   if (section === "recovery") return root;
   const filters = spellFilters("play-spells", locale, () => filter(), filterState);
   // Casting-time and concentration chips narrow the list beside the name and level filters.
-  const chips = styled("div", "dnd-spell-chips");
+  const chips = styled("div", "dnd-filter-chips");
   chips.setAttribute("role", "group");
   chips.setAttribute("aria-label", t("Filter spells"));
   for (const [kind, name] of [

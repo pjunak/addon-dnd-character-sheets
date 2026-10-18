@@ -68,6 +68,16 @@ export function pinQuickUse(input: Inputs, id: string, pinned: boolean): boolean
   return true;
 }
 
+/** Sets a quantity; an empty entry leaves its body place, attunement and hands. */
+export function setItemQuantity(item: Item, quantity: number): void {
+  item.quantity = Math.max(0, quantity);
+  if (item.quantity === 0) {
+    delete item.bodyPlacement;
+    item.attuned = false;
+    if (item.location === "equipped") item.location = "carried";
+  }
+}
+
 export function removeInventoryItem(input: Inputs, id: string): void {
   input.play.inventory = input.play.inventory.filter((item) => item.id !== id);
   pinQuickUse(input, id, false);
