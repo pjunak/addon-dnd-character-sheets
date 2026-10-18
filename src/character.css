@@ -309,19 +309,33 @@
   color: var(--text-parchment);
   font-variant-numeric: tabular-nums;
 }
-/* A roll the character has Advantage on; special movement beside Speed. */
-.dnd-advantage {
+/* ADV or DIS after a roll the Engine marks; a hovered condition outlines its own. */
+.dse-roll-tag {
   display: inline-block;
   margin-left: var(--space-1);
   padding: 0 0.25rem;
-  border: 1px solid var(--accent-gold-dim);
-  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--color-success) 45%, transparent);
+  border-radius: 3px;
+  color: var(--color-success);
   font-size: 0.6rem;
   font-weight: 600;
+  letter-spacing: 0.05em;
   line-height: 1.4;
-  color: var(--accent-gold);
   vertical-align: middle;
+  cursor: help;
 }
+.dse-roll-tag[data-mode="disadvantage"] {
+  border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+  color: var(--color-danger);
+}
+.dse-roll-tag.is-linked {
+  outline: 1.5px dashed currentColor;
+  outline-offset: 2px;
+}
+.dse-roll-tag.is-quiet:not(.is-linked) {
+  display: none;
+}
+/* Special movement beside Speed. */
 .dnd-movement {
   display: block;
   font-size: var(--text-xs);

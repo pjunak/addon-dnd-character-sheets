@@ -1,7 +1,9 @@
 import type { SheetView } from "./character-sheet.js";
 import {
   abilityRail,
-  advantageMark,
+  initiativeTag,
+  present,
+  rollTag,
   advantageNames,
   defenseNames,
   casterSource,
@@ -75,6 +77,12 @@ export function compactNavigation(nav: HTMLElement): void {
     svg.append(path);
     control.prepend(svg);
   }
+}
+
+// A roll mark sits after the value of its cell.
+function withTag(target: HTMLElement, tag: HTMLElement | undefined): HTMLElement {
+  if (tag) target.querySelector(".dsc-cell-value")?.append(tag);
+  return target;
 }
 
 // Buttons that open a floating window carry the window mark.
@@ -260,6 +268,18 @@ export function statusRow(
       ),
     );
     chip.dataset["conditionId"] = condition.id;
+    // Hovering or focusing a condition outlines the roll marks it causes.
+    const link = (on: boolean): void => {
+      for (const tag of chip
+        .closest(".addon-dnd-character")
+        ?.querySelectorAll<HTMLElement>(".dse-roll-tag") ?? [])
+        if ((tag.dataset["rollSources"] ?? "").split(" ").includes("condition:" + condition.id))
+          tag.classList.toggle("is-linked", on);
+    };
+    chip.addEventListener("pointerenter", () => link(true));
+    chip.addEventListener("pointerleave", () => link(false));
+    chip.addEventListener("focusin", () => link(true));
+    chip.addEventListener("focusout", () => link(false));
     if (data["status"] === "immune") {
       chip.dataset["state"] = "inactive";
       chip.title = t("Immune: retained for tracking; its effects are inactive.");
@@ -399,7 +419,9 @@ export function compactVitals(
     hitPoints(view),
     derivedCell(view, "AC", "armorClass"),
     speed,
-    ...(combat ? [derivedCell(view, "Init", "initiative", true)] : []),
+    ...(combat
+      ? [withTag(derivedCell(view, "Init", "initiative", true), initiativeTag(view))]
+      : []),
     derivedCell(view, "Prof", "proficiencyBonus", true),
     inspiration(view),
   );
@@ -603,7 +625,7 @@ function combatAbilities(view: SheetView): HTMLElement {
           "dsc-save",
           shield,
           savedRule(view.projection, signed(save["total"]), "saves." + ability + ".total"),
-          ...(save["advantage"] === true ? [advantageMark(view.locale)] : []),
+          ...present(rollTag(view.projection, view.locale, save, "save", { ability })),
         ),
       ),
     );
@@ -698,6 +720,17 @@ function attackTable(view: SheetView): HTMLElement {
           "td",
           "dsc-hit",
           savedRule(view.projection, signed(weapon["attackBonus"]), path + ".attackBonus"),
+          ...present(
+            rollTag(
+              view.projection,
+              view.locale,
+              {
+                advantage: view.projection?.sheet["attackAdvantage"],
+                disadvantage: view.projection?.sheet["attackDisadvantage"],
+              },
+              "attack",
+            ),
+          ),
         ),
         damage,
         ...(ranged ? [attackRange(view, weapon, path)] : []),
@@ -851,8 +884,10 @@ function training(view: SheetView): HTMLElement {
     const value = defenseNames(sheet[key], view.locale);
     if (value) row(t(label(key)), value);
   }
-  const advantages = advantageNames(view.projection, view.locale);
+  const advantages = advantageNames(view.projection, view.locale),
+    disadvantages = advantageNames(view.projection, view.locale, "disadvantage");
   if (advantages.length) row(t("Advantage"), advantages.join("; "));
+  if (disadvantages.length) row(t("Disadvantage"), disadvantages.join("; "));
   if (Number(sheet["concentrationSaveBonus"] ?? 0) !== 0)
     row(
       t("Concentration"),

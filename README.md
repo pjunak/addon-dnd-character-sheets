@@ -114,6 +114,12 @@ bonuses or spell save DCs. Condition summaries survive provider loss, print and
 export. End conditions explicitly, including after a rest; situational effects,
 concentration, dropped items and death remain table decisions.
 
+**ADV** and **DIS** tags mark rolls the Engine gives Advantage or Disadvantage
+on, after it cancels opposite effects; hovering a tag names its sources. Marks
+from features and armor (heavy armor on Stealth) always show. Marks that only a
+condition causes stay hidden on the ability cards until you hover or focus that
+condition, and always show on Combat's attacks, saves and Initiative.
+
 Valid changes save automatically. Build completion is separate from validity:
 an unfinished character is saved as it is built, while rules-dependent play
 requires outstanding choices to be completed. There are no device drafts,

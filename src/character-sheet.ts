@@ -172,7 +172,7 @@ export function abilityRail(view: SheetView): HTMLElement {
             t("Init {0}", [signed(derived["initiative"])]),
             "derived.initiative",
           ),
-          ...(sheet["initiativeAdvantage"] === true ? [advantageMark(view.locale)] : []),
+          ...present(initiativeTag(view)),
         ),
       );
     if (view.layout === "compact" && ability === "WIS")
@@ -208,7 +208,7 @@ export function abilityRail(view: SheetView): HTMLElement {
       dock,
       proficiency,
       savedRule(view.projection, signed(save["total"]), "saves." + ability + ".total"),
-      ...(save["advantage"] === true ? [advantageMark(view.locale)] : []),
+      ...present(rollTag(view.projection, view.locale, save, "save", { ability }, true)),
     );
     const tile = styled(
       "div",
@@ -267,7 +267,19 @@ export function abilityRail(view: SheetView): HTMLElement {
           "strong",
           "dse-total",
           savedRule(view.projection, signed(skill["total"]), "skills." + id + ".total"),
-          ...(skill["advantage"] === true ? [advantageMark(view.locale)] : []),
+          ...present(
+            rollTag(
+              view.projection,
+              view.locale,
+              skill,
+              "check",
+              {
+                skill: id,
+                ability: text(skill["ability"]),
+              },
+              true,
+            ),
+          ),
         ),
       );
       line.dataset["trained"] = String(skill["proficient"] === true || skill["expertise"] === true);
@@ -416,7 +428,7 @@ export function vitals(view: SheetView): HTMLElement {
     );
   if (view.layout === "classic") {
     const initiative = tile("Initiative", "initiative", true);
-    if (sheet["initiativeAdvantage"] === true) initiative.append(advantageMark(view.locale));
+    initiative.append(...present(initiativeTag(view)));
     stats.append(initiative, tile("Passive perception", "passivePerception"));
   }
   const inspiration = checkbox(t("Inspiration"), view.input.play.inspiration === true, (value) => {
@@ -839,11 +851,18 @@ export function movementDetails(
   return root.childElementCount ? root : undefined;
 }
 /** A small mark on a roll the character has Advantage on. */
-export function advantageMark(locale: string): HTMLElement {
-  const mark = styled("span", "dnd-advantage", "A");
-  mark.title = translator(locale)("Advantage");
-  mark.setAttribute("aria-label", mark.title);
-  return mark;
+/** An optional node as a list, for spreading into element children. */
+export const present = (node: HTMLElement | undefined): HTMLElement[] => (node ? [node] : []);
+export function initiativeTag(
+  view: Pick<SheetView, "locale" | "projection">,
+): HTMLElement | undefined {
+  const sheet = view.projection?.sheet ?? {};
+  return rollTag(
+    view.projection,
+    view.locale,
+    { advantage: sheet["initiativeAdvantage"], disadvantage: sheet["initiativeDisadvantage"] },
+    "initiative",
+  );
 }
 /** Damage types or conditions in the UI language: "Ohnivé, Jedové". */
 export function defenseNames(value: unknown, locale: string): string {
@@ -853,10 +872,21 @@ export function defenseNames(value: unknown, locale: string): string {
     .join(", ");
 }
 /** The rolls features give Advantage on, situational ones with their condition. */
-export function advantageNames(projection: Projection | undefined, locale: string): string[] {
+// Lasting roll effects from features and gear, by mode; conditions show their
+// own effects in the status row, so they are left out here.
+export function advantageNames(
+  projection: Projection | undefined,
+  locale: string,
+  mode: "advantage" | "disadvantage" = "advantage",
+): string[] {
   const t = translator(locale),
     names: string[] = [];
   for (const entry of rows(projection?.sheet["advantages"])) {
+    if (
+      text(entry["mode"], "advantage") !== mode ||
+      object(entry["source"])["type"] === "condition"
+    )
+      continue;
     const scope = [
       ...strings(entry["abilities"]),
       ...strings(entry["skills"]).map((skill) => t(label(skill))),
@@ -870,15 +900,71 @@ export function advantageNames(projection: Projection | undefined, locale: strin
           ? scope
             ? t("{0} checks", [scope])
             : t("All checks")
-          : entry["on"] === "initiative"
-            ? t("Initiative")
-            : entry["on"] === "concentration"
-              ? t("Concentration")
-              : t("Death saves");
+          : entry["on"] === "attack"
+            ? t("Attack rolls")
+            : entry["on"] === "initiative"
+              ? t("Initiative")
+              : entry["on"] === "concentration"
+                ? t("Concentration")
+                : t("Death saves");
     const name = entry["when"] ? t("{0} ({1})", [roll, text(entry["when"])]) : roll;
     if (!names.includes(name)) names.push(name);
   }
   return names;
+}
+/**
+ * The ADV or DIS tag for a roll the Engine marked, titled with the sources
+ * behind it. The Engine already cancelled opposite marks; this only names them.
+ */
+export function rollTag(
+  projection: Projection | undefined,
+  locale: string,
+  marks: Record<string, unknown>,
+  on: string,
+  target: { ability?: string; skill?: string } = {},
+  quietConditions = false,
+): HTMLElement | undefined {
+  const mode =
+    marks["advantage"] === true
+      ? "advantage"
+      : marks["disadvantage"] === true
+        ? "disadvantage"
+        : "";
+  if (!mode) return undefined;
+  const t = translator(locale),
+    sources = rows(projection?.sheet["advantages"]).filter((entry) => {
+      if (entry["when"] || text(entry["mode"], "advantage") !== mode || entry["on"] !== on)
+        return false;
+      const abilities = strings(entry["abilities"]),
+        skills = strings(entry["skills"]);
+      if (!target.ability && !target.skill) return true;
+      if (target.skill)
+        return (
+          skills.includes(target.skill) ||
+          abilities.includes(target.ability ?? "") ||
+          skills.length + abilities.length === 0
+        );
+      return abilities.length === 0 || abilities.includes(target.ability!);
+    });
+  const tag = styled("span", "dse-roll-tag", t(mode === "advantage" ? "ADV" : "DIS"));
+  tag.dataset["mode"] = mode;
+  // A mark only conditions cause can wait until its condition is hovered.
+  if (
+    quietConditions &&
+    sources.length &&
+    sources.every((entry) => object(entry["source"])["type"] === "condition")
+  )
+    tag.classList.add("is-quiet");
+  tag.dataset["rollSources"] = sources
+    .map(
+      (entry) => text(object(entry["source"])["type"]) + ":" + text(object(entry["source"])["id"]),
+    )
+    .join(" ");
+  tag.title = t(mode === "advantage" ? "Advantage: {0}" : "Disadvantage: {0}", [
+    [...new Set(sources.map((entry) => text(entry["name"])))].join(", "),
+  ]);
+  tag.setAttribute("aria-label", tag.title);
+  return tag;
 }
 /** Class choices whose picks have no feature of their own (Divine Order, Wild Shape forms). */
 export function selectionEntries(
@@ -996,9 +1082,17 @@ export function explorationDetails(view: SheetView): HTMLElement {
     const value = defenseNames(sheet[key], view.locale);
     if (value) traits.append(el("p", el("strong", t(label(key)) + ": "), value));
   }
-  const advantages = advantageNames(view.projection, view.locale);
-  if (advantages.length)
-    traits.append(el("p", el("strong", t("Advantage") + ": "), advantages.join("; ")));
+  for (const mode of ["advantage", "disadvantage"] as const) {
+    const names = advantageNames(view.projection, view.locale, mode);
+    if (names.length)
+      traits.append(
+        el(
+          "p",
+          el("strong", t(mode === "advantage" ? "Advantage" : "Disadvantage") + ": "),
+          names.join("; "),
+        ),
+      );
+  }
   root.append(
     proficiencyDetails(view.projection, view.locale),
     senseDetails(view.projection, view.locale),
