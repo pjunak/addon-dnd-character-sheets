@@ -900,5 +900,10 @@
   "Poison": "Poison",
   "Psychic": "Psychic",
   "Radiant": "Radiant",
-  "Thunder": "Thunder"
+  "Thunder": "Thunder",
+  "Concentrating on {0}": "Concentrating on {0}",
+  "{0} ended concentration on {1}.": "{0} ended concentration on {1}.",
+  "{0} save {1} keeps concentration on {2}.": "{0} save {1} keeps concentration on {2}.",
+  "Kept concentration on {0}": "Kept concentration on {0}",
+  "End concentration on {0}": "End concentration on {0}"
 }

@@ -362,6 +362,14 @@
 .dsc-chip[data-state="terminal"] {
   border-width: 2px;
 }
+.dsc-concentration {
+  border-color: color-mix(in srgb, var(--color-mystery) 50%, transparent);
+  background: color-mix(in srgb, var(--color-mystery) 8%, transparent);
+  color: var(--color-mystery);
+}
+.dsc-concentration-save {
+  font-weight: 600;
+}
 .dsc-adjustment {
   border-style: dashed;
   padding-right: 0.55rem;
@@ -927,6 +935,21 @@
 .dnd-spell-tag[data-time="R"] {
   border-color: color-mix(in srgb, var(--color-success) 40%, transparent);
   color: var(--color-success);
+}
+.dnd-spell-name {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.dnd-spell-active {
+  padding: 0 0.4rem;
+  border: 1px solid color-mix(in srgb, var(--color-mystery) 50%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-mystery) 8%, transparent);
+  color: var(--color-mystery);
+  font-size: 0.72rem;
 }
 .dnd-spell-tag[data-tag="concentration"] {
   border-color: color-mix(in srgb, var(--color-mystery) 45%, transparent);

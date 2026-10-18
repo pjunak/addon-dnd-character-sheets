@@ -2,8 +2,8 @@ github.com/Masterminds/semver/v3 v3.5.0 h1:kQceYJfbupGfZOKZQg0kou0DgAKhzDg2NZPAw
 github.com/Masterminds/semver/v3 v3.5.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/dlclark/regexp2 v1.11.0 h1:G/nrcoOa7ZXlpoa/91N3X7mM3r8eIlMBBJZvsz/mxKI=
 github.com/dlclark/regexp2 v1.11.0/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
-github.com/pjunak/addon-dnd-engine v0.0.0-20261011102150-aa9ce28e5a76 h1:tn6CA/uEYG6o83bkJd5UtlWyzVW/UR/wkkCzTyltZDQ=
-github.com/pjunak/addon-dnd-engine v0.0.0-20261011102150-aa9ce28e5a76/go.mod h1:hKA1liczhUxmQlthj4xJPbajztLjN1NZSUoXbvsjvb4=
+github.com/pjunak/addon-dnd-engine v0.0.0-20261018170632-a6389fbf2af2 h1:eGTVkj4DFxfy6BgbHQ6a2M+XgkYu1pTN0BFuxyR86yw=
+github.com/pjunak/addon-dnd-engine v0.0.0-20261018170632-a6389fbf2af2/go.mod h1:hKA1liczhUxmQlthj4xJPbajztLjN1NZSUoXbvsjvb4=
 github.com/pjunak/ttrpg-codex v0.0.0-20261013201843-5ac53b541bad h1:/kUAayqwMPxawixEM8mptb4wy9mBT1RGzu96+G1p8xk=
 github.com/pjunak/ttrpg-codex v0.0.0-20261013201843-5ac53b541bad/go.mod h1:Pv/KUDe4ZI7KScmD/RkIoHUi4TTJyRcsMC0mq58L38A=
 github.com/santhosh-tekuri/jsonschema/v6 v6.0.3 h1:1EYB5IzjZawrrnELUi78f9fPu57HuXjmddZPjrls/28=

@@ -902,7 +902,12 @@ export const catalogs = {
     "Poison": "Poison",
     "Psychic": "Psychic",
     "Radiant": "Radiant",
-    "Thunder": "Thunder"
+    "Thunder": "Thunder",
+    "Concentrating on {0}": "Concentrating on {0}",
+    "{0} ended concentration on {1}.": "{0} ended concentration on {1}.",
+    "{0} save {1} keeps concentration on {2}.": "{0} save {1} keeps concentration on {2}.",
+    "Kept concentration on {0}": "Kept concentration on {0}",
+    "End concentration on {0}": "End concentration on {0}"
   },
   "cs": {
     "Hands and grip": "Ruce a úchop",
@@ -1806,6 +1811,11 @@ export const catalogs = {
     "Poison": "Jedové",
     "Psychic": "Psychické",
     "Radiant": "Zářivé",
-    "Thunder": "Hromové"
+    "Thunder": "Hromové",
+    "Concentrating on {0}": "Soustředění na {0}",
+    "{0} ended concentration on {1}.": "Stav {0} ukončil soustředění na {1}.",
+    "{0} save {1} keeps concentration on {2}.": "Záchranný hod na {0} {1} udrží soustředění na {2}.",
+    "Kept concentration on {0}": "Soustředění na {0} udrženo",
+    "End concentration on {0}": "Ukončit soustředění na {0}"
   }
 } as const;

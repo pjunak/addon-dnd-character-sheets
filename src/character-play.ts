@@ -183,17 +183,23 @@ export function playActions(
     filters.report(shown);
   };
   root.append(chips, filters.controls);
-  const spellRow = (ref: string): HTMLElement =>
-    markSpellRow(
+  // The spell being concentrated on carries an "active" pill after its name.
+  const concentrating = text(object(evaluation.sheet["concentration"])["ref"]);
+  const spellRow = (ref: string): HTMLElement => {
+    const name = rule(spellName(ref), { kind: "spell", id: ref });
+    return markSpellRow(
       styled(
         "div",
         "dnd-spell-row",
-        rule(spellName(ref), { kind: "spell", id: ref }),
+        ref === concentrating
+          ? styled("span", "dnd-spell-name", name, styled("span", "dnd-spell-active", t("active")))
+          : name,
         spellFacts(catalog, ref, locale),
       ),
       ref,
       catalog,
     );
+  };
   for (const caster of rows(evaluation.spellOptions["classes"])) {
     const classId = String(caster["classId"]),
       group = panel(t("{0} spells", [label(classId)])),

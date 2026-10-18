@@ -11,6 +11,7 @@ import {
   compactNavigation,
   compactSheet,
   compactSpellBar,
+  concentrationChip,
   figureWindow,
   restWindow,
   type CompactActions,
@@ -1264,6 +1265,8 @@ export function defineCharacterElement(
           ),
         );
       root.append(rest);
+      const concentration = concentrationChip(view);
+      if (concentration) root.append(concentration);
       root.append(conditions(view), combatDetails(view));
       if (this.#evaluation) {
         const recovery = el("fieldset");

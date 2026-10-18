@@ -46,8 +46,8 @@ led by the character's name in at most two lines that shrink as it grows.
 Sheet and Combat share HP, temporary HP, AC, Speed, Proficiency and Inspiration;
 Combat adds Initiative. The HP field takes a value or `-7` (damage), `+5`
 (healing) or `=30` (set) followed by Enter; damage and healing go through the
-rules. A status row lists conditions with their levels and remove buttons, the
-separate D20 adjustment and Short/Long rest. Equipment shows AC, Speed and
+rules. A status row lists concentration, conditions with their levels and
+remove buttons, the separate D20 adjustment and Short/Long rest. Equipment shows AC, Speed and
 attunement; Spells names each caster's class and ability with when it may change
 its prepared spells, then casting numbers, spell-slot pips and the prepared
 count beside **Change**. Compact puts abilities and skills on the right,
@@ -112,7 +112,14 @@ automatically. Speed includes supported condition restrictions. A separate D20
 roll adjustment is shown explicitly and is not folded into the displayed
 bonuses or spell save DCs. Condition summaries survive provider loss, print and
 export. End conditions explicitly, including after a rest; situational effects,
-concentration, dropped items and death remain table decisions.
+dropped items and death remain table decisions.
+
+**Concentration** starts when you cast a spell that needs it and replaces the
+previous one; the chip ◈ names the spell, and the spell list marks it
+**active**. Taking damage shows the Engine's save DC on the chip: ✓ keeps
+concentrating after a successful save and × ends it. A condition that ends
+Concentration (Incapacitated and those that include it) dims the chip until you
+end it. Rests keep it.
 
 **ADV** and **DIS** tags mark rolls the Engine gives Advantage or Disadvantage
 on, after it cancels opposite effects; hovering a tag names its sources. Marks

@@ -235,6 +235,52 @@ function inspiration(view: SheetView): HTMLElement {
   return root;
 }
 
+// Concentration leads the status line: the spell, the save DC after damage with
+// Kept and End, or the condition that has already ended it.
+export function concentrationChip(view: SheetView): HTMLElement | undefined {
+  const t = translator(view.locale),
+    concentration = object(view.projection?.sheet["concentration"]),
+    ref = text(concentration["ref"]);
+  if (!ref) return undefined;
+  const name = text(concentration["name"], ref),
+    chip = styled(
+      "span",
+      "dsc-chip dsc-concentration",
+      rule("◈ " + name, { kind: "spell", id: ref }, undefined, undefined, view.projection),
+    ),
+    endedBy = text(concentration["endedBy"]),
+    dc = concentration["saveDC"];
+  chip.title = t("Concentrating on {0}", [name]);
+  if (endedBy) {
+    chip.dataset["state"] = "inactive";
+    chip.title = t("{0} ended concentration on {1}.", [endedBy, name]);
+  } else if (typeof dc === "number") {
+    const save = styled("b", "dsc-concentration-save", t("DC {0}", [dc]));
+    save.title = t("{0} save {1} keeps concentration on {2}.", [
+      t(abilityNames[text(concentration["saveAbility"])] ?? ""),
+      signed(concentration["saveBonus"]),
+      name,
+    ]);
+    const kept = button(
+      "✓",
+      () => view.act({ operation: "keep-concentration" }),
+      !view.canPlay,
+      "concentration/keep",
+    );
+    kept.setAttribute("aria-label", t("Kept concentration on {0}", [name]));
+    chip.append(save, kept);
+  }
+  const end = button(
+    "×",
+    () => view.act({ operation: "end-concentration" }),
+    !view.canPlay,
+    "concentration/end",
+  );
+  end.setAttribute("aria-label", t("End concentration on {0}", [name]));
+  chip.append(end);
+  return chip;
+}
+
 // Conditions appear once, here, with the separate d20 adjustment and rests.
 export function statusRow(
   view: SheetView,
@@ -245,6 +291,8 @@ export function statusRow(
     saved = rows(view.projection?.sheet["conditions"]),
     options = rows(view.conditions["options"]);
   root.setAttribute("aria-label", t("Conditions"));
+  const concentration = concentrationChip(view);
+  if (concentration) root.append(concentration);
   for (const condition of view.input.play.conditions ?? []) {
     const data = saved.find((row) => row["id"] === condition.id) ?? {},
       option = options.find((row) => row["id"] === condition.id),

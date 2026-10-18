@@ -32,6 +32,11 @@ export interface ClassReplacement {
   in: string;
 }
 
+export interface Concentration {
+  ref: string;
+  saveDC?: number;
+}
+
 export interface Condition {
   id: string;
   level: number;
@@ -142,6 +147,7 @@ export interface Play {
   inspiration?: boolean;
   quickUse?: Array<string>;
   containers?: Array<Container>;
+  concentration?: Concentration;
   rolls: Array<PlayRoll>;
   hp: number;
   temporaryHp: number;
