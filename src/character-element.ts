@@ -48,6 +48,7 @@ import type { Grant, Inputs, Request, Response, Result, State } from "./characte
 import {
   spellPicker,
   spellSourceLabel,
+  spellbookHeading,
   unassignedSpellState,
   savedSpellBook,
   type PlayFilterState,
@@ -1480,10 +1481,12 @@ export function defineCharacterElement(
         if (caster["prepares"] === "spellbook")
           root.append(
             picks(
-              this.#t("{0} spellbook · {1} gained from levels", [
+              spellbookHeading(
                 this.#t(label(id)),
-                human(caster["spellbookKnown"]),
-              ]),
+                caster,
+                this.#context?.host.locale,
+                this.#evaluation?.evidence,
+              ),
               leveled,
               this.#input.build.spells.spellbook[id] ?? [],
               (value) => {

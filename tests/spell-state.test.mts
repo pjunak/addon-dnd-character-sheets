@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { reconcileCharacterMap } from "#web/character-client";
-import { spellSourceLabel } from "#web/character-spells";
+import { spellbookHeading, spellSourceLabel } from "#web/character-spells";
 void test("accepted spell withdrawals preserve later selections and edits", () => {
   const sent = { first: ["a", "b"], second: ["c"] },
     current = { first: ["a", "b"], second: ["later"] };
@@ -36,4 +36,46 @@ void test("grant labels name an unnamed source from its evidence record", () => 
   ];
   assert.equal(spellSourceLabel(source, "en", evidence), "Armor of Shadows");
   assert.equal(spellSourceLabel(source, "en"), "Invocation armor of shadows");
+});
+void test("spellbook headings separate level-granted spells from each bonus source", () => {
+  const savant = { type: "feature", id: "evoker-evocation-savant" };
+  const evidence = [
+    {
+      reference: { kind: "feature", id: "evoker-evocation-savant" },
+      name: "Evocation Savant",
+      hash: "h",
+      summary: "",
+      facts: {},
+    },
+  ];
+  const caster = {
+    spellbookKnown: 12,
+    spellbookBonus: 2,
+    spellbookBonusSources: [{ source: savant, count: 2, school: "Evocation" }],
+  };
+  assert.equal(
+    spellbookHeading("Wizard", caster, "en", evidence),
+    "Wizard spellbook · 10 gained from levels · 2 Evocation spells gained from Evocation Savant",
+  );
+  assert.equal(
+    spellbookHeading("Čaroděj", caster, "cs", evidence),
+    "Čaroděj: kniha kouzel · 10 získáno za úrovně · 2 ze školy Evocation získáno za Evocation Savant",
+  );
+  assert.equal(
+    spellbookHeading(
+      "Wizard",
+      { ...caster, spellbookBonusSources: [{ source: savant, count: 2 }] },
+      "en",
+      evidence,
+    ),
+    "Wizard spellbook · 10 gained from levels · 2 gained from Evocation Savant",
+  );
+  assert.equal(
+    spellbookHeading("Wizard", { spellbookKnown: 12, spellbookBonus: 2 }),
+    "Wizard spellbook · 10 gained from levels · 2 gained from class features",
+  );
+  assert.equal(
+    spellbookHeading("Wizard", { spellbookKnown: 8 }),
+    "Wizard spellbook · 8 gained from levels",
+  );
 });

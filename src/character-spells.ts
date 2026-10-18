@@ -37,6 +37,38 @@ export function spellSourceLabel(
   return [name, owner, t("Level {0}", [acquired["level"]])].join(" · ");
 }
 
+/**
+ * "Wizard spellbook · 10 gained from levels · 2 Evocation spells gained from
+ * Evocation Savant": the Engine's spellbook total split into class levels and
+ * each source's bonus. Older Engines report only the bonus total.
+ */
+export function spellbookHeading(
+  className: string,
+  caster: Record<string, unknown>,
+  locale = "en",
+  evidence: readonly Evidence[] = [],
+): string {
+  const t = translator(locale),
+    bonus = Number(caster["spellbookBonus"] ?? 0),
+    sources = rows(caster["spellbookBonusSources"]),
+    parts = [
+      t("{0} spellbook · {1} gained from levels", [
+        className,
+        Number(caster["spellbookKnown"] ?? 0) - bonus,
+      ]),
+    ];
+  for (const row of sources) {
+    const name = spellSourceLabel(row["source"], locale, evidence);
+    parts.push(
+      row["school"]
+        ? t("{0} {1} spells gained from {2}", [row["count"], row["school"], name])
+        : t("{0} gained from {1}", [row["count"], name]),
+    );
+  }
+  if (bonus > 0 && !sources.length) parts.push(t("{0} gained from class features", [bonus]));
+  return parts.join(" · ");
+}
+
 /** "Level 1 · 3 / 4" for a slot resource; without a level, its own name. */
 export function slotLabel(
   resource: Record<string, unknown>,
