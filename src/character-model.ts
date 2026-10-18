@@ -45,6 +45,7 @@ export interface Condition {
 export interface Container {
   id: string;
   name: string;
+  itemId?: string;
 }
 
 export interface Difference {
@@ -133,6 +134,7 @@ export interface Item {
   acquisition: string;
   grantId?: string;
   notes: string;
+  weightLb?: number;
 }
 
 export interface Level {
@@ -148,6 +150,7 @@ export interface Play {
   quickUse?: Array<string>;
   containers?: Array<Container>;
   concentration?: Concentration;
+  coinWeight?: boolean;
   rolls: Array<PlayRoll>;
   hp: number;
   temporaryHp: number;

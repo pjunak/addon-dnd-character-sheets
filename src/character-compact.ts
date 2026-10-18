@@ -26,6 +26,7 @@ import {
   moveEquipment,
   pinQuickUse,
   stowAndUnattune,
+  weightText,
 } from "./character-inventory.js";
 import { bodyPlacementLabel } from "./character-placement.js";
 import { handControls } from "./character-hands.js";
@@ -1142,8 +1143,76 @@ function equipmentBar(view: SheetView): HTMLElement {
       ),
     );
   }
+  const carrying = carryingCell(view);
+  if (carrying) values.append(carrying);
   root.append(values);
   return root;
+}
+
+// Carried weight against capacity; the Engine's breakdown shows on hover.
+function carryingCell(view: SheetView): HTMLElement | undefined {
+  const t = translator(view.locale),
+    carrying = object(view.projection?.sheet["carrying"]),
+    load = Number(carrying["weightLb"]),
+    capacity = Number(carrying["capacityLb"]);
+  if (!Number.isFinite(load) || !(capacity > 0)) return undefined;
+  const number = new Intl.NumberFormat(view.locale, { maximumFractionDigits: 1 }),
+    node = cell(
+      t("Carrying"),
+      savedRule(view.projection, number.format(load), "carrying"),
+      "carrying",
+      t("/ {0} lb", [number.format(capacity)]),
+    ),
+    meter = styled("span", "dsc-meter", el("span"));
+  meter.style.setProperty("--fill", Math.min(100, (load / capacity) * 100) + "%");
+  node.append(meter);
+  if (load > capacity) node.dataset["state"] = "over";
+  const unknown = strings(carrying["unknown"]).length;
+  if (unknown) node.title = t("Items without a known weight are not counted: {0}", [unknown]);
+  return node;
+}
+
+// A backpack group's weight: a container's load against its capacity, or what
+// its contents weigh when they are stored or inside a weightless container.
+function packWeight(view: SheetView, members: Item[], container?: string): HTMLElement | undefined {
+  const t = translator(view.locale),
+    carrying = object(view.projection?.sheet["carrying"]);
+  if (!Object.keys(carrying).length) return undefined;
+  const weights = object(carrying["items"]),
+    load = container
+      ? object(object(carrying["containers"])[container])
+      : {
+          loadLb: members.reduce(
+            (total, item) => total + Number(object(weights[item.id])["totalLb"] ?? 0),
+            0,
+          ),
+        },
+    pounds = Number(load["loadLb"] ?? 0),
+    capacity = Number(load["capacityLb"] ?? 0),
+    node = styled("span", "dsc-pack-weight");
+  if (load["stored"] === true)
+    node.textContent = t("{0} · not carried", [weightText(pounds, view.locale)]);
+  else if (load["weightless"] === true) {
+    node.dataset["state"] = "weightless";
+    node.textContent = t("{0} inside · counts as 0", [weightText(pounds, view.locale)]);
+  } else if (capacity > 0) {
+    const meter = styled("span", "dsc-meter", el("span"));
+    meter.style.setProperty("--fill", Math.min(100, (pounds / capacity) * 100) + "%");
+    const amount = t("{0} / {1}", [
+      new Intl.NumberFormat(view.locale, { maximumFractionDigits: 2 }).format(pounds),
+      weightText(capacity, view.locale),
+    ]);
+    if (pounds > capacity) node.dataset["state"] = "over";
+    node.append(
+      meter,
+      pounds > capacity
+        ? t("{0} · over by {1}", [amount, weightText(pounds - capacity, view.locale)])
+        : pounds === capacity
+          ? t("{0} · full", [amount])
+          : amount,
+    );
+  } else node.textContent = weightText(pounds, view.locale);
+  return node;
 }
 
 const bodyPlaces = [
@@ -1285,6 +1354,8 @@ function backpackSummary(view: SheetView, open: (container?: string) => void): H
   const group = (title: string, members: Item[], container?: string): void => {
     if (!members.length && !container) return;
     const head = styled("h4", "dsc-pack-group", title, el("small", String(members.length)));
+    const weight = packWeight(view, members, container);
+    if (weight) head.append(weight);
     if (container) {
       const openGroup = opens(
         button(t("Open"), () => open(container), false, "storage/open/" + container),
@@ -1371,6 +1442,33 @@ function currencyWorth(view: SheetView): HTMLElement[] {
   ];
 }
 
+// Coins count toward carried weight unless this is turned off.
+function coinWeightToggle(view: SheetView): HTMLElement | undefined {
+  const t = translator(view.locale),
+    carrying = object(view.projection?.sheet["carrying"]);
+  if (!Object.keys(carrying).length) return undefined;
+  const counted = carrying["coinWeight"] !== false,
+    box = el("input");
+  box.type = "checkbox";
+  box.checked = counted;
+  box.disabled = !view.editing;
+  box.dataset["focusKey"] = "currency/coin-weight";
+  box.addEventListener("change", () => {
+    if (box.checked) delete view.input.play.coinWeight;
+    else view.input.play.coinWeight = false;
+    view.change();
+    view.refresh();
+  });
+  return styled(
+    "label",
+    "dsc-coin-weight",
+    box,
+    counted
+      ? t("Count coin weight ({0})", [weightText(carrying["coinsLb"], view.locale)])
+      : t("Count coin weight"),
+  );
+}
+
 export function compactEquipment(view: SheetView, actions: CompactActions): HTMLElement {
   const t = translator(view.locale);
   const controls = el(
@@ -1384,6 +1482,8 @@ export function compactEquipment(view: SheetView, actions: CompactActions): HTML
     styled("div", "dsc-coin-row", currency(view), ...currencyWorth(view)),
   );
   coins.classList.add("dsc-currency");
+  const coinWeight = coinWeightToggle(view);
+  if (coinWeight) coins.querySelector("h3")?.append(coinWeight);
   return styled(
     "div",
     "dsc-equipment",

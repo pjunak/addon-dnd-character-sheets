@@ -591,6 +591,9 @@
               "maxLength": 30000,
               "type": "string"
             },
+            "coinWeight": {
+              "type": "boolean"
+            },
             "concentration": {
               "additionalProperties": false,
               "properties": {
@@ -640,6 +643,10 @@
                 "additionalProperties": false,
                 "properties": {
                   "id": {
+                    "maxLength": 30000,
+                    "type": "string"
+                  },
+                  "itemId": {
                     "maxLength": 30000,
                     "type": "string"
                   },
@@ -790,6 +797,11 @@
                   "spellId": {
                     "maxLength": 30000,
                     "type": "string"
+                  },
+                  "weightLb": {
+                    "maximum": 1000000000,
+                    "minimum": -1000000000,
+                    "type": "number"
                   }
                 },
                 "required": [

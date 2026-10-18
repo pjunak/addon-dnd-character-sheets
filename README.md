@@ -20,8 +20,17 @@ and keeps the item, and deleting an item removes its pin in the same save.
 **Storage containers** organize carried/stored inventory into named groups.
 Create, rename or remove a group and choose destinations in inventory or the
 item picker. Removing a container leaves its items intact; equipping an item
-clears only its membership. Organization adds no items or carrying-capacity
-rules, and saved reading, print and export retain it without a provider.
+clears only its membership. A container can be linked to the item it is (a
+Backpack, a Bag of Holding); the Engine then gives its capacity and whether its
+contents count. Saved reading, print and export retain organization without a
+provider.
+**Weight**: Equipment's bar shows carried weight against capacity (Strength ×
+15 in the 2024 rules) with the Engine's breakdown on hover, and each Backpack
+group shows its weight, a container its load against capacity. Stored items and
+Bag of Holding contents are listed but not counted; coin weight can be turned
+off on the Currency panel. Rules items take their weight from the Compendium;
+custom items, and items the rules give no weight, take one in an item's
+details. Nothing is enforced.
 **Body placement** organizes equipped instances using Engine-provided source
 choices. It does not add bonuses or equipment limits. Ordinary stowing clears
 placement while preserving the item and its attunement; saved reading, print
@@ -47,8 +56,8 @@ Sheet and Combat share HP, temporary HP, AC, Speed, Proficiency and Inspiration;
 Combat adds Initiative. The HP field takes a value or `-7` (damage), `+5`
 (healing) or `=30` (set) followed by Enter; damage and healing go through the
 rules. A status row lists concentration, conditions with their levels and
-remove buttons, the separate D20 adjustment and Short/Long rest. Equipment shows AC, Speed and
-attunement; Spells names each caster's class and ability with when it may change
+remove buttons, the separate D20 adjustment and Short/Long rest. Equipment shows AC, Speed,
+attunement and carried weight; Spells names each caster's class and ability with when it may change
 its prepared spells, then casting numbers, spell-slot pips and the prepared
 count beside **Change**. Compact puts abilities and skills on the right,
 starting at the top; untrained skills are dimmed. **Limited uses** shows remaining uses as pips (round

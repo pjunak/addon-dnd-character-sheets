@@ -12,6 +12,7 @@ import {
   pinQuickUse,
   removeInventoryItem,
   stowAndUnattune,
+  weightText,
   type EquipmentSlot,
 } from "./character-inventory.js";
 import type { CatalogRecord } from "./character-client.js";
@@ -702,6 +703,7 @@ export function backpack(
             ),
           ),
         );
+        details.append(itemWeight(view, item));
         if (reason) details.append(el("p", t("Attunement") + ": " + reason));
         const equipReason = equipmentReason(eligibility["equipReason"], view.locale);
         if (equipReason && equipReason !== reason)
@@ -727,6 +729,27 @@ export function backpack(
   pack.append(split);
   if (options.coins !== false) pack.append(currency(view));
   return pack;
+}
+// Rules items show their weight; custom items, and items the rules give no
+// weight, take one in pounds for each unit.
+export function itemWeight(view: SheetView, item: Item): HTMLElement {
+  const t = translator(view.locale),
+    known = object(object(object(view.projection?.sheet["carrying"])["items"])[item.id]);
+  if (item.reference && known["custom"] === false && item.weightLb === undefined)
+    return el("p", t("Weight: {0} each", [weightText(known["eachLb"], view.locale)]));
+  const control = numberInput(
+    item.weightLb,
+    (value) => {
+      if (value === undefined) delete item.weightLb;
+      else item.weightLb = value;
+      view.change();
+    },
+    0,
+    100000,
+  );
+  control.step = "any";
+  control.dataset["focusKey"] = "inventory/" + item.id + "/weight";
+  return field(t("Weight in lb, each"), control);
 }
 export function currency(view: SheetView): HTMLElement {
   const coins = rulesTarget(styled("div", "dse-coins"), "currency");

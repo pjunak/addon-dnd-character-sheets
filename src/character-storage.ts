@@ -1,7 +1,12 @@
-import type { Inputs, Item } from "./character-model.js";
+import type { Container, Inputs, Item } from "./character-model.js";
 import type { SheetView } from "./character-sheet.js";
-import { newId } from "./character-client.js";
-import { assignContainer, containerOptions, removeContainer } from "./character-inventory.js";
+import { newId, rows } from "./character-client.js";
+import {
+  assignContainer,
+  containerOptions,
+  removeContainer,
+  weightText,
+} from "./character-inventory.js";
 import { translator } from "./character-locale.js";
 import { button, el, field, panel, select, styled, textInput } from "./character-ui.js";
 
@@ -36,7 +41,7 @@ export function storage(view: SheetView): HTMLElement {
     el(
       "p",
       t(
-        "Organize carried and stored items in named containers. This does not add items or set a carrying capacity.",
+        "Organize carried and stored items in named containers. Link a container to the item it is, such as a Backpack, to use its capacity.",
       ),
     ),
   );
@@ -94,11 +99,58 @@ export function storage(view: SheetView): HTMLElement {
       "storage/" + container.id + "/remove",
     );
     remove.setAttribute("aria-label", t("Remove container: {0}", [container.name]));
-    row.append(nameField, el("span", t("Inventory entries: {0}", [count])), remove);
+    row.append(nameField);
+    const link = containerItem(view, container);
+    if (link) row.append(link);
+    row.append(el("span", t("Inventory entries: {0}", [count])), remove);
     root.append(row);
   }
   root.append(el("p", t("Removing a container leaves its items in inventory.")));
   return root;
+}
+
+// The item a container is, such as a Backpack, from the items whose rules
+// declare a container. Its capacity and weightless contents come from the Engine.
+function containerItem(view: SheetView, container: Container): HTMLElement | undefined {
+  const t = translator(view.locale),
+    linked = new Set(
+      (view.input.play.containers ?? [])
+        .filter((other) => other.id !== container.id && other.itemId)
+        .map((other) => other.itemId),
+    ),
+    options = rows(view.storage["containerItems"]).flatMap((row) => {
+      const item = view.input.play.inventory.find((entry) => entry.id === row["itemId"]);
+      if (!item) return [];
+      const capacity = row["capacityLb"],
+        facts = [
+          typeof capacity === "number" ? t("holds {0}", [weightText(capacity, view.locale)]) : "",
+          row["weightless"] === true ? t("contents count as 0") : "",
+        ].filter(Boolean);
+      return [
+        {
+          id: item.id,
+          label: facts.length ? item.name + " · " + facts.join(" · ") : item.name,
+          disabled: linked.has(item.id) || item.containerId === container.id,
+        },
+      ];
+    });
+  if (!options.length && !container.itemId) return undefined;
+  const control = select(
+    container.itemId ?? "",
+    options,
+    (value) => {
+      if (value) container.itemId = value;
+      else delete container.itemId;
+      view.change();
+      view.refresh();
+    },
+    t,
+  );
+  control.options[0]!.textContent = t("No item");
+  control.dataset["focusKey"] = "storage/" + container.id + "/item";
+  const wrapper = field(t("Container item"), control);
+  wrapper.dataset["uiKey"] = "storage/" + container.id + "/item";
+  return wrapper;
 }
 
 export function itemContainer(view: SheetView, item: Item): HTMLElement | undefined {

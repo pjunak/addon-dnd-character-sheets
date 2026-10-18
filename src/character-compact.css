@@ -1093,6 +1093,65 @@
   text-transform: none;
   letter-spacing: 0;
 }
+/* Weight against capacity: a thin gold meter that turns red when over. */
+.dsc-meter {
+  display: block;
+  height: 0.3rem;
+  min-width: 3rem;
+  border-radius: 3px;
+  background: var(--bg-raised);
+  overflow: hidden;
+}
+.dsc-meter > span {
+  display: block;
+  height: 100%;
+  width: var(--fill);
+  background: var(--accent-gold);
+}
+[data-state="over"] > .dsc-meter > span {
+  background: var(--color-danger);
+}
+.dsc-cell[data-stat="carrying"] {
+  gap: 0.2rem;
+  min-width: 7rem;
+}
+.dsc-cell[data-state="over"] .dsc-cell-value {
+  color: var(--color-danger);
+}
+.dsc-pack-weight {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+.dsc-pack-group .dsc-pack-weight {
+  margin-left: auto;
+}
+.addon-dnd-character .dsc-pack-group .dsc-pack-weight + button {
+  margin-left: 0;
+}
+.dsc-pack-weight .dsc-meter {
+  width: 3.5rem;
+}
+.dsc-pack-weight[data-state="over"] {
+  color: var(--color-danger);
+}
+.dsc-pack-weight[data-state="weightless"] {
+  color: var(--color-mystery);
+}
+.dsc-coin-weight {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  font: 400 0.74rem var(--font-ui);
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
 .dsc-pack-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto auto;

@@ -71,6 +71,16 @@ export function pinQuickUse(input: Inputs, id: string, pinned: boolean): boolean
 export function removeInventoryItem(input: Inputs, id: string): void {
   input.play.inventory = input.play.inventory.filter((item) => item.id !== id);
   pinQuickUse(input, id, false);
+  // A container that was this item stays, without its capacity.
+  for (const container of input.play.containers ?? [])
+    if (container.itemId === id) delete container.itemId;
+}
+
+/** "5 lb" or "0.5 lb" in the locale's digits, for weights the Engine reports. */
+export function weightText(pounds: unknown, locale: string): string {
+  return translator(locale)("{0} lb", [
+    new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(Number(pounds ?? 0)),
+  ]);
 }
 
 /**
