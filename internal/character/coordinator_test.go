@@ -3,6 +3,7 @@ package character
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	model "github.com/pjunak/addon-dnd-engine/character"
 	"github.com/pjunak/ttrpg-codex/sdk/go/workerrpc"
 	"testing"
@@ -151,16 +152,27 @@ func TestDMAmendmentRecordsNewAuthorityAndExpiryInvalidatesReview(t *testing.T) 
 	}
 }
 func TestGenericEditsCannotForgeDMGrants(t *testing.T) {
-	c, _, _, meta := fixture(t)
+	c, data, _, meta := fixture(t)
 	input := model.Blank()
 	input.Grants = []model.Grant{{ID: "forged", ActorID: "dm", Active: true}}
-	for _, operation := range []string{"build", "inventory", "notes", "adopt-rules"} {
-		if _, err := invoke(t, c, meta, "preview", Request{Operation: operation, OperationID: "forged-change", Inputs: &input}); err == nil {
-			t.Fatalf("%s permitted a forged DM grant", operation)
+	refused := func(operation, kind, message string) {
+		t.Helper()
+		_, err := invoke(t, c, meta, "preview", Request{Operation: operation, OperationID: "forged-change", Inputs: &input, Grant: &input.Grants[0]})
+		var failure *workerrpc.RPCError
+		if !errors.As(err, &failure) || failure.Data == nil || failure.Data.Kind != kind || failure.Data.Message != message {
+			t.Fatalf("%s answered %v, want %s %q", operation, err, kind, message)
 		}
 	}
-	if _, err := invoke(t, c, meta, "preview", Request{Operation: "grant", Grant: &input.Grants[0]}); err == nil {
-		t.Fatal("player could grant")
+	for _, operation := range []string{"build", "adopt-rules"} {
+		refused(operation, workerrpc.KindUnauthorized, "DM grants require a DM grant command.")
+	}
+	// Edits go through build; there are no separate inventory or spell edits.
+	for _, operation := range []string{"inventory", "spells", "notes"} {
+		refused(operation, workerrpc.KindInvalidRequest, "Choose a supported character change.")
+	}
+	refused("grant", workerrpc.KindUnauthorized, "Only a DM can grant character exceptions.")
+	if data.writes != 0 || len(c.previews) != 0 {
+		t.Fatal("a refused edit was saved or reviewed")
 	}
 }
 func TestRemovedSheetCanBeImportedAndEditedAgain(t *testing.T) {

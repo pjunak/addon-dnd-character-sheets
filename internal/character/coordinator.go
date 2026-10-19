@@ -242,7 +242,7 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 		r.Inputs = &proposed
 	}
 	switch r.Operation {
-	case "build", "inventory", "spells", "adopt-rules":
+	case "build", "adopt-rules":
 		if r.Inputs != nil {
 			input = *r.Inputs
 		}
