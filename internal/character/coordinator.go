@@ -41,12 +41,17 @@ func New(data Data, engine Engine) *Coordinator {
 
 var operationPattern = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9._-]{7,79}$`)
 
+// storedLimit keeps a saved sheet under the host's 256 KiB document limit.
+// Character data itself is bounded by the Engine's published
+// model.MaxRequestBytes, checked on every Engine payload before calling.
+const storedLimit = 250000
+
 func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any, error) {
 	if rpc.Meta == nil || rpc.Meta.Actor == nil || rpc.Meta.Actor.ID == "" || (rpc.Meta.Actor.Role != "dm" && rpc.Meta.Actor.Role != "player") {
 		return nil, failure(workerrpc.KindUnauthorized, "An authenticated character editor is required.")
 	}
 	var request Request
-	if len(rpc.Params) > 190000 || decode(rpc.Params, &request) != nil || request.ContractVersion != "character.v3" || request.Key == "" || len(request.Key) > 200 || request.ExpectedRevision < 0 {
+	if decode(rpc.Params, &request) != nil || request.ContractVersion != "character.v3" || request.Key == "" || len(request.Key) > 200 || request.ExpectedRevision < 0 {
 		return nil, failure(workerrpc.KindInvalidRequest, "Character request is invalid.")
 	}
 	if request.Change != nil && request.Operation != "play" {
@@ -91,6 +96,19 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 	}
 	evaluation, rules, err := c.evaluate(ctx, rpc.Meta, input, request.Change)
 	if err != nil {
+		var large tooLargeError
+		if errors.As(err, &large) {
+			// Nothing is evaluated or saved, so the answer has no rules status.
+			// A saved character too large for the Engine stays readable, as it
+			// does without compatible rules.
+			response.Status = "too-large"
+			response.Message = large.Error()
+			if method == "load" {
+				response.Status = "unavailable"
+				response.Message = fmt.Sprintf("This character is %d bytes; the rules engine accepts at most %d. The saved character remains readable, printable and exportable.", large.size, model.MaxRequestBytes)
+			}
+			return response, nil
+		}
 		var rpcError *workerrpc.RPCError
 		rejected := method != "load" && errors.As(err, &rpcError) && rpcError.Data != nil && (rpcError.Data.Kind == workerrpc.KindInvalidRequest || rpcError.Data.Kind == workerrpc.KindValidationFailed)
 		// The rules refused this play action, so nothing is saved. Answer with
@@ -173,11 +191,17 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 		return nil, failure(workerrpc.KindInvalidRequest, "A change ID is required.")
 	}
 	next := State{SchemaVersion: SchemaVersion, Inputs: evaluation.Evaluation.Inputs, Projection: Projection{Sheet: evaluation.Evaluation.Sheet, Explanations: evaluation.Evaluation.Explanations, Evidence: evaluation.Evaluation.Evidence, Issues: evaluation.Evaluation.Issues}, Rules: rules, OperationID: request.OperationID}
-	// Document limits include the saved explanation/evidence, not the transient
+	// A saved character must stay small enough to evaluate again. The document
+	// limit includes the saved explanations and evidence, not the transient
 	// catalogs and builder guidance.
-	if len(raw(next)) > 250000 {
-		response.Status = "invalid"
-		response.Message = "This character snapshot exceeds the storage limit. Reduce authored notes or inventory before committing."
+	if size := len(raw(payload(next.Inputs, nil))); size > model.MaxRequestBytes {
+		response.Status = "too-large"
+		response.Message = tooLargeMessage(size)
+		return response, nil
+	}
+	if size := len(raw(next)); size > storedLimit {
+		response.Status = "too-large"
+		response.Message = fmt.Sprintf("This character's saved snapshot would be %d bytes; the storage limit is %d. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.", size, storedLimit)
 		return response, nil
 	}
 	if !saveable(evaluation.Evaluation) {
@@ -364,12 +388,33 @@ func linkGrantItem(input *model.Inputs, grantID, itemID string) {
 	}
 }
 
-func (c *Coordinator) evaluate(ctx context.Context, meta *workerrpc.Meta, input model.Inputs, change map[string]any) (evaluated, RulesContext, error) {
-	method := "evaluate-character"
+// payload is the Engine request for one evaluation or play command.
+func payload(input model.Inputs, change map[string]any) map[string]any {
 	params := map[string]any{"contractVersion": model.ContractVersion, "inputs": input}
 	if change != nil {
-		method = "character-play"
 		params["change"] = change
+	}
+	return params
+}
+
+// tooLargeError reports an Engine payload over the Engine's published limit.
+type tooLargeError struct{ size int }
+
+func (e tooLargeError) Error() string { return tooLargeMessage(e.size) }
+
+func tooLargeMessage(size int) string {
+	return fmt.Sprintf("This character is %d bytes; the rules engine accepts at most %d. Remove inventory entries or shorten item notes, then try again.", size, model.MaxRequestBytes)
+}
+
+func (c *Coordinator) evaluate(ctx context.Context, meta *workerrpc.Meta, input model.Inputs, change map[string]any) (evaluated, RulesContext, error) {
+	method := "evaluate-character"
+	if change != nil {
+		method = "character-play"
+	}
+	params := payload(input, change)
+	// The Engine would refuse a larger request with a generic error.
+	if size := len(raw(params)); size > model.MaxRequestBytes {
+		return evaluated{}, RulesContext{}, tooLargeError{size}
 	}
 	result, err := c.engine.Call(ctx, meta, workerrpc.ServiceCall{Contract: "dnd5e.rules-engine", Method: method, Params: params})
 	if err != nil {

@@ -72,6 +72,18 @@ void test("rule feedback preserves engine values and performs no calculation", (
       "Attuned to more than 4 magic items (limit 4)",
       "Sladěno s více než 4 kouzelnými předměty (limit 4)",
     ],
+    [
+      "This character is 180001 bytes; the rules engine accepts at most 180000. Remove inventory entries or shorten item notes, then try again.",
+      "Tato postava má 180001 bajtů; engine pravidel přijme nejvýše 180000. Odeberte položky z inventáře nebo zkraťte jejich poznámky a zkuste to znovu.",
+    ],
+    [
+      "This character is 180001 bytes; the rules engine accepts at most 180000. The saved character remains readable, printable and exportable.",
+      "Tato postava má 180001 bajtů; engine pravidel přijme nejvýše 180000. Uloženou postavu lze nadále číst, tisknout a exportovat.",
+    ],
+    [
+      "This character's saved snapshot would be 251234 bytes; the storage limit is 250000. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.",
+      "Uložený snímek postavy by měl 251234 bajtů; limit úložiště je 250000. Snímek uchovává podklady pravidel pro každé použité povolání, odbornost, kouzlo a předmět, proto odeberte položky, které postava už nepotřebuje, a zkuste to znovu.",
+    ],
   ] as const)
     assert.equal(feedbackMessage(source, "cs"), expected);
 });

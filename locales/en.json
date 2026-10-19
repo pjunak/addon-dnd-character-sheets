@@ -433,7 +433,7 @@
   "The rules changed. Adopt them to save edits and use play actions.": "The rules changed. Adopt them to save edits and use play actions.",
   "These revisions have the same character values and rules.": "These revisions have the same character values and rules.",
   "This character file exceeds the import limit.": "This character file exceeds the import limit.",
-  "This character snapshot exceeds the storage limit. Reduce authored notes or inventory before committing.": "This character snapshot exceeds the storage limit. Reduce authored notes or inventory before committing.",
+  "This character's saved snapshot would be {0} bytes; the storage limit is {1}. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.": "This character's saved snapshot would be {0} bytes; the storage limit is {1}. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.",
   "Tools": "Tools",
   "Traits": "Traits",
   "Tremorsense": "Tremorsense",
@@ -946,5 +946,7 @@
   "Your other changes are not saved yet. Correct or reload them first.": "Your other changes are not saved yet. Correct or reload them first.",
   "The character view changed. Try again.": "The character view changed. Try again.",
   "The import could not be reviewed.": "The import could not be reviewed.",
-  "The current rules no longer allow these saved selections, so they were removed:": "The current rules no longer allow these saved selections, so they were removed:"
+  "The current rules no longer allow these saved selections, so they were removed:": "The current rules no longer allow these saved selections, so they were removed:",
+  "This character is {0} bytes; the rules engine accepts at most {1}. Remove inventory entries or shorten item notes, then try again.": "This character is {0} bytes; the rules engine accepts at most {1}. Remove inventory entries or shorten item notes, then try again.",
+  "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable.": "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable."
 }

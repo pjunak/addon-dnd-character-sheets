@@ -539,9 +539,17 @@ Preview tokens bind actor, role, generation, character, expected revision,
 operation and exact candidate, and expire after 15 minutes. Commit rechecks rules
 and expiry. A stale token cannot apply a different candidate.
 
-Requests are bounded to 190 KB, stored characters to 250 KB, transfer envelopes
-to 1 MB and imported inputs to 180 KB. File and paste share validation. Export
-and print use the current saved state and are available only in Tools.
+Character data is bounded by the Engine's published request limit
+(`character.MaxRequestBytes`, 180,000 bytes). The worker checks each Engine
+payload against it before calling, and each state before saving, so a saved
+character can always be evaluated again. Stored characters are bounded to
+250,000 bytes, including their saved explanations and rules evidence, and
+transfer envelopes to 1 MB; the browser checks imported inputs against the same
+published limit. Data over a limit is answered `too-large` with its size;
+nothing is saved and pending input stays on the page. A saved character over
+the Engine's limit loads as without compatible rules. File and paste share
+validation. Export and print use the current saved state and are available only
+in Tools.
 File parsing, size, missing-DM-authorization and refused-review errors appear
 inside the import dialog, receive focus and retain the entered input; a review
 the rules refuse lists their blockers under the reason. The dialog also says

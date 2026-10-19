@@ -435,7 +435,7 @@ export const catalogs = {
     "The rules changed. Adopt them to save edits and use play actions.": "The rules changed. Adopt them to save edits and use play actions.",
     "These revisions have the same character values and rules.": "These revisions have the same character values and rules.",
     "This character file exceeds the import limit.": "This character file exceeds the import limit.",
-    "This character snapshot exceeds the storage limit. Reduce authored notes or inventory before committing.": "This character snapshot exceeds the storage limit. Reduce authored notes or inventory before committing.",
+    "This character's saved snapshot would be {0} bytes; the storage limit is {1}. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.": "This character's saved snapshot would be {0} bytes; the storage limit is {1}. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.",
     "Tools": "Tools",
     "Traits": "Traits",
     "Tremorsense": "Tremorsense",
@@ -948,7 +948,9 @@ export const catalogs = {
     "Your other changes are not saved yet. Correct or reload them first.": "Your other changes are not saved yet. Correct or reload them first.",
     "The character view changed. Try again.": "The character view changed. Try again.",
     "The import could not be reviewed.": "The import could not be reviewed.",
-    "The current rules no longer allow these saved selections, so they were removed:": "The current rules no longer allow these saved selections, so they were removed:"
+    "The current rules no longer allow these saved selections, so they were removed:": "The current rules no longer allow these saved selections, so they were removed:",
+    "This character is {0} bytes; the rules engine accepts at most {1}. Remove inventory entries or shorten item notes, then try again.": "This character is {0} bytes; the rules engine accepts at most {1}. Remove inventory entries or shorten item notes, then try again.",
+    "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable.": "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable."
   },
   "cs": {
     "Hands and grip": "Ruce a úchop",
@@ -1385,7 +1387,7 @@ export const catalogs = {
     "The rules changed. Adopt them to save edits and use play actions.": "Pravidla se změnila. Úpravy se uloží a herní akce se zpřístupní, až je přijmete.",
     "These revisions have the same character values and rules.": "Tyto revize mají stejné hodnoty postavy a pravidla.",
     "This character file exceeds the import limit.": "Soubor postavy překračuje limit importu.",
-    "This character snapshot exceeds the storage limit. Reduce authored notes or inventory before committing.": "Snímek postavy překračuje limit úložiště. Před uložením zkraťte poznámky nebo inventář.",
+    "This character's saved snapshot would be {0} bytes; the storage limit is {1}. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.": "Uložený snímek postavy by měl {0} bajtů; limit úložiště je {1}. Snímek uchovává podklady pravidel pro každé použité povolání, odbornost, kouzlo a předmět, proto odeberte položky, které postava už nepotřebuje, a zkuste to znovu.",
     "Tools": "Nástroje",
     "Traits": "Rysy",
     "Tremorsense": "Vnímání otřesů",
@@ -1898,6 +1900,8 @@ export const catalogs = {
     "Your other changes are not saved yet. Correct or reload them first.": "Vaše ostatní změny ještě nejsou uložené. Nejprve je opravte, nebo načtěte uloženou postavu.",
     "The character view changed. Try again.": "Zobrazení postavy se změnilo. Zkuste to znovu.",
     "The import could not be reviewed.": "Import se nepodařilo zkontrolovat.",
-    "The current rules no longer allow these saved selections, so they were removed:": "Současná pravidla tyto uložené volby už nepovolují, proto byly odebrány:"
+    "The current rules no longer allow these saved selections, so they were removed:": "Současná pravidla tyto uložené volby už nepovolují, proto byly odebrány:",
+    "This character is {0} bytes; the rules engine accepts at most {1}. Remove inventory entries or shorten item notes, then try again.": "Tato postava má {0} bajtů; engine pravidel přijme nejvýše {1}. Odeberte položky z inventáře nebo zkraťte jejich poznámky a zkuste to znovu.",
+    "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable.": "Tato postava má {0} bajtů; engine pravidel přijme nejvýše {1}. Uloženou postavu lze nadále číst, tisknout a exportovat."
   }
 } as const;

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pjunak/addon-dnd-character-sheets/internal/character"
+	model "github.com/pjunak/addon-dnd-engine/character"
 	"os"
 	"reflect"
 	"sort"
@@ -71,6 +72,7 @@ func writeTypescript() {
 	for _, key := range keys {
 		output += "\n" + declarations[key] + "\n"
 	}
+	output += fmt.Sprintf("\n/** The Engine's published request limit in bytes; it bounds character data. */\nexport const maxRequestBytes = %d;\n", model.MaxRequestBytes)
 	if err := os.WriteFile("src/character-model.ts", []byte(output), 0644); err != nil {
 		panic(err)
 	}

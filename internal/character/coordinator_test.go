@@ -48,9 +48,11 @@ type fakeEngine struct {
 	generation  string
 	unavailable bool
 	invalid     bool
+	calls       int
 }
 
 func (engine *fakeEngine) Call(_ context.Context, _ *workerrpc.Meta, call workerrpc.ServiceCall) (workerrpc.ServiceResult, error) {
+	engine.calls++
 	if engine.unavailable {
 		return workerrpc.ServiceResult{}, failure(workerrpc.KindUnavailable, "missing rules")
 	}

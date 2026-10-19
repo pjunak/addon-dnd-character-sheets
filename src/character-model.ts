@@ -294,3 +294,6 @@ export interface Term {
   grantId?: string;
   status?: string;
 }
+
+/** The Engine's published request limit in bytes; it bounds character data. */
+export const maxRequestBytes = 180000;

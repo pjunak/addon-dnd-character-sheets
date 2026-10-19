@@ -1,5 +1,11 @@
 import type { AddonContext, ServiceHandle } from "./sdk.js";
-import type { Inputs, Request, Response, State } from "./character-model.js";
+import {
+  maxRequestBytes,
+  type Inputs,
+  type Request,
+  type Response,
+  type State,
+} from "./character-model.js";
 
 export const abilities = ["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const;
 export const newId = (): string => crypto.randomUUID();
@@ -180,7 +186,7 @@ export function parseCharacter(body: string): Inputs {
   const input = object(envelope["inputs"]);
   if (!input["build"] || !input["play"] || !Array.isArray(input["grants"]))
     throw new Error("The character export is incomplete.");
-  if (new TextEncoder().encode(JSON.stringify(input)).length > 180000)
+  if (new TextEncoder().encode(JSON.stringify(input)).length > maxRequestBytes)
     throw new Error("The character inputs exceed the import limit.");
   return input as unknown as Inputs;
 }

@@ -54,6 +54,18 @@ const templates: readonly (readonly [keyof typeof catalogs.en, RegExp])[] = [
     "Attuned to more than {0} magic items (limit {1})",
     /^Attuned to more than (\d+) magic items \(limit (\d+)\)$/u,
   ],
+  [
+    "This character is {0} bytes; the rules engine accepts at most {1}. Remove inventory entries or shorten item notes, then try again.",
+    /^This character is (\d+) bytes; the rules engine accepts at most (\d+)\. Remove inventory entries or shorten item notes, then try again\.$/u,
+  ],
+  [
+    "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable.",
+    /^This character is (\d+) bytes; the rules engine accepts at most (\d+)\. The saved character remains readable, printable and exportable\.$/u,
+  ],
+  [
+    "This character's saved snapshot would be {0} bytes; the storage limit is {1}. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.",
+    /^This character's saved snapshot would be (\d+) bytes; the storage limit is (\d+)\. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again\.$/u,
+  ],
 ];
 
 export function feedbackMessage(message: string, locale: string): string {

@@ -648,10 +648,15 @@ export function defineCharacterElement(
           }
           if (response.evaluation) this.#evaluation = response.evaluation;
           if (response.status !== "ready" || !response.state) {
-            this.#response = { ...this.#response, ...response };
+            // A too-large request was never evaluated, so it carries no rules state.
+            if (response.status !== "too-large")
+              this.#response = { ...this.#response, ...response };
             this.#blocked = true;
             this.#message = response.message;
-            if (response.status === "invalid" && version !== this.#changeVersion) {
+            if (
+              (response.status === "invalid" || response.status === "too-large") &&
+              version !== this.#changeVersion
+            ) {
               this.#blocked = false;
               continue;
             }
@@ -1803,10 +1808,12 @@ export function defineCharacterElement(
           } else {
             // The worker answered without saving, so nothing waits on this action.
             // A changed revision is re-read rather than rebased onto newer inputs.
+            // A too-large request was never evaluated, so it carries no rules state.
             this.#command = undefined;
-            this.#response = { ...this.#response, ...response };
+            if (response.status !== "too-large")
+              this.#response = { ...this.#response, ...response };
             this.#message = response.message;
-            if (response.status === "invalid")
+            if (response.status === "invalid" || response.status === "too-large")
               this.#ruleNotes = [
                 {
                   message: response.message,
