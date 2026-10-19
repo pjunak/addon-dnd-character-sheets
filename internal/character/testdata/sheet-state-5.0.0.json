@@ -1,0 +1,7209 @@
+{
+  "schemaVersion": "5.0.0",
+  "inputs": {
+    "build": {
+      "method": "rolled",
+      "baseScores": {
+        "CHA": 9,
+        "CON": 14,
+        "DEX": 13,
+        "INT": 16,
+        "STR": 10,
+        "WIS": 11
+      },
+      "rolls": [
+        {
+          "origin": "import",
+          "id": "roll-str",
+          "ability": "STR",
+          "dice": [
+            3,
+            2,
+            5,
+            1
+          ],
+          "kept": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "origin": "import",
+          "id": "roll-dex",
+          "ability": "DEX",
+          "dice": [
+            2,
+            6,
+            4,
+            3
+          ],
+          "kept": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "origin": "import",
+          "id": "roll-con",
+          "ability": "CON",
+          "dice": [
+            5,
+            1,
+            5,
+            4
+          ],
+          "kept": [
+            0,
+            2,
+            3
+          ]
+        },
+        {
+          "origin": "import",
+          "id": "roll-int",
+          "ability": "INT",
+          "dice": [
+            6,
+            6,
+            4,
+            3
+          ],
+          "kept": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "origin": "import",
+          "id": "roll-wis",
+          "ability": "WIS",
+          "dice": [
+            4,
+            2,
+            4,
+            3
+          ],
+          "kept": [
+            0,
+            2,
+            3
+          ]
+        },
+        {
+          "origin": "import",
+          "id": "roll-cha",
+          "ability": "CHA",
+          "dice": [
+            3,
+            3,
+            1,
+            3
+          ],
+          "kept": [
+            0,
+            1,
+            3
+          ]
+        }
+      ],
+      "species": "dwarf",
+      "lineage": "",
+      "background": "acolyte",
+      "levels": [
+        {
+          "id": "4d1f6c2a-level-1",
+          "classId": "wizard"
+        },
+        {
+          "id": "8b0e3f71-level-2",
+          "classId": "wizard",
+          "hitPoints": 5
+        },
+        {
+          "id": "c2a95d40-level-3",
+          "classId": "wizard",
+          "hitPoints": 3
+        },
+        {
+          "id": "f7e21b9c-level-4",
+          "classId": "wizard",
+          "hitPoints": 6
+        },
+        {
+          "id": "1a6d8e33-level-5",
+          "classId": "wizard",
+          "hitPoints": 4
+        }
+      ],
+      "subclasses": {
+        "wizard": "evoker"
+      },
+      "choices": [
+        {
+          "id": "bgasi",
+          "slot": 0,
+          "value": {
+            "INT": 2,
+            "WIS": 1
+          }
+        },
+        {
+          "id": "asi:wizard:4",
+          "slot": 0,
+          "value": "asi"
+        },
+        {
+          "id": "asi:wizard:4:ability",
+          "slot": 0,
+          "value": {
+            "CON": 1,
+            "DEX": 1
+          }
+        }
+      ],
+      "spells": {
+        "cantrips": {
+          "wizard": [
+            "fire-bolt",
+            "mage-hand",
+            "prestidigitation",
+            "light"
+          ]
+        },
+        "spellbook": {
+          "wizard": [
+            "mage-armor",
+            "magic-missile",
+            "shield",
+            "detect-magic",
+            "feather-fall",
+            "identify",
+            "find-familiar",
+            "burning-hands",
+            "alarm",
+            "comprehend-languages",
+            "grease",
+            "thunderwave",
+            "misty-step",
+            "fireball",
+            "haste"
+          ]
+        },
+        "grantChoices": {
+          "feat:magic-initiate:mi-cantrips": [
+            "message",
+            "light"
+          ],
+          "feat:magic-initiate:mi-spell": [
+            "sleep"
+          ]
+        },
+        "castingAbilities": {},
+        "swaps": [],
+        "acquisitions": [
+          {
+            "origin": "recorded",
+            "id": "5e9b1c47-2d8a-4f63-9a0e-7b2c4d6f8e13",
+            "classId": "wizard",
+            "spellId": "haste",
+            "level": 5,
+            "at": "2026-10-12T19:42:07Z",
+            "costGp": 150,
+            "scrollId": "f1a7-scroll"
+          }
+        ]
+      }
+    },
+    "play": {
+      "conditions": [
+        {
+          "id": "exhaustion",
+          "level": 1
+        }
+      ],
+      "hands": {
+        "main": "a3f1-quarterstaff",
+        "off": "",
+        "grip": "two",
+        "suspendedOff": {
+          "itemId": "b7c2-dagger",
+          "expectedItemSha256": "4113679e686a6a7b869c265c32abc95351c7202ea694bb43548af8ad23d6beb6"
+        }
+      },
+      "inspiration": true,
+      "quickUse": [
+        "e5f0-potions"
+      ],
+      "containers": [
+        {
+          "id": "pack",
+          "name": "Backpack",
+          "itemId": "c9d4-backpack"
+        },
+        {
+          "id": "chest",
+          "name": "Chest at the Lantern Inn"
+        }
+      ],
+      "concentration": {
+        "ref": "sleep",
+        "saveDC": 10
+      },
+      "coinWeight": false,
+      "rolls": [
+        {
+          "origin": "recorded",
+          "id": "hit-die-6c0d2f",
+          "resource": "hit-dice-d6",
+          "die": 6,
+          "result": 4,
+          "at": "2026-10-12T19:42:07Z"
+        }
+      ],
+      "hp": 24,
+      "temporaryHp": 5,
+      "inventory": [
+        {
+          "id": "a3f1-quarterstaff",
+          "reference": {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          },
+          "name": "Quarterstaff",
+          "quantity": 1,
+          "location": "equipped",
+          "attuned": false,
+          "acquisition": "Starting equipment",
+          "notes": "Carved with the names of former teachers."
+        },
+        {
+          "id": "b7c2-dagger",
+          "reference": {
+            "kind": "weapon",
+            "id": "dagger"
+          },
+          "name": "Dagger",
+          "quantity": 2,
+          "location": "carried",
+          "attuned": false,
+          "acquisition": "Starting equipment",
+          "notes": ""
+        },
+        {
+          "id": "c9d4-backpack",
+          "reference": {
+            "kind": "gear",
+            "id": "backpack"
+          },
+          "name": "Backpack",
+          "quantity": 1,
+          "location": "equipped",
+          "attuned": false,
+          "acquisition": "Starting equipment",
+          "notes": ""
+        },
+        {
+          "id": "d2e8-ring",
+          "bodyPlacement": "other",
+          "reference": {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          },
+          "name": "Ring of Warding",
+          "quantity": 1,
+          "location": "equipped",
+          "attuned": true,
+          "acquisition": "Reward from the harbour guild",
+          "grantId": "grant-7c1e9a2b-guardian",
+          "notes": "Warm to the touch near undead."
+        },
+        {
+          "id": "e5f0-potions",
+          "containerId": "pack",
+          "reference": {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          },
+          "name": "Potion of Healing",
+          "quantity": 2,
+          "location": "carried",
+          "attuned": false,
+          "acquisition": "Bought in Westgate",
+          "notes": ""
+        },
+        {
+          "id": "f1a7-scroll",
+          "containerId": "pack",
+          "reference": {
+            "kind": "gear",
+            "id": "spell-scroll"
+          },
+          "spellId": "haste",
+          "name": "Spell Scroll (Haste)",
+          "quantity": 0,
+          "location": "carried",
+          "attuned": false,
+          "acquisition": "Looted from the cult archive",
+          "notes": "Copy before the next long journey."
+        },
+        {
+          "id": "0b3c-rations",
+          "containerId": "pack",
+          "reference": {
+            "kind": "gear",
+            "id": "rations"
+          },
+          "name": "Rations",
+          "quantity": 5,
+          "location": "carried",
+          "attuned": false,
+          "acquisition": "Bought in Westgate",
+          "notes": ""
+        },
+        {
+          "id": "2c8d-journal",
+          "containerId": "chest",
+          "name": "Research journal",
+          "quantity": 1,
+          "location": "stored",
+          "attuned": false,
+          "acquisition": "Written by the character",
+          "notes": "Notes on the sealed vault beneath the observatory.",
+          "weightLb": 2.5
+        }
+      ],
+      "currency": {
+        "cp": 125,
+        "gp": 162,
+        "pp": 2,
+        "sp": 47
+      },
+      "resourceUses": {
+        "charge:feat:magic-initiate:mi-spell": 1,
+        "guardian-pool": 0,
+        "hit-dice-d6": 1,
+        "slot-1": 1,
+        "slot-2": 0,
+        "slot-3": 0
+      },
+      "activeFeatures": {
+        "feat:guardian:stance": true
+      },
+      "preparedSpells": {
+        "wizard": [
+          "mage-armor",
+          "magic-missile",
+          "shield",
+          "detect-magic",
+          "feather-fall",
+          "find-familiar",
+          "thunderwave",
+          "misty-step",
+          "fireball"
+        ]
+      },
+      "asOf": "2026-10-12T19:42:07Z"
+    },
+    "grants": [
+      {
+        "id": "grant-7c1e9a2b-guardian",
+        "name": "Oath of the harbour watch",
+        "reason": "Held the harbour gate during the siege",
+        "actorId": "dm-asurai",
+        "grantedAt": "2026-10-05T18:30:00Z",
+        "active": true,
+        "effectiveLevel": 4,
+        "itemId": "d2e8-ring",
+        "condition": "attuned",
+        "feat": {
+          "kind": "feat",
+          "id": "guardian"
+        },
+        "effects": [
+          {
+            "target": "maxHp",
+            "mode": "add",
+            "value": 3
+          },
+          {
+            "target": "savingThrow",
+            "key": "CON",
+            "mode": "add",
+            "value": 1
+          }
+        ],
+        "waivers": [
+          "feat:guardian"
+        ]
+      },
+      {
+        "id": "grant-91d0f4c3-blessing",
+        "name": "Blessing of the tide shrine",
+        "reason": "Restored the shrine's bell",
+        "actorId": "dm-asurai",
+        "grantedAt": "2026-10-08T20:05:00Z",
+        "active": true,
+        "effectiveLevel": 5,
+        "expiresAt": "2026-11-01T00:00:00Z",
+        "condition": "always",
+        "effects": [
+          {
+            "target": "sense",
+            "key": "darkvision",
+            "mode": "minimum",
+            "value": 60
+          }
+        ],
+        "waivers": []
+      }
+    ]
+  },
+  "projection": {
+    "sheet": {
+      "abilities": {
+        "CHA": {
+          "base": 9,
+          "bonus": 0,
+          "cap": 20,
+          "mod": -1,
+          "score": 9
+        },
+        "CON": {
+          "base": 14,
+          "bonus": 1,
+          "cap": 20,
+          "mod": 2,
+          "score": 15
+        },
+        "DEX": {
+          "base": 13,
+          "bonus": 1,
+          "cap": 20,
+          "mod": 2,
+          "score": 14
+        },
+        "INT": {
+          "base": 16,
+          "bonus": 2,
+          "cap": 20,
+          "mod": 4,
+          "score": 18
+        },
+        "STR": {
+          "base": 10,
+          "bonus": 0,
+          "cap": 20,
+          "mod": 0,
+          "score": 10
+        },
+        "WIS": {
+          "base": 11,
+          "bonus": 1,
+          "cap": 20,
+          "mod": 1,
+          "score": 12
+        }
+      },
+      "ac": {
+        "activeBonus": 1,
+        "base": "Unarmored",
+        "candidates": [
+          {
+            "id": "unarmored",
+            "label": "Unarmored",
+            "value": 12
+          }
+        ],
+        "restrictions": null,
+        "shield": 0,
+        "value": 14
+      },
+      "activations": [
+        {
+          "active": true,
+          "available": true,
+          "exclusiveGroup": null,
+          "id": "stance",
+          "key": "feat:guardian:stance",
+          "name": "Guardian Stance",
+          "resource": null,
+          "source": {
+            "id": "guardian",
+            "level": 5,
+            "type": "feat"
+          }
+        }
+      ],
+      "armorRestrictions": null,
+      "attunement": {
+        "count": 1,
+        "limit": 3,
+        "over": false
+      },
+      "bodyPlacement": [
+        {
+          "itemId": "d2e8-ring",
+          "name": "Ring of Warding",
+          "placement": "other"
+        }
+      ],
+      "carrying": {
+        "capacityLb": 150,
+        "coinWeight": false,
+        "coinsLb": 0,
+        "containers": {
+          "chest": {
+            "loadLb": 2.5,
+            "stored": true,
+            "weightless": false
+          },
+          "pack": {
+            "loadLb": 11,
+            "stored": false,
+            "weightless": false
+          }
+        },
+        "items": {
+          "0b3c-rations": {
+            "custom": false,
+            "eachLb": 2,
+            "totalLb": 10
+          },
+          "2c8d-journal": {
+            "custom": true,
+            "eachLb": 2.5,
+            "totalLb": 2.5
+          },
+          "a3f1-quarterstaff": {
+            "custom": false,
+            "eachLb": 4,
+            "totalLb": 4
+          },
+          "b7c2-dagger": {
+            "custom": false,
+            "eachLb": 1,
+            "totalLb": 2
+          },
+          "c9d4-backpack": {
+            "custom": false,
+            "eachLb": 5,
+            "totalLb": 5
+          },
+          "e5f0-potions": {
+            "custom": false,
+            "eachLb": 0.5,
+            "totalLb": 1
+          },
+          "f1a7-scroll": {
+            "custom": false,
+            "eachLb": 0,
+            "totalLb": 0
+          }
+        },
+        "itemsLb": 22,
+        "storedLb": 2.5,
+        "unknown": [
+          "d2e8-ring"
+        ],
+        "weightLb": 22,
+        "weightlessLb": 0
+      },
+      "class": {
+        "id": "wizard",
+        "kind": "class",
+        "name": "Wizard"
+      },
+      "classValues": [],
+      "classes": [
+        {
+          "classId": "wizard",
+          "hitDie": "d6",
+          "level": 5,
+          "name": "Wizard",
+          "subclass": "evoker"
+        }
+      ],
+      "concentration": {
+        "name": "Sleep",
+        "ref": "sleep",
+        "saveAbility": "CON",
+        "saveBonus": 3,
+        "saveDC": 10
+      },
+      "concentrationSaveBonus": 0,
+      "conditionEffects": {
+        "d20Adjustment": -2
+      },
+      "conditionImmunities": [],
+      "conditions": [
+        {
+          "id": "exhaustion",
+          "labelKey": "",
+          "level": 1,
+          "name": "Exhaustion",
+          "reference": {
+            "kind": "rule",
+            "id": "table-states"
+          },
+          "status": "active",
+          "summary": "Synthetic tiered condition.",
+          "terminal": false
+        }
+      ],
+      "damageImmunities": [],
+      "derived": {
+        "armorClass": 14,
+        "hitDie": "d6",
+        "initiative": 2,
+        "maxHp": 42,
+        "passivePerception": 11,
+        "proficiencyBonus": 3,
+        "speed": 30
+      },
+      "equipment": {
+        "0b3c-rations": {
+          "bodyPlacements": [],
+          "slot": "worn"
+        },
+        "2c8d-journal": {
+          "bodyPlacements": [],
+          "slot": "worn"
+        },
+        "a3f1-quarterstaff": {
+          "bodyPlacements": [],
+          "slot": "worn"
+        },
+        "b7c2-dagger": {
+          "bodyPlacements": [],
+          "slot": "worn"
+        },
+        "c9d4-backpack": {
+          "bodyPlacements": [],
+          "slot": "worn"
+        },
+        "d2e8-ring": {
+          "bodyPlacements": [
+            "other"
+          ],
+          "slot": "worn"
+        },
+        "e5f0-potions": {
+          "bodyPlacements": [],
+          "slot": "worn"
+        },
+        "f1a7-scroll": {
+          "bodyPlacements": [],
+          "slot": "worn"
+        }
+      },
+      "featIdentities": [
+        {
+          "category": "",
+          "id": "magic-initiate"
+        },
+        {
+          "category": "",
+          "id": "guardian"
+        }
+      ],
+      "feats": [
+        {
+          "count": 1,
+          "id": "magic-initiate",
+          "name": "Magic Initiate"
+        },
+        {
+          "count": 1,
+          "id": "guardian",
+          "name": "Guardian"
+        }
+      ],
+      "features": [
+        {
+          "id": "wizard-arcane-recovery",
+          "name": "Arcane Recovery",
+          "source": {
+            "id": "wizard",
+            "level": 1,
+            "type": "class"
+          }
+        },
+        {
+          "id": "wizard-scholar",
+          "name": "Scholar",
+          "source": {
+            "id": "wizard",
+            "level": 2,
+            "type": "class"
+          }
+        }
+      ],
+      "flySpeed": 0,
+      "hands": {
+        "grip": "two",
+        "main": {
+          "active": true,
+          "itemId": "a3f1-quarterstaff",
+          "name": "Quarterstaff",
+          "reference": {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          }
+        },
+        "off": {
+          "active": false,
+          "itemId": "",
+          "name": ""
+        },
+        "restoreReason": "",
+        "suspendedOff": {
+          "active": false,
+          "itemId": "b7c2-dagger",
+          "name": "Dagger",
+          "reference": {
+            "kind": "weapon",
+            "id": "dagger"
+          }
+        }
+      },
+      "hp": {
+        "breakdown": {
+          "conMod": 2,
+          "conTotal": 10,
+          "dice": 22,
+          "level": 5,
+          "miscPerLevel": 1,
+          "miscTotal": 5
+        },
+        "levels": [
+          {
+            "bonus": 1,
+            "classId": "wizard",
+            "constitution": 2,
+            "die": 6,
+            "gained": 9,
+            "levelId": "4d1f6c2a-level-1",
+            "method": "first level maximum",
+            "minimum": 1,
+            "result": 6
+          },
+          {
+            "bonus": 1,
+            "classId": "wizard",
+            "constitution": 2,
+            "die": 6,
+            "gained": 8,
+            "levelId": "8b0e3f71-level-2",
+            "method": "recorded roll",
+            "minimum": 1,
+            "result": 5
+          },
+          {
+            "bonus": 1,
+            "classId": "wizard",
+            "constitution": 2,
+            "die": 6,
+            "gained": 6,
+            "levelId": "c2a95d40-level-3",
+            "method": "recorded roll",
+            "minimum": 1,
+            "result": 3
+          },
+          {
+            "bonus": 1,
+            "classId": "wizard",
+            "constitution": 2,
+            "die": 6,
+            "gained": 9,
+            "levelId": "f7e21b9c-level-4",
+            "method": "recorded roll",
+            "minimum": 1,
+            "result": 6
+          },
+          {
+            "bonus": 1,
+            "classId": "wizard",
+            "constitution": 2,
+            "die": 6,
+            "gained": 7,
+            "levelId": "1a6d8e33-level-5",
+            "method": "recorded roll",
+            "minimum": 1,
+            "result": 4
+          }
+        ],
+        "max": 42
+      },
+      "inspiration": true,
+      "languages": [
+        "giant"
+      ],
+      "passives": {
+        "perception": 11
+      },
+      "proficiencies": {
+        "armor": [],
+        "languages": [
+          "giant"
+        ],
+        "saves": {
+          "CHA": false,
+          "CON": false,
+          "DEX": false,
+          "INT": true,
+          "STR": false,
+          "WIS": true
+        },
+        "skills": {
+          "acrobatics": "none",
+          "animalHandling": "none",
+          "arcana": "none",
+          "athletics": "none",
+          "deception": "none",
+          "history": "none",
+          "insight": "none",
+          "intimidation": "none",
+          "investigation": "none",
+          "medicine": "none",
+          "nature": "none",
+          "perception": "none",
+          "performance": "none",
+          "persuasion": "none",
+          "religion": "none",
+          "sleightOfHand": "none",
+          "stealth": "none",
+          "survival": "none"
+        },
+        "tools": [],
+        "weapons": []
+      },
+      "quickUse": [
+        {
+          "available": true,
+          "itemId": "e5f0-potions",
+          "location": "carried",
+          "name": "Potion of Healing",
+          "quantity": 2,
+          "reason": "",
+          "reference": {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          }
+        }
+      ],
+      "resistances": [
+        "poison",
+        "fire"
+      ],
+      "resources": [
+        {
+          "key": "guardian-pool",
+          "kind": "pool",
+          "max": 2,
+          "name": "Guardian Pool",
+          "recharge": [
+            {
+              "amount": "full",
+              "on": "short"
+            }
+          ],
+          "remaining": 2,
+          "source": {
+            "id": "guardian",
+            "level": 5,
+            "type": "feat"
+          },
+          "spent": 0
+        },
+        {
+          "die": "d6",
+          "key": "hit-dice-d6",
+          "kind": "hitdice",
+          "max": 5,
+          "name": "Hit Dice (d6)",
+          "recharge": [
+            {
+              "amount": "full",
+              "on": "long"
+            }
+          ],
+          "remaining": 4,
+          "source": {
+            "type": "class"
+          },
+          "spent": 1
+        },
+        {
+          "key": "slot-1",
+          "kind": "slot",
+          "level": 1,
+          "max": 4,
+          "name": "Spell Slots (1st)",
+          "recharge": [
+            {
+              "amount": "full",
+              "on": "long"
+            }
+          ],
+          "remaining": 3,
+          "source": {
+            "type": "spellcasting"
+          },
+          "spent": 1
+        },
+        {
+          "key": "slot-2",
+          "kind": "slot",
+          "level": 2,
+          "max": 3,
+          "name": "Spell Slots (2nd)",
+          "recharge": [
+            {
+              "amount": "full",
+              "on": "long"
+            }
+          ],
+          "remaining": 3,
+          "source": {
+            "type": "spellcasting"
+          },
+          "spent": 0
+        },
+        {
+          "key": "slot-3",
+          "kind": "slot",
+          "level": 3,
+          "max": 2,
+          "name": "Spell Slots (3rd)",
+          "recharge": [
+            {
+              "amount": "full",
+              "on": "long"
+            }
+          ],
+          "remaining": 2,
+          "source": {
+            "type": "spellcasting"
+          },
+          "spent": 0
+        },
+        {
+          "key": "charge:feat:magic-initiate:mi-spell",
+          "kind": "charge",
+          "max": 1,
+          "name": "Sleep (free cast)",
+          "recharge": [
+            {
+              "amount": "full",
+              "on": "long"
+            }
+          ],
+          "remaining": 0,
+          "source": {
+            "id": "magic-initiate",
+            "level": 5,
+            "type": "feat"
+          },
+          "spent": 1
+        }
+      ],
+      "saves": {
+        "CHA": {
+          "mod": -1,
+          "proficient": false,
+          "total": -1
+        },
+        "CON": {
+          "mod": 2,
+          "proficient": false,
+          "total": 3
+        },
+        "DEX": {
+          "mod": 2,
+          "proficient": false,
+          "total": 2
+        },
+        "INT": {
+          "mod": 4,
+          "proficient": true,
+          "total": 7
+        },
+        "STR": {
+          "mod": 0,
+          "proficient": false,
+          "total": 0
+        },
+        "WIS": {
+          "mod": 1,
+          "proficient": true,
+          "total": 4
+        }
+      },
+      "senses": {
+        "darkvision": 120
+      },
+      "skills": {
+        "acrobatics": {
+          "ability": "DEX",
+          "expertise": false,
+          "mod": 2,
+          "proficient": false,
+          "total": 2
+        },
+        "animalHandling": {
+          "ability": "WIS",
+          "expertise": false,
+          "mod": 1,
+          "proficient": false,
+          "total": 1
+        },
+        "arcana": {
+          "ability": "INT",
+          "expertise": false,
+          "mod": 4,
+          "proficient": false,
+          "total": 4
+        },
+        "athletics": {
+          "ability": "STR",
+          "expertise": false,
+          "mod": 0,
+          "proficient": false,
+          "total": 0
+        },
+        "deception": {
+          "ability": "CHA",
+          "expertise": false,
+          "mod": -1,
+          "proficient": false,
+          "total": -1
+        },
+        "history": {
+          "ability": "INT",
+          "expertise": false,
+          "mod": 4,
+          "proficient": false,
+          "total": 4
+        },
+        "insight": {
+          "ability": "WIS",
+          "expertise": false,
+          "mod": 1,
+          "proficient": false,
+          "total": 1
+        },
+        "intimidation": {
+          "ability": "CHA",
+          "expertise": false,
+          "mod": -1,
+          "proficient": false,
+          "total": -1
+        },
+        "investigation": {
+          "ability": "INT",
+          "expertise": false,
+          "mod": 4,
+          "proficient": false,
+          "total": 4
+        },
+        "medicine": {
+          "ability": "WIS",
+          "expertise": false,
+          "mod": 1,
+          "proficient": false,
+          "total": 1
+        },
+        "nature": {
+          "ability": "INT",
+          "expertise": false,
+          "mod": 4,
+          "proficient": false,
+          "total": 4
+        },
+        "perception": {
+          "ability": "WIS",
+          "expertise": false,
+          "mod": 1,
+          "proficient": false,
+          "total": 1
+        },
+        "performance": {
+          "ability": "CHA",
+          "expertise": false,
+          "mod": -1,
+          "proficient": false,
+          "total": -1
+        },
+        "persuasion": {
+          "ability": "CHA",
+          "expertise": false,
+          "mod": -1,
+          "proficient": false,
+          "total": -1
+        },
+        "religion": {
+          "ability": "INT",
+          "expertise": false,
+          "mod": 4,
+          "proficient": false,
+          "total": 4
+        },
+        "sleightOfHand": {
+          "ability": "DEX",
+          "expertise": false,
+          "mod": 2,
+          "proficient": false,
+          "total": 2
+        },
+        "stealth": {
+          "ability": "DEX",
+          "expertise": false,
+          "mod": 2,
+          "proficient": false,
+          "total": 2
+        },
+        "survival": {
+          "ability": "WIS",
+          "expertise": false,
+          "mod": 1,
+          "proficient": false,
+          "total": 1
+        }
+      },
+      "species": {
+        "id": "dwarf",
+        "kind": "species",
+        "name": "Dwarf"
+      },
+      "speed": 30,
+      "speedBonuses": [],
+      "spellcasting": {
+        "casterLevel": 5,
+        "castingAbilityChoices": [],
+        "granted": [
+          {
+            "alwaysPrepared": true,
+            "castAtLevel": null,
+            "castingAbility": null,
+            "free": null,
+            "level": 0,
+            "name": "Message",
+            "ref": "message",
+            "school": "Transmutation",
+            "source": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          },
+          {
+            "alwaysPrepared": true,
+            "castAtLevel": null,
+            "castingAbility": null,
+            "free": null,
+            "level": 0,
+            "name": "Light",
+            "ref": "light",
+            "school": "Evocation",
+            "source": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          },
+          {
+            "alwaysPrepared": true,
+            "castAtLevel": null,
+            "castingAbility": null,
+            "free": "1/long",
+            "level": 1,
+            "name": "Sleep",
+            "ref": "sleep",
+            "resourceKey": "charge:feat:magic-initiate:mi-spell",
+            "school": "Enchantment",
+            "source": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "pendingChoices": [
+          {
+            "alwaysPrepared": true,
+            "choose": 2,
+            "default": null,
+            "from": {
+              "class": [
+                "wizard"
+              ]
+            },
+            "key": "feat:magic-initiate:mi-cantrips",
+            "maxSpellLevel": null,
+            "picked": [
+              "message",
+              "light"
+            ],
+            "source": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            },
+            "spellLevel": 0
+          },
+          {
+            "alwaysPrepared": true,
+            "choose": 1,
+            "default": null,
+            "free": "1/long",
+            "from": {
+              "class": [
+                "wizard"
+              ]
+            },
+            "key": "feat:magic-initiate:mi-spell",
+            "maxSpellLevel": null,
+            "picked": [
+              "sleep"
+            ],
+            "source": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            },
+            "spellLevel": 1
+          }
+        ],
+        "perClass": [
+          {
+            "ability": "INT",
+            "cantripsKnown": 4,
+            "classId": "wizard",
+            "expandedSpellIds": [],
+            "level": 5,
+            "maxSpellLevel": 3,
+            "pact": null,
+            "preparedCount": 9,
+            "preparedLimit": 9,
+            "prepares": "spellbook",
+            "ritual": true,
+            "saveDC": 15,
+            "spellAttack": 7,
+            "spellListClassId": "wizard",
+            "spellbookCapacity": 15,
+            "spellbookKnown": 14,
+            "type": "full"
+          }
+        ],
+        "slots": [
+          4,
+          3,
+          2
+        ]
+      },
+      "storage": {
+        "containers": [
+          {
+            "id": "pack",
+            "itemIds": [
+              "e5f0-potions",
+              "f1a7-scroll",
+              "0b3c-rations"
+            ],
+            "name": "Backpack"
+          },
+          {
+            "id": "chest",
+            "itemIds": [
+              "2c8d-journal"
+            ],
+            "name": "Chest at the Lantern Inn"
+          }
+        ]
+      },
+      "totalLevel": 5,
+      "weaponMastery": {
+        "chosen": [],
+        "slots": 0
+      },
+      "weapons": [
+        {
+          "ability": "STR",
+          "attackBonus": 0,
+          "damage": "1d8",
+          "damageType": "bludgeoning",
+          "grip": "two",
+          "itemId": "a3f1-quarterstaff",
+          "mastery": "Topple",
+          "masteryActive": false,
+          "name": "Quarterstaff",
+          "proficient": false,
+          "properties": [
+            "versatile"
+          ],
+          "ref": "quarterstaff",
+          "versatileDamage": "1d8"
+        }
+      ]
+    },
+    "explanations": {
+      "abilities.CHA.base": {
+        "label": "abilities.CHA.base",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 9,
+        "terms": [
+          {
+            "label": "mod",
+            "value": -1
+          },
+          {
+            "label": "base",
+            "value": 9
+          },
+          {
+            "label": "bonus",
+            "value": 0
+          }
+        ],
+        "sources": []
+      },
+      "abilities.CHA.bonus": {
+        "label": "abilities.CHA.bonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "mod",
+            "value": -1
+          },
+          {
+            "label": "base",
+            "value": 9
+          },
+          {
+            "label": "bonus",
+            "value": 0
+          }
+        ],
+        "sources": []
+      },
+      "abilities.CHA.cap": {
+        "label": "abilities.CHA.cap",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 20,
+        "terms": [
+          {
+            "label": "mod",
+            "value": -1
+          },
+          {
+            "label": "base",
+            "value": 9
+          },
+          {
+            "label": "bonus",
+            "value": 0
+          }
+        ],
+        "sources": []
+      },
+      "abilities.CHA.mod": {
+        "label": "CHA modifier",
+        "formula": "floor((effective score − 10) / 2)",
+        "value": -1,
+        "terms": [
+          {
+            "label": "Effective score",
+            "value": 9
+          }
+        ],
+        "sources": []
+      },
+      "abilities.CHA.score": {
+        "label": "CHA score",
+        "formula": "min(effective ability cap, base score + granted increases)",
+        "value": 9,
+        "terms": [
+          {
+            "label": "Recorded base",
+            "value": 9
+          },
+          {
+            "label": "Granted increases",
+            "value": 0
+          },
+          {
+            "label": "Effective cap",
+            "value": 20
+          }
+        ],
+        "sources": []
+      },
+      "abilities.CON.base": {
+        "label": "abilities.CON.base",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 14,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 2
+          },
+          {
+            "label": "base",
+            "value": 14
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "abilities.CON.bonus": {
+        "label": "abilities.CON.bonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 2
+          },
+          {
+            "label": "base",
+            "value": 14
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "abilities.CON.cap": {
+        "label": "abilities.CON.cap",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 20,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 2
+          },
+          {
+            "label": "base",
+            "value": 14
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "abilities.CON.mod": {
+        "label": "CON modifier",
+        "formula": "floor((effective score − 10) / 2)",
+        "value": 2,
+        "terms": [
+          {
+            "label": "Effective score",
+            "value": 15
+          }
+        ],
+        "sources": []
+      },
+      "abilities.CON.score": {
+        "label": "CON score",
+        "formula": "min(effective ability cap, base score + granted increases)",
+        "value": 15,
+        "terms": [
+          {
+            "label": "Recorded base",
+            "value": 14
+          },
+          {
+            "label": "Granted increases",
+            "value": 1
+          },
+          {
+            "label": "Effective cap",
+            "value": 20
+          }
+        ],
+        "sources": []
+      },
+      "abilities.DEX.base": {
+        "label": "abilities.DEX.base",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 13,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 2
+          },
+          {
+            "label": "base",
+            "value": 13
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "abilities.DEX.bonus": {
+        "label": "abilities.DEX.bonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 2
+          },
+          {
+            "label": "base",
+            "value": 13
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "abilities.DEX.cap": {
+        "label": "abilities.DEX.cap",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 20,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 2
+          },
+          {
+            "label": "base",
+            "value": 13
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "abilities.DEX.mod": {
+        "label": "DEX modifier",
+        "formula": "floor((effective score − 10) / 2)",
+        "value": 2,
+        "terms": [
+          {
+            "label": "Effective score",
+            "value": 14
+          }
+        ],
+        "sources": []
+      },
+      "abilities.DEX.score": {
+        "label": "DEX score",
+        "formula": "min(effective ability cap, base score + granted increases)",
+        "value": 14,
+        "terms": [
+          {
+            "label": "Recorded base",
+            "value": 13
+          },
+          {
+            "label": "Granted increases",
+            "value": 1
+          },
+          {
+            "label": "Effective cap",
+            "value": 20
+          }
+        ],
+        "sources": []
+      },
+      "abilities.INT.base": {
+        "label": "abilities.INT.base",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 16,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 4
+          },
+          {
+            "label": "base",
+            "value": 16
+          },
+          {
+            "label": "bonus",
+            "value": 2
+          }
+        ],
+        "sources": []
+      },
+      "abilities.INT.bonus": {
+        "label": "abilities.INT.bonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 4
+          },
+          {
+            "label": "base",
+            "value": 16
+          },
+          {
+            "label": "bonus",
+            "value": 2
+          }
+        ],
+        "sources": []
+      },
+      "abilities.INT.cap": {
+        "label": "abilities.INT.cap",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 20,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 4
+          },
+          {
+            "label": "base",
+            "value": 16
+          },
+          {
+            "label": "bonus",
+            "value": 2
+          }
+        ],
+        "sources": []
+      },
+      "abilities.INT.mod": {
+        "label": "INT modifier",
+        "formula": "floor((effective score − 10) / 2)",
+        "value": 4,
+        "terms": [
+          {
+            "label": "Effective score",
+            "value": 18
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "abilities.INT.score": {
+        "label": "INT score",
+        "formula": "min(effective ability cap, base score + granted increases)",
+        "value": 18,
+        "terms": [
+          {
+            "label": "Recorded base",
+            "value": 16
+          },
+          {
+            "label": "Granted increases",
+            "value": 2
+          },
+          {
+            "label": "Effective cap",
+            "value": 20
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "abilities.STR.base": {
+        "label": "abilities.STR.base",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 10,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 0
+          },
+          {
+            "label": "base",
+            "value": 10
+          },
+          {
+            "label": "bonus",
+            "value": 0
+          }
+        ],
+        "sources": []
+      },
+      "abilities.STR.bonus": {
+        "label": "abilities.STR.bonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 0
+          },
+          {
+            "label": "base",
+            "value": 10
+          },
+          {
+            "label": "bonus",
+            "value": 0
+          }
+        ],
+        "sources": []
+      },
+      "abilities.STR.cap": {
+        "label": "abilities.STR.cap",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 20,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 0
+          },
+          {
+            "label": "base",
+            "value": 10
+          },
+          {
+            "label": "bonus",
+            "value": 0
+          }
+        ],
+        "sources": []
+      },
+      "abilities.STR.mod": {
+        "label": "STR modifier",
+        "formula": "floor((effective score − 10) / 2)",
+        "value": 0,
+        "terms": [
+          {
+            "label": "Effective score",
+            "value": 10
+          }
+        ],
+        "sources": []
+      },
+      "abilities.STR.score": {
+        "label": "STR score",
+        "formula": "min(effective ability cap, base score + granted increases)",
+        "value": 10,
+        "terms": [
+          {
+            "label": "Recorded base",
+            "value": 10
+          },
+          {
+            "label": "Granted increases",
+            "value": 0
+          },
+          {
+            "label": "Effective cap",
+            "value": 20
+          }
+        ],
+        "sources": []
+      },
+      "abilities.WIS.base": {
+        "label": "abilities.WIS.base",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 11,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 1
+          },
+          {
+            "label": "base",
+            "value": 11
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "abilities.WIS.bonus": {
+        "label": "abilities.WIS.bonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 1
+          },
+          {
+            "label": "base",
+            "value": 11
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "abilities.WIS.cap": {
+        "label": "abilities.WIS.cap",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 20,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 1
+          },
+          {
+            "label": "base",
+            "value": 11
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "abilities.WIS.mod": {
+        "label": "WIS modifier",
+        "formula": "floor((effective score − 10) / 2)",
+        "value": 1,
+        "terms": [
+          {
+            "label": "Effective score",
+            "value": 12
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "abilities.WIS.score": {
+        "label": "WIS score",
+        "formula": "min(effective ability cap, base score + granted increases)",
+        "value": 12,
+        "terms": [
+          {
+            "label": "Recorded base",
+            "value": 11
+          },
+          {
+            "label": "Granted increases",
+            "value": 1
+          },
+          {
+            "label": "Effective cap",
+            "value": 20
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "ac.activeBonus": {
+        "label": "ac.activeBonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "base",
+            "value": "Unarmored"
+          }
+        ],
+        "sources": []
+      },
+      "ac.candidates.0.value": {
+        "label": "ac.candidates.0.value",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 12,
+        "terms": [],
+        "sources": []
+      },
+      "ac.shield": {
+        "label": "ac.shield",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "base",
+            "value": "Unarmored"
+          }
+        ],
+        "sources": []
+      },
+      "ac.value": {
+        "label": "ac.value",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 14,
+        "terms": [
+          {
+            "label": "base",
+            "value": "Unarmored"
+          }
+        ],
+        "sources": []
+      },
+      "activations.0.source.level": {
+        "label": "activations.0.source.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "attunement.count": {
+        "label": "Attuned items",
+        "formula": "count of attuned inventory instances",
+        "value": 1,
+        "terms": [
+          {
+            "label": "Inventory",
+            "value": [
+              {
+                "id": "a3f1-quarterstaff",
+                "reference": {
+                  "kind": "weapon",
+                  "id": "quarterstaff"
+                },
+                "name": "Quarterstaff",
+                "quantity": 1,
+                "location": "equipped",
+                "attuned": false,
+                "acquisition": "Starting equipment",
+                "notes": "Carved with the names of former teachers."
+              },
+              {
+                "id": "b7c2-dagger",
+                "reference": {
+                  "kind": "weapon",
+                  "id": "dagger"
+                },
+                "name": "Dagger",
+                "quantity": 2,
+                "location": "carried",
+                "attuned": false,
+                "acquisition": "Starting equipment",
+                "notes": ""
+              },
+              {
+                "id": "c9d4-backpack",
+                "reference": {
+                  "kind": "gear",
+                  "id": "backpack"
+                },
+                "name": "Backpack",
+                "quantity": 1,
+                "location": "equipped",
+                "attuned": false,
+                "acquisition": "Starting equipment",
+                "notes": ""
+              },
+              {
+                "id": "d2e8-ring",
+                "bodyPlacement": "other",
+                "reference": {
+                  "kind": "magic-item",
+                  "id": "ring-of-warding"
+                },
+                "name": "Ring of Warding",
+                "quantity": 1,
+                "location": "equipped",
+                "attuned": true,
+                "acquisition": "Reward from the harbour guild",
+                "grantId": "grant-7c1e9a2b-guardian",
+                "notes": "Warm to the touch near undead."
+              },
+              {
+                "id": "e5f0-potions",
+                "containerId": "pack",
+                "reference": {
+                  "kind": "gear",
+                  "id": "potion-of-healing"
+                },
+                "name": "Potion of Healing",
+                "quantity": 2,
+                "location": "carried",
+                "attuned": false,
+                "acquisition": "Bought in Westgate",
+                "notes": ""
+              },
+              {
+                "id": "f1a7-scroll",
+                "containerId": "pack",
+                "reference": {
+                  "kind": "gear",
+                  "id": "spell-scroll"
+                },
+                "spellId": "haste",
+                "name": "Spell Scroll (Haste)",
+                "quantity": 0,
+                "location": "carried",
+                "attuned": false,
+                "acquisition": "Looted from the cult archive",
+                "notes": "Copy before the next long journey."
+              },
+              {
+                "id": "0b3c-rations",
+                "containerId": "pack",
+                "reference": {
+                  "kind": "gear",
+                  "id": "rations"
+                },
+                "name": "Rations",
+                "quantity": 5,
+                "location": "carried",
+                "attuned": false,
+                "acquisition": "Bought in Westgate",
+                "notes": ""
+              },
+              {
+                "id": "2c8d-journal",
+                "containerId": "chest",
+                "name": "Research journal",
+                "quantity": 1,
+                "location": "stored",
+                "attuned": false,
+                "acquisition": "Written by the character",
+                "notes": "Notes on the sealed vault beneath the observatory.",
+                "weightLb": 2.5
+              }
+            ]
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "feat",
+            "id": "guardian"
+          },
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-arcane-recovery"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-scholar"
+          },
+          {
+            "kind": "gear",
+            "id": "backpack"
+          },
+          {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          },
+          {
+            "kind": "gear",
+            "id": "rations"
+          },
+          {
+            "kind": "gear",
+            "id": "spell-scroll"
+          },
+          {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          },
+          {
+            "kind": "species",
+            "id": "dwarf"
+          },
+          {
+            "kind": "spell",
+            "id": "light"
+          },
+          {
+            "kind": "spell",
+            "id": "message"
+          },
+          {
+            "kind": "spell",
+            "id": "sleep"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          },
+          {
+            "kind": "weapon",
+            "id": "dagger"
+          },
+          {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          }
+        ]
+      },
+      "attunement.limit": {
+        "label": "Attunement capacity",
+        "formula": "maximum of the ruleset limit and unlocked class capacities",
+        "value": 3,
+        "terms": [
+          {
+            "label": "Class progression",
+            "value": [
+              {
+                "classId": "wizard",
+                "hitDie": "d6",
+                "level": 5,
+                "name": "Wizard",
+                "subclass": "evoker"
+              }
+            ]
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "feat",
+            "id": "guardian"
+          },
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-arcane-recovery"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-scholar"
+          },
+          {
+            "kind": "gear",
+            "id": "backpack"
+          },
+          {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          },
+          {
+            "kind": "gear",
+            "id": "rations"
+          },
+          {
+            "kind": "gear",
+            "id": "spell-scroll"
+          },
+          {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          },
+          {
+            "kind": "species",
+            "id": "dwarf"
+          },
+          {
+            "kind": "spell",
+            "id": "light"
+          },
+          {
+            "kind": "spell",
+            "id": "message"
+          },
+          {
+            "kind": "spell",
+            "id": "sleep"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          },
+          {
+            "kind": "weapon",
+            "id": "dagger"
+          },
+          {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          }
+        ]
+      },
+      "bodyPlacement": {
+        "label": "Body placement",
+        "formula": "Authored display organization of equipped inventory instances. Placement grants no bonuses or extra equipment slots and does not limit the number of worn accessories. Armor, shield and attunement rules are evaluated separately.",
+        "value": [
+          {
+            "itemId": "d2e8-ring",
+            "name": "Ring of Warding",
+            "placement": "other"
+          }
+        ],
+        "terms": [
+          {
+            "label": "Ring of Warding",
+            "value": "other",
+            "source": {
+              "kind": "magic-item",
+              "id": "ring-of-warding"
+            },
+            "grantId": "grant-7c1e9a2b-guardian"
+          }
+        ],
+        "sources": [
+          {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          }
+        ]
+      },
+      "carrying": {
+        "label": "Carrying",
+        "formula": "Weight × quantity of equipped and carried items, plus coins when counted, against the Strength score × the ruleset's capacity per point. Items without a known weight are left out.",
+        "value": 22,
+        "terms": [
+          {
+            "label": "Equipped and carried items",
+            "value": 22
+          },
+          {
+            "label": "Stored, not counted",
+            "value": 2.5,
+            "status": "excluded"
+          },
+          {
+            "label": "Capacity: Strength 10 × 15",
+            "value": 150
+          }
+        ],
+        "sources": []
+      },
+      "classes.0.level": {
+        "label": "classes.0.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "concentration": {
+        "label": "Concentration",
+        "formula": "Authored play state. Casting a Concentration spell replaces it; damage records the save DC; keeping or ending it is an explicit command.",
+        "value": {
+          "name": "Sleep",
+          "ref": "sleep",
+          "saveAbility": "CON",
+          "saveBonus": 3,
+          "saveDC": 10
+        },
+        "terms": [
+          {
+            "label": "CON saving throw",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "concentrationSaveBonus": {
+        "label": "concentrationSaveBonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [],
+        "sources": []
+      },
+      "conditionEffects.d20Adjustment": {
+        "label": "D20 roll adjustment",
+        "formula": "Sum of source-declared penalties for active condition levels. Apply once to each D20 Test, including Initiative. This adjustment is not included in printed bonuses or spell save DCs.",
+        "value": -2,
+        "terms": [
+          {
+            "label": "Exhaustion",
+            "value": 1,
+            "source": {
+              "kind": "rule",
+              "id": "table-states"
+            },
+            "status": "active"
+          }
+        ],
+        "sources": [
+          {
+            "kind": "rule",
+            "id": "table-states"
+          }
+        ]
+      },
+      "conditions": {
+        "label": "Conditions",
+        "formula": "Authored conditions are preserved until explicitly changed. Movement restrictions apply to displayed speeds. Apply the separate D20 adjustment to rolls; ability modifiers, printed roll bonuses and spell save DCs remain unchanged. Situational effects and ending conditions require adjudication.",
+        "value": [
+          {
+            "id": "exhaustion",
+            "labelKey": "",
+            "level": 1,
+            "name": "Exhaustion",
+            "reference": {
+              "kind": "rule",
+              "id": "table-states"
+            },
+            "status": "active",
+            "summary": "Synthetic tiered condition.",
+            "terminal": false
+          }
+        ],
+        "terms": [
+          {
+            "label": "Exhaustion",
+            "value": 1,
+            "source": {
+              "kind": "rule",
+              "id": "table-states"
+            },
+            "status": "active"
+          }
+        ],
+        "sources": [
+          {
+            "kind": "rule",
+            "id": "table-states"
+          }
+        ]
+      },
+      "derived.armorClass": {
+        "label": "Armor Class",
+        "formula": "highest eligible AC formula + shield + applicable bonuses",
+        "value": 14,
+        "terms": [
+          {
+            "label": "Available formulas (highest applies)",
+            "value": [
+              {
+                "id": "unarmored",
+                "label": "Unarmored",
+                "value": 12
+              }
+            ]
+          },
+          {
+            "label": "Chosen formula",
+            "value": "Unarmored"
+          },
+          {
+            "label": "Shield",
+            "value": 0
+          },
+          {
+            "label": "activeBonus",
+            "value": 1
+          },
+          {
+            "label": "restrictions",
+            "value": null
+          },
+          {
+            "label": "Ring of Warding (add)",
+            "value": 1,
+            "source": {
+              "kind": "magic-item",
+              "id": "ring-of-warding"
+            },
+            "status": "applied"
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "feat",
+            "id": "guardian"
+          },
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-arcane-recovery"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-scholar"
+          },
+          {
+            "kind": "gear",
+            "id": "backpack"
+          },
+          {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          },
+          {
+            "kind": "gear",
+            "id": "rations"
+          },
+          {
+            "kind": "gear",
+            "id": "spell-scroll"
+          },
+          {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          },
+          {
+            "kind": "species",
+            "id": "dwarf"
+          },
+          {
+            "kind": "spell",
+            "id": "light"
+          },
+          {
+            "kind": "spell",
+            "id": "message"
+          },
+          {
+            "kind": "spell",
+            "id": "sleep"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          },
+          {
+            "kind": "weapon",
+            "id": "dagger"
+          },
+          {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          }
+        ]
+      },
+      "derived.initiative": {
+        "label": "Initiative",
+        "formula": "Dexterity modifier + applicable feature bonuses",
+        "value": 2,
+        "terms": [
+          {
+            "label": "Dexterity modifier",
+            "value": 2
+          },
+          {
+            "label": "Feature bonuses",
+            "value": 0
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "feat",
+            "id": "guardian"
+          },
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-arcane-recovery"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-scholar"
+          },
+          {
+            "kind": "gear",
+            "id": "backpack"
+          },
+          {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          },
+          {
+            "kind": "gear",
+            "id": "rations"
+          },
+          {
+            "kind": "gear",
+            "id": "spell-scroll"
+          },
+          {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          },
+          {
+            "kind": "species",
+            "id": "dwarf"
+          },
+          {
+            "kind": "spell",
+            "id": "light"
+          },
+          {
+            "kind": "spell",
+            "id": "message"
+          },
+          {
+            "kind": "spell",
+            "id": "sleep"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          },
+          {
+            "kind": "weapon",
+            "id": "dagger"
+          },
+          {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          }
+        ]
+      },
+      "derived.maxHp": {
+        "label": "Maximum HP",
+        "formula": "sum of each level's max(minimum gain, hit die result + Constitution modifier) + per-level grants + fixed grants",
+        "value": 42,
+        "terms": [
+          {
+            "label": "Level gains",
+            "value": [
+              {
+                "bonus": 1,
+                "classId": "wizard",
+                "constitution": 2,
+                "die": 6,
+                "gained": 9,
+                "levelId": "4d1f6c2a-level-1",
+                "method": "first level maximum",
+                "minimum": 1,
+                "result": 6
+              },
+              {
+                "bonus": 1,
+                "classId": "wizard",
+                "constitution": 2,
+                "die": 6,
+                "gained": 8,
+                "levelId": "8b0e3f71-level-2",
+                "method": "recorded roll",
+                "minimum": 1,
+                "result": 5
+              },
+              {
+                "bonus": 1,
+                "classId": "wizard",
+                "constitution": 2,
+                "die": 6,
+                "gained": 6,
+                "levelId": "c2a95d40-level-3",
+                "method": "recorded roll",
+                "minimum": 1,
+                "result": 3
+              },
+              {
+                "bonus": 1,
+                "classId": "wizard",
+                "constitution": 2,
+                "die": 6,
+                "gained": 9,
+                "levelId": "f7e21b9c-level-4",
+                "method": "recorded roll",
+                "minimum": 1,
+                "result": 6
+              },
+              {
+                "bonus": 1,
+                "classId": "wizard",
+                "constitution": 2,
+                "die": 6,
+                "gained": 7,
+                "levelId": "1a6d8e33-level-5",
+                "method": "recorded roll",
+                "minimum": 1,
+                "result": 4
+              }
+            ]
+          },
+          {
+            "label": "DM given: Oath of the harbour watch (add)",
+            "value": 3,
+            "grantId": "grant-7c1e9a2b-guardian",
+            "status": "applied"
+          }
+        ],
+        "sources": [
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "species",
+            "id": "dwarf"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          }
+        ]
+      },
+      "derived.passivePerception": {
+        "label": "derived.passivePerception",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 11,
+        "terms": [],
+        "sources": []
+      },
+      "derived.proficiencyBonus": {
+        "label": "Proficiency bonus",
+        "formula": "2 + floor((character level − 1) / 4)",
+        "value": 3,
+        "terms": [
+          {
+            "label": "Character level",
+            "value": 5
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "feat",
+            "id": "guardian"
+          },
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-arcane-recovery"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-scholar"
+          },
+          {
+            "kind": "gear",
+            "id": "backpack"
+          },
+          {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          },
+          {
+            "kind": "gear",
+            "id": "rations"
+          },
+          {
+            "kind": "gear",
+            "id": "spell-scroll"
+          },
+          {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          },
+          {
+            "kind": "species",
+            "id": "dwarf"
+          },
+          {
+            "kind": "spell",
+            "id": "light"
+          },
+          {
+            "kind": "spell",
+            "id": "message"
+          },
+          {
+            "kind": "spell",
+            "id": "sleep"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          },
+          {
+            "kind": "weapon",
+            "id": "dagger"
+          },
+          {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          }
+        ]
+      },
+      "derived.speed": {
+        "label": "Speed",
+        "formula": "species movement + applicable grants and active effects Apply source-declared condition restrictions after other speed effects; zero Speed takes precedence.",
+        "value": 30,
+        "unit": "ft",
+        "terms": [
+          {
+            "label": "Dwarf: speeds",
+            "value": {
+              "walk": 30
+            },
+            "source": {
+              "kind": "species",
+              "id": "dwarf"
+            }
+          },
+          {
+            "label": "Before conditions",
+            "value": 35
+          },
+          {
+            "label": "Exhaustion",
+            "value": 1,
+            "source": {
+              "kind": "rule",
+              "id": "table-states"
+            },
+            "status": "active"
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "feat",
+            "id": "guardian"
+          },
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-arcane-recovery"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-scholar"
+          },
+          {
+            "kind": "gear",
+            "id": "backpack"
+          },
+          {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          },
+          {
+            "kind": "gear",
+            "id": "rations"
+          },
+          {
+            "kind": "gear",
+            "id": "spell-scroll"
+          },
+          {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          },
+          {
+            "kind": "species",
+            "id": "dwarf"
+          },
+          {
+            "kind": "spell",
+            "id": "light"
+          },
+          {
+            "kind": "spell",
+            "id": "message"
+          },
+          {
+            "kind": "spell",
+            "id": "sleep"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          },
+          {
+            "kind": "weapon",
+            "id": "dagger"
+          },
+          {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          },
+          {
+            "kind": "rule",
+            "id": "table-states"
+          }
+        ]
+      },
+      "feats.0.count": {
+        "label": "feats.0.count",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [],
+        "sources": []
+      },
+      "feats.1.count": {
+        "label": "feats.1.count",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [],
+        "sources": []
+      },
+      "features.0.source.level": {
+        "label": "features.0.source.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "level",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "features.1.source.level": {
+        "label": "features.1.source.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "level",
+            "value": 2
+          }
+        ],
+        "sources": []
+      },
+      "flySpeed": {
+        "label": "flySpeed",
+        "formula": "Result of the selected rule and its applicable progression row. Apply source-declared condition restrictions after other speed effects; zero Speed takes precedence.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "Before conditions",
+            "value": 0
+          },
+          {
+            "label": "Exhaustion",
+            "value": 1,
+            "source": {
+              "kind": "rule",
+              "id": "table-states"
+            },
+            "status": "active"
+          }
+        ],
+        "sources": [
+          {
+            "kind": "rule",
+            "id": "table-states"
+          }
+        ]
+      },
+      "hands": {
+        "label": "Hands and grip",
+        "formula": "Owned instance selection and source-declared grip. A suspended off-hand item is carried and contributes no active equipment effects; its attunement allocation is retained. Restoration checks the exact unchanged instance. Turn and action costs are not tracked.",
+        "value": {
+          "grip": "two",
+          "main": {
+            "active": true,
+            "itemId": "a3f1-quarterstaff",
+            "name": "Quarterstaff",
+            "reference": {
+              "kind": "weapon",
+              "id": "quarterstaff"
+            }
+          },
+          "off": {
+            "active": false,
+            "itemId": "",
+            "name": ""
+          },
+          "restoreReason": "",
+          "suspendedOff": {
+            "active": false,
+            "itemId": "b7c2-dagger",
+            "name": "Dagger",
+            "reference": {
+              "kind": "weapon",
+              "id": "dagger"
+            }
+          }
+        },
+        "terms": [],
+        "sources": []
+      },
+      "hp.breakdown.conMod": {
+        "label": "hp.breakdown.conMod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "hp.breakdown.conTotal": {
+        "label": "hp.breakdown.conTotal",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 10,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "hp.breakdown.dice": {
+        "label": "hp.breakdown.dice",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 22,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "hp.breakdown.level": {
+        "label": "hp.breakdown.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "hp.breakdown.miscPerLevel": {
+        "label": "hp.breakdown.miscPerLevel",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "hp.breakdown.miscTotal": {
+        "label": "hp.breakdown.miscTotal",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.0.bonus": {
+        "label": "hp.levels.0.bonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.0.constitution": {
+        "label": "hp.levels.0.constitution",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.0.die": {
+        "label": "hp.levels.0.die",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 6,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.0.gained": {
+        "label": "hp.levels.0.gained",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 9,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.0.minimum": {
+        "label": "hp.levels.0.minimum",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.0.result": {
+        "label": "hp.levels.0.result",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 6,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.1.bonus": {
+        "label": "hp.levels.1.bonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.1.constitution": {
+        "label": "hp.levels.1.constitution",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.1.die": {
+        "label": "hp.levels.1.die",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 6,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.1.gained": {
+        "label": "hp.levels.1.gained",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 8,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.1.minimum": {
+        "label": "hp.levels.1.minimum",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.1.result": {
+        "label": "hp.levels.1.result",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.2.bonus": {
+        "label": "hp.levels.2.bonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.2.constitution": {
+        "label": "hp.levels.2.constitution",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.2.die": {
+        "label": "hp.levels.2.die",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 6,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.2.gained": {
+        "label": "hp.levels.2.gained",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 6,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.2.minimum": {
+        "label": "hp.levels.2.minimum",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.2.result": {
+        "label": "hp.levels.2.result",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 3,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.3.bonus": {
+        "label": "hp.levels.3.bonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.3.constitution": {
+        "label": "hp.levels.3.constitution",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.3.die": {
+        "label": "hp.levels.3.die",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 6,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.3.gained": {
+        "label": "hp.levels.3.gained",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 9,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.3.minimum": {
+        "label": "hp.levels.3.minimum",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.3.result": {
+        "label": "hp.levels.3.result",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 6,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.4.bonus": {
+        "label": "hp.levels.4.bonus",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.4.constitution": {
+        "label": "hp.levels.4.constitution",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.4.die": {
+        "label": "hp.levels.4.die",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 6,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.4.gained": {
+        "label": "hp.levels.4.gained",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 7,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.4.minimum": {
+        "label": "hp.levels.4.minimum",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.levels.4.result": {
+        "label": "hp.levels.4.result",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 4,
+        "terms": [
+          {
+            "label": "die",
+            "value": 6
+          },
+          {
+            "label": "bonus",
+            "value": 1
+          }
+        ],
+        "sources": []
+      },
+      "hp.max": {
+        "label": "hp.max",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 42,
+        "terms": [],
+        "sources": []
+      },
+      "inspiration": {
+        "label": "Inspiration",
+        "formula": "Authored play state. Awarding and spending Inspiration are explicit edits; calculation and rest do not change it.",
+        "value": true,
+        "terms": [],
+        "sources": []
+      },
+      "passives.perception": {
+        "label": "passives.perception",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 11,
+        "terms": [],
+        "sources": []
+      },
+      "play.hp": {
+        "label": "Current HP",
+        "formula": "Recorded play value between zero and effective maximum HP.",
+        "value": 24,
+        "minimum": 0,
+        "maximum": 42,
+        "terms": [
+          {
+            "label": "Effective maximum",
+            "value": 42
+          }
+        ],
+        "sources": []
+      },
+      "play.temporaryHp": {
+        "label": "Temporary HP",
+        "formula": "Separate non-negative play pool; it does not increase maximum HP.",
+        "value": 5,
+        "minimum": 0,
+        "terms": [],
+        "sources": []
+      },
+      "quickUse": {
+        "label": "Quick use",
+        "formula": "Pins reference owned inventory instances. Using one reduces that instance's quantity once; item effects are resolved separately. Stored or depleted items remain pinned. Rest and recalculation never replenish them.",
+        "value": [
+          {
+            "available": true,
+            "itemId": "e5f0-potions",
+            "location": "carried",
+            "name": "Potion of Healing",
+            "quantity": 2,
+            "reason": "",
+            "reference": {
+              "kind": "gear",
+              "id": "potion-of-healing"
+            }
+          }
+        ],
+        "terms": [],
+        "sources": []
+      },
+      "resources.0.max": {
+        "label": "resources.0.max",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "source",
+            "value": {
+              "id": "guardian",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.0.remaining": {
+        "label": "resources.0.remaining",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "source",
+            "value": {
+              "id": "guardian",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.0.source.level": {
+        "label": "resources.0.source.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "resources.0.spent": {
+        "label": "resources.0.spent",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "source",
+            "value": {
+              "id": "guardian",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.1.max": {
+        "label": "resources.1.max",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "die",
+            "value": "d6"
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "class"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.1.remaining": {
+        "label": "resources.1.remaining",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 4,
+        "terms": [
+          {
+            "label": "die",
+            "value": "d6"
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "class"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.1.spent": {
+        "label": "resources.1.spent",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "die",
+            "value": "d6"
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "class"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.2.level": {
+        "label": "resources.2.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "level",
+            "value": 1
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.2.max": {
+        "label": "resources.2.max",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 4,
+        "terms": [
+          {
+            "label": "level",
+            "value": 1
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.2.remaining": {
+        "label": "resources.2.remaining",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 3,
+        "terms": [
+          {
+            "label": "level",
+            "value": 1
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.2.spent": {
+        "label": "resources.2.spent",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "level",
+            "value": 1
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.3.level": {
+        "label": "resources.3.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "level",
+            "value": 2
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.3.max": {
+        "label": "resources.3.max",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 3,
+        "terms": [
+          {
+            "label": "level",
+            "value": 2
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.3.remaining": {
+        "label": "resources.3.remaining",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 3,
+        "terms": [
+          {
+            "label": "level",
+            "value": 2
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.3.spent": {
+        "label": "resources.3.spent",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "level",
+            "value": 2
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.4.level": {
+        "label": "resources.4.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 3,
+        "terms": [
+          {
+            "label": "level",
+            "value": 3
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.4.max": {
+        "label": "resources.4.max",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "level",
+            "value": 3
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.4.remaining": {
+        "label": "resources.4.remaining",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "level",
+            "value": 3
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.4.spent": {
+        "label": "resources.4.spent",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "level",
+            "value": 3
+          },
+          {
+            "label": "source",
+            "value": {
+              "type": "spellcasting"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.5.max": {
+        "label": "resources.5.max",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "source",
+            "value": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.5.remaining": {
+        "label": "resources.5.remaining",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "source",
+            "value": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.5.source.level": {
+        "label": "resources.5.source.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "resources.5.spent": {
+        "label": "resources.5.spent",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "source",
+            "value": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "resources.charge:feat:magic-initiate:mi-spell.max": {
+        "label": "Sleep (free cast)",
+        "formula": "capacity from the granting rule's level/proficiency/ability progression",
+        "value": 1,
+        "terms": [
+          {
+            "label": "Resource rule",
+            "value": {
+              "key": "charge:feat:magic-initiate:mi-spell",
+              "kind": "charge",
+              "max": 1,
+              "name": "Sleep (free cast)",
+              "recharge": [
+                {
+                  "amount": "full",
+                  "on": "long"
+                }
+              ],
+              "remaining": 0,
+              "source": {
+                "id": "magic-initiate",
+                "level": 5,
+                "type": "feat"
+              },
+              "spent": 1
+            }
+          }
+        ],
+        "sources": [
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          }
+        ]
+      },
+      "resources.charge:feat:magic-initiate:mi-spell.remaining": {
+        "label": "Sleep (free cast) remaining",
+        "formula": "effective capacity − recorded spent uses",
+        "value": 0,
+        "terms": [
+          {
+            "label": "Capacity",
+            "value": 1
+          },
+          {
+            "label": "Spent",
+            "value": 1
+          }
+        ],
+        "sources": [
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          }
+        ]
+      },
+      "resources.guardian-pool.max": {
+        "label": "Guardian Pool",
+        "formula": "capacity from the granting rule's level/proficiency/ability progression",
+        "value": 2,
+        "terms": [
+          {
+            "label": "Resource rule",
+            "value": {
+              "key": "guardian-pool",
+              "kind": "pool",
+              "max": 2,
+              "name": "Guardian Pool",
+              "recharge": [
+                {
+                  "amount": "full",
+                  "on": "short"
+                }
+              ],
+              "remaining": 2,
+              "source": {
+                "id": "guardian",
+                "level": 5,
+                "type": "feat"
+              },
+              "spent": 0
+            }
+          }
+        ],
+        "sources": [
+          {
+            "kind": "feat",
+            "id": "guardian"
+          }
+        ]
+      },
+      "resources.guardian-pool.remaining": {
+        "label": "Guardian Pool remaining",
+        "formula": "effective capacity − recorded spent uses",
+        "value": 2,
+        "terms": [
+          {
+            "label": "Capacity",
+            "value": 2
+          },
+          {
+            "label": "Spent",
+            "value": 0
+          }
+        ],
+        "sources": [
+          {
+            "kind": "feat",
+            "id": "guardian"
+          }
+        ]
+      },
+      "resources.hit-dice-d6.max": {
+        "label": "Hit Dice (d6)",
+        "formula": "capacity from the granting rule's level/proficiency/ability progression",
+        "value": 5,
+        "terms": [
+          {
+            "label": "Resource rule",
+            "value": {
+              "die": "d6",
+              "key": "hit-dice-d6",
+              "kind": "hitdice",
+              "max": 5,
+              "name": "Hit Dice (d6)",
+              "recharge": [
+                {
+                  "amount": "full",
+                  "on": "long"
+                }
+              ],
+              "remaining": 4,
+              "source": {
+                "type": "class"
+              },
+              "spent": 1
+            }
+          }
+        ],
+        "sources": [
+          {
+            "kind": "class",
+            "id": "wizard"
+          }
+        ]
+      },
+      "resources.hit-dice-d6.remaining": {
+        "label": "Hit Dice (d6) remaining",
+        "formula": "effective capacity − recorded spent uses",
+        "value": 4,
+        "terms": [
+          {
+            "label": "Capacity",
+            "value": 5
+          },
+          {
+            "label": "Spent",
+            "value": 1
+          }
+        ],
+        "sources": [
+          {
+            "kind": "class",
+            "id": "wizard"
+          }
+        ]
+      },
+      "resources.slot-1.max": {
+        "label": "Spell Slots (1st)",
+        "formula": "capacity from the granting rule's level/proficiency/ability progression",
+        "value": 4,
+        "terms": [
+          {
+            "label": "Resource rule",
+            "value": {
+              "key": "slot-1",
+              "kind": "slot",
+              "level": 1,
+              "max": 4,
+              "name": "Spell Slots (1st)",
+              "recharge": [
+                {
+                  "amount": "full",
+                  "on": "long"
+                }
+              ],
+              "remaining": 3,
+              "source": {
+                "type": "spellcasting"
+              },
+              "spent": 1
+            }
+          }
+        ],
+        "sources": [
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          }
+        ]
+      },
+      "resources.slot-1.remaining": {
+        "label": "Spell Slots (1st) remaining",
+        "formula": "effective capacity − recorded spent uses",
+        "value": 3,
+        "terms": [
+          {
+            "label": "Capacity",
+            "value": 4
+          },
+          {
+            "label": "Spent",
+            "value": 1
+          }
+        ],
+        "sources": [
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          }
+        ]
+      },
+      "resources.slot-2.max": {
+        "label": "Spell Slots (2nd)",
+        "formula": "capacity from the granting rule's level/proficiency/ability progression",
+        "value": 3,
+        "terms": [
+          {
+            "label": "Resource rule",
+            "value": {
+              "key": "slot-2",
+              "kind": "slot",
+              "level": 2,
+              "max": 3,
+              "name": "Spell Slots (2nd)",
+              "recharge": [
+                {
+                  "amount": "full",
+                  "on": "long"
+                }
+              ],
+              "remaining": 3,
+              "source": {
+                "type": "spellcasting"
+              },
+              "spent": 0
+            }
+          }
+        ],
+        "sources": [
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          }
+        ]
+      },
+      "resources.slot-2.remaining": {
+        "label": "Spell Slots (2nd) remaining",
+        "formula": "effective capacity − recorded spent uses",
+        "value": 3,
+        "terms": [
+          {
+            "label": "Capacity",
+            "value": 3
+          },
+          {
+            "label": "Spent",
+            "value": 0
+          }
+        ],
+        "sources": [
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          }
+        ]
+      },
+      "resources.slot-3.max": {
+        "label": "Spell Slots (3rd)",
+        "formula": "capacity from the granting rule's level/proficiency/ability progression",
+        "value": 2,
+        "terms": [
+          {
+            "label": "Resource rule",
+            "value": {
+              "key": "slot-3",
+              "kind": "slot",
+              "level": 3,
+              "max": 2,
+              "name": "Spell Slots (3rd)",
+              "recharge": [
+                {
+                  "amount": "full",
+                  "on": "long"
+                }
+              ],
+              "remaining": 2,
+              "source": {
+                "type": "spellcasting"
+              },
+              "spent": 0
+            }
+          }
+        ],
+        "sources": [
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          }
+        ]
+      },
+      "resources.slot-3.remaining": {
+        "label": "Spell Slots (3rd) remaining",
+        "formula": "effective capacity − recorded spent uses",
+        "value": 2,
+        "terms": [
+          {
+            "label": "Capacity",
+            "value": 2
+          },
+          {
+            "label": "Spent",
+            "value": 0
+          }
+        ],
+        "sources": [
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          }
+        ]
+      },
+      "saves.CHA.mod": {
+        "label": "saves.CHA.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": -1,
+        "terms": [
+          {
+            "label": "mod",
+            "value": -1
+          },
+          {
+            "label": "proficient",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "saves.CHA.total": {
+        "label": "C H A",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": -1,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": -1
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "saves.CON.mod": {
+        "label": "saves.CON.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 2
+          },
+          {
+            "label": "proficient",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "saves.CON.total": {
+        "label": "C O N",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 3,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 2
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          },
+          {
+            "label": "DM given: Oath of the harbour watch (add)",
+            "value": 1,
+            "grantId": "grant-7c1e9a2b-guardian",
+            "status": "applied"
+          }
+        ],
+        "sources": []
+      },
+      "saves.DEX.mod": {
+        "label": "saves.DEX.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 2
+          },
+          {
+            "label": "proficient",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "saves.DEX.total": {
+        "label": "D E X",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 2,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 2
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "saves.INT.mod": {
+        "label": "saves.INT.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 4,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 4
+          },
+          {
+            "label": "proficient",
+            "value": true
+          }
+        ],
+        "sources": []
+      },
+      "saves.INT.total": {
+        "label": "I N T",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 7,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 4
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 1
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          }
+        ]
+      },
+      "saves.STR.mod": {
+        "label": "saves.STR.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 0
+          },
+          {
+            "label": "proficient",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "saves.STR.total": {
+        "label": "S T R",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 0,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "saves.WIS.mod": {
+        "label": "saves.WIS.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "mod",
+            "value": 1
+          },
+          {
+            "label": "proficient",
+            "value": true
+          }
+        ],
+        "sources": []
+      },
+      "saves.WIS.total": {
+        "label": "W I S",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 4,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 1
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 1
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          }
+        ]
+      },
+      "senses.darkvision": {
+        "label": "Darkvision",
+        "formula": "greatest applicable granted range, followed by explicit DM adjustments",
+        "value": 120,
+        "unit": "ft",
+        "terms": [
+          {
+            "label": "Dwarf",
+            "value": 120,
+            "source": {
+              "kind": "species",
+              "id": "dwarf"
+            }
+          },
+          {
+            "label": "DM given: Blessing of the tide shrine (minimum)",
+            "value": 60,
+            "grantId": "grant-91d0f4c3-blessing",
+            "status": "applied"
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "feat",
+            "id": "guardian"
+          },
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-arcane-recovery"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-scholar"
+          },
+          {
+            "kind": "gear",
+            "id": "backpack"
+          },
+          {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          },
+          {
+            "kind": "gear",
+            "id": "rations"
+          },
+          {
+            "kind": "gear",
+            "id": "spell-scroll"
+          },
+          {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          },
+          {
+            "kind": "species",
+            "id": "dwarf"
+          },
+          {
+            "kind": "spell",
+            "id": "light"
+          },
+          {
+            "kind": "spell",
+            "id": "message"
+          },
+          {
+            "kind": "spell",
+            "id": "sleep"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          },
+          {
+            "kind": "weapon",
+            "id": "dagger"
+          },
+          {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          }
+        ]
+      },
+      "skills.acrobatics.mod": {
+        "label": "skills.acrobatics.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "DEX"
+          },
+          {
+            "label": "mod",
+            "value": 2
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.acrobatics.total": {
+        "label": "Acrobatics",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 2,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 2
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "skills.animalHandling.mod": {
+        "label": "skills.animalHandling.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "WIS"
+          },
+          {
+            "label": "mod",
+            "value": 1
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.animalHandling.total": {
+        "label": "Animal Handling",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 1,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 1
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "skills.arcana.mod": {
+        "label": "skills.arcana.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 4,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "INT"
+          },
+          {
+            "label": "mod",
+            "value": 4
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.arcana.total": {
+        "label": "Arcana",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 4,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 4
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "skills.athletics.mod": {
+        "label": "skills.athletics.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "STR"
+          },
+          {
+            "label": "mod",
+            "value": 0
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.athletics.total": {
+        "label": "Athletics",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 0,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "skills.deception.mod": {
+        "label": "skills.deception.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": -1,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "CHA"
+          },
+          {
+            "label": "mod",
+            "value": -1
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.deception.total": {
+        "label": "Deception",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": -1,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": -1
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "skills.history.mod": {
+        "label": "skills.history.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 4,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "INT"
+          },
+          {
+            "label": "mod",
+            "value": 4
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.history.total": {
+        "label": "History",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 4,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 4
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "skills.insight.mod": {
+        "label": "skills.insight.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "WIS"
+          },
+          {
+            "label": "mod",
+            "value": 1
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.insight.total": {
+        "label": "Insight",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 1,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 1
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "skills.intimidation.mod": {
+        "label": "skills.intimidation.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": -1,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "CHA"
+          },
+          {
+            "label": "mod",
+            "value": -1
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.intimidation.total": {
+        "label": "Intimidation",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": -1,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": -1
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "skills.investigation.mod": {
+        "label": "skills.investigation.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 4,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "INT"
+          },
+          {
+            "label": "mod",
+            "value": 4
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.investigation.total": {
+        "label": "Investigation",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 4,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 4
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "skills.medicine.mod": {
+        "label": "skills.medicine.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "WIS"
+          },
+          {
+            "label": "mod",
+            "value": 1
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.medicine.total": {
+        "label": "Medicine",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 1,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 1
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "skills.nature.mod": {
+        "label": "skills.nature.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 4,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "INT"
+          },
+          {
+            "label": "mod",
+            "value": 4
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.nature.total": {
+        "label": "Nature",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 4,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 4
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "skills.perception.mod": {
+        "label": "skills.perception.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "WIS"
+          },
+          {
+            "label": "mod",
+            "value": 1
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.perception.total": {
+        "label": "Perception",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 1,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 1
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "skills.performance.mod": {
+        "label": "skills.performance.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": -1,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "CHA"
+          },
+          {
+            "label": "mod",
+            "value": -1
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.performance.total": {
+        "label": "Performance",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": -1,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": -1
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "skills.persuasion.mod": {
+        "label": "skills.persuasion.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": -1,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "CHA"
+          },
+          {
+            "label": "mod",
+            "value": -1
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.persuasion.total": {
+        "label": "Persuasion",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": -1,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": -1
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "skills.religion.mod": {
+        "label": "skills.religion.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 4,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "INT"
+          },
+          {
+            "label": "mod",
+            "value": 4
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.religion.total": {
+        "label": "Religion",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 4,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 4
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "skills.sleightOfHand.mod": {
+        "label": "skills.sleightOfHand.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "DEX"
+          },
+          {
+            "label": "mod",
+            "value": 2
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.sleightOfHand.total": {
+        "label": "Sleight Of Hand",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 2,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 2
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "skills.stealth.mod": {
+        "label": "skills.stealth.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "DEX"
+          },
+          {
+            "label": "mod",
+            "value": 2
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.stealth.total": {
+        "label": "Stealth",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 2,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 2
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": []
+      },
+      "skills.survival.mod": {
+        "label": "skills.survival.mod",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "ability",
+            "value": "WIS"
+          },
+          {
+            "label": "mod",
+            "value": 1
+          },
+          {
+            "label": "proficient",
+            "value": false
+          },
+          {
+            "label": "expertise",
+            "value": false
+          }
+        ],
+        "sources": []
+      },
+      "skills.survival.total": {
+        "label": "Survival",
+        "formula": "ability modifier + proficiency multiplier × proficiency bonus + feature bonuses",
+        "value": 1,
+        "terms": [
+          {
+            "label": "Ability modifier",
+            "value": 1
+          },
+          {
+            "label": "Proficiency multiplier",
+            "value": 0
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          }
+        ]
+      },
+      "speed": {
+        "label": "speed",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 35,
+        "terms": [],
+        "sources": []
+      },
+      "spellcasting.casterLevel": {
+        "label": "spellcasting.casterLevel",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [],
+        "sources": []
+      },
+      "spellcasting.granted.0.level": {
+        "label": "spellcasting.granted.0.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "level",
+            "value": 0
+          },
+          {
+            "label": "source",
+            "value": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.granted.0.source.level": {
+        "label": "spellcasting.granted.0.source.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.granted.1.level": {
+        "label": "spellcasting.granted.1.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "level",
+            "value": 0
+          },
+          {
+            "label": "source",
+            "value": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.granted.1.source.level": {
+        "label": "spellcasting.granted.1.source.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.granted.2.level": {
+        "label": "spellcasting.granted.2.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "level",
+            "value": 1
+          },
+          {
+            "label": "source",
+            "value": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.granted.2.source.level": {
+        "label": "spellcasting.granted.2.source.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.pendingChoices.0.choose": {
+        "label": "spellcasting.pendingChoices.0.choose",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [
+          {
+            "label": "source",
+            "value": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.pendingChoices.0.source.level": {
+        "label": "spellcasting.pendingChoices.0.source.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.pendingChoices.0.spellLevel": {
+        "label": "spellcasting.pendingChoices.0.spellLevel",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [
+          {
+            "label": "source",
+            "value": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.pendingChoices.1.choose": {
+        "label": "spellcasting.pendingChoices.1.choose",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "source",
+            "value": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.pendingChoices.1.source.level": {
+        "label": "spellcasting.pendingChoices.1.source.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.pendingChoices.1.spellLevel": {
+        "label": "spellcasting.pendingChoices.1.spellLevel",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 1,
+        "terms": [
+          {
+            "label": "source",
+            "value": {
+              "id": "magic-initiate",
+              "level": 5,
+              "type": "feat"
+            }
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.perClass.0.cantripsKnown": {
+        "label": "spellcasting.perClass.0.cantripsKnown",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 4,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          },
+          {
+            "label": "ability",
+            "value": "INT"
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.perClass.0.level": {
+        "label": "spellcasting.perClass.0.level",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          },
+          {
+            "label": "ability",
+            "value": "INT"
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.perClass.0.maxSpellLevel": {
+        "label": "spellcasting.perClass.0.maxSpellLevel",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 3,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          },
+          {
+            "label": "ability",
+            "value": "INT"
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.perClass.0.preparedCount": {
+        "label": "spellcasting.perClass.0.preparedCount",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 9,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          },
+          {
+            "label": "ability",
+            "value": "INT"
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.perClass.0.preparedLimit": {
+        "label": "Prepared spells",
+        "formula": "the class table's prepared spells at this class level",
+        "value": 9,
+        "terms": [
+          {
+            "label": "Class level",
+            "value": 5
+          },
+          {
+            "label": "Prepared",
+            "value": 9
+          }
+        ],
+        "sources": [
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          }
+        ]
+      },
+      "spellcasting.perClass.0.saveDC": {
+        "label": "Spell save DC",
+        "formula": "base + proficiency bonus + spellcasting ability modifier",
+        "value": 15,
+        "terms": [
+          {
+            "label": "Base",
+            "value": 8
+          },
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          },
+          {
+            "label": "INT modifier",
+            "value": 4
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          }
+        ]
+      },
+      "spellcasting.perClass.0.spellAttack": {
+        "label": "Spell attack",
+        "formula": "proficiency bonus + spellcasting ability modifier",
+        "value": 7,
+        "terms": [
+          {
+            "label": "Proficiency bonus",
+            "value": 3
+          },
+          {
+            "label": "INT modifier",
+            "value": 4
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          }
+        ]
+      },
+      "spellcasting.perClass.0.spellbookCapacity": {
+        "label": "spellcasting.perClass.0.spellbookCapacity",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 15,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          },
+          {
+            "label": "ability",
+            "value": "INT"
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.perClass.0.spellbookKnown": {
+        "label": "spellcasting.perClass.0.spellbookKnown",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 14,
+        "terms": [
+          {
+            "label": "level",
+            "value": 5
+          },
+          {
+            "label": "ability",
+            "value": "INT"
+          }
+        ],
+        "sources": []
+      },
+      "spellcasting.slots.0": {
+        "label": "spellcasting.slots.0",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 4,
+        "terms": [],
+        "sources": []
+      },
+      "spellcasting.slots.1": {
+        "label": "spellcasting.slots.1",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 3,
+        "terms": [],
+        "sources": []
+      },
+      "spellcasting.slots.2": {
+        "label": "spellcasting.slots.2",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 2,
+        "terms": [],
+        "sources": []
+      },
+      "storage": {
+        "label": "Storage",
+        "formula": "Named containers group existing inventory instances without creating items or enforcing capacity. Membership does not change carried/stored location, quantity, attunement or quick-use availability. Removing a container requires explicitly unassigning its contents.",
+        "value": [
+          {
+            "id": "pack",
+            "itemIds": [
+              "e5f0-potions",
+              "f1a7-scroll",
+              "0b3c-rations"
+            ],
+            "name": "Backpack"
+          },
+          {
+            "id": "chest",
+            "itemIds": [
+              "2c8d-journal"
+            ],
+            "name": "Chest at the Lantern Inn"
+          }
+        ],
+        "terms": [],
+        "sources": []
+      },
+      "totalLevel": {
+        "label": "totalLevel",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 5,
+        "terms": [],
+        "sources": []
+      },
+      "weaponMastery.slots": {
+        "label": "weaponMastery.slots",
+        "formula": "Result of the selected rule and its applicable progression row.",
+        "value": 0,
+        "terms": [],
+        "sources": []
+      },
+      "weapons.0.attackBonus": {
+        "label": "Weapon attack",
+        "formula": "attack ability modifier + proficiency bonus when proficient + attack bonuses",
+        "value": 0,
+        "terms": [
+          {
+            "label": "STR modifier",
+            "value": 0
+          },
+          {
+            "label": "Applicable proficiency",
+            "value": 0
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "feat",
+            "id": "guardian"
+          },
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-arcane-recovery"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-scholar"
+          },
+          {
+            "kind": "gear",
+            "id": "backpack"
+          },
+          {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          },
+          {
+            "kind": "gear",
+            "id": "rations"
+          },
+          {
+            "kind": "gear",
+            "id": "spell-scroll"
+          },
+          {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          },
+          {
+            "kind": "species",
+            "id": "dwarf"
+          },
+          {
+            "kind": "spell",
+            "id": "light"
+          },
+          {
+            "kind": "spell",
+            "id": "message"
+          },
+          {
+            "kind": "spell",
+            "id": "sleep"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          },
+          {
+            "kind": "weapon",
+            "id": "dagger"
+          },
+          {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          }
+        ]
+      },
+      "weapons.0.damage": {
+        "label": "Weapon damage",
+        "formula": "largest eligible damage die + attack ability modifier + damage bonuses",
+        "value": "1d8",
+        "terms": [
+          {
+            "label": "STR modifier",
+            "value": 0
+          },
+          {
+            "label": "Damage type",
+            "value": "bludgeoning"
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "feat",
+            "id": "guardian"
+          },
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-arcane-recovery"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-scholar"
+          },
+          {
+            "kind": "gear",
+            "id": "backpack"
+          },
+          {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          },
+          {
+            "kind": "gear",
+            "id": "rations"
+          },
+          {
+            "kind": "gear",
+            "id": "spell-scroll"
+          },
+          {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          },
+          {
+            "kind": "species",
+            "id": "dwarf"
+          },
+          {
+            "kind": "spell",
+            "id": "light"
+          },
+          {
+            "kind": "spell",
+            "id": "message"
+          },
+          {
+            "kind": "spell",
+            "id": "sleep"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          },
+          {
+            "kind": "weapon",
+            "id": "dagger"
+          },
+          {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          }
+        ]
+      },
+      "weapons.0.versatileDamage": {
+        "label": "Versatile damage",
+        "formula": "two-handed weapon dice + attack ability modifier + damage bonuses",
+        "value": "1d8",
+        "terms": [
+          {
+            "label": "STR modifier",
+            "value": 0
+          }
+        ],
+        "sources": [
+          {
+            "kind": "background",
+            "id": "acolyte"
+          },
+          {
+            "kind": "class",
+            "id": "wizard"
+          },
+          {
+            "kind": "feat",
+            "id": "guardian"
+          },
+          {
+            "kind": "feat",
+            "id": "magic-initiate"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-arcane-recovery"
+          },
+          {
+            "kind": "feature",
+            "id": "wizard-scholar"
+          },
+          {
+            "kind": "gear",
+            "id": "backpack"
+          },
+          {
+            "kind": "gear",
+            "id": "potion-of-healing"
+          },
+          {
+            "kind": "gear",
+            "id": "rations"
+          },
+          {
+            "kind": "gear",
+            "id": "spell-scroll"
+          },
+          {
+            "kind": "magic-item",
+            "id": "ring-of-warding"
+          },
+          {
+            "kind": "species",
+            "id": "dwarf"
+          },
+          {
+            "kind": "spell",
+            "id": "light"
+          },
+          {
+            "kind": "spell",
+            "id": "message"
+          },
+          {
+            "kind": "spell",
+            "id": "sleep"
+          },
+          {
+            "kind": "subclass",
+            "id": "evoker"
+          },
+          {
+            "kind": "weapon",
+            "id": "dagger"
+          },
+          {
+            "kind": "weapon",
+            "id": "quarterstaff"
+          }
+        ]
+      }
+    },
+    "evidence": [
+      {
+        "reference": {
+          "kind": "background",
+          "id": "acolyte"
+        },
+        "name": "Acolyte",
+        "hash": "d5188cf978f39c236f18ff59ec3a2295921ab22939239eb5e804a9b9edd22a34",
+        "summary": "",
+        "facts": {
+          "abilityScores": [
+            "INT",
+            "WIS",
+            "CHA"
+          ],
+          "id": "acolyte",
+          "kind": "background",
+          "name": "Acolyte",
+          "originFeat": "magic-initiate"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "class",
+          "id": "wizard"
+        },
+        "name": "Wizard",
+        "hash": "f48ade8b4ea7ff4b27469a365160ec064c0f407ff1e2848cd1f0619cc493ad16",
+        "summary": "",
+        "facts": {
+          "hitDie": "d6",
+          "id": "wizard",
+          "kind": "class",
+          "name": "Wizard",
+          "progression": [
+            {
+              "features": [
+                "Arcane Recovery"
+              ],
+              "level": 1,
+              "spellSlots": [
+                2
+              ]
+            },
+            {
+              "features": [
+                "Scholar",
+                "Spell Mastery"
+              ],
+              "level": 2,
+              "spellSlots": [
+                3
+              ]
+            },
+            {
+              "cantripsKnown": 4,
+              "level": 5,
+              "preparedSpells": 9,
+              "spellSlots": [
+                4,
+                3,
+                2
+              ]
+            }
+          ],
+          "savingThrows": [
+            "INT",
+            "WIS"
+          ],
+          "spellcasting": {
+            "ability": "INT",
+            "prepares": "spellbook",
+            "ritual": true,
+            "type": "full"
+          },
+          "subclassLevel": 3
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "feat",
+          "id": "guardian"
+        },
+        "name": "Guardian",
+        "hash": "db6c219e0c1d24ca6574af601f05d186ffec6174a721b2b218dcd0cf7f33bcd7",
+        "summary": "A synthetic feat for steadfast defenders.",
+        "facts": {
+          "grants": {
+            "activations": [
+              {
+                "id": "stance",
+                "modifiers": [
+                  {
+                    "add": 1,
+                    "target": "armorClass"
+                  },
+                  {
+                    "add": 5,
+                    "target": "speed"
+                  }
+                ],
+                "name": "Guardian Stance"
+              }
+            ],
+            "languages": [
+              "giant"
+            ],
+            "resistances": [
+              "fire"
+            ],
+            "resources": [
+              {
+                "fixed": 2,
+                "key": "guardian-pool",
+                "name": "Guardian Pool",
+                "recharge": "short"
+              }
+            ]
+          },
+          "id": "guardian",
+          "kind": "feat",
+          "name": "Guardian",
+          "prerequisites": {
+            "level": 8
+          }
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "feat",
+          "id": "magic-initiate"
+        },
+        "name": "Magic Initiate",
+        "hash": "048c9a6c4c63d298fdb4222993c37408eb8e337cb6711125f9fe0c8d7d4bea40",
+        "summary": "",
+        "facts": {
+          "grants": {
+            "spells": [
+              {
+                "alwaysPrepared": true,
+                "choose": 2,
+                "from": {
+                  "class": [
+                    "wizard"
+                  ]
+                },
+                "id": "mi-cantrips",
+                "spellLevel": 0
+              },
+              {
+                "alwaysPrepared": true,
+                "choose": 1,
+                "free": "1/long",
+                "from": {
+                  "class": [
+                    "wizard"
+                  ]
+                },
+                "id": "mi-spell",
+                "spellLevel": 1
+              }
+            ]
+          },
+          "id": "magic-initiate",
+          "kind": "feat",
+          "name": "Magic Initiate"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "feature",
+          "id": "wizard-arcane-recovery"
+        },
+        "name": "Arcane Recovery",
+        "hash": "34063b66d9cde0e99b4a1ce8cb8422d905054107202d6eef695295073570d64e",
+        "summary": "",
+        "facts": {
+          "classId": "wizard",
+          "id": "wizard-arcane-recovery",
+          "kind": "feature",
+          "level": 1,
+          "name": "Arcane Recovery"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "feature",
+          "id": "wizard-scholar"
+        },
+        "name": "Scholar",
+        "hash": "2a442eb3fc1f0714b5063d598b4f2c6b5c39032b73d2aa9c88a451465ea43548",
+        "summary": "",
+        "facts": {
+          "classId": "wizard",
+          "id": "wizard-scholar",
+          "kind": "feature",
+          "level": 2,
+          "name": "Scholar"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "gear",
+          "id": "backpack"
+        },
+        "name": "Backpack",
+        "hash": "51f2802bf87a0d1d2c4c26b008a09be6ea0f1c5ece626fbb76513fbf137a2641",
+        "summary": "",
+        "facts": {
+          "capacityLb": 30,
+          "id": "backpack",
+          "kind": "gear",
+          "name": "Backpack",
+          "weightLb": 5
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "gear",
+          "id": "potion-of-healing"
+        },
+        "name": "Potion of Healing",
+        "hash": "4c38f8f9e30b4b4a7053dbb40a6f4baf825204abd0477516502f692b431e50af",
+        "summary": "",
+        "facts": {
+          "consumable": true,
+          "id": "potion-of-healing",
+          "kind": "gear",
+          "name": "Potion of Healing",
+          "weightLb": 0.5
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "gear",
+          "id": "rations"
+        },
+        "name": "Rations",
+        "hash": "9b6de2732fb6f9f5b4edf3f187a3c943faca6000335e2c3e23c6ddceffdb8925",
+        "summary": "",
+        "facts": {
+          "id": "rations",
+          "kind": "gear",
+          "name": "Rations",
+          "weightLb": 2
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "gear",
+          "id": "spell-scroll"
+        },
+        "name": "Spell Scroll",
+        "hash": "a426bf38628710c34e127e184fa4605c8a00f34b18e287514e90402714062f4b",
+        "summary": "",
+        "facts": {
+          "id": "spell-scroll",
+          "kind": "gear",
+          "name": "Spell Scroll",
+          "weightLb": 0
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "magic-item",
+          "id": "ring-of-warding"
+        },
+        "name": "Ring of Warding",
+        "hash": "6472b4ed3d71cbf5d34e2ebf3beb671dcd6c947816e66d2021f36918a7c9e21b",
+        "summary": "A synthetic ring that wards its wearer.",
+        "facts": {
+          "attunement": true,
+          "bodyPlacements": [
+            "other"
+          ],
+          "characterEffects": [
+            {
+              "mode": "add",
+              "target": "armorClass",
+              "value": 1
+            }
+          ],
+          "characterMechanics": "complete",
+          "id": "ring-of-warding",
+          "kind": "magic-item",
+          "name": "Ring of Warding"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "rule",
+          "id": "table-states"
+        },
+        "name": "Synthetic condition rules",
+        "book": "test",
+        "hash": "f7f905ce7cecc897da9dcd26f639f54e76a92cb08eb1343cc802f899e51c4c34",
+        "summary": "",
+        "facts": {
+          "book": "test",
+          "conditionDefinitions": [
+            {
+              "id": "poisoned",
+              "maximumLevel": 1,
+              "name": "Poisoned",
+              "summary": "Synthetic condition: disadvantage on attacks and checks."
+            },
+            {
+              "d20PenaltyPerLevel": 2,
+              "id": "exhaustion",
+              "maximumLevel": 6,
+              "name": "Exhaustion",
+              "speedPenaltyPerLevel": 5,
+              "summary": "Synthetic tiered condition.",
+              "terminalLevel": 6
+            },
+            {
+              "endsConcentration": true,
+              "id": "incapacitated",
+              "maximumLevel": 1,
+              "name": "Incapacitated",
+              "summary": "Synthetic condition that ends concentration."
+            }
+          ],
+          "id": "table-states",
+          "kind": "rule",
+          "name": "Synthetic condition rules"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "species",
+          "id": "dwarf"
+        },
+        "name": "Dwarf",
+        "hash": "cbfbc28d720b8975c4ba4ab2d67ed6ea9df70dfeb9fc7071676e91ada1bb38b1",
+        "summary": "",
+        "facts": {
+          "grants": {
+            "hpPerLevel": 1
+          },
+          "id": "dwarf",
+          "kind": "species",
+          "name": "Dwarf",
+          "resistances": [
+            "poison"
+          ],
+          "senses": {
+            "darkvision": 120
+          },
+          "speeds": {
+            "walk": 30
+          }
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "alarm"
+        },
+        "name": "Alarm",
+        "hash": "d4c0760bef1d94a806fd6e0d7861a8019325997f63bd7ccd3524f0dcaf3e22c4",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "alarm",
+          "kind": "spell",
+          "level": 1,
+          "name": "Alarm",
+          "ritual": true,
+          "school": "Abjuration"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "burning-hands"
+        },
+        "name": "Burning Hands",
+        "hash": "731d272bd2701f695be4aa2a8cdca8ba7b548d05b7c8f696e6d69edef920c8f2",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "burning-hands",
+          "kind": "spell",
+          "level": 1,
+          "name": "Burning Hands",
+          "school": "Evocation"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "comprehend-languages"
+        },
+        "name": "Comprehend Languages",
+        "hash": "ff8fd922fc4836207388a40401beb42faaac6da88bfda74fcb16ccbc5aa9d531",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "comprehend-languages",
+          "kind": "spell",
+          "level": 1,
+          "name": "Comprehend Languages",
+          "ritual": true,
+          "school": "Divination"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "detect-magic"
+        },
+        "name": "Detect Magic",
+        "hash": "91dd5df9185121e5bc88b0fb777b57c6eba5b6f9a7e0297f047d62689eb0a68e",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "concentration": true,
+          "id": "detect-magic",
+          "kind": "spell",
+          "level": 1,
+          "name": "Detect Magic",
+          "ritual": true,
+          "school": "Divination"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "feather-fall"
+        },
+        "name": "Feather Fall",
+        "hash": "67eb20f27bd3a24f849c9d323baee932205a853e0fefbcbceb186e7546b55715",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "feather-fall",
+          "kind": "spell",
+          "level": 1,
+          "name": "Feather Fall",
+          "school": "Transmutation"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "find-familiar"
+        },
+        "name": "Find Familiar",
+        "hash": "053a9c7e5b36e1050d86e1aa09da843441033f9347ccc864521df6f9de8c7f16",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "find-familiar",
+          "kind": "spell",
+          "level": 1,
+          "name": "Find Familiar",
+          "ritual": true,
+          "school": "Conjuration"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "fire-bolt"
+        },
+        "name": "Fire Bolt",
+        "hash": "c30e40745dd86fa6f8c991f9bfe1b3d169c266eae17460047512d2d8da169e78",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "fire-bolt",
+          "kind": "spell",
+          "level": 0,
+          "name": "Fire Bolt",
+          "school": "Evocation"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "fireball"
+        },
+        "name": "Fireball",
+        "hash": "34beeedcef92928738ba9496c205214145431d640b3dd17cbd4f6cd7d903b833",
+        "summary": "A synthetic burst of flame used by the sheet fixture.",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "fireball",
+          "kind": "spell",
+          "level": 3,
+          "name": "Fireball",
+          "school": "Evocation"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "grease"
+        },
+        "name": "Grease",
+        "hash": "fa30cbed6bacc3a3cebdade396a8c1e24474813dba2699a1360832899579f7ae",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "grease",
+          "kind": "spell",
+          "level": 1,
+          "name": "Grease",
+          "school": "Conjuration"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "haste"
+        },
+        "name": "Haste",
+        "hash": "81ef014eaea70cc6f1b1aec313c6fe683faf23d65d0db2011dbf1cae22efebeb",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "concentration": true,
+          "id": "haste",
+          "kind": "spell",
+          "level": 3,
+          "name": "Haste",
+          "school": "Transmutation"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "identify"
+        },
+        "name": "Identify",
+        "hash": "85895561ead85a116d88dab62c6d74732a75e40ba53b09b0e43b9ad119c29db8",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "identify",
+          "kind": "spell",
+          "level": 1,
+          "name": "Identify",
+          "ritual": true,
+          "school": "Divination"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "light"
+        },
+        "name": "Light",
+        "hash": "4a3938b3ce52df9d2681f7acead82e65a0d49fcb1bcc7375fd4e5ef3a3e71871",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "light",
+          "kind": "spell",
+          "level": 0,
+          "name": "Light",
+          "school": "Evocation"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "mage-armor"
+        },
+        "name": "Mage Armor",
+        "hash": "a554ce5ff2b910fe0973c040fd384a694d12aa57c7b8b33191487d0a20535e67",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "mage-armor",
+          "kind": "spell",
+          "level": 1,
+          "name": "Mage Armor",
+          "school": "Abjuration"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "mage-hand"
+        },
+        "name": "Mage Hand",
+        "hash": "98f7301ed30d12c7322f307f250e5c2d3b047e008af9609d7df43532a30434fc",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "mage-hand",
+          "kind": "spell",
+          "level": 0,
+          "name": "Mage Hand",
+          "school": "Conjuration"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "magic-missile"
+        },
+        "name": "Magic Missile",
+        "hash": "3e315cb9aaa3c604910539443387ef11013542868523eef164005bf91936bafd",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "magic-missile",
+          "kind": "spell",
+          "level": 1,
+          "name": "Magic Missile",
+          "school": "Evocation"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "message"
+        },
+        "name": "Message",
+        "hash": "a86667112ffd5432a44ec865a47085ceae156f70e0359ae4a9a3c740665c117d",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "message",
+          "kind": "spell",
+          "level": 0,
+          "name": "Message",
+          "school": "Transmutation"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "misty-step"
+        },
+        "name": "Misty Step",
+        "hash": "29b9aca106c00d2791d9a480c4fbc78a9610af81583cda97bbe614e95de17255",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "misty-step",
+          "kind": "spell",
+          "level": 2,
+          "name": "Misty Step",
+          "school": "Conjuration"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "prestidigitation"
+        },
+        "name": "Prestidigitation",
+        "hash": "571bbff2b1b1309651e75935946d2eb02eadb52963ed119950ad2d4fd041d144",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "prestidigitation",
+          "kind": "spell",
+          "level": 0,
+          "name": "Prestidigitation",
+          "school": "Transmutation"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "shield"
+        },
+        "name": "Shield",
+        "hash": "abead2f946426b9c98e8d0c48cf9283e189818a7a298d9cc8246de46cf4a88b7",
+        "summary": "A synthetic reaction ward used by the sheet fixture.",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "shield",
+          "kind": "spell",
+          "level": 1,
+          "name": "Shield",
+          "school": "Abjuration"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "sleep"
+        },
+        "name": "Sleep",
+        "hash": "ae73e2f53d52d0b1781a09f7959896580d8376e83b46da1bee0b9988fd201321",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "concentration": true,
+          "id": "sleep",
+          "kind": "spell",
+          "level": 1,
+          "name": "Sleep",
+          "school": "Enchantment"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "spell",
+          "id": "thunderwave"
+        },
+        "name": "Thunderwave",
+        "hash": "18392312982d1958b2db2b9abdf823451524f3a439c50ca988146d29238442ed",
+        "summary": "",
+        "facts": {
+          "classes": [
+            "wizard"
+          ],
+          "id": "thunderwave",
+          "kind": "spell",
+          "level": 1,
+          "name": "Thunderwave",
+          "school": "Evocation"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "subclass",
+          "id": "evoker"
+        },
+        "name": "Evoker",
+        "hash": "4b3407af5132e3af6397c88169a25b1d0f79a43e38c0b3e3e0fb6fb10bd9c898",
+        "summary": "",
+        "facts": {
+          "classId": "wizard",
+          "id": "evoker",
+          "kind": "subclass",
+          "name": "Evoker"
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "weapon",
+          "id": "dagger"
+        },
+        "name": "Dagger",
+        "hash": "9a0182f2472a4cb0a94173e5ec94d0604678d686383cb2dce85c4ffaa1bfaaa9",
+        "summary": "",
+        "facts": {
+          "category": "simple",
+          "damage": "1d4",
+          "damageType": "piercing",
+          "id": "dagger",
+          "kind": "weapon",
+          "mastery": "Nick",
+          "name": "Dagger",
+          "properties": [
+            "finesse",
+            "light",
+            "thrown"
+          ],
+          "range": "melee",
+          "weightLb": 1
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      },
+      {
+        "reference": {
+          "kind": "weapon",
+          "id": "quarterstaff"
+        },
+        "name": "Quarterstaff",
+        "hash": "ad63083112a30a5c7ffbceea8d16a5a2d553f3b09ea36ace53e7b0ed887cd463",
+        "summary": "",
+        "facts": {
+          "category": "simple",
+          "damage": "1d6",
+          "damageType": "bludgeoning",
+          "id": "quarterstaff",
+          "kind": "weapon",
+          "mastery": "Topple",
+          "name": "Quarterstaff",
+          "properties": [
+            "versatile"
+          ],
+          "range": "melee",
+          "versatileDamage": "1d8",
+          "weightLb": 4
+        },
+        "packageId": "synthetic-rules",
+        "packageGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+        "contentRevision": "content-12"
+      }
+    ],
+    "issues": [
+      {
+        "id": "waived:feat:guardian",
+        "target": "choices",
+        "message": "DM given: Oath of the harbour watch waives this requirement.",
+        "severity": "info",
+        "reference": {
+          "kind": "feat",
+          "id": "guardian"
+        }
+      }
+    ]
+  },
+  "rules": {
+    "engineId": "dnd-engine",
+    "engineVersion": "5.0.0",
+    "engineGeneration": "9c4e1b7a3f5d2086e1c9b4a7d3f6e2058b1a9c7e4d2f6083a5b7c9e1d4f2a6b8",
+    "identity": {
+      "providerAddonId": "synthetic-rules",
+      "providerContractVersion": "3.0.0",
+      "providerGeneration": "4f2c8a61d9b3e7051a6c2f8d4b9e1a7c3d5f0b2e8a4c6d1f9b7e3a5c2d8f0a6b",
+      "contentRevision": "content-12",
+      "rulesetId": "synthetic-dnd-2024",
+      "rulesetVersion": 2,
+      "edition": "2024"
+    }
+  },
+  "operationId": "3f8a2c1e-7b4d-4e9a-b6c0-5d1f2e8a9b74"
+}

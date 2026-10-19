@@ -6,9 +6,13 @@ described below. The core profile, portrait and relationships are host-owned.
 
 ## Schema updates
 
-New optional fields extend schema 5.0.0 without changing its version, but each
-changes the closed schema's hash. Installing such a package goes through the
-host's [guided update confirmation](https://github.com/pjunak/ttrpg-codex/blob/main/docs/SELF_HOSTING.md#add-on-installation):
+Any change to the stored schema, even a new optional field, ships as a new
+`SchemaVersion` with an upgrade ([below](#changing-the-stored-format)).
+`internal/character/stored_format_test.go` pins each released format's schema
+digest and a frozen saved sheet (`testdata/sheet-state-5.0.0.json`), so CI fails
+when the schema changes without a version bump or an older sheet stops loading.
+Installing a changed schema goes through the host's
+[guided update confirmation](https://github.com/pjunak/ttrpg-codex/blob/main/docs/SELF_HOSTING.md#add-on-installation):
 choose **Heal and update** to keep existing characters with their exact JSON
 and document revisions. Old characters do not gain default values. Removal is
 an explicit alternative that clears current sheet saves. Rolling a package back
@@ -27,7 +31,8 @@ Carry them forward instead:
    new `schemaVersion`.
 3. Change the Go types, bump `SchemaVersion` (and the manifest's
    `schemaVersion`), then build. The generated stored schema accepts the
-   current format and every frozen legacy format.
+   current format and every frozen legacy format. Add the new format's schema
+   digest, which the failing guard prints, to `storedFormats`.
 4. Install the update with **Heal and update**: existing sheets still validate,
    so the host keeps them. The worker upgrades each sheet when it loads it and
    saves it in the new format.
@@ -36,7 +41,9 @@ Carry them forward instead:
    release).
 
 Unknown formats still fail without partial normalization; `upgrade_test.go`
-covers chained upgrades and rejection.
+covers chained upgrades and rejection. The frozen 5.0.0 sheet must keep loading
+through the upgrades and validating against the generated schema; never edit
+it to make a change pass.
 
 ## Authored conditions
 
