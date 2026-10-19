@@ -103,18 +103,23 @@ export class CharacterClient {
     this.signal = signal;
     this.subscribe = subscribe;
   }
-  async call(method: string, request: CharacterRequest): Promise<Response> {
+  /** The activation's signal, or both it and `signal` when a caller can cancel earlier. */
+  private until(signal: AbortSignal | undefined): AbortSignal {
+    return signal ? AbortSignal.any([this.signal, signal]) : this.signal;
+  }
+  async call(method: string, request: CharacterRequest, signal?: AbortSignal): Promise<Response> {
     const result = await this.service.call<Response>(
       method,
       { ...request, contractVersion: "character.v3" },
-      { deadlineMs: 30000, signal: this.signal },
+      { deadlineMs: 30000, signal: this.until(signal) },
     );
     if (result.contractVersion !== "character-response.v3" || result.key !== request.key)
       throw new Error("The character service returned an incompatible response.");
     return result;
   }
-  async catalog(kind: string): Promise<CatalogRecord[]> {
+  async catalog(kind: string, signal?: AbortSignal): Promise<CatalogRecord[]> {
     if (!this.engine.available) return [];
+    const until = this.until(signal);
     const result: CatalogRecord[] = [];
     let cursor = "";
     do {
@@ -126,7 +131,7 @@ export class CharacterClient {
           limit: 200,
           ...(cursor ? { cursor } : {}),
         },
-        { deadlineMs: 15000, signal: this.signal },
+        { deadlineMs: 15000, signal: until },
       );
       result.push(...page.records);
       cursor = page.nextCursor ?? "";

@@ -116,7 +116,7 @@ export function defineCharacterElement(
     // instance takes the current runtime; old instances keep their expired one.
     readonly #runtime = runtimes.get(generation)!;
     readonly #session = new CharacterSession({
-      call: (method, request) => this.#runtime.client.call(method, request),
+      call: (method, request, signal) => this.#runtime.client.call(method, request, signal),
       signal: this.#runtime.client.signal,
       view: {
         canEdit: () => this.#context?.host.canEdit === true,
@@ -295,7 +295,7 @@ export function defineCharacterElement(
         ];
         this.#render();
         const results = await Promise.allSettled(
-          kinds.map((kind) => this.#runtime.client.catalog(kind)),
+          kinds.map((kind) => this.#runtime.client.catalog(kind, view.signal)),
         );
         if (!view.current()) return;
         results.forEach((result, index) => {

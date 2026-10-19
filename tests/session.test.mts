@@ -4,7 +4,7 @@ import { blank, type CharacterRequest } from "#web/character-client";
 import { changeGrant } from "#web/character-grant";
 import type { Grant, Inputs, Response, Result, State } from "#web/character-model";
 import type { CharacterPending } from "#web/character-pending";
-import { CharacterSession } from "#web/character-session";
+import { CharacterSession, type ViewHandle } from "#web/character-session";
 import { required } from "./support/helpers.mts";
 
 const policy = { standardArray: [15, 14, 13, 12, 10, 8] };
@@ -79,6 +79,8 @@ interface Call {
   readonly method: string;
   /** The request as it was sent. */
   readonly request: CharacterRequest;
+  /** What can cancel the request besides the add-on stopping. */
+  readonly signal: AbortSignal | undefined;
   answer(response: Response): Promise<void>;
   fail(error: unknown): Promise<void>;
 }
@@ -100,11 +102,12 @@ function sheet(t: TestContext) {
   const calls: Call[] = [],
     events: string[] = [];
   const session = new CharacterSession({
-    call: (method, request) =>
+    call: (method, request, signal) =>
       new Promise<Response>((resolve, reject) => {
         calls.push({
           method,
           request: structuredClone(request),
+          signal,
           answer: async (response) => {
             resolve(response);
             await settle();
@@ -143,14 +146,15 @@ function sheet(t: TestContext) {
     t.mock.timers.tick(250);
   };
   /** Opens a view of the character and answers its read. */
-  const open = async (response: Response, handoff?: unknown): Promise<void> => {
+  const open = async (response: Response, handoff?: unknown): Promise<ViewHandle> => {
     session.connect(handoff);
-    session.begin("hero");
+    const view = session.begin("hero");
     const reading = session.guard(async () => {
       await session.read();
     });
     await (await next("load")).answer(response);
     await reading;
+    return view;
   };
   const saves = (): Call[] => calls.filter((call) => call.method === "save");
   return { session, calls, events, next, edit, open, saves };
@@ -626,6 +630,44 @@ void test("answers that arrive after the view changed are ignored", async (t) =>
   assert.equal(session.state.saved, undefined);
   assert.equal(session.state.saving, false);
   assert.equal(events.length, seen);
+});
+
+void test("a view's reads stop when it ends, but its saves never do", async (t) => {
+  const { session, next, edit, open } = sheet(t);
+  const view = await open(savedAnswer(blank(), 3));
+  assert.equal(view.signal.aborted, false);
+  const refreshing = session.refresh();
+  const read = await next("load");
+  assert.equal(read.signal, view.signal);
+  edit((input) => {
+    input.play.currency.gp = 5;
+  });
+  const save = await next("save");
+  assert.equal(save.signal, undefined);
+
+  // Another character is shown: the old view's reads and catalog fetches stop.
+  session.reset();
+  assert.equal(view.signal.aborted, true);
+  await read.fail(new DOMException("This operation was aborted", "AbortError"));
+  await refreshing;
+  assert.equal(session.state.saved, undefined);
+  assert.equal(session.begin("villain").signal.aborted, false);
+
+  // A read of a view that left the page stops too.
+  session.connect(undefined);
+  const reopened = session.begin("hero");
+  const reading = session.guard(async () => {
+    await session.read();
+  });
+  const reread = await next("load");
+  const message = session.state.message;
+  session.disconnect();
+  assert.equal(reread.signal?.aborted, true);
+  assert.equal(reopened.current(), false);
+  await reread.fail(new DOMException("This operation was aborted", "AbortError"));
+  await reading;
+  // The stopped read reports nothing.
+  assert.equal(session.state.message, message);
 });
 
 void test("pending edits handed over by the host return with their unanswered save", async (t) => {

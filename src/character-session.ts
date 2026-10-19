@@ -19,8 +19,12 @@ import {
 } from "./character-pending.js";
 import { saveBlockers, type RuleNote } from "./character-rule-notes.js";
 
-/** Sends one request to the character worker. */
-export type CharacterCall = (method: string, request: CharacterRequest) => Promise<Response>;
+/** Sends one request to the character worker; `signal` cancels a read. */
+export type CharacterCall = (
+  method: string,
+  request: CharacterRequest,
+  signal?: AbortSignal,
+) => Promise<Response>;
 
 /** What the worker last reported about the saved character. */
 export interface SavedCharacter {
@@ -105,6 +109,8 @@ export interface Loaded {
 
 /** One view of a character, from `begin()` until the next view or disconnection. */
 export interface ViewHandle {
+  /** Aborted when the view ends, so its reads and catalog fetches stop. */
+  readonly signal: AbortSignal;
   /** The view is still the current one. */
   current(): boolean;
 }
@@ -166,6 +172,8 @@ export class CharacterSession {
   #handoff: unknown;
   /** Grows when a view begins or ends; answers from an earlier view are ignored. */
   #epoch = 0;
+  /** Cancels the current view's reads. Saves never use it: their outcome must be known. */
+  #reads = new AbortController();
   #connected = false;
   #saving: Promise<void> | undefined;
   #timer: ReturnType<typeof setTimeout> | undefined;
@@ -204,7 +212,7 @@ export class CharacterSession {
   }
 
   #leave(): void {
-    this.#epoch++;
+    this.#nextView();
     this.#setSaving(undefined);
     this.#state.attempt = undefined;
     this.#state.command = undefined;
@@ -216,8 +224,18 @@ export class CharacterSession {
   begin(key: string): ViewHandle {
     this.#key = key;
     clearTimeout(this.#timer);
-    const epoch = ++this.#epoch;
-    return { current: () => epoch === this.#epoch && this.#connected };
+    const epoch = this.#nextView();
+    return {
+      signal: this.#reads.signal,
+      current: () => epoch === this.#epoch && this.#connected,
+    };
+  }
+
+  /** Ends the current view: its reads stop and later answers are ignored. */
+  #nextView(): number {
+    this.#reads.abort();
+    this.#reads = new AbortController();
+    return ++this.#epoch;
   }
 
   /** A new request for the current saved revision. */
@@ -261,9 +279,9 @@ export class CharacterSession {
     }
   }
 
-  async #send(method: string, request: CharacterRequest): Promise<Response> {
+  async #send(method: string, request: CharacterRequest, signal?: AbortSignal): Promise<Response> {
     const epoch = this.#epoch,
-      response = await this.#call(method, request);
+      response = await this.#call(method, request, signal);
     if (epoch !== this.#epoch || !this.#connected) throw new Error(viewChanged);
     return response;
   }
@@ -292,7 +310,7 @@ export class CharacterSession {
    */
   async read(): Promise<Loaded> {
     const s = this.#state,
-      response = await this.#send("load", { key: this.#key });
+      response = await this.#send("load", { key: this.#key }, this.#reads.signal);
     if (response.status !== "ready" && response.status !== "unavailable")
       throw new Error(response.message);
     const pending = this.#handoff === undefined ? undefined : readCharacterPending(this.#handoff);
@@ -342,7 +360,7 @@ export class CharacterSession {
     if (s.busy || this.#saving || s.dirty || s.command || !s.saved) return;
     const version = s.changeVersion;
     try {
-      const response = await this.#send("load", { key: this.#key });
+      const response = await this.#send("load", { key: this.#key }, this.#reads.signal);
       const saved = s.saved;
       if (
         !saved ||
