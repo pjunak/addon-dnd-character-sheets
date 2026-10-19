@@ -1,4 +1,4 @@
-import { grantForm } from "./character-grant.js";
+import { changeGrant, grantForm } from "./character-grant.js";
 import { comparisonView, previewProblems } from "./character-comparison.js";
 import { translator } from "./character-locale.js";
 import { feedbackMessage } from "./character-feedback.js";
@@ -1638,28 +1638,36 @@ export function defineCharacterElement(
     }
     #grants(): HTMLElement {
       const root = rulesTarget(panel(this.#t("DM given")), "grants");
-      // Like play commands, grant commands wait until changed rules are adopted.
-      const blocked = !this.#access.command;
-      for (const grant of this.#response?.state?.inputs.grants ?? []) {
+      // Like play commands, a new grant waits until changed rules are adopted.
+      // Existing grants can still be revoked or amended to repair the character.
+      const { edit, command } = this.#access;
+      for (const grant of this.#input.grants) {
         root.append(el("p", grant.name + " · " + grant.reason));
         if (grant.active && this.#response?.role === "dm")
           root.append(
-            button(this.#t("Amend {0}", [grant.name]), () => this.#grant(grant), blocked),
-            button(
-              this.#t("Revoke {0}", [grant.name]),
-              () =>
-                this.#perform({
-                  ...this.#base("revoke-grant"),
-                  grantId: grant.id,
-                  inputs: structuredClone(this.#input),
-                }),
-              blocked,
-            ),
+            button(this.#t("Amend {0}", [grant.name]), () => this.#grant(grant), !edit),
+            button(this.#t("Revoke {0}", [grant.name]), () => this.#revoke(grant), !edit),
           );
       }
       if (this.#response?.role === "dm")
-        root.append(button(this.#t("Give a DM grant"), () => this.#grant(), blocked));
+        root.append(button(this.#t("Give a DM grant"), () => this.#grant(), !command));
       return root;
+    }
+    #revoke(grant: Grant): void {
+      // Under changed rules the revocation waits with the other edits; adopting
+      // the rules saves it.
+      if (this.#response?.rulesChanged) {
+        if (changeGrant(this.#input, grant.id)) {
+          this.#changed();
+          this.#render();
+        }
+        return;
+      }
+      void this.#perform({
+        ...this.#base("revoke-grant"),
+        grantId: grant.id,
+        inputs: structuredClone(this.#input),
+      });
     }
     #grant(previous?: Grant): void {
       this.#open(
@@ -1670,6 +1678,15 @@ export function defineCharacterElement(
           this.#catalogs.get("feat") ?? [],
           previous,
           async (grant) => {
+            // Under changed rules an amendment waits with the other edits;
+            // adopting the rules saves it.
+            if (previous && this.#response?.rulesChanged) {
+              if (!changeGrant(this.#input, previous.id, grant))
+                return this.#feedback("The active grant to amend was not found.");
+              this.#changed();
+              this.#dialog?.close();
+              return "";
+            }
             const request = {
               ...this.#base(previous ? "amend-grant" : "grant"),
               inputs: structuredClone(this.#input),

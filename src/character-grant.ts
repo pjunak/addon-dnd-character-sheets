@@ -14,6 +14,24 @@ import {
 } from "./character-ui.js";
 
 /**
+ * Revokes (without `amended`) or amends an existing DM grant in pending input,
+ * moving its item link as the worker's grant commands do. While changed rules
+ * wait for adoption, this is how a DM repairs a grant: the adoption saves it,
+ * and the worker records who amended it and when.
+ */
+export function changeGrant(input: Inputs, id: string, amended?: Grant): boolean {
+  const index = input.grants.findIndex((grant) => grant.id === id);
+  if (index < 0) return false;
+  if (amended) input.grants[index] = { ...structuredClone(amended), id };
+  else input.grants.splice(index, 1);
+  for (const item of input.play.inventory) {
+    if (item.grantId === id) delete item.grantId;
+    if (amended?.itemId && item.id === amended.itemId) item.grantId = id;
+  }
+  return true;
+}
+
+/**
  * The same typed contribution editor creates and amends character exceptions.
  * `submit` answers why the grant could not be applied, or "" when it was; the
  * form keeps the DM's input and shows the reason.

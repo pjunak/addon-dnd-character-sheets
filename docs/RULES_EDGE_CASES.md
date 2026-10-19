@@ -291,6 +291,14 @@ links owned by that grant. Revocation also removes those links without changing
 item quantities, locations, notes or other grants. Rejected or unavailable
 amendments return the unchanged saved snapshot and never write a revision.
 
+While changed rules wait for adoption, a DM can still revoke or amend existing
+grants, for example one naming a record the new sources no longer provide. The
+change joins the pending edits instead of running as a command: its autosave
+answers `rules-changed`, and adopting the rules saves it. The worker accepts
+grant changes in a DM's `build` or `adopt-rules` input only then and only for
+existing grants, and records amendments as `amend-grant` does (actor, time,
+required reason, item link). A new grant waits for the adoption.
+
 Create and amend share the same form. Effect rows retain their controls and
 stable field identities as other rows change. Adding a row focuses its target;
 removing one focuses the next row, previous row, or Add effect. Each group has a
@@ -503,7 +511,8 @@ name, summary and hash. This preserves readable spell labels without a provider.
 Loading never adopts changed rules. Tools provides explicit adoption. Until
 then, Builder, spell and other authored edits stay available so a character the
 new rules reject can be repaired; their autosaves answer `rules-changed` and keep
-the input for the adoption. Play and DM grant commands wait for it.
+the input for the adoption; a DM's grant revocations and amendments do too.
+Play commands and new DM grants wait for it.
 A malformed response, incompatible contract version or broker validation failure
 on load returns the unchanged saved state as unavailable. Provider validation
 errors on edits remain errors; they cannot masquerade as a successful save.

@@ -91,6 +91,7 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 			return nil, err
 		}
 	}
+	carriesGrants := (request.Operation == "build" || request.Operation == "adopt-rules") && state != nil && !equalGrants(state.Inputs.Grants, input.Grants)
 	if method != "load" || input.Play.AsOf == "" {
 		input.Play.AsOf = c.now().UTC().Format(time.RFC3339)
 	}
@@ -184,6 +185,11 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 	response.Evaluation = &evaluation.Evaluation
 	response.Policy = evaluation.Policy
 	response.RulesChanged = state != nil && !reflect.DeepEqual(state.Rules, rules)
+	// Grant changes travel with edits only until changed rules are adopted;
+	// otherwise they need their own commands.
+	if carriesGrants && !response.RulesChanged {
+		return nil, failure(workerrpc.KindUnauthorized, "DM grants require a DM grant command.")
+	}
 	if method == "load" || method == "evaluate" {
 		return response, nil
 	}
@@ -353,7 +359,15 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 			grants = base.Inputs.Grants
 		}
 		if !equalGrants(grants, input.Grants) {
-			return input, failure(workerrpc.KindUnauthorized, "DM grants require a DM grant command.")
+			// A DM's revocations and amendments can travel with pending edits
+			// while changed rules wait for adoption; HandleRPC refuses them
+			// once the rules are current.
+			if meta.Actor.Role != "dm" || (r.Operation != "build" && r.Operation != "adopt-rules") {
+				return input, failure(workerrpc.KindUnauthorized, "DM grants require a DM grant command.")
+			}
+			if err := c.carryGrantChanges(meta, grants, &input); err != nil {
+				return input, err
+			}
 		}
 	}
 	if r.Operation != "import" {
@@ -366,6 +380,44 @@ func (c *Coordinator) propose(ctx context.Context, meta *workerrpc.Meta, r Reque
 		}
 	}
 	return input, nil
+}
+
+// carryGrantChanges checks the grant revocations and amendments a DM's pending
+// edits carry, and records them as revoke-grant and amend-grant do. A new
+// grant still needs its own command.
+func (c *Coordinator) carryGrantChanges(meta *workerrpc.Meta, saved []model.Grant, input *model.Inputs) error {
+	previous := map[string]model.Grant{}
+	for _, grant := range saved {
+		previous[grant.ID] = grant
+	}
+	kept := map[string]bool{}
+	for index := range input.Grants {
+		grant := &input.Grants[index]
+		old, existed := previous[grant.ID]
+		if !existed || kept[grant.ID] {
+			return failure(workerrpc.KindUnauthorized, "DM grants require a DM grant command.")
+		}
+		kept[grant.ID] = true
+		if reflect.DeepEqual(old, *grant) {
+			continue
+		}
+		if !old.Active {
+			return failure(workerrpc.KindNotFound, "The active grant to amend was not found.")
+		}
+		if strings.TrimSpace(grant.Reason) == "" {
+			return failure(workerrpc.KindInvalidRequest, "Explain why this DM grant was given.")
+		}
+		grant.ActorID = meta.Actor.ID
+		grant.GrantedAt = c.now().UTC().Format(time.RFC3339)
+		grant.Active = true
+		linkGrantItem(input, grant.ID, grant.ItemID)
+	}
+	for _, grant := range saved {
+		if !kept[grant.ID] {
+			linkGrantItem(input, grant.ID, "")
+		}
+	}
+	return nil
 }
 
 // Decode into a fresh value: unmarshalling over existing slices and maps can

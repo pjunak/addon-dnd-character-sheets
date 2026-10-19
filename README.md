@@ -174,10 +174,11 @@ status. Transfers use `dnd-character.v2` / schema 5.0.0 and contain the current
 character only. Changed installed rules require explicit adoption. If an
 autosave discovers changed rules, **Review changed rules** opens Tools; explicit
 adoption can save the pending edits together with the new rules, and removes
-(and lists) saved selections those rules no longer allow. Builder edits stay
-available until then, so the character can be repaired first. Conflicts and
-uncertain requests retain their recovery guards. Without compatible rules,
-saved values, export and printing remain usable.
+(and lists) saved selections those rules no longer allow. Builder edits and a
+DM's grant revocations and amendments stay available until then, so the
+character can be repaired first. Conflicts and uncertain requests retain their
+recovery guards. Without compatible rules, saved values, export and printing
+remain usable.
 
 The sheet is limited to 1,120 px. The host shows no visible character heading;
 the sheet shows the name in each tab's top row. Compact uses tighter ability
