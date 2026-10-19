@@ -219,7 +219,9 @@ engine's [public contract](../addon-dnd-engine/contract/README.md), and the
 
 - `internal/character`: authentication, evaluation, current writes and import review.
 - `src/character-client.ts`: service calls, current transfers and conflict merging.
-- `src/character-element.ts`: autosave queue and workspace lifetime.
+- `src/character-session.ts`: the save session: automatic saves, commands, retries,
+  the pending handoff and cancelling a view's loads.
+- `src/character-element.ts`: workspace lifetime, rendering, dialogs and focus.
 - `src/character-build.ts` and `character-builder-nav.ts`: Builder controls and tabs.
 - `src/character-sheet.ts`: direct play controls and calculated display.
 - Go types generate schemas; the owning build generates web assets and locales.

@@ -34,6 +34,9 @@ friendly and the code clear. Old formats and extra hardening are low priority.
 - `src/character-client.ts` owns browser service calls, transfer and conflict
   merging. Rules-engine calls stay serializable and versioned; never pick a
   provider by add-on ID.
+- `src/character-session.ts` owns save state (autosave, commands, retries,
+  handoff). It never touches the DOM, so `tests/session.test.mts` drives it
+  with a fake worker.
 - Without compatible rules, saved projections, print and export keep working;
   mechanical changes need rules. There is no manual stat fallback.
 - Current HP, inventory, currency, resources, spells and item notes are authored
