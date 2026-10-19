@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { blank } from "#web/character-client";
-import { readCharacterPending } from "#web/character-pending";
+import { readCharacterPending, sheetAccess } from "#web/character-pending";
 
 function pending() {
   const inputs = blank(),
@@ -71,4 +71,27 @@ void test("pending recovery rejects incompatible versions, identities, requests 
 void test("Equipment navigation survives the host-owned pending handoff", () => {
   const original = { ...pending(), tab: "equipment" };
   assert.deepEqual(readCharacterPending(original), original);
+});
+
+void test("changed rules allow repairing edits, while commands wait for the adoption", () => {
+  assert.deepEqual(sheetAccess(true, { status: "ready", rulesChanged: true }), {
+    edit: true,
+    command: false,
+  });
+  assert.deepEqual(sheetAccess(true, { status: "invalid", rulesChanged: true }), {
+    edit: true,
+    command: false,
+  });
+  assert.deepEqual(sheetAccess(true, { status: "ready", rulesChanged: false }), {
+    edit: true,
+    command: true,
+  });
+  assert.deepEqual(sheetAccess(true, { status: "unavailable", rulesChanged: false }), {
+    edit: false,
+    command: false,
+  });
+  assert.deepEqual(sheetAccess(false, { status: "ready", rulesChanged: true }), {
+    edit: false,
+    command: false,
+  });
 });

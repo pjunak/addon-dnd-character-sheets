@@ -109,24 +109,13 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 		response.Message = "Compatible rules are unavailable. The saved character remains readable, printable and exportable."
 		return response, nil
 	}
-	// A reduced maximum and its current-HP correction are saved atomically.
-	// Increasing maximum HP never silently heals the character.
-	if state != nil && (request.Operation == "build" || request.Operation == "grant" || request.Operation == "amend-grant" || request.Operation == "revoke-grant" || request.Operation == "adopt-rules") {
-		if derived, ok := evaluation.Evaluation.Sheet["derived"].(map[string]any); ok {
-			if maximum, ok := derived["maxHp"].(float64); ok && maximum >= 0 && input.Play.HP > int(maximum) {
-				input.Play.HP = int(maximum)
-				evaluation, rules, err = c.evaluate(ctx, rpc.Meta, input, nil)
-				if err != nil {
-					return nil, err
-				}
-			}
-		}
-	}
-	// Structural edits can withdraw earlier grants. Remove only previously
-	// saved selections that the engine now marks as unavailable; a newly
-	// supplied illegal option is still rejected.
-	repairChoices := request.Operation == "build" || request.Operation == "amend-grant" || request.Operation == "revoke-grant"
+	// Structural edits and newly adopted rules can withdraw earlier grants.
+	// Remove only previously saved selections that the engine now marks as
+	// unavailable, and report them; a newly supplied illegal option is still
+	// rejected.
+	repairChoices := request.Operation == "build" || request.Operation == "amend-grant" || request.Operation == "revoke-grant" || request.Operation == "adopt-rules"
 	if repairChoices && state != nil {
+		proposed := cloneInputs(input)
 		// Each pass removes at least one saved selection, so dependent grants
 		// settle without an arbitrary depth limit.
 		for {
@@ -156,6 +145,21 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 			evaluation, rules, err = c.evaluate(ctx, rpc.Meta, input, nil)
 			if err != nil {
 				return nil, err
+			}
+		}
+		response.Withdrawn = withdrawn(proposed, input)
+	}
+	// A reduced maximum and its current-HP correction are saved atomically,
+	// after any withdrawal that lowered it. Increasing maximum HP never
+	// silently heals the character.
+	if state != nil && (request.Operation == "build" || request.Operation == "grant" || request.Operation == "amend-grant" || request.Operation == "revoke-grant" || request.Operation == "adopt-rules") {
+		if derived, ok := evaluation.Evaluation.Sheet["derived"].(map[string]any); ok {
+			if maximum, ok := derived["maxHp"].(float64); ok && maximum >= 0 && input.Play.HP > int(maximum) {
+				input.Play.HP = int(maximum)
+				evaluation, rules, err = c.evaluate(ctx, rpc.Meta, input, nil)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
@@ -466,6 +470,25 @@ func decode(body []byte, out any) error {
 		return errors.New("unexpected trailing JSON")
 	}
 	return nil
+}
+
+// withdrawn lists the saved selections a repair removed. Choices are listed
+// one by one; the other repaired selections are map entries.
+func withdrawn(before, after model.Inputs) []Difference {
+	result := []Difference{}
+	kept := map[string]bool{}
+	for _, choice := range after.Build.Choices {
+		kept[fmt.Sprintf("%s#%d", choice.ID, choice.Slot)] = true
+	}
+	for _, choice := range before.Build.Choices {
+		if !kept[fmt.Sprintf("%s#%d", choice.ID, choice.Slot)] {
+			var value any
+			_ = json.Unmarshal(choice.Value, &value)
+			result = append(result, Difference{Path: "/inputs/build/choices/" + choice.ID, Before: value})
+		}
+	}
+	before.Build.Choices, after.Build.Choices = nil, nil
+	return append(result, diff(&State{Inputs: before}, &State{Inputs: after})...)
 }
 func randomID() (string, error) {
 	value := make([]byte, 24)

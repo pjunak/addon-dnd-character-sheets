@@ -162,12 +162,16 @@ limits, with correctable local errors kept inside the dialog. Print uses the
 saved projection and includes origin, class/level and currency by default.
 
 Without compatible rules, saved values, printing and export remain usable.
-Changed rules require explicit adoption in Tools before mechanical edits. When
+Changed rules require explicit adoption in Tools before anything is saved.
+Builder and other edits stay open meanwhile, so a character the new rules
+reject can be repaired; play actions and DM grants wait for the adoption. When
 an autosave discovers the change, **Review changed rules** opens that action
 without discarding the pending input. **Adopt rules and save pending changes**
 saves both deliberately, using the opening revision; another editor's changes
-still produce a conflict. A successful acknowledgment re-enables editing, and
-a lost acknowledgment retries the exact adoption rather than a fresh save.
+still produce a conflict. Adoption removes saved selections the new rules no
+longer allow and lists them in the status. A successful acknowledgment
+re-enables play, and a lost acknowledgment retries the exact adoption rather
+than a fresh save.
 
 <a id="implementation-sequence-and-ownership"></a>
 <a id="verification-result"></a>

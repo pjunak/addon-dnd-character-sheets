@@ -173,7 +173,9 @@ empty group. Saving-throw shields show and name their saved training state.
 status. Transfers use `dnd-character.v2` / schema 5.0.0 and contain the current
 character only. Changed installed rules require explicit adoption. If an
 autosave discovers changed rules, **Review changed rules** opens Tools; explicit
-adoption can save the pending edits together with the new rules. Conflicts and
+adoption can save the pending edits together with the new rules, and removes
+(and lists) saved selections those rules no longer allow. Builder edits stay
+available until then, so the character can be repaired first. Conflicts and
 uncertain requests retain their recovery guards. Without compatible rules,
 saved values, export and printing remain usable.
 

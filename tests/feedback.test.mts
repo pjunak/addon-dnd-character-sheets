@@ -76,6 +76,14 @@ void test("rule feedback preserves engine values and performs no calculation", (
     assert.equal(feedbackMessage(source, "cs"), expected);
 });
 
+void test("status, dialog and review explanations read in Czech", () => {
+  for (const source of [
+    "The current rules no longer allow these saved selections, so they were removed:",
+    "The rules changed. Adopt them to save edits and use play actions.",
+  ])
+    assert.notEqual(feedbackMessage(source, "cs"), source, source);
+});
+
 void test("feedback never interpolates or translates captured authored and source values", () => {
   const value = "Saved and Mira {0} <em>Žár</em>\n$&";
   for (const [prefix, suffix, translatedPrefix, translatedSuffix] of [

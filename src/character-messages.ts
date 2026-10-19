@@ -432,7 +432,7 @@ export const catalogs = {
     "The installed rules or allowed sources changed. Review and adopt them in Build before playing.": "The installed rules or allowed sources changed. Review and adopt them in Build before playing.",
     "The latest saved character revision was loaded.": "The latest saved character revision was loaded.",
     "The rules catalog is too large to browse in this view.": "The rules catalog is too large to browse in this view.",
-    "The rules changed. Adopt them to continue editing.": "The rules changed. Adopt them to continue editing.",
+    "The rules changed. Adopt them to save edits and use play actions.": "The rules changed. Adopt them to save edits and use play actions.",
     "These revisions have the same character values and rules.": "These revisions have the same character values and rules.",
     "This character file exceeds the import limit.": "This character file exceeds the import limit.",
     "This character snapshot exceeds the storage limit. Reduce authored notes or inventory before committing.": "This character snapshot exceeds the storage limit. Reduce authored notes or inventory before committing.",
@@ -941,7 +941,8 @@ export const catalogs = {
     "Weight": "Weight",
     "{0} in total": "{0} in total",
     "One fewer {0}": "One fewer {0}",
-    "One more {0}": "One more {0}"
+    "One more {0}": "One more {0}",
+    "The current rules no longer allow these saved selections, so they were removed:": "The current rules no longer allow these saved selections, so they were removed:"
   },
   "cs": {
     "Hands and grip": "Ruce a úchop",
@@ -1375,7 +1376,7 @@ export const catalogs = {
     "The installed rules or allowed sources changed. Review and adopt them in Build before playing.": "Instalovaná pravidla nebo povolené zdroje se změnily. Před hraním je zkontrolujte a přijměte v Tvorbě.",
     "The latest saved character revision was loaded.": "Byla načtena poslední uložená revize postavy.",
     "The rules catalog is too large to browse in this view.": "Katalog pravidel je pro toto zobrazení příliš velký.",
-    "The rules changed. Adopt them to continue editing.": "Pravidla se změnila. Pro další úpravy je nejprve přijměte.",
+    "The rules changed. Adopt them to save edits and use play actions.": "Pravidla se změnila. Úpravy se uloží a herní akce se zpřístupní, až je přijmete.",
     "These revisions have the same character values and rules.": "Tyto revize mají stejné hodnoty postavy a pravidla.",
     "This character file exceeds the import limit.": "Soubor postavy překračuje limit importu.",
     "This character snapshot exceeds the storage limit. Reduce authored notes or inventory before committing.": "Snímek postavy překračuje limit úložiště. Před uložením zkraťte poznámky nebo inventář.",
@@ -1884,6 +1885,7 @@ export const catalogs = {
     "Weight": "Váha",
     "{0} in total": "celkem {0}",
     "One fewer {0}": "O jeden méně: {0}",
-    "One more {0}": "O jeden více: {0}"
+    "One more {0}": "O jeden více: {0}",
+    "The current rules no longer allow these saved selections, so they were removed:": "Současná pravidla tyto uložené volby už nepovolují, proto byly odebrány:"
   }
 } as const;

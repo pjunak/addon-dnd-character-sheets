@@ -213,6 +213,7 @@ export interface Response {
   token?: string;
   expiresAt?: string;
   rulesChanged: boolean;
+  withdrawn?: Array<Difference>;
 }
 
 export interface Result {

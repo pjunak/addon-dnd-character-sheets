@@ -63,6 +63,9 @@ type Response struct {
 	Token           string         `json:"token,omitempty"`
 	ExpiresAt       string         `json:"expiresAt,omitempty"`
 	RulesChanged    bool           `json:"rulesChanged"`
+	// Withdrawn lists the saved selections this change removed because the
+	// rules no longer allow them.
+	Withdrawn []Difference `json:"withdrawn,omitempty"`
 }
 type Difference struct {
 	Path   string `json:"path"`

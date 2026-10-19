@@ -232,15 +232,18 @@ Point buy, granted budgets, source choices and class prerequisites come from the
 engine. UI controls prevent overspending and duplicate selections; server
 validation also protects against stale or forged requests.
 
-Changing an earlier origin or level, or amending/revoking a DM grant, removes only previously saved selections
-that the Engine identifies as unavailable choices, ineligible options or slots
-beyond the new choice count. Stable issue IDs identify the exact slot; valid
-siblings and newly edited replacements survive. Dependent withdrawals settle
-until no more saved selections are removed. Newly supplied illegal choices are
-rejected, and other rule violations remain visible for deliberate repair. Lower maximum
-HP clamps current HP; raising the maximum never heals. Other authored play state
-is preserved unless explicitly changed. Amending/revoking a DM grant replaces or
-removes its current entry, without retaining superseded grants.
+Changing an earlier origin or level, amending/revoking a DM grant, or adopting
+changed rules removes only previously saved selections that the Engine
+identifies as unavailable choices, ineligible options or slots beyond the new
+choice count. Stable issue IDs identify the exact slot; valid siblings and newly
+edited replacements survive. Dependent withdrawals settle until no more saved
+selections are removed. Newly supplied illegal choices are rejected, and other
+rule violations remain visible for deliberate repair. The save response lists
+the removed selections (`withdrawn`) and the sheet shows them in its status.
+Once withdrawals settle, a lower maximum HP clamps current HP; raising the
+maximum never heals. Other authored play state is preserved unless explicitly
+changed. Amending/revoking a DM grant replaces or removes its current entry,
+without retaining superseded grants.
 
 The browser serializes and coalesces pending edits. Independent concurrent fields
 can rebase automatically; overlapping fields/arrays remain pending with a visible
@@ -495,7 +498,10 @@ stored; mechanical changes stay disabled. Spell, sheet and projection details sh
 one adapter for the host's closed saved-evidence contract. Stored metadata and
 spell facts stay in the projection; detail controls receive only their reference,
 name, summary and hash. This preserves readable spell labels without a provider.
-Loading never adopts changed rules. Tools provides explicit adoption.
+Loading never adopts changed rules. Tools provides explicit adoption. Until
+then, Builder, spell and other authored edits stay available so a character the
+new rules reject can be repaired; their autosaves answer `rules-changed` and keep
+the input for the adoption. Play and DM grant commands wait for it.
 A malformed response, incompatible contract version or broker validation failure
 on load returns the unchanged saved state as unavailable. Provider validation
 errors on edits remain errors; they cannot masquerade as a successful save.

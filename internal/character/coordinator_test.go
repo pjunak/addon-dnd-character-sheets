@@ -44,6 +44,7 @@ func (data *memoryData) Transact(_ context.Context, _ *workerrpc.Meta, mutations
 
 type fakeEngine struct {
 	inspect     func(model.Inputs) []model.Issue
+	derived     func(model.Inputs) map[string]any
 	generation  string
 	unavailable bool
 	invalid     bool
@@ -56,6 +57,9 @@ func (engine *fakeEngine) Call(_ context.Context, _ *workerrpc.Meta, call worker
 	params := call.Params.(map[string]any)
 	input := params["inputs"].(model.Inputs)
 	result := evaluated{ContractVersion: "rules-character-response.v2", Identity: map[string]any{"rulesetId": "synthetic"}, Policy: map[string]any{}, Evaluation: model.Result{ContractVersion: model.ContractVersion, Inputs: input, Ready: !engine.invalid, Sheet: map[string]any{"gold": input.Play.Currency["gp"]}, Evidence: []model.Evidence{}, Explanations: map[string]model.Explanation{}, Issues: []model.Issue{}}}
+	if engine.derived != nil {
+		result.Evaluation.Sheet["derived"] = engine.derived(input)
+	}
 	if engine.inspect != nil {
 		result.Evaluation.Issues = engine.inspect(input)
 		result.Evaluation.Ready = len(result.Evaluation.Issues) == 0

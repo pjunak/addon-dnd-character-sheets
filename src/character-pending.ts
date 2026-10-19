@@ -31,6 +31,20 @@ export interface CharacterPending {
   command?: CommandAttempt;
 }
 
+/**
+ * What the sheet allows with a service answer. Changed rules still allow
+ * edits, so a character the new rules reject can be repaired; the edits are
+ * saved when the rules are adopted. Commands wait for the adoption, and
+ * nothing changes without compatible rules.
+ */
+export function sheetAccess(
+  editable: boolean,
+  response: Pick<Response, "status" | "rulesChanged"> | undefined,
+): { edit: boolean; command: boolean } {
+  const edit = editable && response?.status !== "unavailable";
+  return { edit, command: edit && !response?.rulesChanged };
+}
+
 /** A host-owned, page-memory handoff; never a device draft or an SDK handle. */
 export function readCharacterPending(value: unknown): CharacterPending {
   const row = object(value),

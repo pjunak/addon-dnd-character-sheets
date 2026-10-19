@@ -2556,6 +2556,30 @@
     "token": {
       "maxLength": 30000,
       "type": "string"
+    },
+    "withdrawn": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "after": {},
+          "before": {},
+          "path": {
+            "maxLength": 30000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "before",
+          "after"
+        ],
+        "type": "object"
+      },
+      "maxItems": 500,
+      "type": [
+        "array",
+        "null"
+      ]
     }
   },
   "required": [

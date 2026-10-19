@@ -45,6 +45,13 @@ func TestGrantRepairKeepsValidSpellsAndRejectsNewInvalidInput(t *testing.T) {
 	if err != nil || saved.Status != "ready" || !reflect.DeepEqual(data.state.Inputs.Build.Spells.GrantChoices, map[string][]string{"first": {"kept"}, "second": {"other"}}) || data.state.Inputs.Play.ResourceUses["second"] != 1 || data.state.Inputs.Play.ResourceUses["first"] != 0 || len(data.state.Inputs.Build.Spells.CastingAbilities) != 0 || len(data.state.Inputs.Play.ActiveFeatures) != 0 {
 		t.Fatal(saved, err, data.state.Inputs)
 	}
+	reported := []string{}
+	for _, change := range saved.Withdrawn {
+		reported = append(reported, change.Path)
+	}
+	if want := []string{"/inputs/build/spells/castingAbilities/first", "/inputs/build/spells/grantChoices/first", "/inputs/play/activeFeatures/first", "/inputs/play/resourceUses/first"}; !reflect.DeepEqual(reported, want) {
+		t.Fatalf("withdrawn = %v, want %v", reported, want)
+	}
 	input.Build.Spells.GrantChoices["first"] = []string{"new-illegal"}
 	saved, err = invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "spell-illegal", Inputs: &input, ExpectedRevision: 2})
 	if err != nil || saved.Status != "invalid" || data.writes != 2 {

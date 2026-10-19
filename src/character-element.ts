@@ -45,7 +45,15 @@ import {
   type BuilderNavigation,
 } from "./character-builder-nav.js";
 import type { AddonContext, ContributionContext } from "./sdk.js";
-import type { Grant, Inputs, Request, Response, Result, State } from "./character-model.js";
+import type {
+  Difference,
+  Grant,
+  Inputs,
+  Request,
+  Response,
+  Result,
+  State,
+} from "./character-model.js";
 import {
   spellPicker,
   spellSourceLabel,
@@ -92,6 +100,7 @@ import {
 } from "./character-ui.js";
 import {
   readCharacterPending,
+  sheetAccess,
   type CharacterPending,
   type CommandAttempt,
   type SaveAttempt,
@@ -144,6 +153,8 @@ export function defineCharacterElement(
     #command: CommandAttempt | undefined;
     #saveIssues: string[] = [];
     #ruleNotes: RuleNote[] = [];
+    /** Saved selections the last save removed because the rules no longer allow them. */
+    #withdrawn: Difference[] = [];
     #changeVersion = 0;
     #blocked = false;
     #layout: Layout = "compact";
@@ -320,6 +331,7 @@ export function defineCharacterElement(
         this.#dirty = false;
         this.#attempt = undefined;
         this.#saveIssues = [];
+        this.#withdrawn = [];
         this.#message = response.message;
         this.#layout = preferredLayout(localStorage, response.actorId, this.#key);
         this.#blocked = false;
@@ -443,6 +455,7 @@ export function defineCharacterElement(
       this.#blocked = false;
       this.#saveIssues = [];
       this.#ruleNotes = [];
+      this.#withdrawn = [];
       this.#message = "Saving…";
       this.#publish();
       this.#status();
@@ -529,10 +542,20 @@ export function defineCharacterElement(
         // not only in Tools where they are adopted.
         node.dataset["uiState"] = "info";
         node.replaceChildren(
-          el("span", this.#t("The rules changed. Adopt them to continue editing.")),
+          el("span", this.#t("The rules changed. Adopt them to save edits and use play actions.")),
         );
         if (this.#tab !== "tools")
           node.append(button(this.#t("Review changed rules"), () => this.#reviewRules()));
+      } else if (this.#withdrawn.length && !this.#dirty) {
+        node.append(
+          el(
+            "p",
+            this.#t(
+              "The current rules no longer allow these saved selections, so they were removed:",
+            ),
+          ),
+          comparisonView(this.#withdrawn, undefined, this.#context?.host.locale),
+        );
       }
       node.dataset["quiet"] = String(
         node.childElementCount === 1 &&
@@ -575,6 +598,7 @@ export function defineCharacterElement(
       this.#blocked = false;
       this.#saveIssues = [];
       this.#ruleNotes = [];
+      this.#withdrawn = [];
       this.#attempt = undefined;
       this.#message = response.message;
       this.#publish();
@@ -671,6 +695,7 @@ export function defineCharacterElement(
             );
           if (version === this.#changeVersion) {
             this.#dirty = false;
+            this.#withdrawn = response.withdrawn ?? [];
             this.#message = "Saved";
             const focused = document.activeElement;
             if (
@@ -920,10 +945,12 @@ export function defineCharacterElement(
         content.prepend(characterName(view));
       return content;
     }
+    get #access(): { edit: boolean; command: boolean } {
+      return sheetAccess(this.#editable, this.#response);
+    }
     #sheetView(): SheetView {
-      const editing =
-        this.#editable && this.#response?.status !== "unavailable" && !this.#response?.rulesChanged;
-      const canPlay = editing && this.#evaluation?.ready === true && !!this.#response?.state;
+      const { edit: editing, command: commands } = this.#access;
+      const canPlay = commands && this.#evaluation?.ready === true && !!this.#response?.state;
       return {
         locale: this.#context?.host.locale ?? "en",
         layout: this.#layout,
@@ -932,16 +959,16 @@ export function defineCharacterElement(
         projection: this.#response?.state?.projection,
         catalogs: this.#catalogs,
         equipment:
-          this.#response?.rulesChanged || this.#response?.status === "unavailable"
+          this.#response?.status === "unavailable"
             ? {}
             : object(this.#evaluation?.guidance["equipment"]),
         editing,
         canPlay,
         canEditHands:
-          editing &&
+          commands &&
           !!this.#response?.state &&
           object(this.#evaluation?.guidance["authoredPlay"])["hands"] === true,
-        hands: editing ? object(this.#evaluation?.guidance["hands"]) : {},
+        hands: commands ? object(this.#evaluation?.guidance["hands"]) : {},
         canEditInspiration:
           editing && object(this.#evaluation?.guidance["authoredPlay"])["inspiration"] === true,
         canEditConditions:
@@ -1095,10 +1122,7 @@ export function defineCharacterElement(
         this.#t("Change prepared spells"),
         () => {
           const fields = el("fieldset");
-          fields.disabled =
-            !this.#editable ||
-            this.#response?.status === "unavailable" ||
-            !!this.#response?.rulesChanged;
+          fields.disabled = !this.#access.edit;
           fields.append(this.#spellChoices(this.#spellPickers));
           return [fields];
         },
@@ -1221,10 +1245,7 @@ export function defineCharacterElement(
     }
     #builder(navigation = this.#builderNav, pickers = this.#spellPickers): HTMLElement {
       const body = el("fieldset");
-      body.disabled =
-        !this.#editable ||
-        this.#response?.status === "unavailable" ||
-        !!this.#response?.rulesChanged;
+      body.disabled = !this.#access.edit;
       const view = this.#view();
       navigation.tab = builderDestination(view, navigation.tab, navigation.target);
       if (
@@ -1315,10 +1336,7 @@ export function defineCharacterElement(
       }
       const choices = el("details", el("summary", this.#t("Manage spells"))),
         fields = el("fieldset");
-      fields.disabled =
-        !this.#editable ||
-        this.#response?.status === "unavailable" ||
-        !!this.#response?.rulesChanged;
+      fields.disabled = !this.#access.edit;
       choices.dataset["spellManagement"] = "";
       choices.open = this.#spellManagementOpen;
       fields.append(this.#spellChoices(pickers));
@@ -1394,7 +1412,7 @@ export function defineCharacterElement(
             this.#response?.status === "unavailable"
               ? "Compatible rules are unavailable. Saved values and notes remain accessible."
               : this.#response?.rulesChanged
-                ? "The rules changed. Adopt them to continue editing."
+                ? "The rules changed. Adopt them to save edits and use play actions."
                 : "Rules are connected.",
           ),
         ),
@@ -1614,11 +1632,13 @@ export function defineCharacterElement(
     }
     #grants(): HTMLElement {
       const root = rulesTarget(panel(this.#t("DM given")), "grants");
+      // Like play commands, grant commands wait until changed rules are adopted.
+      const blocked = !this.#access.command;
       for (const grant of this.#response?.state?.inputs.grants ?? []) {
         root.append(el("p", grant.name + " · " + grant.reason));
         if (grant.active && this.#response?.role === "dm")
           root.append(
-            button(this.#t("Amend {0}", [grant.name]), () => this.#grant(grant), !this.#editable),
+            button(this.#t("Amend {0}", [grant.name]), () => this.#grant(grant), blocked),
             button(
               this.#t("Revoke {0}", [grant.name]),
               () =>
@@ -1627,12 +1647,12 @@ export function defineCharacterElement(
                   grantId: grant.id,
                   inputs: structuredClone(this.#input),
                 }),
-              !this.#editable,
+              blocked,
             ),
           );
       }
       if (this.#response?.role === "dm")
-        root.append(button(this.#t("Give a DM grant"), () => this.#grant(), !this.#editable));
+        root.append(button(this.#t("Give a DM grant"), () => this.#grant(), blocked));
       return root;
     }
     #grant(previous?: Grant): void {
@@ -1740,6 +1760,7 @@ export function defineCharacterElement(
           if (response.status === "ready" && response.state) {
             this.#command = undefined;
             this.#accept(response);
+            this.#withdrawn = response.withdrawn ?? [];
             this.#message = "Saved";
           } else {
             // The worker answered without saving, so nothing waits on this action.
