@@ -88,6 +88,7 @@ export function playActions(
   // grant beside the slots that upcast it). Alone there is nothing to pick;
   // otherwise the first entry is preselected.
   const slotPicker = (
+    key: string,
     name: string,
     slots: readonly string[],
     change: (value: string) => void,
@@ -96,6 +97,7 @@ export function playActions(
     return resources.length
       ? [
           field(
+            key,
             name,
             select(
               slots[0] ?? "",
@@ -119,6 +121,7 @@ export function playActions(
       let result: number | undefined;
       root.append(
         field(
+          section + "/hit-die/" + key,
           t("{0} — recorded die result", [human(resource["name"])]),
           numberInput(
             undefined,
@@ -209,7 +212,7 @@ export function playActions(
       let slot = slots[0] ?? "";
       const row = spellRow(ref);
       row.append(
-        ...slotPicker(t("Spend slot"), slots, (value) => {
+        ...slotPicker("cast/" + classId + "/" + ref + "/slot", t("Spend slot"), slots, (value) => {
           slot = value;
         }),
       );
@@ -233,6 +236,7 @@ export function playActions(
         scrollId = "";
       group.append(
         field(
+          "copy/" + classId + "/spell",
           t("Spell to copy"),
           select(
             "",
@@ -247,6 +251,7 @@ export function playActions(
           ),
         ),
         field(
+          "copy/" + classId + "/scroll",
           t("Owned scroll (optional)"),
           select(
             "",
@@ -270,6 +275,7 @@ export function playActions(
         ref = "";
       group.append(
         field(
+          "swap/" + classId + "/out",
           t("Replace known spell"),
           select(
             "",
@@ -281,6 +287,7 @@ export function playActions(
           ),
         ),
         field(
+          "swap/" + classId + "/in",
           t("Replacement spell"),
           select(
             "",
@@ -324,7 +331,7 @@ export function playActions(
       ),
     );
     row.append(
-      ...slotPicker(t("Granted cast resource"), slots, (value) => {
+      ...slotPicker("granted/" + key + "/slot", t("Granted cast resource"), slots, (value) => {
         slot = value;
       }),
     );

@@ -61,7 +61,7 @@ export function equipmentPicker(
       t,
     );
     control.options[0]!.textContent = t("No container");
-    root.append(field(t("Destination container"), control));
+    root.append(field("equipment/destination", t("Destination container"), control));
   }
   const path = styled("nav", "dnd-equipment-path");
   path.setAttribute("aria-label", t("Equipment folders"));
@@ -164,7 +164,7 @@ export function equipmentPicker(
           t,
         );
         stack.options[0]!.textContent = t("New inventory entry");
-        row.append(field(t("Add to"), stack));
+        row.append(field("equipment/tray/" + key + "/stack", t("Add to"), stack));
       }
       selected.append(row);
     }
@@ -229,10 +229,15 @@ export function equipmentPicker(
   );
   magicFilter.options[0]!.textContent = t("All equipment");
   root.append(
-    styled("div", "dsc-pack-toolbar", field(t("Item type"), type), field(t("Magic"), magicFilter)),
+    styled(
+      "div",
+      "dsc-pack-toolbar",
+      field("equipment/type", t("Item type"), type),
+      field("equipment/magic", t("Magic"), magicFilter),
+    ),
   );
   root.append(
-    field(t("Find catalog item"), search),
+    field("equipment/search", t("Find catalog item"), search),
     path,
     styled("div", "dnd-picker-split", results, selected),
   );
@@ -241,12 +246,14 @@ export function equipmentPicker(
     quantity = 1;
   custom.append(
     field(
+      "equipment/custom/name",
       t("Name"),
       textInput("", (value) => {
         name = value;
       }),
     ),
     field(
+      "equipment/custom/quantity",
       t("Quantity"),
       numberInput(
         1,

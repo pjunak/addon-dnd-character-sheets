@@ -77,11 +77,8 @@ export function grantForm(
     heading.id = identity;
     row.setAttribute("role", "group");
     row.setAttribute("aria-labelledby", identity);
-    const ownedField = (name: string, control: HTMLElement): HTMLElement => {
-      const wrapper = field(t(name), control);
-      wrapper.dataset["uiKey"] = identity + ":" + name;
-      return wrapper;
-    };
+    const ownedField = (key: string, name: string, control: HTMLElement): HTMLElement =>
+      field(identity + "/" + key, t(name), control);
     // Keep existing controls mounted. Updating one target must not replace every
     // row, lose its keyboard position, or reuse a sibling's enhancement identity.
     const renderKey = (): void => {
@@ -115,7 +112,7 @@ export function grantForm(
           t,
         );
         key.required = true;
-        keySlot.append(ownedField("Applies to", key));
+        keySlot.append(ownedField("key", "Applies to", key));
       }
     };
     const target = select(
@@ -156,10 +153,10 @@ export function grantForm(
     mode.required = true;
     amount.required = true;
     row.append(
-      ownedField("Effect", target),
+      ownedField("target", "Effect", target),
       keySlot,
-      ownedField("Operation", mode),
-      ownedField("Amount", amount),
+      ownedField("mode", "Operation", mode),
+      ownedField("amount", "Amount", amount),
       button(t("Remove effect"), () => {
         const index = grant.effects.indexOf(effect);
         grant.effects.splice(index, 1);
@@ -229,11 +226,12 @@ export function grantForm(
   notice.setAttribute("role", "alert");
   const form = el(
     "form",
-    field(t("Name"), name),
-    field(t(previous ? "Reason for amendment" : "Reason"), reason),
-    field(t("Effective character level"), level),
+    field("grant/name", t("Name"), name),
+    field("grant/reason", t(previous ? "Reason for amendment" : "Reason"), reason),
+    field("grant/level", t("Effective character level"), level),
     effects,
     field(
+      "grant/feat",
       t("Granted feat (optional)"),
       combo(
         grant.feat?.id ?? "",
@@ -249,6 +247,7 @@ export function grantForm(
       ),
     ),
     field(
+      "grant/waivers",
       t("Exact prerequisite issue IDs to waive (comma-separated, optional)"),
       textInput(grant.waivers.join(", "), (value) => {
         grant.waivers = value
@@ -257,8 +256,9 @@ export function grantForm(
           .filter(Boolean);
       }),
     ),
-    field(t("Condition"), condition),
+    field("grant/condition", t("Condition"), condition),
     field(
+      "grant/item",
       t("Item instance"),
       combo(
         grant.itemId ?? "",
@@ -271,6 +271,7 @@ export function grantForm(
       ),
     ),
     field(
+      "grant/expires",
       t("Expires at (RFC 3339, optional)"),
       textInput(grant.expiresAt ?? "", (value) => {
         grant.expiresAt = value;

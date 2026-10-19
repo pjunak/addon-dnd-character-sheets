@@ -198,10 +198,12 @@ export function backpackDialog(
         item.attuned || object(view.equipment[item.id])["attuneReason"] !== "not-required",
       move = locationSelect(view, item);
     side.append(
-      field(t("Quantity"), quantityInput(view, item)),
+      field("inventory/" + item.id + "/quantity", t("Quantity"), quantityInput(view, item)),
       ...itemFields(view, item),
-      field(t("Location"), move),
-      ...(attunable ? [field(t("Attunement"), attune.control)] : []),
+      field("inventory/" + item.id + "/move", t("Location"), move),
+      ...(attunable
+        ? [field("inventory/" + item.id + "/attune", t("Attunement"), attune.control)]
+        : []),
     );
     const placement = itemBodyPlacement(view, item),
       destination = itemContainer(view, item);
@@ -269,7 +271,7 @@ export function backpackDialog(
       );
     remove.setAttribute("aria-label", t("Remove container: {0}", [container.name]));
     settings.replaceChildren(
-      field(t("Container name"), rename),
+      field("storage/" + container.id + "/name", t("Container name"), rename),
       ...(link ? [link] : []),
       ...(load ? [load] : []),
       remove,

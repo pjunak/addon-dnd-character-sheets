@@ -95,8 +95,7 @@ export function handControls(view: SheetView, combat: boolean): HTMLElement {
     control.options[0]!.textContent = t("Free hand");
     control.disabled = hand === "off" && two;
     control.dataset["focusKey"] = "hands/" + hand;
-    const wrapper = field(t(hand === "main" ? "Main hand" : "Off hand"), control);
-    wrapper.dataset["uiKey"] = "hands/" + hand;
+    const wrapper = field("hands/" + hand, t(hand === "main" ? "Main hand" : "Off hand"), control);
     if (hand === "off" && hands?.suspendedOff) {
       const item = view.input.play.inventory.find((item) => item.id === hands.suspendedOff!.itemId);
       wrapper.append(

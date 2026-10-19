@@ -349,7 +349,7 @@ export function vitals(view: SheetView): HTMLElement {
         operation === "set-hp" ? Number(derived["maxHp"]) : 1000000,
       );
     area.append(
-      field(t("Amount"), input),
+      field("vitals/hp-amount", t("Amount"), input),
       button(title, async () => {
         if (input.reportValidity()) await view.act({ operation, amount: input.valueAsNumber });
       }),

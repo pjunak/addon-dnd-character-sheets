@@ -539,17 +539,6 @@ export function defineCharacterElement(
         dialog.querySelector("[data-character-status]")?.remove();
         dialog.insertBefore(status, dialog.querySelector("[data-dialog-body]"));
       } else this.#placeStatus(status, root);
-      for (const field of root.querySelectorAll<HTMLElement>(".character-field")) {
-        const scope = field.closest<HTMLElement>(
-          "[id^=character-choice-], [data-item], [data-builder-target]",
-        );
-        // The shared controls restore focus during refresh, before local caret restoration.
-        if (field.dataset["uiKey"] === field.querySelector("label")?.textContent)
-          field.dataset["uiKey"] =
-            (scope?.id || scope?.dataset["item"] || scope?.dataset["builderTarget"] || "") +
-            "/" +
-            field.querySelector("label")?.textContent;
-      }
       for (const child of Array.from(this.children)) if (child !== dialog) child.remove();
       this.prepend(root);
       this.#syncBusyButtons();
@@ -559,11 +548,14 @@ export function defineCharacterElement(
       for (const details of this.querySelectorAll<HTMLDetailsElement>("details[data-details-key]"))
         if (this.#details.has(details.dataset["detailsKey"]!))
           details.open = this.#details.get(details.dataset["detailsKey"]!)!;
-      for (const field of root.querySelectorAll<HTMLElement>(".character-field")) {
-        for (const control of field.querySelectorAll<HTMLElement>("input,select,textarea,button"))
-          control.dataset["focusKey"] ??=
-            field.dataset["uiKey"] + "/" + (control.getAttribute("aria-label") ?? control.tagName);
-      }
+      // A field's controls are found again by its key and their place in it,
+      // never by their (translated) names.
+      for (const field of root.querySelectorAll<HTMLElement>(".character-field"))
+        field
+          .querySelectorAll<HTMLElement>("input,select,textarea,button")
+          .forEach((control, index) => {
+            control.dataset["focusKey"] ??= field.dataset["uiKey"] + "/" + index;
+          });
       // Action buttons get a key from their section and label, so focus and a
       // rules refusal can find the same button after the next render.
       for (const control of root.querySelectorAll<HTMLButtonElement>(
@@ -1062,6 +1054,7 @@ export function defineCharacterElement(
         "character-toolbar",
         characterName({ name: this.#name }),
         field(
+          "tools/layout",
           this.#t("Sheet layout"),
           select(
             this.#layout,
@@ -1321,6 +1314,7 @@ export function defineCharacterElement(
           builderTarget(
             key,
             field(
+              "spells/casting-ability/" + key,
               spellSourceLabel(
                 choice["source"],
                 this.#context?.host.locale,
@@ -1600,8 +1594,8 @@ export function defineCharacterElement(
       this.#open(
         this.#t("Import character"),
         [
-          field(this.#t("Choose a file"), file),
-          field(this.#t("Or paste the export"), area),
+          field("import/file", this.#t("Choose a file"), file),
+          field("import/paste", this.#t("Or paste the export"), area),
           ...(this.#saved?.role === "dm"
             ? [
                 checkbox(

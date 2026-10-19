@@ -47,8 +47,7 @@ export function itemBodyPlacement(view: SheetView, item: Item): HTMLElement | un
   control.options[0]!.textContent = t("Unassigned");
   control.dataset["focusKey"] = "inventory/" + item.id + "/body-placement";
   control.setAttribute("aria-label", t("Body placement for {0}", [item.name]));
-  const wrapper = field(t("Body placement"), control);
+  const wrapper = field("inventory/" + item.id + "/body-placement", t("Body placement"), control);
   wrapper.classList.add("dse-item-placement");
-  wrapper.dataset["uiKey"] = "inventory/" + item.id + "/body-placement";
   return wrapper;
 }

@@ -75,8 +75,8 @@ export function classReplacements(view: BuildView, classId: string): HTMLElement
       );
       replacement.dataset["focusKey"] = root.id + "/in";
       controls.append(
-        field(t("Current choice"), current),
-        field(t("New choice"), replacement),
+        field(root.id + "/out", t("Current choice"), current),
+        field(root.id + "/in", t("New choice"), replacement),
         apply,
       );
       root.append(controls);

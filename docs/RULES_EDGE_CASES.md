@@ -132,8 +132,8 @@ and edit inventory entries with the same item controls. The existing item picker
 for catalog and narrative additions; additions remain separate instances.
 Removing a group unassigns only its members without deleting inventory.
 Native labelled fields/actions use `ui.controls.v1`, semantic tokens and stable
-focus keys. The sheet renderer preserves keys assigned by reusable controls
-and only generates fallback keys for unkeyed fields. Editing requires live `guidance.authoredPlay.storage`; counts and
+focus keys. Every field is created with an explicit key built from IDs, and
+the renderer derives its controls' focus keys from it. Editing requires live `guidance.authoredPlay.storage`; counts and
 labels remain readable without a provider, and print/export retain membership.
 
 The worker rejects results that drop, rename, reorder or substitute groups or
@@ -453,9 +453,10 @@ in English and Czech. Authored catalog names remain source text.
 First-class, lineage, subclass, advancement and spell targets open the relevant
 section and focus its first unfinished visible control. Host `ui.controls.v1`
 owns comboboxes and tabs; refresh enhancement before restoring keyboard focus
-so the hidden native value select never receives focus. Before enhancement,
-field keys include the owning choice, item or Builder target. Repeated labels
-such as Selection 1 must not move focus to another acquisition after autosave.
+so the hidden native value select never receives focus. Field keys name the
+owning choice, item, level or Builder target and never come from label text,
+so repeated or translated labels such as "1 of 2" do not move focus to another
+acquisition after autosave.
 Reduced-motion settings disable animated navigation.
 
 Repeatable feat choices carry Engine-owned acquisition IDs and source labels.

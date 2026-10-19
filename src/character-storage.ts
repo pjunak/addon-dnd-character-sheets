@@ -78,8 +78,7 @@ export function storage(view: SheetView): HTMLElement {
     name.required = true;
     if (Number.isFinite(maximumName)) name.maxLength = maximumName;
     name.dataset["focusKey"] = "storage/" + container.id + "/name";
-    const nameField = field(t("Container name"), name);
-    nameField.dataset["uiKey"] = "storage/" + container.id + "/name";
+    const nameField = field("storage/" + container.id + "/name", t("Container name"), name);
     const count = view.input.play.inventory.filter(
       (item) => item.containerId === container.id,
     ).length;
@@ -148,8 +147,7 @@ export function containerItem(view: SheetView, container: Container): HTMLElemen
   );
   control.options[0]!.textContent = t("No item");
   control.dataset["focusKey"] = "storage/" + container.id + "/item";
-  const wrapper = field(t("Container item"), control);
-  wrapper.dataset["uiKey"] = "storage/" + container.id + "/item";
+  const wrapper = field("storage/" + container.id + "/item", t("Container item"), control);
   return wrapper;
 }
 
@@ -181,6 +179,7 @@ export function itemContainer(view: SheetView, item: Item): HTMLElement | undefi
   control.dataset["focusKey"] = "inventory/" + item.id + "/container";
   control.setAttribute("aria-label", t("Container for {0}", [item.name]));
   const wrapper = field(
+    "inventory/" + item.id + "/container",
     t("Container"),
     control,
     item.location === "equipped"
@@ -188,6 +187,5 @@ export function itemContainer(view: SheetView, item: Item): HTMLElement | undefi
       : undefined,
   );
   wrapper.classList.add("dse-item-container");
-  wrapper.dataset["uiKey"] = "inventory/" + item.id + "/container";
   return wrapper;
 }

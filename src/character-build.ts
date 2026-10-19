@@ -100,7 +100,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
       },
       t,
     );
-    foundation.append(field(t("Creation method"), method));
+    foundation.append(field("abilities/method", t("Creation method"), method));
     const scores = styled("div", "character-stats");
     scores.dataset["builderTarget"] = "abilities";
     const spent = (): number =>
@@ -129,6 +129,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
         };
         scores.append(
           field(
+            "abilities/" + ability,
             ability,
             stepper(
               () => build.baseScores[ability] ?? minimum,
@@ -148,6 +149,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
         const array = (policy["standardArray"] ?? []) as number[];
         scores.append(
           field(
+            "abilities/" + ability,
             ability,
             select(
               String(build.baseScores[ability] ?? ""),
@@ -179,6 +181,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
         dice.forEach((_, index) =>
           group.append(
             field(
+              "abilities/" + ability + "/die-" + index,
               t("Die {0}", [index + 1]),
               stepper(
                 () => dice[index]!,
@@ -223,7 +226,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
             }, true),
           t,
         );
-      const source = field(t(label(kind)), choice);
+      const source = field("origin/" + kind, t(label(kind)), choice);
       source.dataset["builderTarget"] = kind;
       origin.append(source);
       const selected = catalogRecord(records, build[kind]);
@@ -232,6 +235,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
           builderTarget(
             "lineage",
             field(
+              "origin/lineage",
               t("Lineage"),
               combo(
                 build.lineage,
@@ -265,7 +269,9 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
   if (active === "add-class") {
     const existing = new Set(build.levels.map((level) => level.classId)),
       eligible = available.filter((option) => !existing.has(option.id));
-    root.append(builderTarget("add-class", field(t("Add class"), combo("", eligible, add, t))));
+    root.append(
+      builderTarget("add-class", field("classes/add", t("Add class"), combo("", eligible, add, t))),
+    );
     if (!eligible.length)
       root.append(el("p", t("No additional classes meet the rules at this level.")));
     return root;
@@ -328,6 +334,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
           builderTarget(
             "subclass:" + active,
             field(
+              "classes/" + active + "/subclass",
               t("Subclass"),
               combo(
                 build.subclasses[active] ?? "",
@@ -344,6 +351,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
       if (index > 0) {
         row.append(
           field(
+            "level/" + level.id + "/hp-gain",
             t("HP gain"),
             select(
               level.hitPoints === undefined ? "fixed" : "rolled",
@@ -363,6 +371,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
         if (level.hitPoints !== undefined)
           row.append(
             field(
+              "level/" + level.id + "/hit-die",
               t("Recorded hit-die roll"),
               stepper(
                 () => level.hitPoints!,
@@ -434,6 +443,7 @@ function choiceView(
     for (const ability of eligible)
       scores.append(
         field(
+          "choice/" + id + "/" + ability,
           ability,
           stepper(
             () => Number(object(current(0))[ability] ?? 0),
@@ -452,6 +462,7 @@ function choiceView(
     const mode = text(current(0));
     root.append(
       field(
+        "choice/" + id + "/mode",
         t("Advancement"),
         select(
           mode,
@@ -489,6 +500,7 @@ function choiceView(
     for (let slot = 0; slot < count; slot++) {
       // A single pick is named by the panel heading; several are numbered.
       const selection = field(
+        "choice/" + id + "/" + slot,
         count > 1 ? t("{0} of {1}", [slot + 1, count]) : heading,
         combo(
           text(current(slot)),

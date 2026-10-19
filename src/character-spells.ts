@@ -128,10 +128,8 @@ export function spellFilters(
     t,
   );
   level.options[0]!.textContent = t("All spell levels");
-  const nameField = field(t("Filter spells"), search),
-    levelField = field(t("Spell level"), level);
-  nameField.dataset["uiKey"] = key + ":name";
-  levelField.dataset["uiKey"] = key + ":level";
+  const nameField = field(key + ":name", t("Filter spells"), search),
+    levelField = field(key + ":level", t("Spell level"), level);
   const status = el("p");
   status.setAttribute("role", "status");
   status.setAttribute("aria-live", "polite");

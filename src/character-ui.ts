@@ -31,7 +31,17 @@ export function button(
   });
   return node;
 }
-export function field(label: string, control: HTMLElement, help?: string): HTMLElement {
+/**
+ * A labelled control. `key` names the field uniquely within the sheet and
+ * stays the same across renders and languages, so the shared controls can
+ * return focus to it after a render. Build it from IDs, never from label text.
+ */
+export function field(
+  key: string,
+  label: string,
+  control: HTMLElement,
+  help?: string,
+): HTMLElement {
   const id = `character-control-${crypto.randomUUID()}`;
   const target = control.matches("input,select,textarea,button")
     ? control
@@ -42,7 +52,7 @@ export function field(label: string, control: HTMLElement, help?: string): HTMLE
   const wrapper = el("div", title, control);
   wrapper.className = "character-field";
   wrapper.dataset["uiField"] = "";
-  wrapper.dataset["uiKey"] = label;
+  wrapper.dataset["uiKey"] = key;
   if (help) {
     const hint = el("small", help);
     hint.id = `${id}-hint`;

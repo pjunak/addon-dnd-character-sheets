@@ -128,7 +128,9 @@ export function conditions(view: SheetView): HTMLElement {
         Number(option!["maximumLevel"]),
       );
       level.dataset["focusKey"] = "conditions/" + id + "/level";
-      row.querySelector(":scope > span")?.replaceWith(field(t("{0} level", [name]), level));
+      row
+        .querySelector(":scope > span")
+        ?.replaceWith(field("conditions/" + id + "/level", t("{0} level", [name]), level));
     }
     const remove = button(
       t("Remove {0}", [name]),
@@ -171,7 +173,7 @@ export function conditions(view: SheetView): HTMLElement {
       t,
     );
     picker.querySelector("select")!.dataset["focusKey"] = "conditions/add";
-    root.append(field(t("Add condition"), picker));
+    root.append(field("conditions/add", t("Add condition"), picker));
   }
   return root;
 }

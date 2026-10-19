@@ -217,7 +217,11 @@ export function itemWeight(view: SheetView, item: Item): HTMLElement {
     100000,
   );
   control.step = "any";
-  return field(t("Weight in lb, each"), focusKey(control, item, "weight"));
+  return field(
+    "inventory/" + item.id + "/weight",
+    t("Weight in lb, each"),
+    focusKey(control, item, "weight"),
+  );
 }
 
 /** Name, acquisition, notes, scroll spell and weight. */
@@ -225,6 +229,7 @@ export function itemFields(view: SheetView, item: Item): HTMLElement[] {
   const t = translator(view.locale);
   return [
     field(
+      "inventory/" + item.id + "/name",
       t("Name"),
       textInput(item.name, (value) => {
         item.name = value;
@@ -233,6 +238,7 @@ export function itemFields(view: SheetView, item: Item): HTMLElement[] {
     ),
     itemWeight(view, item),
     field(
+      "inventory/" + item.id + "/acquisition",
       t("Acquired from"),
       textInput(item.acquisition, (value) => {
         item.acquisition = value;
@@ -240,6 +246,7 @@ export function itemFields(view: SheetView, item: Item): HTMLElement[] {
       }),
     ),
     field(
+      "inventory/" + item.id + "/notes",
       t("Notes"),
       textInput(
         item.notes,
@@ -251,6 +258,7 @@ export function itemFields(view: SheetView, item: Item): HTMLElement[] {
       ),
     ),
     field(
+      "inventory/" + item.id + "/scroll-spell",
       t("Scroll spell (optional)"),
       select(
         item.spellId ?? "",
