@@ -942,6 +942,12 @@ export const catalogs = {
     "{0} in total": "{0} in total",
     "One fewer {0}": "One fewer {0}",
     "One more {0}": "One more {0}",
+    "An earlier action may already be saved. Resolve its outcome before starting another.": "An earlier action may already be saved. Resolve its outcome before starting another.",
+    "An earlier save may already be stored. Retry it or reload the saved character first.": "An earlier save may already be stored. Retry it or reload the saved character first.",
+    "Wait for the current request to finish, then try again.": "Wait for the current request to finish, then try again.",
+    "Your other changes are not saved yet. Correct or reload them first.": "Your other changes are not saved yet. Correct or reload them first.",
+    "The character view changed. Try again.": "The character view changed. Try again.",
+    "The import could not be reviewed.": "The import could not be reviewed.",
     "The current rules no longer allow these saved selections, so they were removed:": "The current rules no longer allow these saved selections, so they were removed:"
   },
   "cs": {
@@ -1886,6 +1892,12 @@ export const catalogs = {
     "{0} in total": "celkem {0}",
     "One fewer {0}": "O jeden méně: {0}",
     "One more {0}": "O jeden více: {0}",
+    "An earlier action may already be saved. Resolve its outcome before starting another.": "Dřívější akce už možná byla uložena. Než začnete další, vyřešte její výsledek.",
+    "An earlier save may already be stored. Retry it or reload the saved character first.": "Dřívější uložení už možná proběhlo. Nejprve ho zkuste znovu, nebo načtěte uloženou postavu.",
+    "Wait for the current request to finish, then try again.": "Počkejte na dokončení probíhajícího požadavku a zkuste to znovu.",
+    "Your other changes are not saved yet. Correct or reload them first.": "Vaše ostatní změny ještě nejsou uložené. Nejprve je opravte, nebo načtěte uloženou postavu.",
+    "The character view changed. Try again.": "Zobrazení postavy se změnilo. Zkuste to znovu.",
+    "The import could not be reviewed.": "Import se nepodařilo zkontrolovat.",
     "The current rules no longer allow these saved selections, so they were removed:": "Současná pravidla tyto uložené volby už nepovolují, proto byly odebrány:"
   }
 } as const;

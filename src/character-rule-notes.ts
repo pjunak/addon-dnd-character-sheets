@@ -1,4 +1,13 @@
+import { rows } from "./character-client.js";
+import type { Result } from "./character-model.js";
 import { styled } from "./character-ui.js";
+
+/** The Engine issues that keep a refused change from being saved. */
+export function saveBlockers(evaluation: Result | undefined): Record<string, unknown>[] {
+  return rows(evaluation?.guidance["saveIssues"] ?? evaluation?.issues).filter(
+    (issue) => issue["severity"] === "blocker",
+  );
+}
 
 /** A rules refusal shown next to what caused it. */
 export interface RuleNote {

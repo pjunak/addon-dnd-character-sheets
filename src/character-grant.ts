@@ -13,13 +13,17 @@ import {
   textInput,
 } from "./character-ui.js";
 
-/** The same typed contribution editor creates and amends character exceptions. */
+/**
+ * The same typed contribution editor creates and amends character exceptions.
+ * `submit` answers why the grant could not be applied, or "" when it was; the
+ * form keeps the DM's input and shows the reason.
+ */
 export function grantForm(
   input: Inputs,
   evaluation: Result | undefined,
   feats: readonly CatalogRecord[],
   previous: Grant | undefined,
-  submit: (grant: Grant) => void | Promise<void>,
+  submit: (grant: Grant) => Promise<string>,
   locale = "en",
 ): Node[] {
   const t = translator(locale);
@@ -200,6 +204,11 @@ export function grantForm(
   condition.required = true;
   const apply = button(t("Apply DM grant"), () => undefined);
   apply.type = "submit";
+  const notice = el("p");
+  notice.hidden = true;
+  notice.tabIndex = -1;
+  notice.dataset["uiState"] = "error";
+  notice.setAttribute("role", "alert");
   const form = el(
     "form",
     field(t("Name"), name),
@@ -249,13 +258,20 @@ export function grantForm(
         grant.expiresAt = value;
       }),
     ),
+    notice,
     apply,
   );
   // Native form validation focuses the missing field and retains the draft.
   // Mechanical validity and authorization still belong to the worker/engine.
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    void submit(grant);
+    notice.hidden = true;
+    void submit(grant).then((problem) => {
+      if (!problem) return;
+      notice.textContent = problem;
+      notice.hidden = false;
+      notice.focus();
+    });
   });
   return [form];
 }

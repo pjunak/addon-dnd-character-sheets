@@ -45,6 +45,36 @@ export function sheetAccess(
   return { edit, command: edit && !response?.rulesChanged };
 }
 
+/** What decides whether a command can start now. */
+export interface CommandReadiness {
+  /** The host lets this viewer edit the character. */
+  canEdit: boolean;
+  /** Another request of this sheet is running. */
+  busy: boolean;
+  /** An earlier command's outcome is not confirmed. */
+  command: boolean;
+  /** An earlier automatic save's outcome is not confirmed. */
+  attempt: boolean;
+  /** Edits on this page are not saved. */
+  dirty: boolean;
+}
+
+/**
+ * Why a command cannot start now, or "" when it can. A dialog shows the reason
+ * and keeps its input. Adopting changed rules saves the pending edits itself.
+ */
+export function commandBlocker(state: CommandReadiness, adoptingRules = false): string {
+  if (!state.canEdit) return "You are not allowed to make this change.";
+  if (state.command)
+    return "An earlier action may already be saved. Resolve its outcome before starting another.";
+  if (state.attempt)
+    return "An earlier save may already be stored. Retry it or reload the saved character first.";
+  if (state.busy) return "Wait for the current request to finish, then try again.";
+  if (state.dirty && !adoptingRules)
+    return "Your other changes are not saved yet. Correct or reload them first.";
+  return "";
+}
+
 /** A host-owned, page-memory handoff; never a device draft or an SDK handle. */
 export function readCharacterPending(value: unknown): CharacterPending {
   const row = object(value),

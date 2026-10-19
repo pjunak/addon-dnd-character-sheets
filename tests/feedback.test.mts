@@ -78,6 +78,8 @@ void test("rule feedback preserves engine values and performs no calculation", (
 
 void test("status, dialog and review explanations read in Czech", () => {
   for (const source of [
+    "The character view changed. Try again.",
+    "The import could not be reviewed.",
     "The current rules no longer allow these saved selections, so they were removed:",
     "The rules changed. Adopt them to save edits and use play actions.",
   ])

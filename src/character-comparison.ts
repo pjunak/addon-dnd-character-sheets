@@ -1,6 +1,22 @@
-import type { Difference, Projection } from "./character-model.js";
+import type { Difference, Projection, Response } from "./character-model.js";
 import { translator } from "./character-locale.js";
+import { saveBlockers } from "./character-rule-notes.js";
 import { el, human, label, rule, styled } from "./character-ui.js";
+
+/**
+ * Why an import preview cannot be confirmed, or nothing when it can: the
+ * service's status message and, when the rules refuse it, their blockers.
+ */
+export function previewProblems(
+  response: Pick<Response, "status" | "message" | "token" | "evaluation">,
+): string[] {
+  if (response.status === "ready" && response.token) return [];
+  const blockers =
+    response.status === "invalid"
+      ? saveBlockers(response.evaluation).map((issue) => String(issue["message"]))
+      : [];
+  return [response.message || "The import could not be reviewed.", ...blockers];
+}
 
 /** Stored keys such as "feat:magic-initiate@background%3Aguide:mi-spell" read as their last part. */
 function pathPart(value: string): string {

@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { blank } from "#web/character-client";
-import { readCharacterPending, sheetAccess } from "#web/character-pending";
+import { commandBlocker, readCharacterPending, sheetAccess } from "#web/character-pending";
+import { feedbackMessage } from "#web/character-feedback";
 
 function pending() {
   const inputs = blank(),
@@ -94,4 +95,25 @@ void test("changed rules allow repairing edits, while commands wait for the adop
     edit: false,
     command: false,
   });
+});
+
+void test("a command that cannot start says why in both languages", () => {
+  const ready = { canEdit: true, busy: false, command: false, attempt: false, dirty: false };
+  assert.equal(commandBlocker(ready), "");
+  const reasons = [
+    commandBlocker({ ...ready, canEdit: false }),
+    commandBlocker({ ...ready, command: true }),
+    commandBlocker({ ...ready, attempt: true }),
+    commandBlocker({ ...ready, busy: true }),
+    commandBlocker({ ...ready, dirty: true }),
+  ];
+  assert.equal(new Set(reasons).size, reasons.length);
+  for (const reason of reasons) {
+    assert.ok(reason);
+    assert.notEqual(feedbackMessage(reason, "cs"), reason, reason);
+  }
+  // Adopting changed rules saves the pending edits itself, but never over an
+  // uncertain earlier save.
+  assert.equal(commandBlocker({ ...ready, dirty: true }, true), "");
+  assert.notEqual(commandBlocker({ ...ready, dirty: true, attempt: true }, true), "");
 });

@@ -293,11 +293,13 @@ amendments return the unchanged saved snapshot and never write a revision.
 
 Create and amend share the same form. Effect rows retain their controls and
 stable field identities as other rows change. Adding a row focuses its target;
-removing one focuses the next row, previous row, or Add effect. Each group has
-a wrapping heading with its full effect name, including on enlarged phone
-layouts. Required fields use native form validation and keep incomplete input
-in the dialog. Feat and item searches borrow host ui.controls.v1 comboboxes;
-the Engine still owns mechanical validity.
+removing one focuses the next row, previous row, or Add effect. Each group has a
+wrapping heading with its full effect name, including on enlarged phone layouts.
+Required fields use native form validation and keep incomplete input in the
+dialog. The dialog closes only once the grant is saved; when the grant cannot
+start yet (unsaved edits, an uncertain earlier action) or the service refuses
+it, the dialog keeps the input and says why. Feat and item searches borrow host
+ui.controls.v1 comboboxes; the Engine still owns mechanical validity.
 
 Separate acquisitions of the same feat (for example two Magic Initiate picks)
 each keep their own choices, casting ability and spent uses through effect
@@ -540,11 +542,14 @@ and expiry. A stale token cannot apply a different candidate.
 Requests are bounded to 190 KB, stored characters to 250 KB, transfer envelopes
 to 1 MB and imported inputs to 180 KB. File and paste share validation. Export
 and print use the current saved state and are available only in Tools.
-File parsing, size and missing-DM-authorization errors appear inside the import
-dialog, receive focus and retain the entered input. This browser explanation
-does not replace server authorization. The replacement review initially focuses
-its heading; closing either dialog restores the current Import action even
-after a render. Both reuse the shared dialog, feedback and focus conventions.
+File parsing, size, missing-DM-authorization and refused-review errors appear
+inside the import dialog, receive focus and retain the entered input; a review
+the rules refuse lists their blockers under the reason. The dialog also says
+when unsaved edits or an uncertain earlier action must be resolved first. This
+browser explanation does not replace server authorization. The replacement
+review initially focuses its heading and closes only once the replacement is
+saved; closing either dialog restores the current Import action even after a
+render. Both reuse the shared dialog, feedback and focus conventions.
 
 Default print includes saved origin and class/level identity plus every stored
 currency denomination. Equipment and spell toggles do not hide currency or

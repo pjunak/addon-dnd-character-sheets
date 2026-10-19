@@ -1,5 +1,5 @@
 import { grantForm } from "./character-grant.js";
-import { comparisonView } from "./character-comparison.js";
+import { comparisonView, previewProblems } from "./character-comparison.js";
 import { translator } from "./character-locale.js";
 import { feedbackMessage } from "./character-feedback.js";
 import { playActions } from "./character-play.js";
@@ -99,6 +99,7 @@ import {
   textInput,
 } from "./character-ui.js";
 import {
+  commandBlocker,
   readCharacterPending,
   sheetAccess,
   type CharacterPending,
@@ -106,7 +107,7 @@ import {
   type SaveAttempt,
   type CharacterTab as Tab,
 } from "./character-pending.js";
-import { rulesTarget, showRuleNotes, type RuleNote } from "./character-rule-notes.js";
+import { rulesTarget, saveBlockers, showRuleNotes, type RuleNote } from "./character-rule-notes.js";
 
 const runtimes = new Map<
   string,
@@ -504,7 +505,12 @@ export function defineCharacterElement(
           node.append(
             el("p", this.#command.request.grant.name + " · " + this.#command.request.grant.reason),
           );
-        if (this.#command.retry) node.append(button(this.#t("Retry"), () => this.#sendCommand()));
+        if (this.#command.retry)
+          node.append(
+            button(this.#t("Retry"), async () => {
+              await this.#sendCommand();
+            }),
+          );
         node.append(
           el(
             "p",
@@ -649,12 +655,7 @@ export function defineCharacterElement(
               this.#blocked = false;
               continue;
             }
-            const blockers =
-              response.status === "invalid"
-                ? rows(
-                    response.evaluation?.guidance["saveIssues"] ?? response.evaluation?.issues,
-                  ).filter((issue) => issue["severity"] === "blocker")
-                : [];
+            const blockers = response.status === "invalid" ? saveBlockers(response.evaluation) : [];
             this.#saveIssues = blockers.map((issue) => String(issue["message"]));
             this.#ruleNotes = blockers.map((issue) => ({
               message: String(issue["message"]),
@@ -1663,96 +1664,132 @@ export function defineCharacterElement(
           this.#evaluation,
           this.#catalogs.get("feat") ?? [],
           previous,
-          (grant) => {
-            this.#dialog?.close();
-            return this.#perform({
+          async (grant) => {
+            const request = {
               ...this.#base(previous ? "amend-grant" : "grant"),
               inputs: structuredClone(this.#input),
               grant,
               ...(previous ? { grantId: previous.id } : {}),
-            });
+            };
+            const blocker = await this.#commandReady(request);
+            if (blocker) return this.#feedback(blocker);
+            // A refused or uncertain grant keeps its dialog; the status says why.
+            if (await this.#send(request)) this.#dialog?.close();
+            return "";
           },
           this.#context?.host.locale,
         ),
       );
     }
     async #perform(request: Omit<Request, "contractVersion">): Promise<void> {
-      const epoch = this.#epoch,
-        trigger = document.activeElement;
+      const trigger = document.activeElement;
       const focusKey =
         trigger instanceof HTMLElement && this.contains(trigger)
           ? trigger.dataset["focusKey"]
           : undefined;
-      if (!this.#editable) return;
-      await this.#saving;
-      if (!this.#editable || epoch !== this.#epoch || request.key !== this.#key) return;
+      if (await this.#commandReady(request)) return;
+      await this.#send(request, focusKey);
+    }
+    /**
+     * Waits for pending saves, then answers why a command cannot start now, or
+     * "" when it can.
+     */
+    async #commandReady(request: Omit<Request, "contractVersion">): Promise<string> {
+      const epoch = this.#epoch;
       // Explicit adoption saves the preserved input with new rules. A rejected
       // autosave cannot precede it, and an uncertain request must be resolved first.
       const adoptingRules =
         request.operation === "adopt-rules" &&
         request.adoptRules === true &&
         this.#response?.rulesChanged === true;
+      const blocker = (): string =>
+        epoch !== this.#epoch || request.key !== this.#key
+          ? "The character view changed. Try again."
+          : commandBlocker(
+              {
+                canEdit: this.#context?.host.canEdit === true,
+                busy: this.#busy,
+                command: !!this.#command,
+                attempt: !!this.#attempt,
+                dirty: this.#dirty,
+              },
+              adoptingRules,
+            );
+      if (!this.#editable) return blocker();
+      await this.#saving;
+      if (!this.#editable || epoch !== this.#epoch || request.key !== this.#key) return blocker();
       if (!adoptingRules) await this.#flush();
-      if (
-        (this.#dirty && !adoptingRules) ||
-        this.#attempt ||
-        !this.#editable ||
-        epoch !== this.#epoch ||
-        request.key !== this.#key
-      )
-        return;
+      return blocker();
+    }
+    /** Sends a command that is ready; answers whether it was saved. */
+    async #send(request: Omit<Request, "contractVersion">, focusKey?: string): Promise<boolean> {
       clearTimeout(this.#timer);
       request.expectedRevision = this.#baseRevision;
-      if (request.inputs && request.operation !== "import")
-        request.inputs = structuredClone(this.#input);
-      if (request.operation !== "import") {
-        this.#changeVersion++;
-        this.#ruleNotes = [];
-        this.#command = {
-          method: "save",
-          request: structuredClone(request),
-          retry: true,
-          ...(focusKey === undefined ? {} : { focusKey }),
-        };
-        await this.#sendCommand();
-        return;
-      }
+      if (request.inputs) request.inputs = structuredClone(this.#input);
+      this.#changeVersion++;
+      this.#ruleNotes = [];
+      this.#command = {
+        method: "save",
+        request: structuredClone(request),
+        retry: true,
+        ...(focusKey === undefined ? {} : { focusKey }),
+      };
+      return this.#sendCommand();
+    }
+    /**
+     * Opens the replacement review for an import. Answers why it cannot be
+     * reviewed instead, so the import dialog keeps the DM's input.
+     */
+    async #previewImport(request: Omit<Request, "contractVersion">): Promise<string[]> {
+      const blocker = await this.#commandReady(request);
+      if (blocker) return [blocker];
+      clearTimeout(this.#timer);
+      request.expectedRevision = this.#baseRevision;
+      let problems: string[] = [];
       await this.#guard(async () => {
-        const response = await this.#call("preview", request);
+        let response: Response;
+        try {
+          response = await this.#call("preview", request);
+        } catch (error) {
+          problems = [error instanceof Error ? error.message : "The import could not be reviewed."];
+          return;
+        }
+        problems = previewProblems(response);
+        if (problems.length) return;
         this.#message = response.message;
         const content: Node[] = [
           el("p", this.#t("Replace this character with the imported build and play state?")),
           comparisonView(response.changes ?? [], response.evaluation, this.#context?.host.locale),
+          button(this.#t("Replace character"), async () => {
+            if (!this.#editable) return;
+            // Keep the approved token and revision. Retrying must never create or
+            // approve a new preview, even if another editor changes the character.
+            this.#changeVersion++;
+            this.#command = {
+              method: "commit",
+              request: {
+                key: request.key,
+                expectedRevision: response.revision,
+                operationId: request.operationId!,
+                token: response.token!,
+              },
+              retry: true,
+            };
+            // A refused or uncertain replacement keeps the review; the status says why.
+            if (await this.#sendCommand()) this.#dialog?.close();
+          }),
         ];
-        if (response.token)
-          content.push(
-            button(this.#t("Replace character"), async () => {
-              if (!this.#editable) return;
-              // Keep the approved token and revision. Retrying must never create or
-              // approve a new preview, even if another editor changes the character.
-              this.#changeVersion++;
-              this.#command = {
-                method: "commit",
-                request: {
-                  key: request.key,
-                  expectedRevision: response.revision,
-                  operationId: request.operationId!,
-                  token: response.token!,
-                },
-                retry: true,
-              };
-              this.#dialog?.close();
-              await this.#sendCommand();
-            }),
-          );
         this.#open(this.#t("Import character"), content, "heading", "import-character");
       });
+      return problems;
     }
-    async #sendCommand(): Promise<void> {
+    /** Sends the current command; answers whether it was saved. */
+    async #sendCommand(): Promise<boolean> {
       const attempt = this.#command,
         epoch = this.#epoch;
-      let reread = false;
-      if (!attempt || this.#busy) return;
+      let reread = false,
+        saved = false;
+      if (!attempt || this.#busy) return false;
       this.#message = "Saving…";
       await this.#guard(async () => {
         try {
@@ -1762,6 +1799,7 @@ export function defineCharacterElement(
             this.#accept(response);
             this.#withdrawn = response.withdrawn ?? [];
             this.#message = "Saved";
+            saved = true;
           } else {
             // The worker answered without saving, so nothing waits on this action.
             // A changed revision is re-read rather than rebased onto newer inputs.
@@ -1799,7 +1837,7 @@ export function defineCharacterElement(
           }
         }
       });
-      if (epoch !== this.#epoch || !this.isConnected) return;
+      if (epoch !== this.#epoch || !this.isConnected) return saved;
       if (this.#command) this.querySelector<HTMLElement>("[data-character-status]")?.focus();
       else if (reread) {
         await this.#refreshSaved(true);
@@ -1815,6 +1853,7 @@ export function defineCharacterElement(
           this.#status();
         }
       }
+      return saved;
     }
     #open(
       title: string,
@@ -1917,19 +1956,23 @@ export function defineCharacterElement(
         file = el("input");
       file.type = "file";
       file.accept = ".json,application/json";
-      const notice = el("p");
+      const notice = el("div");
       notice.hidden = true;
       notice.tabIndex = -1;
       notice.dataset["uiState"] = "error";
       notice.setAttribute("role", "alert");
       const clearError = (): void => {
         notice.hidden = true;
-        notice.textContent = "";
+        notice.replaceChildren();
       };
+      // A refused review lists the rules' reasons under the service's message.
       const showError = (error: unknown): void => {
-        notice.textContent = this.#feedback(
-          error instanceof Error ? error.message : "Invalid character file.",
-        );
+        const [message = "", ...reasons] = Array.isArray(error)
+          ? error.map(String)
+          : [error instanceof Error ? error.message : "Invalid character file."];
+        notice.replaceChildren(el("p", this.#feedback(message)));
+        if (reasons.length)
+          notice.append(el("ul", ...reasons.map((reason) => el("li", this.#feedback(reason)))));
         notice.hidden = false;
         notice.focus();
       };
@@ -1999,12 +2042,13 @@ export function defineCharacterElement(
                 throw new Error(
                   "Imported DM grants must be reviewed and authorized by the current DM.",
                 );
-              this.#dialog?.close();
-              await this.#perform({
+              // The review replaces this dialog; until then it keeps the input.
+              const problems = await this.#previewImport({
                 ...this.#base("import"),
                 inputs,
                 reauthorizeGrants: authorize,
               });
+              if (problems.length) showError(problems);
             } catch (error) {
               showError(error);
             }
