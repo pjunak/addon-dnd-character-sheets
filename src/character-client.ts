@@ -84,6 +84,9 @@ export function catalogRecord(
 
 type Subscribe = NonNullable<AddonContext["data"]["subscribe"]>;
 
+/** A character request; the client adds the contract version. */
+export type CharacterRequest = Omit<Request, "contractVersion">;
+
 export class CharacterClient {
   private readonly service: ServiceHandle;
   private readonly engine: ServiceHandle;
@@ -100,7 +103,7 @@ export class CharacterClient {
     this.signal = signal;
     this.subscribe = subscribe;
   }
-  async call(method: string, request: Omit<Request, "contractVersion">): Promise<Response> {
+  async call(method: string, request: CharacterRequest): Promise<Response> {
     const result = await this.service.call<Response>(
       method,
       { ...request, contractVersion: "character.v3" },
@@ -267,4 +270,31 @@ export function reconcileCharacterMap<T>(
     if (Object.hasOwn(saved, key)) current[key] = structuredClone(saved[key]!);
     else delete current[key];
   }
+}
+
+/**
+ * Applies a saved answer's corrections to inputs edited since the save was
+ * sent. Values edited meanwhile win, withdrawn selections stay withdrawn, and
+ * the `build` and `play` objects stay in place for the fields bound to them.
+ */
+export function reconcileCharacter(sent: Inputs, current: Inputs, saved: Inputs): void {
+  if (current.play.asOf === sent.play.asOf) current.play.asOf = saved.play.asOf;
+  if (current.play.hp === sent.play.hp) current.play.hp = saved.play.hp;
+  current.build.choices = reconcileCharacterChoices(
+    sent.build.choices,
+    current.build.choices,
+    saved.build.choices,
+  );
+  // Maps the worker may withdraw entries from after a structural edit.
+  for (const select of [
+    (value: Inputs) => value.build.subclasses,
+    (value: Inputs) => value.build.spells.cantrips,
+    (value: Inputs) => value.build.spells.spellbook,
+    (value: Inputs) => value.build.spells.grantChoices,
+    (value: Inputs) => value.build.spells.castingAbilities,
+    (value: Inputs) => value.play.preparedSpells,
+    (value: Inputs) => value.play.resourceUses,
+    (value: Inputs) => value.play.activeFeatures,
+  ] as ((value: Inputs) => Record<string, unknown>)[])
+    reconcileCharacterMap(select(sent), select(current), select(saved));
 }

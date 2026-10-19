@@ -1,5 +1,5 @@
 import { changeGrant, grantForm } from "./character-grant.js";
-import { comparisonView, previewProblems } from "./character-comparison.js";
+import { comparisonView } from "./character-comparison.js";
 import { translator } from "./character-locale.js";
 import { feedbackMessage } from "./character-feedback.js";
 import { playActions } from "./character-play.js";
@@ -45,15 +45,7 @@ import {
   type BuilderNavigation,
 } from "./character-builder-nav.js";
 import type { AddonContext, ContributionContext } from "./sdk.js";
-import type {
-  Difference,
-  Grant,
-  Inputs,
-  Request,
-  Response,
-  Result,
-  State,
-} from "./character-model.js";
+import type { Grant, Inputs, Response, Result, State } from "./character-model.js";
 import {
   spellPicker,
   spellSourceLabel,
@@ -65,11 +57,7 @@ import {
 } from "./character-spells.js";
 import {
   CharacterClient,
-  blank,
   exportCharacter,
-  mergeCharacter,
-  reconcileCharacterChoices,
-  reconcileCharacterMap,
   newId,
   object,
   parseCharacter,
@@ -77,8 +65,10 @@ import {
   strings,
   text,
   type CatalogRecord,
+  type CharacterRequest,
   catalogRecord,
 } from "./character-client.js";
+import { CharacterSession, type SavedCharacter } from "./character-session.js";
 import { buildView, type BuildView } from "./character-build.js";
 import { printCharacter } from "./character-projection.js";
 import {
@@ -98,16 +88,8 @@ import {
   tabStrip,
   textInput,
 } from "./character-ui.js";
-import {
-  commandBlocker,
-  readCharacterPending,
-  sheetAccess,
-  type CharacterPending,
-  type CommandAttempt,
-  type SaveAttempt,
-  type CharacterTab as Tab,
-} from "./character-pending.js";
-import { rulesTarget, saveBlockers, showRuleNotes, type RuleNote } from "./character-rule-notes.js";
+import { sheetAccess, type CharacterTab as Tab } from "./character-pending.js";
+import { rulesTarget, showRuleNotes } from "./character-rule-notes.js";
 
 const runtimes = new Map<
   string,
@@ -133,31 +115,32 @@ export function defineCharacterElement(
     // A cached custom-element definition outlives an SDK activation. Each new
     // instance takes the current runtime; old instances keep their expired one.
     readonly #runtime = runtimes.get(generation)!;
-    #pending: unknown;
-    #baseInputs: Inputs = blank();
+    readonly #session = new CharacterSession({
+      call: (method, request) => this.#runtime.client.call(method, request),
+      signal: this.#runtime.client.signal,
+      view: {
+        canEdit: () => this.#context?.host.canEdit === true,
+        typing: () => {
+          const focused = document.activeElement;
+          return (
+            focused instanceof HTMLTextAreaElement ||
+            (focused instanceof HTMLInputElement &&
+              focused.type === "text" &&
+              focused.getAttribute("role") !== "combobox")
+          );
+        },
+        render: () => this.#render(),
+        status: () => this.#status(),
+        publish: () => this.#publish(),
+        busy: () => this.#busyStarted(),
+        focusStatus: () => this.querySelector<HTMLElement>("[data-character-status]")?.focus(),
+      },
+    });
     #controls: ReturnType<AddonContext["ui"]["enhance"]> | undefined;
     #context: ContributionContext | undefined;
-    #response: Response | undefined;
-    #input: Inputs = blank();
-    #evaluation: Result | undefined;
-    #baseRevision = 0;
-    #dirty = false;
-    #busy = false;
     #tab: Tab = "sheet";
-    #message = "";
-    #epoch = 0;
     #catalogs = new Map<string, CatalogRecord[]>();
     #dialog: HTMLDialogElement | undefined;
-    #timer: ReturnType<typeof setTimeout> | undefined;
-    #saving: Promise<void> | undefined;
-    #attempt: SaveAttempt | undefined;
-    #command: CommandAttempt | undefined;
-    #saveIssues: string[] = [];
-    #ruleNotes: RuleNote[] = [];
-    /** Saved selections the last save removed because the rules no longer allow them. */
-    #withdrawn: Difference[] = [];
-    #changeVersion = 0;
-    #blocked = false;
     #layout: Layout = "compact";
     #builderNav: BuilderNavigation = { tab: "character", target: "", open: true };
     #spellPickers = new Map<string, SpellPickerState>();
@@ -192,30 +175,20 @@ export function defineCharacterElement(
         this.#frame.reset();
       }
       if (this.isConnected && previous?.host.key !== value.host.key) {
-        this.#epoch++;
-        this.#pending = undefined;
-        this.#saving = undefined;
-        this.#attempt = undefined;
-        this.#command = undefined;
-        this.#changeVersion++;
-        this.#busy = false;
-        this.#response = undefined;
-        this.#evaluation = undefined;
+        this.#session.reset();
         this.#catalogs.clear();
         this.#dialog?.close();
-        clearTimeout(this.#timer);
         void this.#load();
       } else this.#render();
     }
     connectedCallback(): void {
       this.#controls = this.#runtime.enhance(this);
-      this.#pending = this.#context?.edits.handoff?.take();
+      this.#session.connect(this.#context?.edits.handoff?.take());
       this.classList.add("addon-dnd-character", "addon-dnd-sheets");
-      this.#busy = false;
       this.#unsubscribe = this.#runtime.client.subscribe(() => {
         clearTimeout(this.#refreshTimer);
         this.#refreshTimer = setTimeout(() => {
-          void this.#refreshSaved();
+          void this.#session.refresh();
         }, 250);
       });
       void this.#load();
@@ -224,89 +197,67 @@ export function defineCharacterElement(
       this.#frame.disconnect();
       this.#controls?.dispose();
       this.#controls = undefined;
-      this.#epoch++;
-      this.#saving = undefined;
-      this.#attempt = undefined;
-      this.#command = undefined;
-      this.#changeVersion++;
+      this.#session.disconnect();
       this.#unsubscribe?.();
       clearTimeout(this.#refreshTimer);
-      clearTimeout(this.#timer);
       this.#dialog?.close();
       this.#context?.edits.set({ dirty: false, saving: false });
     }
     get #key(): string {
       return this.#context?.host.key ?? "";
     }
+    get #saved(): SavedCharacter | undefined {
+      return this.#session.state.saved;
+    }
+    get #input(): Inputs {
+      return this.#session.state.input;
+    }
+    get #evaluation(): Result | undefined {
+      return this.#session.state.evaluation;
+    }
     get #editable(): boolean {
-      return this.#context?.host.canEdit === true && !this.#busy && !this.#command;
+      const { busy, command } = this.#session.state;
+      return this.#context?.host.canEdit === true && !busy && !command;
     }
     get #name(): string {
       return text(object(this.#context?.host.value)["name"], "Character");
     }
-    #base(operation: string): Omit<Request, "contractVersion"> {
-      return {
-        key: this.#key,
-        expectedRevision: this.#baseRevision,
-        operation,
-        operationId: newId(),
-      };
-    }
-    async #call(method: string, request: Omit<Request, "contractVersion">): Promise<Response> {
-      const epoch = this.#epoch,
-        response = await this.#runtime.client.call(method, request);
-      if (epoch !== this.#epoch || !this.isConnected)
-        throw new Error("The character view changed before the request completed.");
-      return response;
-    }
-    async #guard(action: () => Promise<void>): Promise<void> {
-      if (this.#busy) return;
+    /** A session request started: disable the controls until it ends. */
+    #busyStarted(): () => void {
       const focused =
         document.activeElement instanceof HTMLElement && this.contains(document.activeElement)
           ? document.activeElement
           : undefined;
       const focusKey = focused?.dataset["focusKey"];
-      const epoch = this.#epoch;
-      this.#busy = true;
       this.setAttribute("aria-busy", "true");
       this.#publish();
       this.#status();
       this.#syncBusyButtons();
-      if (!this.#response) this.#render();
-      try {
-        await action();
-      } catch (error) {
-        if (epoch === this.#epoch && !this.#runtime.client.signal.aborted && this.isConnected)
-          this.#message =
-            error instanceof Error
-              ? error.message
-              : "The character request failed. Your edit has not been saved.";
-      } finally {
-        if (epoch === this.#epoch) {
-          // Native disabling can blur the initiating control. Restore its stable
-          // target only when focus was lost, never after the user moved elsewhere.
-          const lostFocus = document.activeElement === document.body;
-          this.#busy = false;
-          this.removeAttribute("aria-busy");
-          this.#publish();
-          this.#syncBusyButtons();
-          this.#render();
-          if (lostFocus && focusKey && !this.#command)
-            restoreControlFocus(
-              this.querySelector<HTMLElement>('[data-focus-key="' + CSS.escape(focusKey) + '"]') ??
-                undefined,
-            );
-        }
-      }
+      if (!this.#saved) this.#render();
+      return () => {
+        // Native disabling can blur the initiating control. Restore its stable
+        // target only when focus was lost, never after the user moved elsewhere.
+        const lostFocus = document.activeElement === document.body;
+        this.removeAttribute("aria-busy");
+        this.#publish();
+        this.#syncBusyButtons();
+        this.#render();
+        if (lostFocus && focusKey && !this.#session.state.command)
+          restoreControlFocus(
+            this.querySelector<HTMLElement>('[data-focus-key="' + CSS.escape(focusKey) + '"]') ??
+              undefined,
+          );
+      };
     }
     #syncBusyButtons(): void {
+      const { busy } = this.#session.state;
       for (const control of this.querySelectorAll<
         HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement
       >("button,input,select,textarea")) {
-        if (this.#busy && !control.disabled) {
+        if (busy && !control.disabled) {
           control.dataset["characterBusy"] = "";
           control.disabled = true;
-        } else if (!this.#busy && control.hasAttribute("data-character-busy")) {
+        } else if (!busy && control.hasAttribute("data-character-busy")) {
           delete control.dataset["characterBusy"];
           control.disabled = false;
         }
@@ -314,53 +265,19 @@ export function defineCharacterElement(
     }
     async #load(): Promise<void> {
       if (!this.#key) return;
-      const epoch = ++this.#epoch;
+      const view = this.#session.begin(this.#key);
       let recovered = false;
-      await this.#guard(async () => {
-        const response = await this.#call("load", { key: this.#key });
-        if (epoch !== this.#epoch || !this.isConnected) return;
-        if (response.status !== "ready" && response.status !== "unavailable")
-          throw new Error(response.message);
-        const pending =
-          this.#pending === undefined ? undefined : readCharacterPending(this.#pending);
-        this.#command = undefined;
-        this.#response = response;
-        this.#evaluation = response.evaluation;
-        this.#input = structuredClone(response.state?.inputs ?? blank());
-        this.#baseRevision = response.revision;
-        this.#baseInputs = structuredClone(this.#input);
-        this.#dirty = false;
-        this.#attempt = undefined;
-        this.#saveIssues = [];
-        this.#withdrawn = [];
-        this.#message = response.message;
-        this.#layout = preferredLayout(localStorage, response.actorId, this.#key);
-        this.#blocked = false;
-        if (!response.state) this.#tab = "builder";
-        if (
-          pending &&
-          pending.key === this.#key &&
-          pending.actorId === response.actorId &&
-          pending.role === response.role
-        ) {
+      await this.#session.guard(async () => {
+        const loaded = await this.#session.read();
+        this.#layout = preferredLayout(localStorage, loaded.saved.actorId, this.#key);
+        if (!loaded.saved.state) this.#tab = "builder";
+        if (loaded.recovered) {
           recovered = true;
-          this.#input = pending.inputs;
-          this.#baseInputs = pending.base;
-          this.#baseRevision = pending.revision;
-          this.#dirty = pending.dirty;
-          this.#changeVersion = pending.changeVersion;
-          this.#attempt = pending.attempt;
-          this.#command = pending.command;
-          this.#tab = pending.tab;
-          this.#builderNav = pending.builder;
-          this.#blocked = this.#dirty;
-          this.#evaluation = undefined;
-          this.#message =
-            "The character reconnected. Your pending changes are still on this page. Review them before retrying.";
+          this.#tab = loaded.recovered.tab;
+          this.#builderNav = loaded.recovered.builder;
         }
-        this.#pending = undefined;
         // Unavailable rules leave the saved projection authoritative; catalog failures must not replace that explanation.
-        if (response.status === "unavailable") {
+        if (loaded.saved.status === "unavailable") {
           this.#catalogs.clear();
           return;
         }
@@ -380,91 +297,25 @@ export function defineCharacterElement(
         const results = await Promise.allSettled(
           kinds.map((kind) => this.#runtime.client.catalog(kind)),
         );
-        if (epoch !== this.#epoch || !this.isConnected) return;
+        if (!view.current()) return;
         results.forEach((result, index) => {
           if (result.status === "fulfilled") this.#catalogs.set(kinds[index]!, result.value);
         });
         if (results.some((result) => result.status === "rejected") && !recovered)
-          this.#message =
-            "Some source catalogs could not be loaded. The saved character remains available; reload to retry.";
+          this.#session.inform(
+            "Some source catalogs could not be loaded. The saved character remains available; reload to retry.",
+          );
       });
-      if (recovered && epoch === this.#epoch && this.isConnected)
+      if (recovered && view.current())
         this.querySelector<HTMLElement>("[data-character-status]")?.focus();
     }
     #publish(): void {
-      const edits = this.#context?.edits;
-      edits?.set({
-        dirty: this.#dirty || !!this.#command || this.#pending !== undefined,
-        saving: this.#busy || !!this.#saving,
-      });
-      const pending: CharacterPending | undefined =
-        this.#response && (this.#dirty || this.#command)
-          ? {
-              version: "character-pending.v1",
-              key: this.#key,
-              actorId: this.#response.actorId,
-              role: this.#response.role,
-              inputs: this.#input,
-              base: this.#baseInputs,
-              revision: this.#baseRevision,
-              dirty: this.#dirty,
-              changeVersion: this.#changeVersion,
-              tab: this.#tab,
-              builder: this.#builderNav,
-              ...(this.#attempt ? { attempt: this.#attempt } : {}),
-              ...(this.#command ? { command: this.#command } : {}),
-            }
-          : undefined;
-      edits?.handoff?.checkpoint(this.#pending ?? pending);
+      const edits = this.#context?.edits,
+        { dirty, saving, pending } = this.#session.checkpoint(this.#tab, this.#builderNav);
+      edits?.set({ dirty, saving });
+      edits?.handoff?.checkpoint(pending);
     }
-    async #refreshSaved(force = false): Promise<void> {
-      if (this.#busy || this.#saving || this.#dirty || this.#command || !this.#response) return;
-      const version = this.#changeVersion;
-      try {
-        const response = await this.#call("load", { key: this.#key });
-        if (
-          version !== this.#changeVersion ||
-          this.#dirty ||
-          this.#command ||
-          this.#busy ||
-          this.#saving ||
-          (!force &&
-            response.revision === this.#response.revision &&
-            response.status === this.#response.status &&
-            response.rulesChanged === this.#response.rulesChanged)
-        )
-          return;
-        // A replay receipt confirms persistence before this guidance read.
-        // Keep its acknowledgement when the read has no newer state or warning.
-        const keepAcknowledgement =
-          this.#message === "Saved" &&
-          response.revision === this.#baseRevision &&
-          response.status === "ready" &&
-          !response.rulesChanged &&
-          !response.message;
-        this.#accept(response);
-        if (keepAcknowledgement) this.#message = "Saved";
-        this.#render();
-      } catch {
-        /* The next change still uses optimistic revision checks. */
-      }
-    }
-    #changed = (): void => {
-      if (this.#command) return;
-      this.#dirty = true;
-      this.#changeVersion++;
-      this.#blocked = false;
-      this.#saveIssues = [];
-      this.#ruleNotes = [];
-      this.#withdrawn = [];
-      this.#message = "Saving…";
-      this.#publish();
-      this.#status();
-      clearTimeout(this.#timer);
-      this.#timer = setTimeout(() => {
-        void this.#flush();
-      }, 250);
-    };
+    #changed = (): void => this.#session.changed();
     #status(): void {
       const node = this.querySelector<HTMLElement>("[data-character-status]");
       if (!node) return;
@@ -482,17 +333,19 @@ export function defineCharacterElement(
       } else if (node.parentElement !== workspace) workspace.prepend(node);
     }
     #saveFeedback(node: HTMLElement): void {
-      node.replaceChildren(el("span", this.#feedback(this.#message)));
-      node.dataset["uiState"] = this.#command
-        ? this.#busy
+      const { message, command, busy, blocked, dirty, attempt, saveIssues, ruleNotes, withdrawn } =
+        this.#session.state;
+      node.replaceChildren(el("span", this.#feedback(message)));
+      node.dataset["uiState"] = command
+        ? busy
           ? "loading"
           : "error"
-        : this.#blocked || this.#ruleNotes.length
+        : blocked || ruleNotes.length
           ? "error"
-          : this.#dirty
+          : dirty
             ? "loading"
             : "success";
-      if (this.#command && !this.#busy) {
+      if (command && !busy) {
         node.append(
           el(
             "p",
@@ -501,49 +354,39 @@ export function defineCharacterElement(
             ),
           ),
         );
-        if (this.#command.request.grant)
-          node.append(
-            el("p", this.#command.request.grant.name + " · " + this.#command.request.grant.reason),
-          );
-        if (this.#command.retry)
+        if (command.request.grant)
+          node.append(el("p", command.request.grant.name + " · " + command.request.grant.reason));
+        if (command.retry)
           node.append(
             button(this.#t("Retry"), async () => {
-              await this.#sendCommand();
+              await this.#session.resend();
             }),
           );
         node.append(
           el(
             "p",
             this.#t(
-              this.#command.retry
+              command.retry
                 ? "Retry sends the same action safely. Checking the saved character ends this retry and does not undo any saved action."
                 : "Check the saved character before deciding whether to repeat the action.",
             ),
           ),
           button(this.#t("Check saved character"), () => this.#reloadSaved()),
         );
-      } else if (this.#blocked && this.#dirty) {
+      } else if (blocked && dirty) {
         node.append(
           el(
             "p",
             this.#t("Your changes are still on this page and have not been confirmed saved."),
           ),
         );
-        if (this.#saveIssues.length)
-          node.append(
-            el("ul", ...this.#saveIssues.map((message) => el("li", this.#feedback(message)))),
-          );
-        if (this.#response?.rulesChanged && !this.#attempt)
+        if (saveIssues.length)
+          node.append(el("ul", ...saveIssues.map((issue) => el("li", this.#feedback(issue)))));
+        if (this.#saved?.rulesChanged && !attempt)
           node.append(button(this.#t("Review changed rules"), () => this.#reviewRules()));
-        else
-          node.append(
-            button(this.#t("Retry"), () => {
-              this.#blocked = false;
-              return this.#flush();
-            }),
-          );
+        else node.append(button(this.#t("Retry"), () => this.#session.retry()));
         node.append(button(this.#t("Reload saved character"), () => this.#reloadSaved()));
-      } else if (this.#response?.rulesChanged && this.#editable) {
+      } else if (this.#saved?.rulesChanged && this.#editable) {
         // Every play control waits for the new rules; say so on every tab,
         // not only in Tools where they are adopted.
         node.dataset["uiState"] = "info";
@@ -552,7 +395,7 @@ export function defineCharacterElement(
         );
         if (this.#tab !== "tools")
           node.append(button(this.#t("Review changed rules"), () => this.#reviewRules()));
-      } else if (this.#withdrawn.length && !this.#dirty) {
+      } else if (withdrawn.length && !dirty) {
         node.append(
           el(
             "p",
@@ -560,12 +403,12 @@ export function defineCharacterElement(
               "The current rules no longer allow these saved selections, so they were removed:",
             ),
           ),
-          comparisonView(this.#withdrawn, undefined, this.#context?.host.locale),
+          comparisonView(withdrawn, undefined, this.#context?.host.locale),
         );
       }
       node.dataset["quiet"] = String(
         node.childElementCount === 1 &&
-          ["", "Saved", "Saving…"].includes(this.#message) &&
+          ["", "Saved", "Saving…"].includes(message) &&
           ["success", "loading"].includes(node.dataset["uiState"]),
       );
     }
@@ -576,9 +419,10 @@ export function defineCharacterElement(
       this.querySelector<HTMLElement>('[data-focus-key="adopt-rules"]')?.focus();
     }
     async #reloadSaved(): Promise<void> {
-      if (this.#busy || this.#saving) return;
+      const { busy, saving, command, dirty } = this.#session.state;
+      if (busy || saving) return;
       if (
-        this.#command &&
+        command &&
         !confirm(
           this.#t(
             "Check the saved character and end this retry? Any action already saved will remain. Review the result before repeating it.",
@@ -587,158 +431,11 @@ export function defineCharacterElement(
       )
         return;
       if (
-        this.#dirty &&
+        dirty &&
         !confirm(this.#t("Discard the unsaved character changes and reload the saved character?"))
       )
         return;
-      clearTimeout(this.#timer);
       await this.#load();
-    }
-    #accept(response: Response): void {
-      this.#response = { ...this.#response, ...response };
-      this.#baseRevision = response.revision;
-      this.#evaluation = response.evaluation;
-      this.#input = structuredClone(response.state?.inputs ?? blank());
-      this.#baseInputs = structuredClone(this.#input);
-      this.#dirty = false;
-      this.#blocked = false;
-      this.#saveIssues = [];
-      this.#ruleNotes = [];
-      this.#withdrawn = [];
-      this.#attempt = undefined;
-      this.#message = response.message;
-      this.#publish();
-    }
-    async #flush(): Promise<void> {
-      if (this.#saving) return this.#saving;
-      if (!this.#dirty || this.#blocked || this.#command || !this.isConnected) return;
-      this.#message = "Saving…";
-      this.#saveIssues = [];
-      this.#status();
-      const epoch = this.#epoch;
-      const run = async (): Promise<void> => {
-        while (this.#dirty && !this.#blocked && this.isConnected && epoch === this.#epoch) {
-          // Keep the exact request until a response establishes its outcome, even
-          // when newer input arrives while an earlier reply is lost.
-          const attempt = (this.#attempt ??= {
-            request: { ...this.#base("build"), inputs: structuredClone(this.#input) },
-            base: structuredClone(this.#baseInputs),
-            version: this.#changeVersion,
-          });
-          const { version, base, request } = attempt,
-            inputs = request.inputs;
-          this.#publish();
-          const response = await this.#call("save", request);
-          this.#attempt = undefined;
-          if (response.status === "conflict" && response.state) {
-            const merged = mergeCharacter(base, this.#input, response.state.inputs);
-            if (merged) {
-              this.#response = { ...this.#response, ...response };
-              this.#baseRevision = response.revision;
-              this.#baseInputs = structuredClone(response.state.inputs);
-              this.#input = merged;
-              this.#render();
-              continue;
-            }
-            this.#blocked = true;
-            this.#message =
-              "This character was edited elsewhere. Your pending input remains on this page. Reload the character before continuing.";
-            this.#status();
-            break;
-          }
-          if (response.evaluation) this.#evaluation = response.evaluation;
-          if (response.status !== "ready" || !response.state) {
-            // A too-large request was never evaluated, so it carries no rules state.
-            if (response.status !== "too-large")
-              this.#response = { ...this.#response, ...response };
-            this.#blocked = true;
-            this.#message = response.message;
-            if (
-              (response.status === "invalid" || response.status === "too-large") &&
-              version !== this.#changeVersion
-            ) {
-              this.#blocked = false;
-              continue;
-            }
-            const blockers = response.status === "invalid" ? saveBlockers(response.evaluation) : [];
-            this.#saveIssues = blockers.map((issue) => String(issue["message"]));
-            this.#ruleNotes = blockers.map((issue) => ({
-              message: String(issue["message"]),
-              target: String(issue["target"]),
-            }));
-            this.#render();
-            break;
-          }
-          this.#response = { ...this.#response, ...response };
-          this.#baseRevision = response.revision;
-          this.#baseInputs = structuredClone(response.state.inputs);
-          this.#evaluation = response.evaluation;
-          // Incorporate server corrections without replacing objects bound to active fields.
-          if (this.#input.play.asOf === inputs.play.asOf)
-            this.#input.play.asOf = response.state.inputs.play.asOf;
-          if (this.#input.play.hp === inputs.play.hp)
-            this.#input.play.hp = response.state.inputs.play.hp;
-          this.#input.build.choices = reconcileCharacterChoices(
-            inputs.build.choices,
-            this.#input.build.choices,
-            response.state.inputs.build.choices,
-          );
-          // Maps the worker may withdraw entries from after a structural edit.
-          for (const select of [
-            (value: Inputs) => value.build.subclasses,
-            (value: Inputs) => value.build.spells.cantrips,
-            (value: Inputs) => value.build.spells.spellbook,
-            (value: Inputs) => value.build.spells.grantChoices,
-            (value: Inputs) => value.build.spells.castingAbilities,
-            (value: Inputs) => value.play.preparedSpells,
-            (value: Inputs) => value.play.resourceUses,
-            (value: Inputs) => value.play.activeFeatures,
-          ] as ((value: Inputs) => Record<string, unknown>)[])
-            reconcileCharacterMap(
-              select(inputs),
-              select(this.#input),
-              select(response.state.inputs),
-            );
-          if (version === this.#changeVersion) {
-            this.#dirty = false;
-            this.#withdrawn = response.withdrawn ?? [];
-            this.#message = "Saved";
-            const focused = document.activeElement;
-            if (
-              focused instanceof HTMLTextAreaElement ||
-              (focused instanceof HTMLInputElement &&
-                focused.type === "text" &&
-                focused.getAttribute("role") !== "combobox")
-            ) {
-              this.#input.play.asOf = response.state.inputs.play.asOf;
-              this.#status();
-            } else {
-              this.#input = structuredClone(response.state.inputs);
-              this.#render();
-            }
-          }
-        }
-      };
-      this.#saving = run()
-        .catch((error) => {
-          if (epoch === this.#epoch && this.isConnected) {
-            this.#blocked = true;
-            this.#message =
-              error instanceof Error
-                ? error.message
-                : "Could not save. Check your connection and retry.";
-            this.#render();
-          }
-        })
-        .finally(() => {
-          if (epoch === this.#epoch) {
-            this.#saving = undefined;
-            this.#publish();
-            if (!this.#dirty && !this.#evaluation) void this.#refreshSaved(true);
-          }
-        });
-      this.#publish();
-      return this.#saving;
     }
     #view(): BuildView {
       return {
@@ -746,14 +443,14 @@ export function defineCharacterElement(
         locale: this.#context?.host.locale ?? "en",
         input: this.#input,
         evaluation: this.#evaluation,
-        policy: this.#response?.policy ?? {},
+        policy: this.#session.state.policy,
         catalogs: this.#catalogs,
         changed: this.#changed,
         navigate: (tab) => {
           this.#builderNav.tab = tab;
         },
         refresh: () => this.#render(),
-        act: (change) => this.#perform({ ...this.#base("play"), change }),
+        act: (change) => this.#perform({ ...this.#session.request("play"), change }),
       };
     }
     #render(): void {
@@ -781,11 +478,12 @@ export function defineCharacterElement(
           : undefined;
       const root = styled("section", "dnd-sheet-shell dse-layout-" + this.#layout);
       this.dataset["layout"] = this.#layout;
-      if (!this.#response) {
-        const status = el("p", this.#feedback(this.#message || "Loading character…"));
+      if (!this.#saved) {
+        const { message, busy } = this.#session.state;
+        const status = el("p", this.#feedback(message || "Loading character…"));
         status.setAttribute("role", "status");
         root.append(status);
-        if (!this.#busy) root.append(button(this.#t("Reload saved character"), () => this.#load()));
+        if (!busy) root.append(button(this.#t("Reload saved character"), () => this.#load()));
         for (const child of Array.from(this.children)) if (child !== dialog) child.remove();
         this.prepend(root);
         return;
@@ -901,7 +599,12 @@ export function defineCharacterElement(
         (restore instanceof HTMLTextAreaElement || restore instanceof HTMLInputElement)
       )
         restore.setSelectionRange(selection.start, selection.end);
-      showRuleNotes(this, this.#ruleNotes, this.#t("Against the rules"), this.#feedback);
+      showRuleNotes(
+        this,
+        this.#session.state.ruleNotes,
+        this.#t("Against the rules"),
+        this.#feedback,
+      );
       if (this.#layout === "compact") this.#frame.connect(root, this.#tab);
     }
     #tabPanel(tab: Tab): HTMLElement {
@@ -919,7 +622,7 @@ export function defineCharacterElement(
         content.append(
           this.#layout === "classic"
             ? vitals(view)
-            : compactSpellBar(view, this.#response?.state ? actions.prepare : undefined),
+            : compactSpellBar(view, this.#saved?.state ? actions.prepare : undefined),
           this.#spells(),
         );
       else if (tab === "equipment") content.append(compactEquipment(view, actions));
@@ -927,7 +630,7 @@ export function defineCharacterElement(
         content.append(compactSheet(view, tab === "combat", actions));
       else {
         const main = styled("div", "dse-cols-main", vitals(view));
-        if (!this.#response?.state)
+        if (!this.#saved?.state)
           main.append(
             panel(
               this.#t("Create your character"),
@@ -952,27 +655,27 @@ export function defineCharacterElement(
       return content;
     }
     get #access(): { edit: boolean; command: boolean } {
-      return sheetAccess(this.#editable, this.#response);
+      return sheetAccess(this.#editable, this.#saved);
     }
     #sheetView(): SheetView {
       const { edit: editing, command: commands } = this.#access;
-      const canPlay = commands && this.#evaluation?.ready === true && !!this.#response?.state;
+      const canPlay = commands && this.#evaluation?.ready === true && !!this.#saved?.state;
       return {
         locale: this.#context?.host.locale ?? "en",
         layout: this.#layout,
         name: this.#name,
         input: this.#input,
-        projection: this.#response?.state?.projection,
+        projection: this.#saved?.state?.projection,
         catalogs: this.#catalogs,
         equipment:
-          this.#response?.status === "unavailable"
+          this.#saved?.status === "unavailable"
             ? {}
             : object(this.#evaluation?.guidance["equipment"]),
         editing,
         canPlay,
         canEditHands:
           commands &&
-          !!this.#response?.state &&
+          !!this.#saved?.state &&
           object(this.#evaluation?.guidance["authoredPlay"])["hands"] === true,
         hands: commands ? object(this.#evaluation?.guidance["hands"]) : {},
         canEditInspiration:
@@ -991,9 +694,9 @@ export function defineCharacterElement(
         // A rejected HP value must remain correctable while other play actions are blocked.
         canEditHP:
           editing &&
-          !!this.#response?.state &&
+          !!this.#saved?.state &&
           (canPlay ||
-            (this.#dirty &&
+            (this.#session.state.dirty &&
               rows(this.#evaluation?.guidance["saveIssues"]).some(
                 (issue) => issue["target"] === "hp",
               ))),
@@ -1001,7 +704,7 @@ export function defineCharacterElement(
         refresh: () => this.#render(),
         addItem: () => this.#equipment(),
         fillSlot: (slot) => this.#slot(slot),
-        act: (change) => this.#perform({ ...this.#base("play"), change }),
+        act: (change) => this.#perform({ ...this.#session.request("play"), change }),
       };
     }
     #equipment(): void {
@@ -1011,10 +714,11 @@ export function defineCharacterElement(
           this.#context?.host.locale ?? "en",
           (items, stacks) => {
             if (!appendEquipment(this.#input, items, stacks)) {
-              this.#message = this.#t(
-                "The selected stack changed. Close and reopen Add item to choose its current destination.",
+              this.#session.inform(
+                this.#t(
+                  "The selected stack changed. Close and reopen Add item to choose its current destination.",
+                ),
               );
-              this.#status();
               return;
             }
             this.#changed();
@@ -1055,10 +759,11 @@ export function defineCharacterElement(
             this.#context?.host.locale ?? "en",
             (items, stacks) => {
               if (!appendEquipment(this.#input, items, stacks)) {
-                this.#message = this.#t(
-                  "The selected stack changed. Close and reopen Add item to choose its current destination.",
+                this.#session.inform(
+                  this.#t(
+                    "The selected stack changed. Close and reopen Add item to choose its current destination.",
+                  ),
                 );
-                this.#status();
                 return;
               }
               // The first added entry opens in the window's editor.
@@ -1116,7 +821,8 @@ export function defineCharacterElement(
           restWindow(this.#sheetView(), kind, recovery(), async () => {
             await this.#sheetView().act({ operation: "rest", rest: kind });
             // A refused or uncertain rest keeps its window, where the note points.
-            if (!this.#command && !this.#ruleNotes.length) this.#dialog?.close();
+            const { command, ruleNotes } = this.#session.state;
+            if (!command && !ruleNotes.length) this.#dialog?.close();
           }),
         ],
         "rest/" + kind,
@@ -1368,7 +1074,7 @@ export function defineCharacterElement(
               this.#layout = value as Layout;
               try {
                 localStorage.setItem(
-                  "dnd-character-layout:" + this.#response?.actorId + ":" + this.#key,
+                  "dnd-character-layout:" + this.#saved?.actorId + ":" + this.#key,
                   value,
                 );
               } catch {
@@ -1381,17 +1087,17 @@ export function defineCharacterElement(
           ),
         ),
       );
-      if (this.#response?.state)
+      if (this.#saved?.state)
         tools.append(
           button(
             this.#t("Export character"),
-            () => download(this.#key + ".character.json", exportCharacter(this.#response!.state!)),
+            () => download(this.#key + ".character.json", exportCharacter(this.#saved!.state!)),
             false,
             "export-character",
           ),
           button(
             this.#t("Print / PDF"),
-            () => this.#print(this.#response!.state!),
+            () => this.#print(this.#saved!.state!),
             false,
             "print-character",
           ),
@@ -1406,7 +1112,7 @@ export function defineCharacterElement(
         button(
           this.#t("Reload character"),
           () => this.#reloadSaved(),
-          this.#busy || !!this.#saving,
+          this.#session.state.busy || this.#session.state.saving,
           "reload-character",
         ),
       );
@@ -1415,26 +1121,27 @@ export function defineCharacterElement(
         el(
           "p",
           this.#t(
-            this.#response?.status === "unavailable"
+            this.#saved?.status === "unavailable"
               ? "Compatible rules are unavailable. Saved values and notes remain accessible."
-              : this.#response?.rulesChanged
+              : this.#saved?.rulesChanged
                 ? "The rules changed. Adopt them to save edits and use play actions."
                 : "Rules are connected.",
           ),
         ),
       );
-      if (this.#response?.rulesChanged) {
-        if (this.#dirty)
+      if (this.#saved?.rulesChanged) {
+        const { dirty, attempt } = this.#session.state;
+        if (dirty)
           provider.append(el("p", this.#t("Adopting rules will also save your pending changes.")));
         const adopt = button(
-          this.#t(this.#dirty ? "Adopt rules and save pending changes" : "Adopt current rules"),
+          this.#t(dirty ? "Adopt rules and save pending changes" : "Adopt current rules"),
           () =>
             this.#perform({
-              ...this.#base("adopt-rules"),
+              ...this.#session.request("adopt-rules"),
               inputs: structuredClone(this.#input),
               adoptRules: true,
             }),
-          !this.#editable || !!this.#attempt,
+          !this.#editable || !!attempt,
         );
         adopt.dataset["focusKey"] = "adopt-rules";
         provider.append(adopt);
@@ -1453,7 +1160,7 @@ export function defineCharacterElement(
           () => {
             this.#changed();
             this.#render();
-            void this.#flush();
+            void this.#session.flush();
           },
           this.#context?.host.locale ?? "en",
         ),
@@ -1547,7 +1254,7 @@ export function defineCharacterElement(
               this.#input.build.spells.spellbook[id] = next;
               this.#changed();
               this.#render();
-              void this.#flush();
+              void this.#session.flush();
             };
             order.append(
               el(
@@ -1643,20 +1350,20 @@ export function defineCharacterElement(
       const { edit, command } = this.#access;
       for (const grant of this.#input.grants) {
         root.append(el("p", grant.name + " · " + grant.reason));
-        if (grant.active && this.#response?.role === "dm")
+        if (grant.active && this.#saved?.role === "dm")
           root.append(
             button(this.#t("Amend {0}", [grant.name]), () => this.#grant(grant), !edit),
             button(this.#t("Revoke {0}", [grant.name]), () => this.#revoke(grant), !edit),
           );
       }
-      if (this.#response?.role === "dm")
+      if (this.#saved?.role === "dm")
         root.append(button(this.#t("Give a DM grant"), () => this.#grant(), !command));
       return root;
     }
     #revoke(grant: Grant): void {
       // Under changed rules the revocation waits with the other edits; adopting
       // the rules saves it.
-      if (this.#response?.rulesChanged) {
+      if (this.#saved?.rulesChanged) {
         if (changeGrant(this.#input, grant.id)) {
           this.#changed();
           this.#render();
@@ -1664,7 +1371,7 @@ export function defineCharacterElement(
         return;
       }
       void this.#perform({
-        ...this.#base("revoke-grant"),
+        ...this.#session.request("revoke-grant"),
         grantId: grant.id,
         inputs: structuredClone(this.#input),
       });
@@ -1680,7 +1387,7 @@ export function defineCharacterElement(
           async (grant) => {
             // Under changed rules an amendment waits with the other edits;
             // adopting the rules saves it.
-            if (previous && this.#response?.rulesChanged) {
+            if (previous && this.#saved?.rulesChanged) {
               if (!changeGrant(this.#input, previous.id, grant))
                 return this.#feedback("The active grant to amend was not found.");
               this.#changed();
@@ -1688,196 +1395,46 @@ export function defineCharacterElement(
               return "";
             }
             const request = {
-              ...this.#base(previous ? "amend-grant" : "grant"),
+              ...this.#session.request(previous ? "amend-grant" : "grant"),
               inputs: structuredClone(this.#input),
               grant,
               ...(previous ? { grantId: previous.id } : {}),
             };
-            const blocker = await this.#commandReady(request);
+            const blocker = await this.#session.ready(request);
             if (blocker) return this.#feedback(blocker);
             // A refused or uncertain grant keeps its dialog; the status says why.
-            if (await this.#send(request)) this.#dialog?.close();
+            if (await this.#session.send(request)) this.#dialog?.close();
             return "";
           },
           this.#context?.host.locale,
         ),
       );
     }
-    async #perform(request: Omit<Request, "contractVersion">): Promise<void> {
+    async #perform(request: CharacterRequest): Promise<void> {
       const trigger = document.activeElement;
       const focusKey =
         trigger instanceof HTMLElement && this.contains(trigger)
           ? trigger.dataset["focusKey"]
           : undefined;
-      if (await this.#commandReady(request)) return;
-      await this.#send(request, focusKey);
-    }
-    /**
-     * Waits for pending saves, then answers why a command cannot start now, or
-     * "" when it can.
-     */
-    async #commandReady(request: Omit<Request, "contractVersion">): Promise<string> {
-      const epoch = this.#epoch;
-      // Explicit adoption saves the preserved input with new rules. A rejected
-      // autosave cannot precede it, and an uncertain request must be resolved first.
-      const adoptingRules =
-        request.operation === "adopt-rules" &&
-        request.adoptRules === true &&
-        this.#response?.rulesChanged === true;
-      const blocker = (): string =>
-        epoch !== this.#epoch || request.key !== this.#key
-          ? "The character view changed. Try again."
-          : commandBlocker(
-              {
-                canEdit: this.#context?.host.canEdit === true,
-                busy: this.#busy,
-                command: !!this.#command,
-                attempt: !!this.#attempt,
-                dirty: this.#dirty,
-              },
-              adoptingRules,
-            );
-      if (!this.#editable) return blocker();
-      await this.#saving;
-      if (!this.#editable || epoch !== this.#epoch || request.key !== this.#key) return blocker();
-      if (!adoptingRules) await this.#flush();
-      return blocker();
-    }
-    /** Sends a command that is ready; answers whether it was saved. */
-    async #send(request: Omit<Request, "contractVersion">, focusKey?: string): Promise<boolean> {
-      clearTimeout(this.#timer);
-      request.expectedRevision = this.#baseRevision;
-      if (request.inputs) request.inputs = structuredClone(this.#input);
-      this.#changeVersion++;
-      this.#ruleNotes = [];
-      this.#command = {
-        method: "save",
-        request: structuredClone(request),
-        retry: true,
-        ...(focusKey === undefined ? {} : { focusKey }),
-      };
-      return this.#sendCommand();
+      if (await this.#session.ready(request)) return;
+      await this.#session.send(request, focusKey);
     }
     /**
      * Opens the replacement review for an import. Answers why it cannot be
      * reviewed instead, so the import dialog keeps the DM's input.
      */
-    async #previewImport(request: Omit<Request, "contractVersion">): Promise<string[]> {
-      const blocker = await this.#commandReady(request);
-      if (blocker) return [blocker];
-      clearTimeout(this.#timer);
-      request.expectedRevision = this.#baseRevision;
-      let problems: string[] = [];
-      await this.#guard(async () => {
-        let response: Response;
-        try {
-          response = await this.#call("preview", request);
-        } catch (error) {
-          problems = [error instanceof Error ? error.message : "The import could not be reviewed."];
-          return;
-        }
-        problems = previewProblems(response);
-        if (problems.length) return;
-        this.#message = response.message;
+    #previewImport(request: CharacterRequest): Promise<string[]> {
+      return this.#session.preview(request, (review: Response) => {
         const content: Node[] = [
           el("p", this.#t("Replace this character with the imported build and play state?")),
-          comparisonView(response.changes ?? [], response.evaluation, this.#context?.host.locale),
+          comparisonView(review.changes ?? [], review.evaluation, this.#context?.host.locale),
           button(this.#t("Replace character"), async () => {
-            if (!this.#editable) return;
-            // Keep the approved token and revision. Retrying must never create or
-            // approve a new preview, even if another editor changes the character.
-            this.#changeVersion++;
-            this.#command = {
-              method: "commit",
-              request: {
-                key: request.key,
-                expectedRevision: response.revision,
-                operationId: request.operationId!,
-                token: response.token!,
-              },
-              retry: true,
-            };
             // A refused or uncertain replacement keeps the review; the status says why.
-            if (await this.#sendCommand()) this.#dialog?.close();
+            if (await this.#session.commit(request, review)) this.#dialog?.close();
           }),
         ];
         this.#open(this.#t("Import character"), content, "heading", "import-character");
       });
-      return problems;
-    }
-    /** Sends the current command; answers whether it was saved. */
-    async #sendCommand(): Promise<boolean> {
-      const attempt = this.#command,
-        epoch = this.#epoch;
-      let reread = false,
-        saved = false;
-      if (!attempt || this.#busy) return false;
-      this.#message = "Saving…";
-      await this.#guard(async () => {
-        try {
-          const response = await this.#call(attempt.method, attempt.request);
-          if (response.status === "ready" && response.state) {
-            this.#command = undefined;
-            this.#accept(response);
-            this.#withdrawn = response.withdrawn ?? [];
-            this.#message = "Saved";
-            saved = true;
-          } else {
-            // The worker answered without saving, so nothing waits on this action.
-            // A changed revision is re-read rather than rebased onto newer inputs.
-            // A too-large request was never evaluated, so it carries no rules state.
-            this.#command = undefined;
-            if (response.status !== "too-large")
-              this.#response = { ...this.#response, ...response };
-            this.#message = response.message;
-            if (response.status === "invalid" || response.status === "too-large")
-              this.#ruleNotes = [
-                {
-                  message: response.message,
-                  ...(attempt.focusKey === undefined ? {} : { focusKey: attempt.focusKey }),
-                },
-              ];
-            if (response.status === "conflict") reread = true;
-          }
-        } catch (error) {
-          if (epoch === this.#epoch && this.isConnected) {
-            const status = Number(object(error)["status"]);
-            const expiredReview =
-              attempt.method === "commit" && status === 409 && object(error)["code"] === "CONFLICT";
-            // A client error other than timeout, conflict or rate limit is a
-            // definite refusal: the service saved nothing. Anything else may
-            // have been saved, so the action waits until it is resolved.
-            const refused =
-              expiredReview || (status >= 400 && status < 500 && ![408, 409, 429].includes(status));
-            if (refused) this.#command = undefined;
-            else attempt.retry = true;
-            this.#message = expiredReview
-              ? "This review is no longer valid. Check the saved character before reviewing another import."
-              : refused
-                ? status === 401 || status === 403
-                  ? "You are not allowed to make this change."
-                  : "The character service refused this action. Nothing was saved."
-                : "The action's outcome could not be confirmed.";
-          }
-        }
-      });
-      if (epoch !== this.#epoch || !this.isConnected) return saved;
-      if (this.#command) this.querySelector<HTMLElement>("[data-character-status]")?.focus();
-      else if (reread) {
-        await this.#refreshSaved(true);
-        if (epoch === this.#epoch) {
-          this.#message =
-            "This character changed in another session. The sheet now shows the saved character; repeat the action if it is still needed.";
-          this.#status();
-        }
-      } else if (!this.#evaluation) {
-        await this.#refreshSaved(true);
-        if (epoch === this.#epoch && !this.#command && !this.#dirty) {
-          this.#message = "Saved";
-          this.#status();
-        }
-      }
-      return saved;
     }
     #open(
       title: string,
@@ -2028,7 +1585,7 @@ export function defineCharacterElement(
       file.addEventListener("change", () => {
         const selected = file.files?.[0];
         if (selected)
-          void this.#guard(async () => {
+          void this.#session.guard(async () => {
             try {
               if (selected.size > 1000000)
                 throw new Error("This character file exceeds the import limit.");
@@ -2045,7 +1602,7 @@ export function defineCharacterElement(
         [
           field(this.#t("Choose a file"), file),
           field(this.#t("Or paste the export"), area),
-          ...(this.#response?.role === "dm"
+          ...(this.#saved?.role === "dm"
             ? [
                 checkbox(
                   this.#t("Authorize imported DM grants as the current DM"),
@@ -2062,13 +1619,13 @@ export function defineCharacterElement(
             try {
               clearError();
               const inputs = parseCharacter(body);
-              if (inputs.grants.length && (this.#response?.role !== "dm" || !authorize))
+              if (inputs.grants.length && (this.#saved?.role !== "dm" || !authorize))
                 throw new Error(
                   "Imported DM grants must be reviewed and authorized by the current DM.",
                 );
               // The review replaces this dialog; until then it keeps the input.
               const problems = await this.#previewImport({
-                ...this.#base("import"),
+                ...this.#session.request("import"),
                 inputs,
                 reauthorizeGrants: authorize,
               });
@@ -2095,8 +1652,7 @@ export function defineCharacterElement(
           try {
             printCharacter(state, this.#name, options, this.#context?.host.locale);
           } catch (error) {
-            this.#message = error instanceof Error ? error.message : "Printing failed.";
-            this.#status();
+            this.#session.inform(error instanceof Error ? error.message : "Printing failed.");
           }
         }),
       ]);
