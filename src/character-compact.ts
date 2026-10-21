@@ -12,8 +12,11 @@ import {
   classValueRows,
   currency,
   featureDCRows,
+  itemProperties,
   movementDetails,
+  playResources,
   recordName,
+  resourceSource,
   savedRule,
   selectionEntries,
   sizeDetails,
@@ -32,13 +35,13 @@ import { handControls } from "./character-hands.js";
 import { quickUse } from "./character-quick-use.js";
 import { packWeight } from "./character-backpack.js";
 import { pinStar } from "./character-item-editor.js";
-import { conditionName } from "./character-conditions.js";
+import { conditionName, grantedConditions } from "./character-conditions.js";
 import { parseHpEntry } from "./character-hp.js";
 import { abilityNames, translator } from "./character-locale.js";
 import type { Reference } from "./character-model.js";
 import { proficiencyGroups } from "./character-proficiencies.js";
 import { rulesTarget } from "./character-rule-notes.js";
-import { slotLabel, spellSourceLabel } from "./character-spells.js";
+import { slotLabel } from "./character-spells.js";
 import {
   button,
   el,
@@ -296,7 +299,7 @@ export function statusRow(
   const concentration = concentrationChip(view);
   if (concentration) root.append(concentration);
   for (const condition of view.input.play.conditions ?? []) {
-    const data = saved.find((row) => row["id"] === condition.id) ?? {},
+    const data = saved.find((row) => row["id"] === condition.id && row["granted"] !== true) ?? {},
       option = options.find((row) => row["id"] === condition.id),
       name = conditionName(
         Object.keys(data).length ? data : (option ?? {}),
@@ -387,6 +390,26 @@ export function statusRow(
       );
       remove.setAttribute("aria-label", t("Remove {0}", [name]));
       chip.append(remove);
+    }
+    root.append(chip);
+  }
+  for (const condition of grantedConditions(view.projection, view.locale)) {
+    const chip = styled(
+      "span",
+      "dsc-chip dsc-condition",
+      rule(condition.name, undefined, undefined, condition.summary || undefined, view.projection),
+    );
+    chip.dataset["conditionId"] = condition.id;
+    chip.dataset["granted"] = "";
+    if (condition.immune) chip.dataset["state"] = "inactive";
+    chip.title = [
+      ...(condition.sources.length ? [t("Granted by {0}", [condition.sources.join(", ")])] : []),
+      ...(condition.immune ? [t("Immune: retained for tracking; its effects are inactive.")] : []),
+    ].join("\n");
+    if (condition.level > 1) {
+      const level = el("b", String(condition.level));
+      level.setAttribute("aria-label", t("Level {0}", [condition.level]));
+      chip.append(level);
     }
     root.append(chip);
   }
@@ -585,7 +608,7 @@ export function limitedUses(view: SheetView): HTMLElement {
         styled("span", "dsc-use-value", value),
       ),
     );
-  for (const resource of rows(sheet["resources"])) {
+  for (const resource of playResources(view.projection)) {
     const key = String(resource["key"]),
       name = text(resource["name"], key),
       maximum = Math.max(0, Number(resource["max"] ?? 0)),
@@ -597,10 +620,8 @@ export function limitedUses(view: SheetView): HTMLElement {
     );
     const recharge = rechargeTag(resource, view.locale);
     if (recharge) label.append(recharge);
-    if (object(resource["source"])["acquisition"])
-      label.append(
-        el("small", spellSourceLabel(resource["source"], view.locale, view.projection?.evidence)),
-      );
+    const source = resourceSource(resource, view.locale, view.projection?.evidence);
+    if (source) label.append(el("small", source));
     const row = styled(
       "div",
       "dsc-use",
@@ -818,7 +839,9 @@ function featureSource(view: SheetView, value: unknown): string {
     .join(" ");
 }
 
-// Features and feats read as a grid of short entries; each name opens its full text.
+// Features and feats read as a grid of short entries; each name opens its full
+// text. The card body is the record's authored excerpt (the compendium's
+// frequently-needed facts), never the whole description.
 function features(view: SheetView): HTMLElement {
   const t = translator(view.locale),
     sheet = view.projection?.sheet ?? {},
@@ -826,9 +849,11 @@ function features(view: SheetView): HTMLElement {
     grid = styled("div", "dsc-feats");
   root.classList.add("dsc-features");
   const entry = (name: string, reference: Reference, source: string): HTMLElement => {
-    const summary = view.projection?.evidence.find(
-      (row) => row.reference.kind === reference.kind && row.reference.id === reference.id,
-    )?.summary;
+    const excerpt = text(
+      view.projection?.evidence.find(
+        (row) => row.reference.kind === reference.kind && row.reference.id === reference.id,
+      )?.facts["excerpt"],
+    );
     return styled(
       "div",
       "dsc-feat",
@@ -838,7 +863,7 @@ function features(view: SheetView): HTMLElement {
         savedRule(view.projection, name, undefined, reference),
         ...(source ? [el("small", source)] : []),
       ),
-      ...(summary ? [el("p", plainDescription(summary))] : []),
+      ...(excerpt ? [el("p", plainDescription(excerpt))] : []),
     );
   };
   for (const feature of rows(sheet["features"])) {
@@ -847,7 +872,8 @@ function features(view: SheetView): HTMLElement {
     grid.append(
       entry(
         text(feature["name"], id) + (count > 1 ? " × " + count : ""),
-        { kind: "feature", id },
+        // A chosen subclass fills its class's slot row with kind "subclass".
+        { kind: text(feature["kind"]) || "feature", id },
         featureSource(view, feature["source"]),
       ),
     );
@@ -881,6 +907,24 @@ function features(view: SheetView): HTMLElement {
     );
   }
   root.append(grid.children.length ? grid : el("p", t("None recorded")));
+  const items = itemProperties(view.projection, view.catalogs);
+  if (items.length) {
+    const list = styled("div", "dsc-feats");
+    for (const item of items)
+      list.append(
+        styled(
+          "div",
+          "dsc-feat",
+          styled(
+            "div",
+            "dsc-feat-head",
+            savedRule(view.projection, item.name, undefined, item.reference),
+          ),
+          ...(item.text ? [el("p", item.text)] : []),
+        ),
+      );
+    root.append(styled("h4", "dsc-feats-heading", t("Item properties")), list);
+  }
   return root;
 }
 
@@ -1569,7 +1613,7 @@ export function restWindow(
 ): HTMLElement {
   const t = translator(view.locale),
     root = styled("div", "dsc-rest-window"),
-    returning = rows(view.projection?.sheet["resources"]).filter((resource) =>
+    returning = playResources(view.projection).filter((resource) =>
       rows(resource["recharge"]).some(
         (row) => kind === "long" || row["on"] === "short" || row["on"] === "shortOrLong",
       ),
@@ -1579,11 +1623,18 @@ export function restWindow(
     const key = String(resource["key"]),
       maximum = Math.max(0, Number(resource["max"] ?? 0)),
       spent = Math.min(maximum, Math.max(0, view.input.play.resourceUses[key] ?? 0)),
-      tag = rechargeTag(resource, view.locale);
+      tag = rechargeTag(resource, view.locale),
+      source = resourceSource(resource, view.locale, view.projection?.evidence);
     list.append(
       el(
         "li",
-        styled("span", "", text(resource["name"], key), ...(tag ? [tag] : [])),
+        styled(
+          "span",
+          "",
+          text(resource["name"], key),
+          ...(tag ? [tag] : []),
+          ...(source ? [el("small", source)] : []),
+        ),
         el("b", maximum - spent + " / " + maximum),
       ),
     );

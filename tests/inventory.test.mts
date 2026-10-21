@@ -6,6 +6,7 @@ import {
   attunementChoice,
   equipmentReason,
   equipmentSlot,
+  inventoryOwnsKey,
   moveEquipment,
   pinQuickUse,
   removeInventoryItem,
@@ -88,6 +89,28 @@ void test("quick use pins exact instances without copying or resetting inventory
     assert.ok(quickUseReason(reason, "en"));
     assert.notEqual(quickUseReason(reason, "cs"), quickUseReason(reason, "en"));
   }
+});
+
+void test("removing an inventory entry drops the uses, toggles and spell picks its item owned", () => {
+  const input = blank();
+  input.play.inventory = [item("card"), item("other")];
+  input.play.resourceUses = { "item:card:uses": 1, "item:other:uses": 1, "channel-divinity": 2 };
+  input.play.activeFeatures = { "item:card:open-sky": true, "feature:rage:rage": true };
+  input.build.spells.grantChoices = {
+    "item:card:cantrip": ["minor-illusion"],
+    "feat:x:pick": ["a"],
+  };
+  input.build.spells.castingAbilities = { "item:card:casting": "WIS", "item:other:casting": "INT" };
+  assert.equal(inventoryOwnsKey(input, "item:card:uses"), true);
+  assert.equal(inventoryOwnsKey(input, "item:car:uses"), false);
+  assert.equal(inventoryOwnsKey(input, "channel-divinity"), false);
+  removeInventoryItem(input, "card");
+  assert.deepEqual(input.play.resourceUses, { "item:other:uses": 1, "channel-divinity": 2 });
+  assert.deepEqual(input.play.activeFeatures, { "feature:rage:rage": true });
+  assert.deepEqual(input.build.spells.grantChoices, { "feat:x:pick": ["a"] });
+  assert.deepEqual(input.build.spells.castingAbilities, { "item:other:casting": "INT" });
+  assert.equal(inventoryOwnsKey(input, "item:card:uses"), false);
+  assert.equal(inventoryOwnsKey(input, "item:other:uses"), true);
 });
 
 void test("both inventory entry points can replace only the occupied exclusive slot", () => {

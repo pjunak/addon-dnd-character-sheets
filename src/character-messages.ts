@@ -950,7 +950,9 @@ export const catalogs = {
     "The import could not be reviewed.": "The import could not be reviewed.",
     "The current rules no longer allow these saved selections, so they were removed:": "The current rules no longer allow these saved selections, so they were removed:",
     "This character is {0} bytes; the rules engine accepts at most {1}. Remove inventory entries or shorten item notes, then try again.": "This character is {0} bytes; the rules engine accepts at most {1}. Remove inventory entries or shorten item notes, then try again.",
-    "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable.": "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable."
+    "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable.": "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable.",
+    "Item properties": "Item properties",
+    "Granted by {0}": "Granted by {0}"
   },
   "cs": {
     "Hands and grip": "Ruce a úchop",
@@ -1902,6 +1904,8 @@ export const catalogs = {
     "The import could not be reviewed.": "Import se nepodařilo zkontrolovat.",
     "The current rules no longer allow these saved selections, so they were removed:": "Současná pravidla tyto uložené volby už nepovolují, proto byly odebrány:",
     "This character is {0} bytes; the rules engine accepts at most {1}. Remove inventory entries or shorten item notes, then try again.": "Tato postava má {0} bajtů; engine pravidel přijme nejvýše {1}. Odeberte položky z inventáře nebo zkraťte jejich poznámky a zkuste to znovu.",
-    "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable.": "Tato postava má {0} bajtů; engine pravidel přijme nejvýše {1}. Uloženou postavu lze nadále číst, tisknout a exportovat."
+    "This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable.": "Tato postava má {0} bajtů; engine pravidel přijme nejvýše {1}. Uloženou postavu lze nadále číst, tisknout a exportovat.",
+    "Item properties": "Vlastnosti předmětů",
+    "Granted by {0}": "Uděluje: {0}"
   }
 } as const;

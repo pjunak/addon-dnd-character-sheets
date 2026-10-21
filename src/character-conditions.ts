@@ -2,6 +2,7 @@ import type { Inputs, Projection, Reference } from "./character-model.js";
 import type { SheetView } from "./character-sheet.js";
 import { object, rows, text } from "./character-client.js";
 import { translator } from "./character-locale.js";
+import { spellSourceLabel } from "./character-spells.js";
 import {
   button,
   combo,
@@ -25,6 +26,45 @@ export function conditionName(
     : text(row["name"], fallback);
 }
 
+/** A condition active items give, such as Fate-Touched from each Cursed Card. */
+export interface GrantedCondition {
+  id: string;
+  name: string;
+  /** How many active items give it. */
+  level: number;
+  summary: string;
+  /** The names of the items that give it. */
+  sources: string[];
+  immune: boolean;
+}
+// Granted conditions are not authored play state: they last while their items
+// are active, so the sheet shows them without a remove or level control.
+export function grantedConditions(
+  projection: Projection | undefined,
+  locale: string,
+): GrantedCondition[] {
+  return rows(projection?.sheet["conditions"])
+    .filter((row) => row["granted"] === true)
+    .map((row) => {
+      const id = text(row["id"]),
+        level = Number(row["level"]);
+      return {
+        id,
+        name: conditionName(row, locale, id),
+        level: Number.isInteger(level) && level > 0 ? level : 1,
+        summary: text(row["summary"]),
+        sources: [
+          ...new Set(
+            rows(row["sources"]).map((source) =>
+              spellSourceLabel(source, locale, projection?.evidence),
+            ),
+          ),
+        ],
+        immune: row["status"] === "immune",
+      };
+    });
+}
+
 export function conditionsRead(
   input: Inputs,
   projection: Projection | undefined,
@@ -37,10 +77,12 @@ export function conditionsRead(
   const heading = root.querySelector<HTMLElement>("h3")!;
   heading.tabIndex = -1;
   heading.dataset["focusKey"] = "conditions/heading";
-  const saved = rows(projection?.sheet["conditions"]);
-  if (!input.play.conditions?.length) root.append(el("p", t("No active conditions.")));
+  const saved = rows(projection?.sheet["conditions"]),
+    granted = grantedConditions(projection, locale);
+  if (!input.play.conditions?.length && !granted.length)
+    root.append(el("p", t("No active conditions.")));
   for (const condition of input.play.conditions ?? []) {
-    const data = saved.find((row) => row["id"] === condition.id) ?? {},
+    const data = saved.find((row) => row["id"] === condition.id && row["granted"] !== true) ?? {},
       name = conditionName(data, locale, condition.id);
     const reference = object(data["reference"]),
       source: Reference | undefined =
@@ -70,6 +112,23 @@ export function conditionsRead(
           t("This condition has reached its terminal level. Resolve the outcome at the table."),
         ),
       );
+    root.append(row);
+  }
+  for (const condition of granted) {
+    const row = styled("div", "dse-condition"),
+      details = el(
+        "details",
+        el("summary", rule(condition.name, undefined, undefined, undefined, projection)),
+      );
+    row.dataset["conditionId"] = condition.id;
+    row.dataset["granted"] = "";
+    details.dataset["detailsKey"] = "condition/granted/" + condition.id;
+    if (condition.summary) details.append(el("p", condition.summary));
+    row.append(details, el("span", t("Level {0}", [condition.level])));
+    if (condition.sources.length)
+      row.append(el("p", t("Granted by {0}", [condition.sources.join(", ")])));
+    if (condition.immune)
+      row.append(el("p", t("Immune: retained for tracking; its effects are inactive.")));
     root.append(row);
   }
   if (input.play.conditions?.length) {
@@ -112,7 +171,7 @@ export function conditions(view: SheetView): HTMLElement {
     root = conditionsRead(view.input, view.projection, view.locale),
     options = rows(view.conditions["options"]);
   if (!view.canEditConditions) return root;
-  for (const row of root.querySelectorAll<HTMLElement>("[data-condition-id]")) {
+  for (const row of root.querySelectorAll<HTMLElement>("[data-condition-id]:not([data-granted])")) {
     const id = row.dataset["conditionId"]!,
       condition = view.input.play.conditions!.find((value) => value.id === id)!;
     const option = options.find((value) => value["id"] === id),

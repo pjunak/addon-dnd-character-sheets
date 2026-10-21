@@ -3,9 +3,9 @@ import { handsRead } from "./character-hands.js";
 import { storageRead } from "./character-storage.js";
 import { containerOptions } from "./character-inventory.js";
 import { quickUseRead } from "./character-quick-use.js";
-import { conditionsRead } from "./character-conditions.js";
+import { conditionsRead, grantedConditions } from "./character-conditions.js";
 import { grantedSpellsRead } from "./character-spells.js";
-import { featDetails, senseDetails } from "./character-sheet.js";
+import { featDetails, itemPropertyDetails, senseDetails } from "./character-sheet.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
 import type { Projection, State } from "./character-model.js";
 import { translator } from "./character-locale.js";
@@ -95,7 +95,13 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
             ? { kind: source["type"], id: source["id"] }
             : typeof id === "string"
               ? {
-                  kind: group === "features" ? "feature" : group === "weapons" ? "weapon" : "class",
+                  // A feature row's own kind marks a chosen subclass's slot row.
+                  kind:
+                    group === "features"
+                      ? text(row["kind"]) || "feature"
+                      : group === "weapons"
+                        ? "weapon"
+                        : "class",
                   id,
                 }
               : undefined;
@@ -151,8 +157,10 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
     );
     if (list.children.length) root.append(panel(t(label(group)), list));
   }
-  const feats = featDetails(projection, locale);
+  const feats = featDetails(projection, locale),
+    items = itemPropertyDetails(projection, locale);
   if (feats) root.append(feats);
+  if (items) root.append(items);
   const granted = grantedSpellsRead(projection, locale);
   if (granted) root.append(granted);
   for (const group of ["resistances", "damageImmunities", "conditionImmunities", "traits"]) {
@@ -247,7 +255,7 @@ export function printCharacter(
       el("p", t(state.inputs.play.inspiration === true ? "Available" : "Not available")),
     ),
   );
-  if (state.inputs.play.conditions?.length)
+  if (state.inputs.play.conditions?.length || grantedConditions(state.projection, locale).length)
     root.append(conditionsRead(state.inputs, state.projection, locale));
   const currency = Object.entries(state.inputs.play.currency);
   if (currency.length) {

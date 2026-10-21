@@ -1,5 +1,6 @@
 import type { Evidence, Inputs, Projection, Result } from "./character-model.js";
 import { object, rows, text, type CatalogRecord, catalogRecord } from "./character-client.js";
+import { inventoryOwnsKey } from "./character-inventory.js";
 import { translator } from "./character-locale.js";
 import {
   builderTarget,
@@ -266,8 +267,10 @@ export function unassignedSpellState(
   ];
   for (const [saved, descriptors] of groups)
     for (const [key, value] of Object.entries(saved)) {
+      // An unequipped item keeps its toggles and picks for when it is active again.
       if (
         descriptors.some((row) => row["key"] === key) ||
+        inventoryOwnsKey(input, key) ||
         (Array.isArray(value) && !value.length) ||
         value === 0 ||
         value === false
