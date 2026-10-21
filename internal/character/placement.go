@@ -7,7 +7,7 @@ import (
 
 // Only consuming the final unit can clear placement as a play-command effect.
 // Ordinary evaluated edits must return exactly the submitted assignments.
-func preservesPlacement(before, after model.Play, change map[string]any) bool {
+func preservesPlacement(before, after model.Play, change *model.PlayCommand) bool {
 	assignments := func(play model.Play) map[string]string {
 		result := map[string]string{}
 		for _, item := range play.Inventory {
@@ -18,9 +18,9 @@ func preservesPlacement(before, after model.Play, change map[string]any) bool {
 		return result
 	}
 	expected := assignments(before)
-	if change["operation"] == "consume-item" && len(change) == 2 {
+	if change != nil && change.Operation == model.PlayConsumeItem {
 		for _, item := range before.Inventory {
-			if item.ID != change["itemId"] || item.Quantity != 1 || item.Location != "equipped" {
+			if item.ID != change.ItemID || item.Quantity != 1 || item.Location != "equipped" {
 				continue
 			}
 			for _, next := range after.Inventory {

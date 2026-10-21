@@ -12,7 +12,7 @@ func TestPlacementResponsePreservationAndExactDepletion(t *testing.T) {
 		t.Run(scenario, func(t *testing.T) {
 			after := before
 			after.Inventory = append([]model.Item{}, before.Inventory...)
-			change := map[string]any{"operation": "consume-item", "itemId": "one"}
+			change := playCommand(map[string]any{"operation": "consume-item", "itemId": "one"})
 			if scenario == "replace" {
 				after.Inventory[0].BodyPlacement = "legs"
 			} else if scenario == "new" {
@@ -26,11 +26,12 @@ func TestPlacementResponsePreservationAndExactDepletion(t *testing.T) {
 			case "drop":
 				change = nil
 			case "wrong-command":
-				change["operation"] = "rest"
+				change = playCommand(map[string]any{"operation": "rest", "rest": "short"})
 			case "wrong-item":
-				change["itemId"] = "two"
+				change.ItemID = "two"
 			case "extra-field":
-				change["other"] = true
+				// A typed command cannot carry other fields; refuse it like a missing one.
+				change = nil
 			case "not-depleted":
 				after.Inventory[0].Quantity = 1
 			case "wrong-location":

@@ -10,8 +10,8 @@ import (
 )
 
 const Contract = "dnd5e.character"
-const Version = "3.0.0"
-const SchemaVersion = "5.0.0"
+const Version = "4.0.0"
+const SchemaVersion = "6.0.0"
 
 var reference = workerrpc.AddonDataReference{Kind: workerrpc.AddonDataRecordExtension, DataID: "dnd-sheets"}
 
@@ -22,7 +22,7 @@ type RulesContext struct {
 	Identity         map[string]any `json:"identity"`
 }
 type Projection struct {
-	Sheet        map[string]any               `json:"sheet"`
+	Sheet        model.Sheet                  `json:"sheet"`
 	Explanations map[string]model.Explanation `json:"explanations"`
 	Evidence     []model.Evidence             `json:"evidence"`
 	Issues       []model.Issue                `json:"issues"`
@@ -33,20 +33,23 @@ type State struct {
 	Projection    Projection   `json:"projection"`
 	Rules         RulesContext `json:"rules"`
 	OperationID   string       `json:"operationId"`
+	// upgraded marks a sheet read from an older stored format; its
+	// projection is recomputed from the saved inputs.
+	upgraded bool
 }
 type Request struct {
-	ContractVersion   string         `json:"contractVersion"`
-	Key               string         `json:"key"`
-	ExpectedRevision  int64          `json:"expectedRevision,omitempty"`
-	Operation         string         `json:"operation,omitempty"`
-	OperationID       string         `json:"operationId,omitempty"`
-	Inputs            *model.Inputs  `json:"inputs,omitempty"`
-	Change            map[string]any `json:"change,omitempty"`
-	Grant             *model.Grant   `json:"grant,omitempty"`
-	GrantID           string         `json:"grantId,omitempty"`
-	Token             string         `json:"token,omitempty"`
-	AdoptRules        bool           `json:"adoptRules,omitempty"`
-	ReauthorizeGrants bool           `json:"reauthorizeGrants,omitempty"`
+	ContractVersion   string             `json:"contractVersion"`
+	Key               string             `json:"key"`
+	ExpectedRevision  int64              `json:"expectedRevision,omitempty"`
+	Operation         string             `json:"operation,omitempty"`
+	OperationID       string             `json:"operationId,omitempty"`
+	Inputs            *model.Inputs      `json:"inputs,omitempty"`
+	Change            *model.PlayCommand `json:"change,omitempty"`
+	Grant             *model.Grant       `json:"grant,omitempty"`
+	GrantID           string             `json:"grantId,omitempty"`
+	Token             string             `json:"token,omitempty"`
+	AdoptRules        bool               `json:"adoptRules,omitempty"`
+	ReauthorizeGrants bool               `json:"reauthorizeGrants,omitempty"`
 }
 type Response struct {
 	ContractVersion string         `json:"contractVersion"`

@@ -8,8 +8,8 @@ import (
 	model "github.com/pjunak/addon-dnd-engine/character"
 )
 
-func preservesClassReplacements(before, after model.Inputs, change map[string]any) bool {
-	if change["operation"] != "replace-class-choice" {
+func preservesClassReplacements(before, after model.Inputs, change *model.PlayCommand) bool {
+	if change == nil || change.Operation != model.PlayReplaceClassChoice {
 		return slices.Equal(before.Build.Replacements, after.Build.Replacements)
 	}
 	if len(after.Build.Replacements) != len(before.Build.Replacements)+1 || !slices.Equal(before.Build.Replacements, after.Build.Replacements[:len(before.Build.Replacements)]) {
@@ -23,7 +23,7 @@ func preservesClassReplacements(before, after model.Inputs, change map[string]an
 		}
 	}
 	if entry.Origin != "recorded" || entry.ClassID == "" || entry.ClassLevel != level || entry.ClassLevel < 2 ||
-		entry.Kind != change["kind"] || entry.Key != change["key"] || entry.Out != change["out"] || entry.In != change["ref"] ||
+		entry.Kind != change.Kind || entry.Key != change.Key || entry.Out != change.Out || entry.In != change.Ref ||
 		entry.Out == entry.In || entry.In == "" || entry.Slot < 0 || entry.Source.ID == "" || !slices.Contains([]string{"class", "subclass", "feature"}, entry.Source.Kind) {
 		return false
 	}

@@ -22,11 +22,11 @@ func TestHandCommandsPreserveEveryUnrelatedAuthoredValue(t *testing.T) {
 	after := copyPlay(before)
 	after.Inventory[1].Location, after.Inventory[1].BodyPlacement = "carried", ""
 	after.Hands = &model.Hands{Main: "blade", Grip: "two", SuspendedOff: &model.SuspendedHand{ItemID: "shield", ExpectedItemSHA256: model.HandItemFingerprint(after.Inventory[1]), BodyPlacement: "other"}}
-	command := map[string]any{"operation": "set-grip", "grip": "two"}
+	command := playCommand(map[string]any{"operation": "set-grip", "grip": "two"})
 	if !preservesEquipment(before, after, command) {
 		t.Fatal("bounded suspension rejected")
 	}
-	if !preservesEquipment(after, before, map[string]any{"operation": "set-grip", "grip": "one"}) {
+	if !preservesEquipment(after, before, playCommand(map[string]any{"operation": "set-grip", "grip": "one"})) {
 		t.Fatal("exact restoration rejected")
 	}
 	if !preservesEquipment(after, after, command) {
@@ -58,7 +58,7 @@ func TestHandCommandsPreserveEveryUnrelatedAuthoredValue(t *testing.T) {
 			}
 		})
 	}
-	if preservesEquipment(before, after, nil) || preservesEquipment(after, before, map[string]any{"operation": "rest", "rest": "long"}) {
+	if preservesEquipment(before, after, nil) || preservesEquipment(after, before, playCommand(map[string]any{"operation": "rest", "rest": "long"})) {
 		t.Fatal("ordinary evaluation changed hand state")
 	}
 	changed := copyPlay(after)
@@ -66,7 +66,7 @@ func TestHandCommandsPreserveEveryUnrelatedAuthoredValue(t *testing.T) {
 	restored := copyPlay(changed)
 	restored.Hands = &model.Hands{Main: "blade", Off: "shield", Grip: "one"}
 	restored.Inventory[1].Location, restored.Inventory[1].BodyPlacement = "equipped", "other"
-	if preservesEquipment(changed, restored, map[string]any{"operation": "set-grip", "grip": "one"}) {
+	if preservesEquipment(changed, restored, playCommand(map[string]any{"operation": "set-grip", "grip": "one"})) {
 		t.Fatal("provider restored a changed instance")
 	}
 }
@@ -77,7 +77,7 @@ func TestHandCommandsAcceptFreeHandsWithoutRewritingEmptyInventory(t *testing.T)
 		before.Inventory = inventory
 		after := before
 		after.Hands = &model.Hands{Grip: "one"}
-		if !preservesEquipment(before, after, map[string]any{"operation": "set-hand", "hand": "main", "itemId": ""}) {
+		if !preservesEquipment(before, after, playCommand(map[string]any{"operation": "set-hand", "hand": "main", "itemId": ""})) {
 			t.Fatal("free hand rejected for empty inventory")
 		}
 	}

@@ -50,7 +50,7 @@ func TestCommandRetryAfterLostCommitAndWorkerRestart(t *testing.T) {
 				input.Play.Conditions[0].Level = 3
 				command.Inputs = &input
 			case "play":
-				command.Change = map[string]any{"operation": "damage", "amount": 1}
+				command.Change = playCommand(map[string]any{"operation": "damage", "amount": 1})
 			case "grant":
 				command.Grant = &model.Grant{Name: "Reward", Reason: "Completed quest", Active: true, EffectiveLevel: 1, Condition: "always", Effects: []model.Effect{}, Waivers: []string{}}
 			case "import":

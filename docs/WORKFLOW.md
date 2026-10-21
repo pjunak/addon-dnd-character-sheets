@@ -108,7 +108,7 @@ the sheet neither stores nor prints them.
 ## Saving and transfer
 
 There are no character history, undo, restore, draft, or manual save controls.
-The native worker provides `dnd5e.character` 3.0.0 to the add-on's own UI
+The native worker provides `dnd5e.character` 4.0.0 to the add-on's own UI
 (through the host's `services.own`) and writes only current schema-5 state. The host's `workerOnly` extension policy keeps browsers from
 bypassing authenticated commands without retaining snapshots.
 

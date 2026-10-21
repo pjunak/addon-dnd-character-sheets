@@ -1,5 +1,4 @@
 import type { BuildView } from "./character-build.js";
-import { object, rows } from "./character-client.js";
 import { translator } from "./character-locale.js";
 import { button, combo, el, field, panel, rule } from "./character-ui.js";
 
@@ -7,24 +6,17 @@ import { button, combo, el, field, panel, rule } from "./character-ui.js";
 export function classReplacements(view: BuildView, classId: string): HTMLElement[] {
   if (!view.act) return [];
   const t = translator(view.locale);
-  return rows(view.evaluation?.guidance["classReplacements"])
-    .filter((row) => row["classId"] === classId)
+  return (view.evaluation?.guidance.classReplacements ?? [])
+    .filter((row) => row.classId === classId)
     .map((row) => {
-      const kind = String(row["kind"]),
-        key = String(row["key"]),
-        source = object(row["source"]);
+      const { kind, key, source } = row;
       const root = panel(t("Class-level replacement"));
       root.id = "character-replacement-" + encodeURIComponent(kind + "/" + key);
       root.dataset["focusScope"] = "";
       root.dataset["builderTarget"] = "class:" + classId;
+      root.append(rule(row.name, { kind: source.kind, id: source.id }));
       root.append(
-        rule(String(row["name"]), { kind: String(source["kind"]), id: String(source["id"]) }),
-      );
-      root.append(
-        el(
-          "p",
-          t("Class level {0} · {1} replacement remaining", [row["classLevel"], row["remaining"]]),
-        ),
+        el("p", t("Class level {0} · {1} replacement remaining", [row.classLevel, row.remaining])),
       );
       root.append(
         el(
@@ -36,10 +28,9 @@ export function classReplacements(view: BuildView, classId: string): HTMLElement
       );
       const controls = el("fieldset");
       controls.setAttribute("aria-label", t("Replace class choice"));
-      controls.disabled =
-        Number(row["remaining"]) < 1 || view.evaluation?.guidance["canSave"] !== true;
-      const picked = rows(row["picked"]),
-        candidates = rows(row["options"]);
+      controls.disabled = row.remaining < 1 || view.evaluation?.guidance.canSave !== true;
+      const picked = row.picked,
+        candidates = row.options;
       let out = "",
         ref = "";
       const apply = button(
@@ -56,7 +47,7 @@ export function classReplacements(view: BuildView, classId: string): HTMLElement
       };
       const current = combo(
         "",
-        picked.map((value) => ({ id: String(value["id"]), label: String(value["label"]) })),
+        picked.map((value) => ({ id: value.id, label: value.label })),
         (value) => {
           out = value;
           refresh();
@@ -66,7 +57,7 @@ export function classReplacements(view: BuildView, classId: string): HTMLElement
       current.dataset["focusKey"] = root.id + "/out";
       const replacement = combo(
         "",
-        candidates.map((value) => ({ id: String(value["id"]), label: String(value["label"]) })),
+        candidates.map((value) => ({ id: value.id, label: value.label })),
         (value) => {
           ref = value;
           refresh();
@@ -80,7 +71,7 @@ export function classReplacements(view: BuildView, classId: string): HTMLElement
         apply,
       );
       root.append(controls);
-      if (Number(row["remaining"]) < 1) {
+      if (row.remaining < 1) {
         const spent = el("p", t("The replacement for this class level has been used."));
         spent.tabIndex = -1;
         spent.dataset["focusKey"] = root.id + "/spent";

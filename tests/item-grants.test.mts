@@ -8,10 +8,11 @@ import {
 } from "#web/character-sheet";
 import { grantedConditions } from "#web/character-conditions";
 import type { CatalogRecord } from "#web/character-client";
-import type { Evidence, Projection } from "#web/character-model";
+import type { Evidence, Projection, Sheet } from "#web/character-model";
+import { partial } from "./support/helpers.mts";
 
 const projection = (sheet: Record<string, unknown>, evidence: Evidence[] = []): Projection => ({
-  sheet,
+  sheet: partial<Sheet>(sheet),
   explanations: {},
   evidence,
   issues: [],

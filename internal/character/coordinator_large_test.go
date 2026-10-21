@@ -23,11 +23,11 @@ func (engine largeProjectionEngine) Call(ctx context.Context, meta *workerrpc.Me
 	if err := json.Unmarshal(response.Result, &result); err != nil {
 		return response, err
 	}
-	fields := map[string]any{}
+	fields := map[string]int{}
 	for i := 0; i < 600; i++ {
-		fields[fmt.Sprintf("stat-%03d", i)] = result.Evaluation.Inputs.Play.Currency["gp"]
+		fields[fmt.Sprintf("stat-%03d", i)] = int(result.Evaluation.Inputs.Play.Currency["gp"])
 	}
-	result.Evaluation.Sheet["derived"] = fields
+	result.Evaluation.Sheet.Senses = fields
 	response.Result = raw(result)
 	return response, nil
 }
@@ -92,7 +92,7 @@ func TestCharacterDataOverTheEngineLimitIsTooLarge(t *testing.T) {
 	refused, err := invoke(t, c, meta, "save", Request{Operation: "build", OperationID: "larger-character", Inputs: &larger, ExpectedRevision: saved.Revision})
 	tooLarge(refused, err, model.MaxRequestBytes+1)
 	// A play command adds its change to the saved inputs.
-	change := map[string]any{"operation": "rest", "rest": "short"}
+	change := playCommand(map[string]any{"operation": "rest", "rest": "short"})
 	refused, err = invoke(t, c, meta, "save", Request{Operation: "play", OperationID: "rest-at-the-limit", Change: change, ExpectedRevision: saved.Revision})
 	tooLarge(refused, err, len(raw(payload(data.state.Inputs, change))))
 	if engine.calls != calls {
@@ -123,7 +123,7 @@ func (engine evidenceEngine) Call(ctx context.Context, meta *workerrpc.Meta, cal
 		return response, err
 	}
 	for index := 0; index < engine.records; index++ {
-		result.Evaluation.Evidence = append(result.Evaluation.Evidence, model.Evidence{Reference: model.Reference{Kind: "spell", ID: fmt.Sprintf("spell-%03d", index)}, Name: fmt.Sprintf("Spell %d", index), Hash: strings.Repeat("0", 64), Summary: strings.Repeat("s", 800), Facts: map[string]any{}})
+		result.Evaluation.Evidence = append(result.Evaluation.Evidence, model.Evidence{Reference: model.Reference{Kind: "spell", ID: fmt.Sprintf("spell-%03d", index)}, Name: fmt.Sprintf("Spell %d", index), Hash: strings.Repeat("0", 64), Summary: strings.Repeat("s", 800), Facts: model.RecordFacts("{}")})
 	}
 	response.Result = raw(result)
 	return response, nil
@@ -159,7 +159,7 @@ func TestLargeProjectionSaveAcknowledgesWithoutReviewDiff(t *testing.T) {
 	request.OperationID = "large-change"
 	request.ExpectedRevision = first.Revision
 	saved, err := invoke(t, c, meta, "save", request)
-	if err != nil || saved.Status != "ready" || saved.Revision != first.Revision+1 || len(saved.Changes) != 0 || saved.State == nil || len(saved.State.Projection.Sheet["derived"].(map[string]any)) != 600 {
+	if err != nil || saved.Status != "ready" || saved.Revision != first.Revision+1 || len(saved.Changes) != 0 || saved.State == nil || len(saved.State.Projection.Sheet.Senses) != 600 {
 		t.Fatalf("large save did not produce a bounded acknowledgment: %+v %v", saved, err)
 	}
 	retry, err := invoke(t, c, meta, "save", request)
@@ -173,7 +173,7 @@ func TestLargeProjectionSaveAcknowledgesWithoutReviewDiff(t *testing.T) {
 	}
 	found := false
 	for _, change := range preview.Changes {
-		if change.Path == "/projection/sheet/derived" {
+		if change.Path == "/projection/sheet/senses" {
 			found = true
 			if len(change.Before.(map[string]any)) != 600 || len(change.After.(map[string]any)) != 600 {
 				t.Fatal("grouping dropped changed statistics")
@@ -190,16 +190,16 @@ func TestLargeProjectionSaveAcknowledgesWithoutReviewDiff(t *testing.T) {
 }
 
 func TestReviewDiffRetainsAllValuesWhenSeveralGroupsExceedTheLimit(t *testing.T) {
-	before := &State{Inputs: model.Blank(), Rules: RulesContext{Identity: map[string]any{}}, Projection: Projection{Sheet: map[string]any{"derived": map[string]any{}}}}
-	after := &State{Inputs: model.Blank(), Rules: RulesContext{Identity: map[string]any{}}, Projection: Projection{Sheet: map[string]any{"derived": map[string]any{}}}}
+	before := &State{Inputs: model.Blank(), Rules: RulesContext{Identity: map[string]any{}}, Projection: Projection{Sheet: model.Sheet{Calculation: &model.Calculation{Senses: map[string]int{}}}}}
+	after := &State{Inputs: model.Blank(), Rules: RulesContext{Identity: map[string]any{}}, Projection: Projection{Sheet: model.Sheet{Calculation: &model.Calculation{Senses: map[string]int{}}}}}
 	for i := 0; i < 600; i++ {
 		key := fmt.Sprintf("value-%03d", i)
 		before.Inputs.Play.ResourceUses[key] = 0
 		after.Inputs.Play.ResourceUses[key] = 1
 		before.Rules.Identity[key] = 0
 		after.Rules.Identity[key] = 1
-		before.Projection.Sheet["derived"].(map[string]any)[key] = 0
-		after.Projection.Sheet["derived"].(map[string]any)[key] = 1
+		before.Projection.Sheet.Senses[key] = 0
+		after.Projection.Sheet.Senses[key] = 1
 	}
 	changes := diff(before, after)
 	if len(changes) != 3 {

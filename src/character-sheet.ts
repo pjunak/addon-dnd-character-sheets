@@ -12,7 +12,7 @@ import {
 } from "./character-item-editor.js";
 import { spellSourceLabel } from "./character-spells.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
-import type { Inputs, Item, Projection, Reference } from "./character-model.js";
+import type { Inputs, Item, PlayCommand, Projection, Reference, Sheet } from "./character-model.js";
 import {
   attuneEquipment,
   equipmentSlot,
@@ -65,7 +65,7 @@ export interface SheetView {
   refresh(): void;
   addItem(): void;
   fillSlot(slot: EquipmentSlot): void;
-  act(change: Record<string, unknown>): Promise<void>;
+  act(change: PlayCommand): Promise<void>;
 }
 function icon(path: string): SVGSVGElement {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"),
@@ -209,7 +209,7 @@ export function recordName(
 }
 export function abilityRail(view: SheetView): HTMLElement {
   const t = translator(view.locale),
-    sheet = view.projection?.sheet ?? {},
+    sheet = view.projection?.sheet ?? ({} as Partial<Sheet>),
     rail = styled("div", "dse-cards");
   for (const ability of abilities) {
     const score = object(object(sheet["abilities"])[ability]),
@@ -385,7 +385,7 @@ export function castingDetails(
 }
 export function vitals(view: SheetView): HTMLElement {
   const t = translator(view.locale),
-    sheet = view.projection?.sheet ?? {},
+    sheet = view.projection?.sheet ?? ({} as Partial<Sheet>),
     derived = object(sheet["derived"]),
     band = styled("div", "dse-vitals");
   const hp = rulesTarget(
@@ -393,7 +393,11 @@ export function vitals(view: SheetView): HTMLElement {
     "hp",
     "temporaryHp",
   );
-  const adjust = (operation: string, title: string, initial: number): void => {
+  const adjust = (
+    operation: "set-hp" | "heal" | "damage" | "set-temporary-hp",
+    title: string,
+    initial: number,
+  ): void => {
     const area = styled("div", "dse-hp-adjust"),
       input = numberInput(
         initial,
@@ -504,7 +508,7 @@ export function wornEquipment(
   slots: readonly EquipmentSlot[] = ["armor", "shield", "worn", "attuned"],
 ): HTMLElement {
   const t = translator(view.locale),
-    sheet = view.projection?.sheet ?? {};
+    sheet = view.projection?.sheet ?? ({} as Partial<Sheet>);
   const worn = styled("div", "dse-worn", styled("span", "dse-stat-label", t("Worn equipment")));
   for (const slot of slots) {
     const group = styled("div", "dse-worn-group", styled("span", "dse-stat-label", t(label(slot))));
@@ -671,7 +675,7 @@ export function combatDetails(view: SheetView): HTMLElement {
 }
 export function attackDetails(view: SheetView): HTMLElement {
   const t = translator(view.locale),
-    sheet = view.projection?.sheet ?? {};
+    sheet = view.projection?.sheet ?? ({} as Partial<Sheet>);
   const attacks = panel(t("Attacks"));
   attacks.className = "dse-section";
   rows(sheet["weapons"]).forEach((weapon, index) => {
@@ -751,7 +755,7 @@ export function movementDetails(
   locale: string,
 ): HTMLElement | undefined {
   const t = translator(locale),
-    sheet = projection?.sheet ?? {},
+    sheet = projection?.sheet ?? ({} as Partial<Sheet>),
     root = styled("small", "dnd-movement");
   for (const [key, template] of movementModes)
     if (Number(sheet[key] ?? 0) > 0) {
@@ -766,7 +770,7 @@ export const present = (node: HTMLElement | undefined): HTMLElement[] => (node ?
 export function initiativeTag(
   view: Pick<SheetView, "locale" | "projection">,
 ): HTMLElement | undefined {
-  const sheet = view.projection?.sheet ?? {};
+  const sheet = view.projection?.sheet ?? ({} as Partial<Sheet>);
   return rollTag(
     view.projection,
     view.locale,
@@ -919,7 +923,7 @@ export function resourceSource(
 }
 export function resourceDetails(view: SheetView): HTMLElement {
   const t = translator(view.locale),
-    sheet = view.projection?.sheet ?? {};
+    sheet = view.projection?.sheet ?? ({} as Partial<Sheet>);
   const resources = rulesTarget(panel(t("Resources")), "resources");
   resources.className = "dse-section dse-resources";
   for (const [name, value] of [
@@ -974,7 +978,7 @@ export function resourceDetails(view: SheetView): HTMLElement {
 }
 export function explorationDetails(view: SheetView): HTMLElement {
   const t = translator(view.locale),
-    sheet = view.projection?.sheet ?? {},
+    sheet = view.projection?.sheet ?? ({} as Partial<Sheet>),
     root = styled("div", "dse-exploration");
   const traits = panel(t("Features and traits"));
   traits.className = "dse-section";
@@ -1015,7 +1019,7 @@ export function explorationDetails(view: SheetView): HTMLElement {
         ]),
       ),
     );
-  for (const key of ["resistances", "damageImmunities", "conditionImmunities"]) {
+  for (const key of ["resistances", "damageImmunities", "conditionImmunities"] as const) {
     const value = defenseNames(sheet[key], view.locale);
     if (value) traits.append(el("p", el("strong", t(label(key)) + ": "), value));
   }

@@ -128,6 +128,11 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 		response.Message = "Compatible rules are unavailable. The saved character remains readable, printable and exportable."
 		return response, nil
 	}
+	// A sheet saved in an older format keeps its inputs; its projection is
+	// recomputed from them, and the next save stores it.
+	if method == "load" && state != nil && state.upgraded {
+		state.Projection = projectionOf(evaluation.Evaluation)
+	}
 	// Structural edits and newly adopted rules can withdraw earlier grants.
 	// Remove only previously saved selections that the engine now marks as
 	// unavailable, and report them; a newly supplied illegal option is still
@@ -168,20 +173,6 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 		}
 		response.Withdrawn = withdrawn(proposed, input)
 	}
-	// A reduced maximum and its current-HP correction are saved atomically,
-	// after any withdrawal that lowered it. Increasing maximum HP never
-	// silently heals the character.
-	if state != nil && (request.Operation == "build" || request.Operation == "grant" || request.Operation == "amend-grant" || request.Operation == "revoke-grant" || request.Operation == "adopt-rules") {
-		if derived, ok := evaluation.Evaluation.Sheet["derived"].(map[string]any); ok {
-			if maximum, ok := derived["maxHp"].(float64); ok && maximum >= 0 && input.Play.HP > int(maximum) {
-				input.Play.HP = int(maximum)
-				evaluation, rules, err = c.evaluate(ctx, rpc.Meta, input, nil)
-				if err != nil {
-					return nil, err
-				}
-			}
-		}
-	}
 	response.Evaluation = &evaluation.Evaluation
 	response.Policy = evaluation.Policy
 	response.RulesChanged = state != nil && !reflect.DeepEqual(state.Rules, rules)
@@ -196,7 +187,7 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 	if !operationPattern.MatchString(request.OperationID) {
 		return nil, failure(workerrpc.KindInvalidRequest, "A change ID is required.")
 	}
-	next := State{SchemaVersion: SchemaVersion, Inputs: evaluation.Evaluation.Inputs, Projection: Projection{Sheet: evaluation.Evaluation.Sheet, Explanations: evaluation.Evaluation.Explanations, Evidence: evaluation.Evaluation.Evidence, Issues: evaluation.Evaluation.Issues}, Rules: rules, OperationID: request.OperationID}
+	next := State{SchemaVersion: SchemaVersion, Inputs: evaluation.Evaluation.Inputs, Projection: projectionOf(evaluation.Evaluation), Rules: rules, OperationID: request.OperationID}
 	// A saved character must stay small enough to evaluate again. The document
 	// limit includes the saved explanations and evidence, not the transient
 	// catalogs and builder guidance.
@@ -441,7 +432,7 @@ func linkGrantItem(input *model.Inputs, grantID, itemID string) {
 }
 
 // payload is the Engine request for one evaluation or play command.
-func payload(input model.Inputs, change map[string]any) map[string]any {
+func payload(input model.Inputs, change *model.PlayCommand) map[string]any {
 	params := map[string]any{"contractVersion": model.ContractVersion, "inputs": input}
 	if change != nil {
 		params["change"] = change
@@ -458,7 +449,7 @@ func tooLargeMessage(size int) string {
 	return fmt.Sprintf("This character is %d bytes; the rules engine accepts at most %d. Remove inventory entries or shorten item notes, then try again.", size, model.MaxRequestBytes)
 }
 
-func (c *Coordinator) evaluate(ctx context.Context, meta *workerrpc.Meta, input model.Inputs, change map[string]any) (evaluated, RulesContext, error) {
+func (c *Coordinator) evaluate(ctx context.Context, meta *workerrpc.Meta, input model.Inputs, change *model.PlayCommand) (evaluated, RulesContext, error) {
 	method := "evaluate-character"
 	if change != nil {
 		method = "character-play"
@@ -473,7 +464,7 @@ func (c *Coordinator) evaluate(ctx context.Context, meta *workerrpc.Meta, input 
 		return evaluated{}, RulesContext{}, err
 	}
 	var value evaluated
-	if decode(result.Result, &value) != nil || value.ContractVersion != "rules-character-response.v2" || value.Evaluation.ContractVersion != model.ContractVersion || !reflect.DeepEqual(input.Play.Inspiration, value.Evaluation.Inputs.Play.Inspiration) || !slices.Equal(input.Play.Conditions, value.Evaluation.Inputs.Play.Conditions) || !slices.Equal(input.Play.QuickUse, value.Evaluation.Inputs.Play.QuickUse) || !preservesEquipment(input.Play, value.Evaluation.Inputs.Play, change) || !preservesClassReplacements(input, value.Evaluation.Inputs, change) {
+	if decode(result.Result, &value) != nil || value.ContractVersion != model.ResponseVersion || value.Evaluation.ContractVersion != model.ContractVersion || !reflect.DeepEqual(input.Play.Inspiration, value.Evaluation.Inputs.Play.Inspiration) || !slices.Equal(input.Play.Conditions, value.Evaluation.Inputs.Play.Conditions) || !slices.Equal(input.Play.QuickUse, value.Evaluation.Inputs.Play.QuickUse) || !preservesEquipment(input.Play, value.Evaluation.Inputs.Play, change) || !preservesClassReplacements(input, value.Evaluation.Inputs, change) {
 		return value, RulesContext{}, failure(workerrpc.KindValidationFailed, "Rules returned an incompatible character result.")
 	}
 	return value, RulesContext{EngineID: result.ProviderAddonID, EngineVersion: result.ProviderContractVersion, EngineGeneration: result.ProviderGeneration, Identity: value.Identity}, nil
@@ -532,7 +523,13 @@ func (c *Coordinator) commit(ctx context.Context, meta *workerrpc.Meta, r Reques
 	}
 	return c.persist(ctx, meta, p.Key, p.Revision, p.State, response)
 }
-func saveable(result model.Result) bool { return result.Ready || result.Guidance["canSave"] == true }
+
+// projectionOf is the part of an evaluation a saved sheet keeps.
+func projectionOf(result model.Result) Projection {
+	return Projection{Sheet: result.Sheet, Explanations: result.Explanations, Evidence: result.Evidence, Issues: result.Issues}
+}
+
+func saveable(result model.Result) bool { return result.Ready || result.Guidance.CanSave }
 func (c *Coordinator) persist(ctx context.Context, meta *workerrpc.Meta, key string, revision int64, state State, response Response) (Response, error) {
 	receipt, err := c.data.Transact(ctx, meta, []workerrpc.AddonDataMutation{{Operation: "put", Reference: reference, Key: key, ExpectedRevision: revision, Value: state}})
 	if err != nil {

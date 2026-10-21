@@ -1,3 +1,8 @@
+/** A saved part holding only what a test needs; views must read missing parts safely. */
+export function partial<T extends object>(value: object): T {
+  return value as T;
+}
+
 export function required<T>(value: T | undefined, message = "Expected test fixture value"): T {
   if (value === undefined) throw new Error(message);
   return value;

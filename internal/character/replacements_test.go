@@ -9,7 +9,7 @@ import (
 	"github.com/pjunak/ttrpg-codex/sdk/go/workerrpc"
 )
 
-func replacementState() (model.Inputs, model.Inputs, map[string]any) {
+func replacementState() (model.Inputs, model.Inputs, *model.PlayCommand) {
 	before := model.Blank()
 	before.Build.Levels = []model.Level{{ID: "one", ClassID: "martial"}, {ID: "two", ClassID: "martial"}}
 	before.Build.Choices = []model.Choice{{ID: "training", Value: raw("first")}}
@@ -17,7 +17,7 @@ func replacementState() (model.Inputs, model.Inputs, map[string]any) {
 	after := cloneInputs(before)
 	after.Build.Choices[0].Value = raw("second")
 	after.Build.Replacements = []model.ClassReplacement{{Origin: "recorded", Source: model.Reference{Kind: "feature", ID: "training"}, ClassID: "martial", ClassLevel: 2, Kind: "feat", Key: "training", Out: "first", In: "second"}}
-	return before, after, map[string]any{"operation": "replace-class-choice", "kind": "feat", "key": "training", "out": "first", "ref": "second"}
+	return before, after, playCommand(map[string]any{"operation": "replace-class-choice", "kind": "feat", "key": "training", "out": "first", "ref": "second"})
 }
 
 func TestReplacementProviderCanOnlyChangeTheExactChoiceAndAppendOneEntry(t *testing.T) {
@@ -46,7 +46,7 @@ func TestReplacementProviderCanOnlyChangeTheExactChoiceAndAppendOneEntry(t *test
 			}
 		})
 	}
-	if preservesClassReplacements(before, after, nil) || preservesClassReplacements(after, before, map[string]any{"operation": "rest"}) {
+	if preservesClassReplacements(before, after, nil) || preservesClassReplacements(after, before, playCommand(map[string]any{"operation": "rest", "rest": "short"})) {
 		t.Fatal("ordinary evaluation or rest changed the ledger")
 	}
 	before.Build.Replacements = after.Build.Replacements
@@ -64,7 +64,7 @@ func TestReplacementProviderPreservesSiblingSpellSelections(t *testing.T) {
 	_, feat, _ := replacementState()
 	after.Build.Replacements = feat.Build.Replacements
 	after.Build.Replacements[0].Kind = "spell"
-	command["kind"] = "spell"
+	command.Kind = "spell"
 	if !preservesClassReplacements(before, after, command) {
 		t.Fatal("bounded spell replacement rejected")
 	}

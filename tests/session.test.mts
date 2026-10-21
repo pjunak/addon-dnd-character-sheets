@@ -2,32 +2,42 @@ import assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
 import { blank, type CharacterRequest } from "#web/character-client";
 import { changeGrant } from "#web/character-grant";
-import type { Grant, Inputs, Response, Result, State } from "#web/character-model";
+import type {
+  Grant,
+  Guidance,
+  Inputs,
+  Plan,
+  Response,
+  Result,
+  Sheet,
+  SpellOptions,
+  State,
+} from "#web/character-model";
 import type { CharacterPending } from "#web/character-pending";
 import { CharacterSession, type ViewHandle } from "#web/character-session";
-import { required } from "./support/helpers.mts";
+import { partial, required } from "./support/helpers.mts";
 
 const policy = { standardArray: [15, 14, 13, 12, 10, 8] };
-const rules = { engineId: "engine", engineVersion: "5.0.0", engineGeneration: "one", identity: {} };
+const rules = { engineId: "engine", engineVersion: "6.0.0", engineGeneration: "one", identity: {} };
 const builder = { tab: "character", target: "", open: true };
 
 function saved(inputs: Inputs, operationId = "earlier-operation"): State {
   return {
-    schemaVersion: "5.0.0",
+    schemaVersion: "6.0.0",
     inputs: structuredClone(inputs),
-    projection: { sheet: {}, explanations: {}, evidence: [], issues: [] },
+    projection: { sheet: partial<Sheet>({}), explanations: {}, evidence: [], issues: [] },
     rules,
     operationId,
   };
 }
 function evaluation(inputs: Inputs, guidance: Record<string, unknown> = {}): Result {
   return {
-    contractVersion: "rules-engine-result.v5",
+    contractVersion: "rules-character-response.v3",
     inputs: structuredClone(inputs),
-    sheet: {},
-    guidance,
-    plan: {},
-    spellOptions: {},
+    sheet: partial<Sheet>({}),
+    guidance: partial<Guidance>(guidance),
+    plan: partial<Plan>({}),
+    spellOptions: partial<SpellOptions>({}),
     explanations: {},
     evidence: [],
     issues: [],

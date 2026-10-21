@@ -24,6 +24,7 @@ var storedFormats = map[string]struct{ schema, fixture string }{
 		schema:  "e707ccfaa982a1da641924f08bc640ab3d3ea2812081cfd5159a37d82cb33e87",
 		fixture: "4d072fbd143e059255515063e5ce9d93c9bab8c7b51fa7f85c2435d524387f8a",
 	},
+	"6.0.0": {schema: "3e12c7b8ae26aac0dd2271497ed66289013a2547be3df646978ca4c34045e457"},
 }
 
 // digest hashes a JSON value independently of its formatting.
@@ -129,7 +130,7 @@ func TestFrozenSheetsStillLoad(t *testing.T) {
 			if err != nil {
 				t.Fatalf("%s no longer loads: %v", name, err)
 			}
-			if state.SchemaVersion != SchemaVersion || len(state.Inputs.Play.Inventory) == 0 || len(state.Projection.Sheet) == 0 {
+			if state.SchemaVersion != SchemaVersion || len(state.Inputs.Play.Inventory) == 0 || state.Projection.Sheet.Calculation == nil {
 				t.Fatalf("%s loaded incompletely: version %s", name, state.SchemaVersion)
 			}
 			// The upgraded sheet is what this release would save.

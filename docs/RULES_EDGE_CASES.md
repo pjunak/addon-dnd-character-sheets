@@ -1,7 +1,7 @@
 # Character saves and failure semantics
 
 The coordinator owns the current `dnd-sheets` extension for each core character
-lifetime. The stored schema is 5.0.0; its optional authored play fields are
+lifetime. The stored schema is 6.0.0; its optional authored play fields are
 described below. The core profile, portrait and relationships are host-owned.
 
 ## Schema updates
@@ -44,6 +44,11 @@ Unknown formats still fail without partial normalization; `upgrade_test.go`
 covers chained upgrades and rejection. The frozen 5.0.0 sheet must keep loading
 through the upgrades and validating against the generated schema; never edit
 it to make a change pass.
+
+The 5.0.0 upgrade keeps the saved inputs and rules state and carries the old
+snapshot over as far as the typed Engine 6 sheet can read it. The first load
+then recomputes the snapshot from the saved inputs, so the sheet shows complete
+Engine 6 results before it is next saved.
 
 ## Authored conditions
 
@@ -210,7 +215,7 @@ state do not gain default fields.
 
 ## Automatic saving
 
-`dnd5e.character` 3.0.0 exposes `load`, `evaluate`, `save`, `preview` and `commit`
+`dnd5e.character` 4.0.0 exposes `load`, `evaluate`, `save`, `preview` and `commit`
 using `character.v3` / `character-response.v3`. There is no history, revision
 lookup, comparison or restoration. Transfers contain the current character
 only; there is no browser draft or frozen-import store.
@@ -248,8 +253,8 @@ edited replacements survive. Dependent withdrawals settle until no more saved
 selections are removed. Newly supplied illegal choices are rejected, and other
 rule violations remain visible for deliberate repair. The save response lists
 the removed selections (`withdrawn`) and the sheet shows them in its status.
-Once withdrawals settle, a lower maximum HP clamps current HP; raising the
-maximum never heals. Other authored play state is preserved unless explicitly
+Once withdrawals settle, the Engine lowers current HP to a lowered maximum;
+raising the maximum never heals. Other authored play state is preserved unless explicitly
 changed. Amending/revoking a DM grant replaces or removes its current entry,
 without retaining superseded grants.
 

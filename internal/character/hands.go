@@ -7,9 +7,9 @@ import (
 	model "github.com/pjunak/addon-dnd-engine/character"
 )
 
-func preservesEquipment(before, after model.Play, change map[string]any) bool {
-	if change["operation"] == "set-hand" || change["operation"] == "set-grip" {
-		return preservesHandCommand(before, after, change)
+func preservesEquipment(before, after model.Play, change *model.PlayCommand) bool {
+	if change != nil && (change.Operation == model.PlaySetHand || change.Operation == model.PlaySetGrip) {
+		return preservesHandCommand(before, after, *change)
 	}
 	return reflect.DeepEqual(before.Hands, after.Hands) && preservesStorage(before, after) && preservesPlacement(before, after, change)
 }
@@ -17,7 +17,7 @@ func preservesEquipment(before, after model.Play, change map[string]any) bool {
 // A rules provider may change only the selected hand state and the locations
 // involved in that command. It cannot replace instances, consume quantities,
 // drop attunement or rewrite their authored notes, grants or membership.
-func preservesHandCommand(before, after model.Play, change map[string]any) bool {
+func preservesHandCommand(before, after model.Play, change model.PlayCommand) bool {
 	old := before.Hands
 	if old == nil {
 		old = &model.Hands{Grip: "one"}
@@ -32,21 +32,17 @@ func preservesHandCommand(before, after model.Play, change map[string]any) bool 
 	if old.SuspendedOff != nil {
 		allowed[old.SuspendedOff.ItemID], allowedOff[old.SuspendedOff.ItemID] = true, true
 	}
-	switch change["operation"] {
-	case "set-hand":
-		id, ok := change["itemId"].(string)
-		if !ok || len(change) != 3 {
-			return false
-		}
+	if change.Operation == model.PlaySetHand {
+		id := change.ItemID
 		allowed[id] = true
-		switch change["hand"] {
-		case "main":
+		switch change.Hand {
+		case model.HandMain:
 			allowed[old.Main], allowed[old.Off] = true, true
 			expectedMain = id
 			if old.SuspendedOff == nil && next.Grip == "one" && next.Off != old.Off {
 				return false
 			}
-		case "off":
+		case model.HandOff:
 			if old.Grip == "two" || next.Off != id || next.Grip != old.Grip {
 				return false
 			}
@@ -55,8 +51,8 @@ func preservesHandCommand(before, after model.Play, change map[string]any) bool 
 		default:
 			return false
 		}
-	case "set-grip":
-		if len(change) != 2 || next.Grip != change["grip"] {
+	} else {
+		if next.Grip != change.Grip {
 			return false
 		}
 		if before.Hands != nil && old.Grip == next.Grip {
@@ -65,8 +61,6 @@ func preservesHandCommand(before, after model.Play, change map[string]any) bool 
 		if next.Grip == "two" {
 			allowed[old.Off] = true
 		}
-	default:
-		return false
 	}
 	if next.Main != expectedMain || !allowedOff[next.Off] || next.Main != "" && next.Main == next.Off || next.Grip == "two" && next.Off != "" {
 		return false

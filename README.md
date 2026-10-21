@@ -175,15 +175,15 @@ remain usable without a rules provider; missing data stays distinct from an
 empty group. Saving-throw shields show and name their saved training state.
 
 **Tools** owns export, reviewed replacement import, printing, layout and rules
-status. Transfers use `dnd-character.v2` / schema 5.0.0 and contain the current
-character only. Changed installed rules require explicit adoption. If an
-autosave discovers changed rules, **Review changed rules** opens Tools; explicit
-adoption can save the pending edits together with the new rules, and removes
-(and lists) saved selections those rules no longer allow. Builder edits and a
-DM's grant revocations and amendments stay available until then, so the
-character can be repaired first. Conflicts and uncertain requests retain their
-recovery guards. Without compatible rules, saved values, export and printing
-remain usable.
+status. Transfers use `dnd-character.v3` / schema 6.0.0 and contain the current
+character only; older `dnd-character.v2` / 5.0.0 exports still import. Changed
+installed rules require explicit adoption. If an autosave discovers changed
+rules, **Review changed rules** opens Tools; explicit adoption can save the
+pending edits together with the new rules, and removes (and lists) saved
+selections those rules no longer allow. Builder edits and a DM's grant
+revocations and amendments stay available until then, so the character can be
+repaired first. Conflicts and uncertain requests retain their recovery guards.
+Without compatible rules, saved values, export and printing remain usable.
 
 The sheet is limited to 1,120 px. The host shows no visible character heading;
 the sheet shows the name in each tab's top row. Compact uses tighter ability
@@ -195,7 +195,7 @@ keyboard behavior. Ability cards stack their score and skill list when the
 available width would squeeze enlarged skill names into narrow columns.
 
 The host owns the core profile, portrait and relationships. The native worker
-provides `dnd5e.character` 3.0.0, which the add-on's own UI reaches through the
+provides `dnd5e.character` 4.0.0, which the add-on's own UI reaches through the
 host's `services.own`; no other add-on consumes it. The worker is the only
 writer of the `dnd-sheets` schema-5 extension. Its `workerOnly` declaration preserves authorization without
 retaining character snapshots. A package that adds optional fields changes the

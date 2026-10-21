@@ -6,7 +6,7 @@ import {
   spellSourceLabel,
   type PlayFilterState,
 } from "./character-spells.js";
-import type { Inputs, Result } from "./character-model.js";
+import type { Inputs, PlayCommand, Result } from "./character-model.js";
 import { translator } from "./character-locale.js";
 import {
   newId,
@@ -35,7 +35,7 @@ export function playActions(
   input: Inputs,
   evaluation: Result,
   catalog: CatalogRecord[],
-  act: (change: Record<string, unknown>) => Promise<void>,
+  act: (change: PlayCommand) => Promise<void>,
   locale = "en",
   section: "spells" | "recovery" = "spells",
   filterState: PlayFilterState = { query: "", level: "", kind: "" },

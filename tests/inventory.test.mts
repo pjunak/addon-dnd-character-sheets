@@ -15,8 +15,8 @@ import {
 } from "#web/character-inventory";
 
 import { blank } from "#web/character-client";
-import type { Item, Projection } from "#web/character-model";
-import { required } from "./support/helpers.mts";
+import type { Item, Projection, Sheet } from "#web/character-model";
+import { partial, required } from "./support/helpers.mts";
 
 const item = (id: string, location = "carried"): Item => ({
   id,
@@ -171,7 +171,7 @@ void test("worn items coexist and denied actions preserve every authored field",
 void test("saved slots and source evidence render without a provider or catalog ID heuristics", () => {
   const shield = { ...item("guard", "equipped"), reference: { kind: "armor", id: "round-guard" } };
   const projection: Projection = {
-    sheet: { equipment: { guard: { slot: "shield" } } },
+    sheet: partial<Sheet>({ equipment: { guard: { slot: "shield" } } }),
     explanations: {},
     evidence: [],
     issues: [],
@@ -179,7 +179,7 @@ void test("saved slots and source evidence render without a provider or catalog 
   assert.equal(equipmentSlot(shield, {}, projection), "shield");
   assert.equal(equipmentSlot(shield, { guard: { slot: "armor" } }, projection), "armor");
   const withoutSlots: Projection = {
-    sheet: {},
+    sheet: partial<Sheet>({}),
     explanations: {},
     evidence: [
       {

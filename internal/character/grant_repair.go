@@ -1,7 +1,6 @@
 package character
 
 import (
-	"encoding/json"
 	"reflect"
 
 	model "github.com/pjunak/addon-dnd-engine/character"
@@ -14,7 +13,10 @@ func repairGrantSelections(input *model.Inputs, previous model.Inputs, evaluatio
 	for _, issue := range evaluation.Issues {
 		issues[issue.ID] = true
 	}
-	pending := grantDescriptors(evaluation.SpellOptions["pendingChoices"])
+	pending := map[string]model.SpellChoiceOptions{}
+	for _, choice := range evaluation.SpellOptions.PendingChoices {
+		pending[choice.Key] = choice
+	}
 	changed := false
 	for key, ids := range input.Build.Spells.GrantChoices {
 		old, saved := previous.Build.Spells.GrantChoices[key]
@@ -33,8 +35,8 @@ func repairGrantSelections(input *model.Inputs, previous model.Inputs, evaluatio
 				kept = append(kept, id)
 			}
 		}
-		if count, ok := choice["choose"].(float64); ok && issues["spell-grant:"+key] && len(kept) > int(count) {
-			kept = kept[:max(0, int(count))]
+		if available && issues["spell-grant:"+key] && len(kept) > choice.Choose {
+			kept = kept[:max(0, choice.Choose)]
 		}
 		if len(kept) != len(ids) {
 			input.Build.Spells.GrantChoices[key] = kept
@@ -72,32 +74,28 @@ func repairGrantSelections(input *model.Inputs, previous model.Inputs, evaluatio
 			}
 		}
 	}
-	resources := grantDescriptors(evaluation.Sheet["resources"])
+	resources, activations := map[string]bool{}, map[string]bool{}
+	if sheet := evaluation.Sheet.Calculation; sheet != nil {
+		for _, resource := range sheet.Resources {
+			resources[resource.Key] = true
+		}
+		for _, activation := range sheet.Activations {
+			activations[activation.Key] = true
+		}
+	}
 	for key, value := range input.Play.ResourceUses {
 		old, saved := previous.Play.ResourceUses[key]
-		if _, exists := resources[key]; !exists && saved && value == old && issues["resource:"+key] {
+		if !resources[key] && saved && value == old && issues["resource:"+key] {
 			delete(input.Play.ResourceUses, key)
 			changed = true
 		}
 	}
-	activations := grantDescriptors(evaluation.Sheet["activations"])
 	for key, value := range input.Play.ActiveFeatures {
 		old, saved := previous.Play.ActiveFeatures[key]
-		if _, exists := activations[key]; !exists && saved && value == old && issues["activation:"+key] {
+		if !activations[key] && saved && value == old && issues["activation:"+key] {
 			delete(input.Play.ActiveFeatures, key)
 			changed = true
 		}
 	}
 	return changed
-}
-
-func grantDescriptors(value any) map[string]map[string]any {
-	var rows []map[string]any
-	_ = json.Unmarshal(raw(value), &rows)
-	indexed := map[string]map[string]any{}
-	for _, row := range rows {
-		key, _ := row["key"].(string)
-		indexed[key] = row
-	}
-	return indexed
 }

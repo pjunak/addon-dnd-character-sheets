@@ -23,7 +23,7 @@ import {
   wornEquipment,
 } from "./character-sheet.js";
 import { abilities, object, rows, strings, text } from "./character-client.js";
-import type { Item } from "./character-model.js";
+import type { Item, Sheet } from "./character-model.js";
 import {
   assignBodyPlacement,
   moveEquipment,
@@ -592,7 +592,7 @@ function usesControl(
 
 export function limitedUses(view: SheetView): HTMLElement {
   const t = translator(view.locale),
-    sheet = view.projection?.sheet ?? {},
+    sheet = view.projection?.sheet ?? ({} as Partial<Sheet>),
     root = rulesTarget(panel(t("Limited uses")), "resources"),
     list = styled("div", "dsc-uses");
   root.classList.add("dsc-uses-panel");
@@ -656,7 +656,7 @@ export function limitedUses(view: SheetView): HTMLElement {
 
 function combatAbilities(view: SheetView): HTMLElement {
   const t = translator(view.locale),
-    sheet = view.projection?.sheet ?? {},
+    sheet = view.projection?.sheet ?? ({} as Partial<Sheet>),
     root = styled("div", "dsc-combat-abilities");
   root.setAttribute("aria-label", t("Ability modifiers and saving throws"));
   for (const ability of abilities) {
@@ -844,7 +844,7 @@ function featureSource(view: SheetView, value: unknown): string {
 // frequently-needed facts), never the whole description.
 function features(view: SheetView): HTMLElement {
   const t = translator(view.locale),
-    sheet = view.projection?.sheet ?? {},
+    sheet = view.projection?.sheet ?? ({} as Partial<Sheet>),
     root = panel(t("Features and traits")),
     grid = styled("div", "dsc-feats");
   root.classList.add("dsc-features");
@@ -932,7 +932,7 @@ function features(view: SheetView): HTMLElement {
 // saves and skills are already on the ability cards.
 function training(view: SheetView): HTMLElement {
   const t = translator(view.locale),
-    sheet = view.projection?.sheet ?? {},
+    sheet = view.projection?.sheet ?? ({} as Partial<Sheet>),
     root = rulesTarget(panel(t("Training and senses")), "senses"),
     list = styled("dl", "dsc-training");
   const row = (name: string, ...value: (Node | string)[]): HTMLElement => {
@@ -974,7 +974,7 @@ function training(view: SheetView): HTMLElement {
   );
   if (Object.hasOwn(object(sheet["derived"]), "size"))
     row(t("Size"), sizeDetails(view)).classList.add("dsc-size");
-  for (const key of ["resistances", "damageImmunities", "conditionImmunities"]) {
+  for (const key of ["resistances", "damageImmunities", "conditionImmunities"] as const) {
     const value = defenseNames(sheet[key], view.locale);
     if (value) row(t(label(key)), value);
   }
@@ -1076,7 +1076,7 @@ function preparationTiming(preparation: unknown, locale: string): string {
 
 export function compactSpellBar(view: SheetView, prepare?: () => void): HTMLElement {
   const t = translator(view.locale),
-    sheet = view.projection?.sheet ?? {},
+    sheet = view.projection?.sheet ?? ({} as Partial<Sheet>),
     root = styled("section", "dsc-bar"),
     values = styled("div", "dsc-vitals dsc-spell-values");
   root.setAttribute("aria-label", t("Spellcasting"));

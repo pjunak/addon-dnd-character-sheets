@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { readFile } from "node:fs/promises";
 import { blank, parseCharacter, exportCharacter, mergeCharacter } from "#web/character-client";
-import type { Choice, Item } from "#web/character-model";
-import { array, record, required, storage as storageFixture } from "./support/helpers.mts";
+import type { Choice, Item, Sheet } from "#web/character-model";
+import { array, partial, record, required, storage as storageFixture } from "./support/helpers.mts";
 
 void test("provider option labels translate only explicit UI keys", async () => {
   const { guidanceOptions } = await import("#web/character-build");
@@ -61,23 +61,29 @@ void test("current transfer accepts only the explicit current envelope and prese
   inputs.play.containers = [{ id: "pack", name: "Bag" }];
   required(inputs.play.inventory[0]).containerId = "pack";
   const state = {
-    schemaVersion: "5.0.0",
+    schemaVersion: "6.0.0",
     inputs,
     rules: {
       engineId: "rules",
-      engineVersion: "5.0.0",
+      engineVersion: "6.0.0",
       engineGeneration: "generation",
       identity: {},
     },
-    projection: { sheet: {}, explanations: {}, evidence: [], issues: [] },
+    projection: { sheet: partial<Sheet>({}), explanations: {}, evidence: [], issues: [] },
     operationId: "first",
   };
   assert.deepEqual(parseCharacter(exportCharacter(state)), inputs);
+  // An Engine 5 export keeps the same inputs and imports through the same path.
+  assert.deepEqual(
+    parseCharacter(JSON.stringify({ format: "dnd-character.v2", schemaVersion: "5.0.0", inputs })),
+    inputs,
+  );
   for (const value of [
     inputs,
     { v: 3 },
     { format: "dnd-character.v1", schemaVersion: "4.0.0", inputs },
     { format: "dnd-character.v2", schemaVersion: "5.0.0", inputs, admin: true },
+    { format: "dnd-character.v3", schemaVersion: "5.0.0", inputs },
   ])
     assert.throws(() => parseCharacter(JSON.stringify(value)));
   assert.throws(() => parseCharacter(" ".repeat(190001)));
@@ -91,12 +97,12 @@ void test("manifest declares worker-only authority", async () => {
   const extension = record(required(array(manifestObject["recordExtensions"])[0]));
   assert.equal(extension["id"], "dnd-sheets");
   assert.equal(extension["workerOnly"], true);
-  assert.equal(extension["schemaVersion"], "5.0.0");
+  assert.equal(extension["schemaVersion"], "6.0.0");
   const services = record(manifestObject["services"]);
   const consumes = array(services["consumes"]).map(record);
   assert.equal(
     required(consumes.find((service) => service["contract"] === "dnd5e.rules-engine"))["range"],
-    "^5.0.0",
+    "^6.0.0",
   );
   // The UI reaches its own worker with services.own, not as a consumer.
   assert.equal(

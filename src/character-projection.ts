@@ -61,7 +61,7 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
     );
   }
   root.append(scores);
-  for (const group of ["skills", "saves"]) {
+  for (const group of ["skills", "saves"] as const) {
     const list = el("dl");
     list.className = "character-values";
     for (const [key, value] of Object.entries(object(sheet[group]))) {
@@ -80,7 +80,7 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
     root.append(panel(t(label(group)), list));
   }
   root.append(proficiencyDetails(projection, locale), senseDetails(projection, locale));
-  for (const group of ["weapons", "spellcasting", "resources", "features"]) {
+  for (const group of ["weapons", "spellcasting", "resources", "features"] as const) {
     const list = el("div");
     const prefix = group === "spellcasting" ? "spellcasting.perClass" : group;
     rows(group === "spellcasting" ? object(sheet[group])["perClass"] : sheet[group]).forEach(
@@ -163,7 +163,7 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
   if (items) root.append(items);
   const granted = grantedSpellsRead(projection, locale);
   if (granted) root.append(granted);
-  for (const group of ["resistances", "damageImmunities", "conditionImmunities", "traits"]) {
+  for (const group of ["resistances", "damageImmunities", "conditionImmunities"] as const) {
     if (
       human(sheet[group]) &&
       sheet[group] !== undefined &&

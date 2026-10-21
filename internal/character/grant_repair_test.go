@@ -63,7 +63,7 @@ func TestGrantRepairNeverResetsAvailableResource(t *testing.T) {
 	input := model.Blank()
 	input.Play.ResourceUses["pool"] = 1
 	before := raw(input)
-	evaluation := model.Result{Sheet: map[string]any{"resources": []any{map[string]any{"key": "pool", "max": 0}}}, Issues: []model.Issue{{ID: "resource:pool"}}}
+	evaluation := model.Result{Sheet: model.Sheet{Calculation: &model.Calculation{Resources: []model.Resource{{Key: "pool"}}}}, Issues: []model.Issue{{ID: "resource:pool"}}}
 	if repairGrantSelections(&input, input, evaluation) || string(before) != string(raw(input)) {
 		t.Fatal("rewrote still-present state")
 	}

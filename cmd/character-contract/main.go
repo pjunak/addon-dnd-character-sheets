@@ -38,6 +38,10 @@ func storedSchema() any {
 	if len(legacy) == 0 {
 		return current
 	}
+	// The current format's shared definitions stay at the document root, where
+	// its references point.
+	defs := current["$defs"]
+	delete(current, "$defs")
 	formats := []any{current}
 	for _, version := range legacy {
 		body, err := os.ReadFile("contracts/legacy/sheet-state-" + version + ".schema.json")
@@ -50,5 +54,5 @@ func storedSchema() any {
 		}
 		formats = append(formats, schema)
 	}
-	return map[string]any{"anyOf": formats}
+	return map[string]any{"anyOf": formats, "$defs": defs}
 }

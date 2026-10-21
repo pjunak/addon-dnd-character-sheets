@@ -93,7 +93,7 @@ func TestAdoptingRulesWithdrawsSavedChoicesTheNewRulesNoLongerGrant(t *testing.T
 		return chosen
 	}
 	maximum := func(input model.Inputs) int { return 10 + 5*len(feats(input)) }
-	engine.derived = func(input model.Inputs) map[string]any { return map[string]any{"maxHp": maximum(input)} }
+	engine.derived = maximum
 	engine.inspect = func(input model.Inputs) []model.Issue {
 		issues := []model.Issue{}
 		if engine.generation == "engine-two" {

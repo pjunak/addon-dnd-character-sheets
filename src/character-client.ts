@@ -145,7 +145,7 @@ export async function connectCharacter(context: AddonContext): Promise<Character
   const [service, engine] = await Promise.all([
     context.services.own("dnd5e.character", { signal: context.signal }),
     context.services.connect("dnd5e.rules-engine", {
-      range: "^5.0.0",
+      range: "^6.0.0",
       cardinality: "one",
       signal: context.signal,
     }),
@@ -165,8 +165,8 @@ const transferLimit = 1000000;
 export function exportCharacter(state: State): string {
   const body = JSON.stringify(
     {
-      format: "dnd-character.v2",
-      schemaVersion: "5.0.0",
+      format: "dnd-character.v3",
+      schemaVersion: "6.0.0",
       inputs: state.inputs,
       savedRules: state.rules,
       savedProjection: state.projection,
@@ -178,13 +178,18 @@ export function exportCharacter(state: State): string {
     throw new Error("This character exceeds the transfer limit.");
   return body;
 }
+// Each export format the import still reads. Their inputs have one shape, so
+// an older export imports like a current one; the import recomputes the rest.
+const exportFormats: Record<string, string> = {
+  "dnd-character.v2": "5.0.0",
+  "dnd-character.v3": "6.0.0",
+};
 export function parseCharacter(body: string): Inputs {
   if (new TextEncoder().encode(body).length > transferLimit)
     throw new Error("This character file exceeds the import limit.");
   const envelope = object(JSON.parse(body));
   if (
-    envelope["format"] !== "dnd-character.v2" ||
-    envelope["schemaVersion"] !== "5.0.0" ||
+    exportFormats[String(envelope["format"])] !== envelope["schemaVersion"] ||
     Object.keys(envelope).some(
       (key) =>
         !["format", "schemaVersion", "inputs", "savedRules", "savedProjection"].includes(key),

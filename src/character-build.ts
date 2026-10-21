@@ -1,4 +1,4 @@
-import type { Inputs, Result } from "./character-model.js";
+import type { CreationMethod, Inputs, Plan, PlayCommand, Result } from "./character-model.js";
 import { classReplacements } from "./character-replacements.js";
 import { builderLabel, translator } from "./character-locale.js";
 import {
@@ -39,7 +39,7 @@ export interface BuildView {
   changed(): void;
   refresh(): void;
   navigate?(tab: string): void;
-  act?(change: Record<string, unknown>): Promise<void>;
+  act?(change: PlayCommand): Promise<void>;
 }
 const options = (records: readonly CatalogRecord[]): Option[] =>
   records.map((record) => ({
@@ -60,7 +60,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
     { input, policy } = view,
     build = input.build,
     root = styled("div", "character-build");
-  const plan = view.evaluation?.plan ?? {},
+  const plan = view.evaluation?.plan ?? ({} as Partial<Plan>),
     guidance = object(view.evaluation?.guidance["choices"]);
   const update = (action: () => void, render = false): void => {
     action();
@@ -87,7 +87,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
       (value) => {
         if (!value) return;
         update(() => {
-          build.method = value;
+          build.method = value as CreationMethod;
           build.rolls = [];
           build.baseScores = {};
           if (value === "point-buy" && Number.isFinite(minimum))
@@ -253,7 +253,7 @@ export function buildView(view: BuildView, active = "character"): HTMLElement {
     if (view.compact) root.append(origin);
     root.append(foundation);
     const choices = rulesTarget(panel(t("Granted choices")), "choices", "build");
-    for (const key of ["creationChoices", "creationAbilityChoices"])
+    for (const key of ["creationChoices", "creationAbilityChoices"] as const)
       for (const descriptor of rows(plan[key]))
         choices.append(choiceView(descriptor, object(guidance[String(descriptor["id"])]), view));
     if (choices.children.length > 1) root.append(choices);

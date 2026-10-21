@@ -11,6 +11,8 @@ import (
 )
 
 type memoryData struct {
+	// body, when set, is the saved document as stored, in any format.
+	body      json.RawMessage
 	state     *State
 	revision  int64
 	writes    int
@@ -21,12 +23,15 @@ func (data *memoryData) Get(_ context.Context, _ *workerrpc.Meta, _ workerrpc.Ad
 	if data.forbidden {
 		return workerrpc.AddonDataDocument{}, failure(workerrpc.KindUnauthorized, "hidden character")
 	}
-	if data.state == nil && data.revision > 0 {
+	if data.state == nil && data.body == nil && data.revision > 0 {
 		// Like the host, a removed document keeps its revision as a tombstone.
 		return workerrpc.AddonDataDocument{}, workerrpc.NewRPCError(workerrpc.JSONRPCApplication, workerrpc.KindNotFound, "deleted", false, map[string]int64{"deletedRevision": data.revision})
 	}
-	if data.state == nil {
+	if data.state == nil && data.body == nil {
 		return workerrpc.AddonDataDocument{}, failure(workerrpc.KindNotFound, "missing")
+	}
+	if data.body != nil {
+		return workerrpc.AddonDataDocument{Key: key, Revision: data.revision, Value: data.body}, nil
 	}
 	return workerrpc.AddonDataDocument{Key: key, Revision: data.revision, Value: raw(data.state)}, nil
 }
@@ -36,7 +41,7 @@ func (data *memoryData) Transact(_ context.Context, _ *workerrpc.Meta, mutations
 		return workerrpc.AddonDataCommit{}, failure(workerrpc.KindConflict, "changed")
 	}
 	state := m.Value.(State)
-	data.state = &state
+	data.state, data.body = &state, nil
 	data.revision++
 	data.writes++
 	return workerrpc.AddonDataCommit{Results: []workerrpc.AddonDataMutationResult{{AfterRevision: data.revision}}}, nil
@@ -44,7 +49,7 @@ func (data *memoryData) Transact(_ context.Context, _ *workerrpc.Meta, mutations
 
 type fakeEngine struct {
 	inspect     func(model.Inputs) []model.Issue
-	derived     func(model.Inputs) map[string]any
+	derived     func(model.Inputs) int
 	generation  string
 	unavailable bool
 	invalid     bool
@@ -58,10 +63,13 @@ func (engine *fakeEngine) Call(_ context.Context, _ *workerrpc.Meta, call worker
 	}
 	params := call.Params.(map[string]any)
 	input := params["inputs"].(model.Inputs)
-	result := evaluated{ContractVersion: "rules-character-response.v2", Identity: map[string]any{"rulesetId": "synthetic"}, Policy: map[string]any{}, Evaluation: model.Result{ContractVersion: model.ContractVersion, Inputs: input, Ready: !engine.invalid, Sheet: map[string]any{"gold": input.Play.Currency["gp"]}, Evidence: []model.Evidence{}, Explanations: map[string]model.Explanation{}, Issues: []model.Issue{}}}
+	calculation := &model.Calculation{CurrencyWorth: &model.CurrencyWorth{Coin: "gp", Value: input.Play.Currency["gp"]}}
 	if engine.derived != nil {
-		result.Evaluation.Sheet["derived"] = engine.derived(input)
+		// Like the Engine, a lowered maximum lowers current HP.
+		calculation.Derived.MaxHP = engine.derived(input)
+		input.Play.HP = min(input.Play.HP, calculation.Derived.MaxHP)
 	}
+	result := evaluated{ContractVersion: model.ResponseVersion, Identity: map[string]any{"rulesetId": "synthetic"}, Policy: map[string]any{}, Evaluation: model.Result{ContractVersion: model.ContractVersion, Inputs: input, Ready: !engine.invalid, Sheet: model.Sheet{Status: model.SheetCalculated, Calculation: calculation}, Evidence: []model.Evidence{}, Explanations: map[string]model.Explanation{}, Issues: []model.Issue{}}}
 	if engine.inspect != nil {
 		result.Evaluation.Issues = engine.inspect(input)
 		result.Evaluation.Ready = len(result.Evaluation.Issues) == 0
@@ -399,7 +407,7 @@ func TestRejectedPlayActionAnswersWithTheRulesReason(t *testing.T) {
 		}
 		return engine.Call(ctx, meta, call)
 	})
-	response, err := invoke(t, c, meta, "save", Request{Operation: "play", OperationID: "spend-resource", ExpectedRevision: saved.Revision, Change: map[string]any{"operation": "rest", "rest": "short"}})
+	response, err := invoke(t, c, meta, "save", Request{Operation: "play", OperationID: "spend-resource", ExpectedRevision: saved.Revision, Change: playCommand(map[string]any{"operation": "rest", "rest": "short"})})
 	if err != nil || response.Status != "invalid" || response.Message != "No uses remain for this resource." || data.writes != 1 {
 		t.Fatalf("rejected play = %+v, %v, writes %d", response, err, data.writes)
 	}

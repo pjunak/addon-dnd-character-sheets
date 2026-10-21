@@ -1,4 +1,12 @@
-import type { Effect, Grant, Inputs, Result } from "./character-model.js";
+import type {
+  Effect,
+  EffectMode,
+  EffectTarget,
+  Grant,
+  GrantCondition,
+  Inputs,
+  Result,
+} from "./character-model.js";
 import { translator } from "./character-locale.js";
 import { abilities, object, rows, text, type CatalogRecord } from "./character-client.js";
 import {
@@ -131,7 +139,7 @@ export function grantForm(
         "proficiency",
       ].map((id) => ({ id, label: t(label(id)) })),
       (value) => {
-        effect.target = value;
+        effect.target = value as EffectTarget;
         delete effect.key;
         renderKey();
         renameEffects();
@@ -142,7 +150,7 @@ export function grantForm(
       effect.mode,
       ["add", "set", "minimum", "maximum"].map((id) => ({ id, label: t(label(id)) })),
       (value) => {
-        effect.mode = value;
+        effect.mode = value as EffectMode;
       },
       t,
     );
@@ -212,7 +220,7 @@ export function grantForm(
     grant.condition,
     ["always", "equipped", "attuned"].map((id) => ({ id, label: t(label(id)) })),
     (value) => {
-      grant.condition = value;
+      grant.condition = value as GrantCondition;
     },
     t,
   );

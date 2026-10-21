@@ -6,6 +6,8 @@ github.com/pjunak/addon-dnd-engine v0.0.0-20261018172450-dec03aac3aa6 h1:6ze+tDw
 github.com/pjunak/addon-dnd-engine v0.0.0-20261018172450-dec03aac3aa6/go.mod h1:hKA1liczhUxmQlthj4xJPbajztLjN1NZSUoXbvsjvb4=
 github.com/pjunak/addon-dnd-engine v0.0.0-20261019124015-ad5a4e10b3f9 h1:vr0YOubKooVrnh5gJgFhf0QyVPRY34ibEd/bvXYbifs=
 github.com/pjunak/addon-dnd-engine v0.0.0-20261019124015-ad5a4e10b3f9/go.mod h1:hKA1liczhUxmQlthj4xJPbajztLjN1NZSUoXbvsjvb4=
+github.com/pjunak/addon-dnd-engine v0.0.0-20261021231403-bb1b8cc3d60f h1:Ey+xJtctXVgO0MY/pYU+qESOgX3vj8gcqVeogCwCaQg=
+github.com/pjunak/addon-dnd-engine v0.0.0-20261021231403-bb1b8cc3d60f/go.mod h1:6SDbGg3864XkJ1weFSq+AzG/Rf0ffiqab5n0tnJbrxs=
 github.com/pjunak/ttrpg-codex v0.0.0-20261013201843-5ac53b541bad h1:/kUAayqwMPxawixEM8mptb4wy9mBT1RGzu96+G1p8xk=
 github.com/pjunak/ttrpg-codex v0.0.0-20261013201843-5ac53b541bad/go.mod h1:Pv/KUDe4ZI7KScmD/RkIoHUi4TTJyRcsMC0mq58L38A=
 github.com/santhosh-tekuri/jsonschema/v6 v6.0.3 h1:1EYB5IzjZawrrnELUi78f9fPu57HuXjmddZPjrls/28=

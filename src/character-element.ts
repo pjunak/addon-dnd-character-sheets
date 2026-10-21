@@ -45,7 +45,7 @@ import {
   type BuilderNavigation,
 } from "./character-builder-nav.js";
 import type { AddonContext, ContributionContext } from "./sdk.js";
-import type { Grant, Inputs, Response, Result, State } from "./character-model.js";
+import type { Grant, Inputs, Response, Result, SpellOptions, State } from "./character-model.js";
 import {
   spellPicker,
   spellSourceLabel,
@@ -983,7 +983,7 @@ export function defineCharacterElement(
       const view = this.#sheetView(),
         root = styled("div", "dse-combat"),
         rest = styled("div", "dnd-rest-controls");
-      for (const value of ["short", "long"])
+      for (const value of ["short", "long"] as const)
         rest.append(
           button(
             this.#t("{0} rest", [this.#t(label(value))]),
@@ -1143,7 +1143,7 @@ export function defineCharacterElement(
     }
     #spellChoices(pickers = this.#spellPickers): HTMLElement {
       const root = rulesTarget(panel(this.#t("Spells")), "spells"),
-        options = this.#evaluation?.spellOptions ?? {},
+        options = this.#evaluation?.spellOptions ?? ({} as Partial<SpellOptions>),
         casting = object(this.#evaluation?.sheet["spellcasting"]),
         spells = this.#catalogs.get("spell") ?? [];
       root.append(

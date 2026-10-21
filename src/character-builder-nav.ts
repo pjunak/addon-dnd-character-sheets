@@ -1,3 +1,4 @@
+import type { Guidance } from "./character-model.js";
 import type { BuildView } from "./character-build.js";
 import { rows, text, catalogRecord } from "./character-client.js";
 import { builderLabel, translator } from "./character-locale.js";
@@ -30,7 +31,7 @@ export function builderShell(
   name: HTMLElement,
 ): HTMLElement {
   const t = translator(view.locale),
-    guidance = view.evaluation?.guidance ?? {},
+    guidance = view.evaluation?.guidance ?? ({} as Partial<Guidance>),
     rail = styled("details", "dse-build-rail");
   rail.open = state.open;
   rail.setAttribute("aria-label", t("Builder progress"));
