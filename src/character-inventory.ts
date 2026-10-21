@@ -78,12 +78,29 @@ export function setItemQuantity(item: Item, quantity: number): void {
   }
 }
 
+// A magic item's uses, toggles, spell picks and casting ability are saved
+// under "item:<inventory id>:…" and belong to that inventory entry.
+const itemKeyPrefix = (id: string): string => "item:" + id + ":";
+
+/** Whether a saved key belongs to an entry still in the inventory, active or not. */
+export function inventoryOwnsKey(input: Inputs, key: string): boolean {
+  return input.play.inventory.some((item) => key.startsWith(itemKeyPrefix(item.id)));
+}
+
 export function removeInventoryItem(input: Inputs, id: string): void {
   input.play.inventory = input.play.inventory.filter((item) => item.id !== id);
   pinQuickUse(input, id, false);
   // A container that was this item stays, without its capacity.
   for (const container of input.play.containers ?? [])
     if (container.itemId === id) delete container.itemId;
+  const owned: Record<string, unknown>[] = [
+    input.play.resourceUses,
+    input.play.activeFeatures,
+    input.build.spells.grantChoices,
+    input.build.spells.castingAbilities,
+  ];
+  for (const saved of owned)
+    for (const key of Object.keys(saved)) if (key.startsWith(itemKeyPrefix(id))) delete saved[key];
 }
 
 /** "5 lb" or "0.5 lb" in the locale's digits, for weights the Engine reports. */

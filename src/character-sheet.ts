@@ -142,6 +142,59 @@ export function featDetails(
   }
   return root;
 }
+/** An active magic item with the record text that says what it does. */
+export interface ItemProperty {
+  itemId: string;
+  name: string;
+  reference?: Reference;
+  text: string;
+}
+// The Engine lists the active items, so the sheet never decides which ones
+// count. Their text comes from the loaded catalog, or from saved evidence.
+export function itemProperties(
+  projection: Projection | undefined,
+  catalogs?: ReadonlyMap<string, CatalogRecord[]>,
+): ItemProperty[] {
+  return rows(projection?.sheet["activeItems"]).map((item) => {
+    const ref = object(item["ref"]),
+      kind = text(ref["kind"]),
+      id = text(ref["id"]);
+    const reference = kind && id ? { kind, id } : undefined,
+      record = reference ? catalogRecord(catalogs?.get(kind), id)?.value : undefined,
+      evidence = reference
+        ? projection?.evidence.find((row) => row.reference.kind === kind && row.reference.id === id)
+        : undefined;
+    const body = [record?.["description"], record?.["text"], record?.["summary"], evidence?.summary]
+      .map((value) => text(value))
+      .find(Boolean);
+    return {
+      itemId: text(item["itemId"]),
+      name: text(item["name"]) || text(record?.["name"]) || evidence?.name || id,
+      ...(reference ? { reference } : {}),
+      text: plainDescription(body),
+    };
+  });
+}
+/** What each active magic item does, in its own panel beside the feats. */
+export function itemPropertyDetails(
+  projection: Projection | undefined,
+  locale: string,
+  catalogs?: ReadonlyMap<string, CatalogRecord[]>,
+): HTMLElement | undefined {
+  const items = itemProperties(projection, catalogs);
+  if (!items.length) return undefined;
+  const root = panel(translator(locale)("Item properties"));
+  root.className = "dse-section";
+  for (const item of items)
+    root.append(
+      el(
+        "details",
+        el("summary", savedRule(projection, item.name, undefined, item.reference)),
+        ...(item.text ? [el("p", item.text)] : []),
+      ),
+    );
+  return root;
+}
 export function recordName(
   view: Pick<SheetView, "catalogs" | "projection">,
   kind: string,
@@ -728,16 +781,18 @@ export function defenseNames(value: unknown, locale: string): string {
     .map((id) => t(label(id)))
     .join(", ");
 }
-/** The rolls features give Advantage on, situational ones with their condition. */
-// Lasting roll effects from features and gear, by mode; conditions show their
-// own effects in the status row, so they are left out here.
+/**
+ * The rolls features and gear give Advantage on, situational ones with their
+ * condition, each followed by the sources that give it: "Death saves · Resilience".
+ */
+// Conditions show their own effects in the status row, so they are left out here.
 export function advantageNames(
   projection: Projection | undefined,
   locale: string,
   mode: "advantage" | "disadvantage" = "advantage",
 ): string[] {
   const t = translator(locale),
-    names: string[] = [];
+    sources = new Map<string, string[]>();
   for (const entry of rows(projection?.sheet["advantages"])) {
     if (
       text(entry["mode"], "advantage") !== mode ||
@@ -764,10 +819,15 @@ export function advantageNames(
               : entry["on"] === "concentration"
                 ? t("Concentration")
                 : t("Death saves");
-    const name = entry["when"] ? t("{0} ({1})", [roll, text(entry["when"])]) : roll;
-    if (!names.includes(name)) names.push(name);
+    const name = entry["when"] ? t("{0} ({1})", [roll, text(entry["when"])]) : roll,
+      named = sources.get(name) ?? [],
+      source = text(entry["name"]);
+    if (source && !named.includes(source)) named.push(source);
+    sources.set(name, named);
   }
-  return names;
+  return [...sources].map(([name, named]) =>
+    named.length ? t("{0} · {1}", [name, named.join(", ")]) : name,
+  );
 }
 /**
  * The ADV or DIS tag for a roll the Engine marked, titled with the sources
@@ -836,6 +896,27 @@ export function selectionEntries(
     })),
   }));
 }
+/**
+ * The resources the sheet shows. An item that is owned but not active keeps its
+ * uses so rests still restore them; they stay hidden until the item is active.
+ */
+export function playResources(projection: Projection | undefined): Record<string, unknown>[] {
+  return rows(projection?.sheet["resources"]).filter((resource) => resource["active"] !== false);
+}
+/**
+ * Who a resource belongs to when its name alone does not say: the acquisition
+ * that granted it, or the magic item whose uses these are. "" otherwise.
+ */
+export function resourceSource(
+  resource: Record<string, unknown>,
+  locale: string,
+  evidence?: Projection["evidence"],
+): string {
+  const source = object(resource["source"]);
+  if (!source["acquisition"] && source["type"] !== "item") return "";
+  const name = spellSourceLabel(source, locale, evidence);
+  return name === text(resource["name"]) ? "" : name;
+}
 export function resourceDetails(view: SheetView): HTMLElement {
   const t = translator(view.locale),
     sheet = view.projection?.sheet ?? {};
@@ -846,7 +927,7 @@ export function resourceDetails(view: SheetView): HTMLElement {
     ...featureDCRows(view.projection, view.locale),
   ])
     resources.append(styled("div", "dse-resource", el("span", name), el("strong", value)));
-  for (const resource of rows(sheet["resources"])) {
+  for (const resource of playResources(view.projection)) {
     const key = String(resource["key"]),
       name = text(resource["name"], key);
     const row = styled(
@@ -855,10 +936,8 @@ export function resourceDetails(view: SheetView): HTMLElement {
       el("span", savedRule(view.projection, name, "resources." + key + ".remaining")),
       el("strong", human(resource["remaining"]) + " / " + human(resource["max"])),
     );
-    if (object(resource["source"])["acquisition"])
-      row.append(
-        el("small", spellSourceLabel(resource["source"], view.locale, view.projection?.evidence)),
-      );
+    const source = resourceSource(resource, view.locale, view.projection?.evidence);
+    if (source) row.append(el("small", source));
     if (view.editing) {
       const spent = numberInput(
         view.input.play.resourceUses[key] ?? 0,
@@ -955,8 +1034,10 @@ export function explorationDetails(view: SheetView): HTMLElement {
     senseDetails(view.projection, view.locale),
     traits,
   );
-  const feats = featDetails(view.projection, view.locale);
+  const feats = featDetails(view.projection, view.locale),
+    items = itemPropertyDetails(view.projection, view.locale, view.catalogs);
   if (feats) root.append(feats);
+  if (items) root.append(items);
   return root;
 }
 

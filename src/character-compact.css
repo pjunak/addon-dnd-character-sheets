@@ -810,6 +810,14 @@
   color: var(--text-light);
   font-size: 0.78rem;
 }
+/* Item properties follow the features under a smaller heading. */
+.dsc-feats-heading {
+  padding-top: 0.75rem;
+  font: 600 0.68rem/1.2 var(--font-title);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
 .dsc-training {
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);
@@ -1332,6 +1340,10 @@
   display: inline-flex;
   gap: 0.4rem;
   align-items: center;
+}
+.dsc-rest-list li small {
+  color: var(--text-muted);
+  font-size: 0.7rem;
 }
 .dsc-rest-window h3 {
   margin: 0 0 0.5rem;

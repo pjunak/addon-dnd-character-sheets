@@ -63,11 +63,13 @@ count beside **Change**. Compact puts abilities and skills on the right,
 starting at the top; untrained skills are dimmed. **Limited uses** shows remaining uses as pips (round
 for spell slots and hit dice, diamonds for feature uses, a bar with steps for
 large pools) and each resource's short/long rest recharge, after the class
-table values and feature save DCs (a Monk's Focus, maneuvers). Sheet lists
-features, chosen invocations and other options, feats and class choices (Divine
-Order, Wild Shape forms) in a grid with short summaries, and armor, weapon, tool
-and language training, senses, size, defenses and what the character has
-Advantage on in one list. Fly, swim and climb speeds sit under Speed, and an
+table values and feature save DCs (a Monk's Focus, maneuvers). A magic item's
+uses name the item and stay hidden while it is not active; rests still restore
+them. Sheet lists features, chosen invocations and other options, feats and
+class choices (Divine Order, Wild Shape forms) in a grid with short summaries,
+then **Item properties**: the text of each active magic item. Armor, weapon,
+tool and language training, senses, size, defenses and what the character has
+Advantage on, with the feature or item behind each, share one list. Fly, swim and climb speeds sit under Speed, and an
 **A** marks saves, skills and Initiative with Advantage. Combat lists weapons
 and feature attacks in a table (to hit, damage, reach or range, mastery, a
 lowered critical range) with casting numbers beneath. Spells sort by
@@ -128,7 +130,10 @@ automatically. Speed includes supported condition restrictions. A separate D20
 roll adjustment is shown explicitly and is not folded into the displayed
 bonuses or spell save DCs. Condition summaries survive provider loss, print and
 export. End conditions explicitly, including after a rest; situational effects,
-dropped items and death remain table decisions.
+dropped items and death remain table decisions. Conditions that active items
+give, such as Fate-Touched, show their level (the number of items) and the
+items behind them; they last while the items are active and have no remove or
+level control.
 
 **Concentration** starts when you cast a spell that needs it and replaces the
 previous one; the chip ◈ names the spell, and the spell list marks it

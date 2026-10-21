@@ -62,6 +62,11 @@ separate D20 adjustment must be applied once to rolls, without changing printed
 bonuses or save DCs. Other effects require table adjudication; see the
 [Engine contract](../../addon-dnd-engine/contract/README.md#authored-conditions).
 
+Conditions that active magic items give are `granted: true` rows in the
+projection, not authored state. Both layouts and print show their level and
+granting items without remove or level controls; an authored condition with the
+same ID keeps its own row.
+
 ## Inspiration
 
 `inputs.play.inspiration` is an optional boolean. Absent means unavailable
@@ -98,7 +103,10 @@ item effects are resolved separately. Rests and recalculation never replenish it
 Stored/empty pins remain visible but cannot be used.
 
 Unpinning preserves the item. Explicit inventory deletion removes that same
-instance's pin in one autosave. Missing or duplicate references from other
+instance's pin in one autosave, together with the uses, toggles, spell picks and
+casting ability its magic item owned (`item:<inventory id>:…` keys). While the
+entry exists, that state stays saved even when the item is inactive, so it is
+never offered for discarding. Missing or duplicate references from other
 clients/imports are rejected rather than silently repaired. Independent fields
 can merge, competing pin lists conflict, and a merge against a remotely deleted
 item remains pending for explicit unpinning; it cannot recreate the entry.
