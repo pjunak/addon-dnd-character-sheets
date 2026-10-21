@@ -839,7 +839,9 @@ function featureSource(view: SheetView, value: unknown): string {
     .join(" ");
 }
 
-// Features and feats read as a grid of short entries; each name opens its full text.
+// Features and feats read as a grid of short entries; each name opens its full
+// text. The card body is the record's authored excerpt (the compendium's
+// frequently-needed facts), never the whole description.
 function features(view: SheetView): HTMLElement {
   const t = translator(view.locale),
     sheet = view.projection?.sheet ?? {},
@@ -847,9 +849,11 @@ function features(view: SheetView): HTMLElement {
     grid = styled("div", "dsc-feats");
   root.classList.add("dsc-features");
   const entry = (name: string, reference: Reference, source: string): HTMLElement => {
-    const summary = view.projection?.evidence.find(
-      (row) => row.reference.kind === reference.kind && row.reference.id === reference.id,
-    )?.summary;
+    const excerpt = text(
+      view.projection?.evidence.find(
+        (row) => row.reference.kind === reference.kind && row.reference.id === reference.id,
+      )?.facts["excerpt"],
+    );
     return styled(
       "div",
       "dsc-feat",
@@ -859,7 +863,7 @@ function features(view: SheetView): HTMLElement {
         savedRule(view.projection, name, undefined, reference),
         ...(source ? [el("small", source)] : []),
       ),
-      ...(summary ? [el("p", plainDescription(summary))] : []),
+      ...(excerpt ? [el("p", plainDescription(excerpt))] : []),
     );
   };
   for (const feature of rows(sheet["features"])) {
@@ -868,7 +872,8 @@ function features(view: SheetView): HTMLElement {
     grid.append(
       entry(
         text(feature["name"], id) + (count > 1 ? " × " + count : ""),
-        { kind: "feature", id },
+        // A chosen subclass fills its class's slot row with kind "subclass".
+        { kind: text(feature["kind"]) || "feature", id },
         featureSource(view, feature["source"]),
       ),
     );

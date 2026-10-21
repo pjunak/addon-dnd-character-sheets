@@ -980,22 +980,23 @@ export function explorationDetails(view: SheetView): HTMLElement {
   traits.className = "dse-section";
   for (const feature of rows(sheet["features"])) {
     const id = String(feature["id"]),
-      count = Number(feature["count"] ?? 1);
+      count = Number(feature["count"] ?? 1),
+      // A chosen subclass fills its class's slot row with kind "subclass".
+      kind = text(feature["kind"]) || "feature";
     traits.append(
       el(
         "details",
         el(
           "summary",
-          savedRule(view.projection, text(feature["name"], id), undefined, {
-            kind: "feature",
-            id,
-          }),
+          savedRule(view.projection, text(feature["name"], id), undefined, { kind, id }),
           ...(count > 1 ? [" × " + count] : []),
         ),
         el(
           "p",
           plainDescription(
-            view.projection?.evidence.find((row) => row.reference.id === id)?.summary,
+            view.projection?.evidence.find(
+              (row) => row.reference.kind === kind && row.reference.id === id,
+            )?.summary,
           ),
         ),
       ),

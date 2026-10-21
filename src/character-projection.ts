@@ -95,7 +95,13 @@ export function projectionView(projection: Projection, locale = "en"): HTMLEleme
             ? { kind: source["type"], id: source["id"] }
             : typeof id === "string"
               ? {
-                  kind: group === "features" ? "feature" : group === "weapons" ? "weapon" : "class",
+                  // A feature row's own kind marks a chosen subclass's slot row.
+                  kind:
+                    group === "features"
+                      ? text(row["kind"]) || "feature"
+                      : group === "weapons"
+                        ? "weapon"
+                        : "class",
                   id,
                 }
               : undefined;
