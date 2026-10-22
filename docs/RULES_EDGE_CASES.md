@@ -1,7 +1,7 @@
 # Character saves and failure semantics
 
 The coordinator owns the current `dnd-sheets` extension for each core character
-lifetime. The stored schema is 6.0.0; its optional authored play fields are
+lifetime. The stored schema is 6.1.0; its optional authored play fields are
 described below. The core profile, portrait and relationships are host-owned.
 
 ## Schema updates
@@ -49,6 +49,12 @@ The 5.0.0 upgrade keeps the saved inputs and rules state and carries the old
 snapshot over as far as the typed Engine 6 sheet can read it. The first load
 then recomputes the snapshot from the saved inputs, so the sheet shows complete
 Engine 6 results before it is next saved.
+
+The 6.0.0 upgrade only renames the format: 6.1.0 added the optional
+`baseItemId` and `bonus` picks of a magic weapon or armor
+([Magic weapons and armor](#magic-weapons-and-armor)). Each frozen schema is
+embedded with its own definitions, so an older format is checked against its
+own types.
 
 ## Authored conditions
 
@@ -514,6 +520,23 @@ closing/choosing restores focus to the refreshed slot trigger. The dialog
 continues to use the host's borrowed control styling and keyboard containment.
 Both sheet layouts allow enlarged translated skill labels to wrap without
 pushing totals off-screen; the backpack heading wraps around its Add item action.
+
+## Magic weapons and armor
+
+A magic item whose record declares a base form (`baseItem`) is a weapon or
+armor of that base, such as the DMG's "Weapon, +1, +2, or +3" or a homebrew
+"+1 Longsword". The Engine lists what an inventory entry may be in
+`guidance.equipment[id].baseItems` and `bonuses`; the item editor shows a
+**Base weapon or armor** and a **Magic bonus** select when there are several
+options or the entry already has a pick, and writes the authored
+`baseItemId`/`bonus` like any other item field (cleared by choosing the empty
+entry). A pick the item no longer offers stays selected as unavailable until it
+is changed. Panels never resolve the base or apply the bonus themselves: attack
+rows, Armor Class and its explanation come from the Engine, and the entry's
+inventory and attack rows add a muted "Longsword, +1" note unless the item's
+name already says so. Without rules the note names a picked base from the
+catalog or saved evidence only. New copies never join a stack whose entry has
+picks, so each copy keeps its own base and bonus.
 
 ## Rules and transfer
 

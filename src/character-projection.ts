@@ -7,7 +7,8 @@ import { conditionsRead, grantedConditions } from "./character-conditions.js";
 import { grantedSpellsRead } from "./character-spells.js";
 import { featDetails, itemPropertyDetails, senseDetails } from "./character-sheet.js";
 import { proficiencyDetails } from "./character-proficiencies.js";
-import type { Projection, State } from "./character-model.js";
+import type { Item, Projection, State } from "./character-model.js";
+import { gearLabel } from "./character-magic-gear.js";
 import { translator } from "./character-locale.js";
 import { abilities, object, rows, text } from "./character-client.js";
 import { el, human, label, panel, rule } from "./character-ui.js";
@@ -271,7 +272,18 @@ export function printCharacter(
     root.append(handsRead(state.inputs, state.projection, locale));
   if (options.equipment && state.inputs.play.containers?.length)
     root.append(storageRead(state.inputs, locale));
-  const containers = containerOptions(state.inputs.play.containers ?? []);
+  const containers = containerOptions(state.inputs.play.containers ?? []),
+    // Print has no rules, so a magic weapon or armor names only its picks.
+    gearView = {
+      locale: locale ?? "en",
+      equipment: {},
+      catalogs: new Map(),
+      projection: state.projection,
+    },
+    printedName = (item: Item): string => {
+      const gear = gearLabel(gearView, item);
+      return gear ? t("{0} ({1})", [item.name, gear]) : item.name;
+    };
   if (options.equipment && state.inputs.play.inventory.some((item) => item.quantity > 0))
     root.append(
       panel(
@@ -283,7 +295,7 @@ export function printCharacter(
               "p",
               t("{0} × {1}; {2}{3}. {4}", [
                 item.quantity,
-                item.name,
+                printedName(item),
                 t(label(item.location)),
                 item.attuned ? t("; attuned") : "",
                 item.notes +

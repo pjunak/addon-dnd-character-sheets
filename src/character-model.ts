@@ -359,6 +359,8 @@ export interface EquipmentGuidance {
   canAttune: boolean;
   equipReason?: string;
   attuneReason?: string;
+  baseItems?: Array<Option>;
+  bonuses?: Array<number>;
 }
 
 export interface Evidence {
@@ -548,6 +550,8 @@ export interface Item {
   grantId?: string;
   notes: string;
   weightLb?: number;
+  baseItemId?: string;
+  bonus?: number;
 }
 
 export type ItemReason = "" | "build" | "empty" | "missing" | "stored";

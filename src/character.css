@@ -641,6 +641,11 @@
 .dse-attack > span:nth-child(n + 4) {
   grid-column: 1 / -1;
 }
+/* What a magic weapon or armor is, under its name. */
+.dsc-gear {
+  display: block;
+  font-size: var(--text-xs);
+}
 .dse-resource {
   display: flex;
   flex-wrap: wrap;

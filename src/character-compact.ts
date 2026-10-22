@@ -23,6 +23,7 @@ import {
   wornEquipment,
 } from "./character-sheet.js";
 import { abilities, object, rows, strings, text } from "./character-client.js";
+import { gearNote } from "./character-magic-gear.js";
 import type { Item, Sheet } from "./character-model.js";
 import {
   assignBodyPlacement,
@@ -783,6 +784,7 @@ function attackTable(view: SheetView): HTMLElement {
             reference ?? featureReference(weapon),
           ),
           ...(item && item.quantity > 1 ? [el("small", " ×" + item.quantity)] : []),
+          ...gearNote(view, item),
           ...(typeof weapon["criticalRange"] === "number"
             ? [styled("small", "dsc-crit", t("Crit {0}–20", [weapon["criticalRange"]]))]
             : []),
@@ -1298,6 +1300,7 @@ function wornList(view: SheetView, figure: (place?: string) => void): HTMLElemen
       "span",
       "dsc-worn-name",
       savedRule(view.projection, item.name, undefined, item.reference),
+      ...gearNote(view, item),
     );
     if (item.attuned) name.append(styled("span", "dsc-tag", t("Attuned")));
     const node = styled("div", "dsc-worn-row", label, name);
@@ -1373,6 +1376,7 @@ function backpackSummary(view: SheetView, open: (container?: string) => void): H
           "span",
           "dsc-pack-name",
           savedRule(view.projection, item.name, undefined, item.reference),
+          ...gearNote(view, item),
         ),
         styled("span", "dsc-pack-quantity", "×" + item.quantity),
       );

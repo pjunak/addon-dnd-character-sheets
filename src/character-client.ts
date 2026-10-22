@@ -165,8 +165,8 @@ const transferLimit = 1000000;
 export function exportCharacter(state: State): string {
   const body = JSON.stringify(
     {
-      format: "dnd-character.v3",
-      schemaVersion: "6.0.0",
+      format: "dnd-character.v4",
+      schemaVersion: "6.1.0",
       inputs: state.inputs,
       savedRules: state.rules,
       savedProjection: state.projection,
@@ -183,6 +183,7 @@ export function exportCharacter(state: State): string {
 const exportFormats: Record<string, string> = {
   "dnd-character.v2": "5.0.0",
   "dnd-character.v3": "6.0.0",
+  "dnd-character.v4": "6.1.0",
 };
 export function parseCharacter(body: string): Inputs {
   if (new TextEncoder().encode(body).length > transferLimit)

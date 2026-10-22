@@ -11,7 +11,7 @@ import (
 
 const Contract = "dnd5e.character"
 const Version = "4.0.0"
-const SchemaVersion = "6.0.0"
+const SchemaVersion = "6.1.0"
 
 var reference = workerrpc.AddonDataReference{Kind: workerrpc.AddonDataRecordExtension, DataID: "dnd-sheets"}
 

@@ -5,6 +5,8 @@ import (
 	"github.com/pjunak/addon-dnd-character-sheets/internal/character"
 	model "github.com/pjunak/addon-dnd-engine/character"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func main() {
@@ -43,7 +45,7 @@ func storedSchema() any {
 	defs := current["$defs"]
 	delete(current, "$defs")
 	formats := []any{current}
-	for _, version := range legacy {
+	for index, version := range legacy {
 		body, err := os.ReadFile("contracts/legacy/sheet-state-" + version + ".schema.json")
 		if err != nil {
 			panic(err)
@@ -52,7 +54,28 @@ func storedSchema() any {
 		if err := json.Unmarshal(body, &schema); err != nil {
 			panic(err)
 		}
-		formats = append(formats, schema)
+		formats = append(formats, ownReferences(schema, "#/anyOf/"+strconv.Itoa(index+1)))
 	}
 	return map[string]any{"anyOf": formats, "$defs": defs}
+}
+
+// ownReferences points a frozen schema's "#/$defs/…" references at its own
+// definitions, which sit under prefix once it is embedded in anyOf, so an
+// older format is checked against its own types rather than the current ones.
+func ownReferences(value any, prefix string) any {
+	switch current := value.(type) {
+	case map[string]any:
+		for key, child := range current {
+			if reference, ok := child.(string); key == "$ref" && ok && strings.HasPrefix(reference, "#/$defs/") {
+				current[key] = prefix + reference[1:]
+			} else {
+				current[key] = ownReferences(child, prefix)
+			}
+		}
+	case []any:
+		for index, child := range current {
+			current[index] = ownReferences(child, prefix)
+		}
+	}
+	return value
 }

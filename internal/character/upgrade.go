@@ -17,7 +17,7 @@ type Upgrade func(map[string]any) (map[string]any, error)
 // reads, keyed by that format's schemaVersion. Saved sheets are upgraded when
 // the worker loads them and written in the current format on their next save.
 // See docs/RULES_EDGE_CASES.md#changing-the-stored-format.
-var upgrades = map[string]Upgrade{"5.0.0": upgradeFrom5}
+var upgrades = map[string]Upgrade{"5.0.0": upgradeFrom5, "6.0.0": upgradeFrom6}
 
 // upgradeFrom5 moves a sheet saved with Engine 5 to the typed projection of
 // Engine 6. The saved inputs keep their format. The old projection is read
@@ -31,6 +31,13 @@ func upgradeFrom5(value map[string]any) (map[string]any, error) {
 	old, _ := projection["sheet"].(map[string]any)
 	projection["sheet"] = sheetFrom5(old)
 	value["schemaVersion"] = "6.0.0"
+	return value, nil
+}
+
+// upgradeFrom6 moves a sheet saved before magic weapons and armor. Inventory
+// items only gained optional base and bonus picks, so nothing else changes.
+func upgradeFrom6(value map[string]any) (map[string]any, error) {
+	value["schemaVersion"] = "6.1.0"
 	return value, nil
 }
 

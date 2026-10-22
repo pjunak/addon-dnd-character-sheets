@@ -72,7 +72,8 @@ tool and language training, senses, size, defenses and what the character has
 Advantage on, with the feature or item behind each, share one list. Fly, swim and climb speeds sit under Speed, and an
 **A** marks saves, skills and Initiative with Advantage. Combat lists weapons
 and feature attacks in a table (to hit, damage, reach or range, mastery, a
-lowered critical range) with casting numbers beneath. Spells sort by
+lowered critical range) with casting numbers beneath; a magic weapon or
+armor's row notes its base and bonus ("Longsword, +1"). Spells sort by
 level under headings with the remaining slots; each row shows casting time as an A, BA or R
 tag, range, concentration and ritual from the source record. Chips above the
 list narrow it to Action, Bonus action or Concentration spells, and the chosen
@@ -102,7 +103,7 @@ list sorts by container, name, quantity or weight, with ★ pins and − + stepp
 in each row. Selecting a container chip lets you rename it, link it to its item
 or remove it, and **+ Container** adds one. The editor holds the item's name,
 quantity, weight, acquisition, notes, location, attunement, body place and
-container, with Quick use, Stow & unattune and Delete; Classic's inline rows
+container, and for a magic weapon or armor its base and bonus picks, with Quick use, Stow & unattune and Delete; Classic's inline rows
 use the same controls. Add Item opens the catalog picker and returns to the
 window with the new entry selected; it defaults to a new instance and offers
 explicit addition to a carried stack. Existing item names, notes, grants and equipped copies survive.
@@ -175,8 +176,9 @@ remain usable without a rules provider; missing data stays distinct from an
 empty group. Saving-throw shields show and name their saved training state.
 
 **Tools** owns export, reviewed replacement import, printing, layout and rules
-status. Transfers use `dnd-character.v3` / schema 6.0.0 and contain the current
-character only; older `dnd-character.v2` / 5.0.0 exports still import. Changed
+status. Transfers use `dnd-character.v4` / schema 6.1.0 and contain the current
+character only; older `dnd-character.v3` / 6.0.0 and `dnd-character.v2` / 5.0.0
+exports still import. Changed
 installed rules require explicit adoption. If an autosave discovers changed
 rules, **Review changed rules** opens Tools; explicit adoption can save the
 pending edits together with the new rules, and removes (and lists) saved

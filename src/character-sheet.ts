@@ -37,6 +37,7 @@ import {
   styled,
 } from "./character-ui.js";
 import { rulesTarget } from "./character-rule-notes.js";
+import { gearNote } from "./character-magic-gear.js";
 
 export type Layout = "compact" | "classic";
 export interface SheetView {
@@ -607,6 +608,7 @@ export function backpack(
           "span",
           "dse-item-name",
           savedRule(view.projection, item.name, undefined, item.reference),
+          ...gearNote(view, item),
         ),
       );
       if (view.editing) {
@@ -682,11 +684,17 @@ export function attackDetails(view: SheetView): HTMLElement {
     // An unarmed strike comes from the ruleset and has no weapon record.
     const path = "weapons." + index,
       ref = text(weapon["ref"]),
-      reference = ref ? { kind: "weapon", id: ref } : undefined;
+      reference = ref ? { kind: "weapon", id: ref } : undefined,
+      item = view.input.play.inventory.find((entry) => entry.id === weapon["itemId"]);
     const row = styled(
       "div",
       "dse-attack",
-      savedRule(view.projection, String(weapon["name"] ?? weapon["ref"]), undefined, reference),
+      styled(
+        "span",
+        "dse-attack-name",
+        savedRule(view.projection, String(weapon["name"] ?? weapon["ref"]), undefined, reference),
+        ...gearNote(view, item),
+      ),
       el(
         "strong",
         savedRule(view.projection, signed(weapon["attackBonus"]), path + ".attackBonus"),

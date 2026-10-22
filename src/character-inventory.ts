@@ -112,8 +112,9 @@ export function weightText(pounds: unknown, locale: string): string {
 
 /**
  * Whether new copies of a catalog item may join an existing inventory entry:
- * the same item, carried loose in the same place and not attuned, so the
- * entry's notes, grants and identity apply to every copy.
+ * the same item, carried loose in the same place, not attuned and with no
+ * base or bonus picked, so the entry's notes, grants, picks and identity apply
+ * to every copy.
  */
 export function canStackOnto(
   prior: Item,
@@ -123,6 +124,8 @@ export function canStackOnto(
   return (
     prior.location === "carried" &&
     !prior.attuned &&
+    prior.baseItemId === undefined &&
+    prior.bonus === undefined &&
     (prior.containerId ?? "") === (containerId ?? "") &&
     prior.reference?.kind === reference?.kind &&
     prior.reference?.id === reference?.id

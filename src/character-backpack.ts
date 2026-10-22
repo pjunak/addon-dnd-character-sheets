@@ -20,6 +20,7 @@ import {
 import { itemBodyPlacement } from "./character-placement.js";
 import { containerItem, itemContainer } from "./character-storage.js";
 import { translator } from "./character-locale.js";
+import { gearNote } from "./character-magic-gear.js";
 import { button, el, field, label, select, styled, textInput } from "./character-ui.js";
 
 export interface BackpackState {
@@ -142,7 +143,7 @@ export function backpackDialog(
     name.className = "dsc-bp-name";
     name.dataset["focusKey"] = "pack/" + item.id + "/select";
     name.setAttribute("aria-pressed", String(selected));
-    const tags = styled("span", "dsc-bp-tags");
+    const tags = styled("span", "dsc-bp-tags", ...gearNote(view, item));
     if (item.attuned) tags.append(styled("span", "dsc-tag dsc-tag-magic", t("Attuned")));
     const holds = holders.get(item.id);
     if (holds)
@@ -183,7 +184,13 @@ export function backpackDialog(
     }
     const kind = item.reference ? t(label(item.reference.kind)) : t("Custom");
     side.replaceChildren(
-      styled("h4", "dsc-bp-side-title", item.name, styled("span", "dsc-tag", kind)),
+      styled(
+        "h4",
+        "dsc-bp-side-title",
+        item.name,
+        styled("span", "dsc-tag", kind),
+        ...gearNote(view, item),
+      ),
     );
     if (!view.editing) {
       side.append(

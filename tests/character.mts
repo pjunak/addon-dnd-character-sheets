@@ -61,7 +61,7 @@ void test("current transfer accepts only the explicit current envelope and prese
   inputs.play.containers = [{ id: "pack", name: "Bag" }];
   required(inputs.play.inventory[0]).containerId = "pack";
   const state = {
-    schemaVersion: "6.0.0",
+    schemaVersion: "6.1.0",
     inputs,
     rules: {
       engineId: "rules",
@@ -73,9 +73,13 @@ void test("current transfer accepts only the explicit current envelope and prese
     operationId: "first",
   };
   assert.deepEqual(parseCharacter(exportCharacter(state)), inputs);
-  // An Engine 5 export keeps the same inputs and imports through the same path.
+  // Older exports keep the same inputs and import through the same path.
   assert.deepEqual(
     parseCharacter(JSON.stringify({ format: "dnd-character.v2", schemaVersion: "5.0.0", inputs })),
+    inputs,
+  );
+  assert.deepEqual(
+    parseCharacter(JSON.stringify({ format: "dnd-character.v3", schemaVersion: "6.0.0", inputs })),
     inputs,
   );
   for (const value of [
@@ -84,6 +88,7 @@ void test("current transfer accepts only the explicit current envelope and prese
     { format: "dnd-character.v1", schemaVersion: "4.0.0", inputs },
     { format: "dnd-character.v2", schemaVersion: "5.0.0", inputs, admin: true },
     { format: "dnd-character.v3", schemaVersion: "5.0.0", inputs },
+    { format: "dnd-character.v4", schemaVersion: "6.0.0", inputs },
   ])
     assert.throws(() => parseCharacter(JSON.stringify(value)));
   assert.throws(() => parseCharacter(" ".repeat(190001)));
@@ -97,7 +102,7 @@ void test("manifest declares worker-only authority", async () => {
   const extension = record(required(array(manifestObject["recordExtensions"])[0]));
   assert.equal(extension["id"], "dnd-sheets");
   assert.equal(extension["workerOnly"], true);
-  assert.equal(extension["schemaVersion"], "6.0.0");
+  assert.equal(extension["schemaVersion"], "6.1.0");
   const services = record(manifestObject["services"]);
   const consumes = array(services["consumes"]).map(record);
   assert.equal(

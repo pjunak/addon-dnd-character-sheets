@@ -16,6 +16,7 @@ import {
   weightText,
 } from "./character-inventory.js";
 import { translator } from "./character-locale.js";
+import { gearFields } from "./character-magic-gear.js";
 import {
   button,
   el,
@@ -224,7 +225,7 @@ export function itemWeight(view: SheetView, item: Item): HTMLElement {
   );
 }
 
-/** Name, acquisition, notes, scroll spell and weight. */
+/** Name, magic weapon or armor picks, weight, acquisition, notes and scroll spell. */
 export function itemFields(view: SheetView, item: Item): HTMLElement[] {
   const t = translator(view.locale);
   return [
@@ -236,6 +237,7 @@ export function itemFields(view: SheetView, item: Item): HTMLElement[] {
         view.change();
       }),
     ),
+    ...gearFields(view, item),
     itemWeight(view, item),
     field(
       "inventory/" + item.id + "/acquisition",
