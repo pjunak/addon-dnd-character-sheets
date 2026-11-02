@@ -25,7 +25,7 @@
   padding-right: 0.4rem;
 }
 .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs .codex-tab {
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -78,7 +78,7 @@
 }
 .addon-dnd-character .dse-layout-compact .dse-ability-title {
   border: 0;
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   font-weight: 400;
   letter-spacing: 0;
   flex-wrap: wrap;
@@ -86,7 +86,7 @@
 }
 /* "STR Strength": the abbreviation in small capitals, the name beside it. */
 .dse-ability-key {
-  font: 700 0.74rem/1 var(--font-title);
+  font: 700 var(--text-xs)/1 var(--font-title);
   letter-spacing: 0.1em;
   color: var(--text-light);
 }
@@ -115,7 +115,7 @@
   background: var(--bg-raised);
 }
 .addon-dnd-character .dse-layout-compact .dse-score > strong {
-  font-size: 1.35rem;
+  font-size: var(--text-xl);
   font-weight: 600;
 }
 .addon-dnd-character .dse-layout-compact .dse-score .dse-number {
@@ -126,11 +126,11 @@
   border-top: 1px solid var(--border-subtle);
   background: transparent;
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
 }
 .addon-dnd-character .dse-layout-compact .dse-dock {
   white-space: normal;
-  font-size: 0.65rem;
+  font-size: var(--text-xs);
 }
 /* Heading chips sit beside the save, stay whole and wrap below the name when narrow. */
 .addon-dnd-character .dse-layout-compact .dse-dock-slot {
@@ -197,7 +197,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.66rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -205,14 +205,14 @@
 .dsc-cell-value {
   display: flex;
   align-items: baseline;
-  font-size: 1.35rem;
+  font-size: var(--text-xl);
   font-weight: 600;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
 .dsc-cell-value small {
   margin-left: 0.2rem;
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   font-weight: 400;
   color: var(--text-muted);
 }
@@ -237,11 +237,11 @@
   margin-top: 0.25rem;
   padding: 0.3rem 0.5rem;
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--radius-sm);
   background: var(--bg-surface);
   box-shadow: var(--shadow-sm);
   color: var(--text-parchment);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   letter-spacing: 0;
   line-height: 1.4;
   text-transform: none;
@@ -256,14 +256,14 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.35rem;
-  font-size: 1.05rem;
+  font-size: var(--text-base);
   font-variant-numeric: tabular-nums;
 }
 .addon-dnd-character .dsc-hp-values .dsc-hp-input {
   width: 4ch;
   min-height: 0;
   padding: 0.05rem 0.25rem;
-  font-size: 1.45rem;
+  font-size: var(--text-xl);
   font-weight: 600;
   text-align: right;
 }
@@ -272,14 +272,14 @@
   align-items: baseline;
   gap: 0.25rem;
   margin-left: 0.5rem;
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   color: var(--color-info);
 }
 .addon-dnd-character .dsc-temp input {
   width: 3rem;
   min-height: 0;
   padding: 0.05rem 0.25rem;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--color-info);
 }
 .addon-dnd-character .dse-layout-compact .dsc-temp input.ui-control {
@@ -319,7 +319,7 @@
   cursor: inherit;
 }
 .dsc-star {
-  font-size: 1.3rem;
+  font-size: var(--text-xl);
   line-height: 1;
   color: var(--text-muted);
 }
@@ -353,7 +353,7 @@
   border: 1px solid color-mix(in srgb, var(--color-danger) 45%, transparent);
   border-radius: 999px;
   color: var(--color-danger);
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
 }
 .dsc-chip[data-state="inactive"] {
   opacity: 0.65;
@@ -393,7 +393,7 @@
   width: auto;
   min-height: 0;
   padding: 0.15rem 0.6rem;
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
 }
 .addon-dnd-character .dsc-add-condition {
   border-style: dashed;
@@ -416,15 +416,15 @@
   align-items: center;
   gap: 0.15rem 0.4rem;
   min-width: 0;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 .dsc-use-name small {
   flex-basis: 100%;
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
 }
 .dsc-use-count {
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -433,7 +433,7 @@
 /* A class table value (Rage Damage, Martial Arts) fills the control and count columns. */
 .dsc-use-value {
   grid-column: 2 / -1;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -443,7 +443,7 @@
   padding: 0.05rem 0.3rem;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  font-size: 0.62rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
   letter-spacing: 0.04em;
   white-space: nowrap;
@@ -501,7 +501,7 @@
 .addon-dnd-character .dsc-pool button {
   min-height: 0;
   padding: 0.05rem 0.4rem;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   white-space: nowrap;
 }
 
@@ -543,7 +543,7 @@
   justify-content: space-between;
   gap: 0.5rem;
   margin: 0 0 0.5rem;
-  font: 600 0.74rem/1.2 var(--font-title);
+  font: 600 var(--text-xs)/1.2 var(--font-title);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-light);
@@ -585,7 +585,7 @@
   :where(.addon-dnd-character .dse-layout-compact) button.ui-button {
     min-height: 0;
     padding: 0.2rem 0.6rem;
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
   }
 }
 .dsc-opens {
@@ -630,18 +630,18 @@
   background: var(--bg-surface);
 }
 .dsc-combat-ability > small {
-  font: 700 0.72rem/1 var(--font-title);
+  font: 700 var(--text-xs)/1 var(--font-title);
   letter-spacing: 0.1em;
   color: var(--text-light);
 }
 .dsc-combat-ability > strong {
   grid-row: span 2;
   justify-self: end;
-  font-size: 1.15rem;
+  font-size: var(--text-lg);
   font-weight: 600;
 }
 .dsc-combat-ability > .dsc-save {
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 .dsc-save {
@@ -654,7 +654,7 @@
   flex-wrap: wrap;
   gap: 0.5rem 1.5rem;
   margin-top: 0.6rem;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 .dsc-casting .dse-casting {
   display: flex;
@@ -684,7 +684,7 @@
 }
 .addon-dnd-character .dse-layout-compact .dse-hands > .character-field > label {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: var(--text-sm);
   color: var(--text-parchment);
 }
 .addon-dnd-character .dse-layout-compact .dse-hands select {
@@ -693,7 +693,7 @@
 }
 .addon-dnd-character .dse-layout-compact .dse-hands > .character-field > :is(p, small) {
   margin: 0;
-  font-size: 0.76rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 .addon-dnd-character .dse-layout-compact .dse-hands > button {
@@ -705,7 +705,7 @@
   border: 0;
   background: none;
   color: var(--text-parchment);
-  font: 400 0.84rem var(--font-ui);
+  font: 400 var(--text-sm) var(--font-ui);
 }
 .addon-dnd-character .dse-layout-compact .dse-hands > button svg {
   display: none;
@@ -720,7 +720,7 @@
   border-radius: 3px;
   background: var(--dsc-field);
   color: var(--color-on-accent);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   line-height: 1;
 }
 .addon-dnd-character .dse-layout-compact .dse-hands > button[aria-pressed="true"]::before {
@@ -744,15 +744,15 @@
 .addon-dnd-character .dse-layout-compact .dse-quick-use-name {
   display: grid;
   min-width: 0;
-  font-size: 0.84rem;
+  font-size: var(--text-sm);
 }
 .addon-dnd-character .dse-layout-compact .dse-quick-use-name > small {
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
 }
 .dse-quick-use-quantity {
   color: var(--text-light);
-  font-size: 0.84rem;
+  font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
 }
 .addon-dnd-character .dse-layout-compact .dse-quick-use-item > .dnd-workflow-controls {
@@ -764,7 +764,7 @@
 .addon-dnd-character .dse-layout-compact .dse-quick-use-item > :is(p, .dse-quick-use-notes) {
   grid-column: 1 / -1;
   margin: 0;
-  font-size: 0.76rem;
+  font-size: var(--text-xs);
 }
 .addon-dnd-character button.dse-unpin {
   min-width: 0;
@@ -773,7 +773,7 @@
   border: 0;
   background: none;
   color: var(--accent-gold);
-  font-size: 1rem;
+  font-size: var(--text-base);
   line-height: 1;
 }
 
@@ -793,12 +793,12 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0 0.4rem;
-  font-size: 0.84rem;
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 .dsc-feat-head > small {
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: var(--text-xs);
   font-weight: 400;
 }
 .addon-dnd-character .dsc-feat > p {
@@ -808,12 +808,12 @@
   overflow: hidden;
   margin: 0.1rem 0 0;
   color: var(--text-light);
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
 }
 /* Item properties follow the features under a smaller heading. */
 .dsc-feats-heading {
   padding-top: 0.75rem;
-  font: 600 0.68rem/1.2 var(--font-title);
+  font: 600 var(--text-xs)/1.2 var(--font-title);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -823,7 +823,7 @@
   grid-template-columns: max-content minmax(0, 1fr);
   gap: 0.25rem 0.9rem;
   margin: 0;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
 }
 .dsc-training dt {
   color: var(--text-muted);
@@ -842,13 +842,13 @@
 .dsc-attack-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 .dsc-attack-table thead th {
   padding: 0.25rem 0.5rem 0.4rem;
   border-bottom: 1px solid var(--addon-border);
   color: var(--text-muted);
-  font: 600 0.64rem/1 var(--font-ui);
+  font: 600 var(--text-xs)/1 var(--font-ui);
   letter-spacing: 0.08em;
   text-align: left;
   text-transform: uppercase;
@@ -865,7 +865,7 @@
 .dsc-attack-table td small {
   display: block;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
 }
 .dsc-attack-table th small {
   color: var(--text-muted);
@@ -873,7 +873,7 @@
 }
 .dsc-hit {
   color: var(--accent-gold);
-  font-size: 1.05rem;
+  font-size: var(--text-base);
   font-weight: 600;
 }
 .dsc-tag {
@@ -899,7 +899,7 @@
 
 /* Spells */
 .dsc-caster .dsc-muted {
-  font-size: 0.84rem;
+  font-size: var(--text-sm);
 }
 /* The last prepared count sits beside the button that changes it. */
 .dsc-prepared {
@@ -912,7 +912,7 @@
   flex-wrap: wrap;
   gap: 0.2rem 0.6rem;
   align-items: center;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 .dnd-spell-facts > :first-child {
@@ -926,7 +926,7 @@
   border: 1px solid var(--addon-border);
   border-radius: 3px;
   color: var(--text-muted);
-  font-size: 0.62rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: 0.05em;
   text-align: center;
@@ -957,7 +957,7 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--color-mystery) 8%, transparent);
   color: var(--color-mystery);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
 }
 .dnd-spell-tag[data-tag="concentration"] {
   border-color: color-mix(in srgb, var(--color-mystery) 45%, transparent);
@@ -995,14 +995,14 @@
 }
 .addon-dnd-character .dse-layout-compact .dnd-spell-row select {
   padding-block: 0.1rem;
-  font-size: 0.76rem;
+  font-size: var(--text-xs);
 }
 .addon-dnd-character .dnd-sheet-shell .dnd-spell-level {
   margin: 0.7rem 0 0.1rem;
   padding: 0 0.1rem 0.3rem;
   border-bottom: 1px solid var(--addon-border);
   color: var(--text-light);
-  font: 600 0.8rem/1 var(--font-title);
+  font: 600 var(--text-sm)/1 var(--font-title);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -1030,7 +1030,7 @@
   gap: 0.6rem;
   padding-block: 0.4rem;
   border-bottom: 1px solid var(--border-subtle);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 .addon-dnd-character .dsc-worn-place {
   justify-self: start;
@@ -1038,7 +1038,7 @@
   padding: 0;
   border: 0;
   background: none;
-  font-size: 0.64rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -1054,13 +1054,13 @@
 }
 .dsc-worn-name small {
   flex-basis: 100%;
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 .addon-dnd-character .dsc-worn-row > button:last-child {
   min-height: 0;
   padding: 0.15rem 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
 }
 .dsc-empty-places {
   display: flex;
@@ -1074,7 +1074,7 @@
   padding: 0.05rem 0.55rem;
   border-style: dashed;
   border-radius: 999px;
-  font-size: 0.74rem;
+  font-size: var(--text-xs);
 }
 .addon-dnd-character .dse-layout-compact .dsc-pack {
   align-self: stretch;
@@ -1088,7 +1088,7 @@
   align-items: center;
   gap: 0.5rem;
   margin: 0.75rem 0 0.25rem;
-  font: 600 0.68rem var(--font-ui);
+  font: 600 var(--text-xs) var(--font-ui);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -1097,7 +1097,7 @@
   margin-left: auto;
   min-height: 0;
   padding: 0.05rem 0.5rem;
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   text-transform: none;
   letter-spacing: 0;
 }
@@ -1155,7 +1155,7 @@
   align-items: center;
   gap: 0.35rem;
   margin-left: auto;
-  font: 400 0.74rem var(--font-ui);
+  font: 400 var(--text-xs) var(--font-ui);
   text-transform: none;
   letter-spacing: 0;
   color: var(--text-muted);
@@ -1167,7 +1167,7 @@
   gap: 0.5rem;
   padding-block: 0.3rem;
   border-bottom: 1px solid var(--border-subtle);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 .dsc-pack-name {
   min-width: 0;
@@ -1184,7 +1184,7 @@
   border: 0;
   background: none;
   color: var(--text-muted);
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 .addon-dnd-character .dsc-pin[aria-pressed="true"] {
   color: var(--accent-gold);
@@ -1207,7 +1207,7 @@
 }
 .dsc-worth .dsc-cell-value {
   color: var(--accent-gold);
-  font-size: 1.2rem;
+  font-size: var(--text-lg);
 }
 .addon-dnd-character .dsc-currency .dse-coins {
   display: grid;
@@ -1220,7 +1220,7 @@
   justify-items: stretch;
   gap: 3px;
   color: var(--text-muted);
-  font: 600 0.66rem/1.2 var(--font-ui);
+  font: 600 var(--text-xs)/1.2 var(--font-ui);
   letter-spacing: 0.09em;
 }
 .addon-dnd-character .dsc-currency .dse-coins label[data-coin="gp"] > span {
@@ -1231,7 +1231,7 @@
   min-width: 0;
   padding: 0.2rem 0.4rem;
   color: var(--text-parchment);
-  font: 400 1rem var(--font-ui);
+  font: 400 var(--text-base) var(--font-ui);
   letter-spacing: 0;
   text-align: left;
   appearance: textfield;
@@ -1303,10 +1303,10 @@
 .dsc-body-slot small {
   text-transform: uppercase;
   color: var(--text-muted);
-  font-size: 0.62rem;
+  font-size: var(--text-xs);
 }
 .dsc-body-slot span {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
 }
 .dsc-worn-item {
   display: flex;
@@ -1343,11 +1343,11 @@
 }
 .dsc-rest-list li small {
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
 }
 .dsc-rest-window h3 {
   margin: 0 0 0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 
 /* Floating windows: non-modal, moved by the header, resized at the corner. */
@@ -1356,7 +1356,7 @@
   inset: auto;
   left: var(--window-x, 1rem);
   top: var(--window-y, 4rem);
-  z-index: 40;
+  z-index: var(--z-float);
   margin: 0;
   padding: 0;
   width: min(44rem, calc(100vw - 1rem));
@@ -1393,7 +1393,7 @@
 .addon-dnd-character .character-window-head h2 {
   flex: 1;
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 .addon-dnd-character .character-window-close {
   margin: 0;
@@ -1401,7 +1401,7 @@
   padding: 0.1rem 0.55rem;
   border: 0;
   background: none;
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   line-height: 1;
 }
 .character-window > .dnd-save-status {
@@ -1458,7 +1458,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 .dsc-bp-container {
@@ -1476,7 +1476,7 @@
 }
 .dsc-bp-count {
   margin: 0;
-  font-size: 0.74rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 .dsc-bp-main {
@@ -1507,11 +1507,11 @@
   justify-content: space-between;
   gap: 0.5rem;
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--text-md);
 }
 .dsc-bp-side p {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
 }
 .dsc-bp-row {
@@ -1522,7 +1522,7 @@
   padding: 0.25rem 0.35rem;
   border-bottom: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  font-size: 0.84rem;
+  font-size: var(--text-sm);
 }
 .dsc-bp-row:hover {
   background: var(--bg-raised);
@@ -1562,7 +1562,7 @@
 .dsc-bp-note,
 .dsc-bp-weight,
 .dsc-bp-place {
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 .dsc-bp-weight {
