@@ -1467,7 +1467,9 @@ export function defineCharacterElement(
           dismiss();
         });
       }
-      dialog.dataset["uiDialog"] = "";
+      // Shared containment keeps Tab inside modals only; a floating window
+      // leaves the sheet usable, so Tab may move on to it.
+      if (!window) dialog.dataset["uiDialog"] = "";
       heading.id = `character-dialog-${newId()}`;
       dialog.setAttribute("aria-labelledby", heading.id);
       if (initialFocus === "heading") {
