@@ -16,7 +16,7 @@
     "build": "go run ./cmd/character-contract && node tools/build-locales.ts && node tools/clean-web.ts && tsc -p tsconfig.json && node tools/copy-style.ts",
     "package": "npm run build && node tools/build-worker.ts && node tools/package.ts",
     "test": "node --test tests/*.mts",
-    "check:source": "node tools/check-source.mts && node tools/codex-sdk.mts check",
+    "check:source": "node tools/check-source.mts && node tools/codex-sdk.mts check && node tools/codex/style-check.mts src",
     "sync:codex-sdk": "node tools/codex-sdk.mts sync",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json",
     "lint:src": "oxlint --type-aware --tsconfig tsconfig.json --deny-warnings --report-unused-disable-directives src",

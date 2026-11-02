@@ -43,6 +43,8 @@ friendly and the code clear. Old formats and extra hardening are low priority.
   play state; recalculation preserves them unless the user edits them.
 - Panels and controls never implement edition rules. Budgets, costs,
   eligibility, modifiers and bounds come from the Engine with explanations.
+- Styles use the host's design tokens by name. `check:source` runs the host's
+  style check from `tools/codex/` (`npm run sync:codex-sdk` refreshes it).
 - Author source in TypeScript; `web/`, `worker/` and `dist/` are ignored build
   output. Generated public schemas and TypeScript models stay versioned and the
   build must leave tracked source unchanged.
