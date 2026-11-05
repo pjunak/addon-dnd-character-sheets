@@ -2301,3 +2301,13 @@
   visibility: visible;
   opacity: 1;
 }
+
+/* Rules text rendered by the host's Markdown component. */
+.dsc-prose {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dsc-prose :is(p, ul, ol) {
+  margin: 0.35em 0;
+}

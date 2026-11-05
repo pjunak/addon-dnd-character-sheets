@@ -28,6 +28,10 @@ void test("option descriptions read as plain text without Markdown markup", asyn
     "Mortals with a spark.\n\nAasimar Traits\n\nCreature Type: Humanoid\n• Celestial Resistance\n• See Light and Darkvision.",
   );
   assert.equal(plainDescription("snake_case and 2*3*4 stay"), "snake_case and 2*3*4 stay");
+  assert.equal(
+    plainDescription("Gain [[temporary hit points|rule:temporary-hit-points]] or [[Shield]]."),
+    "Gain temporary hit points or Shield.",
+  );
   const long = plainDescription("word ".repeat(400));
   assert.ok(long.length <= 1501 && long.endsWith("word…"));
 });
@@ -117,6 +121,7 @@ void test("manifest declares worker-only authority", async () => {
   const capabilities = record(manifestObject["capabilities"]);
   const requiredCapabilities = array(capabilities["required"]);
   assert.ok(requiredCapabilities.includes("ui.rule-details"));
+  assert.ok(requiredCapabilities.includes("ui.markdown"));
   assert.ok(requiredCapabilities.includes("services.own"));
   const service: unknown = JSON.parse(
     await readFile(new URL("../contracts/character.service.json", import.meta.url), "utf8"),

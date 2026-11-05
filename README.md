@@ -67,7 +67,9 @@ table values and feature save DCs (a Monk's Focus, maneuvers). A magic item's
 uses name the item and stay hidden while it is not active; rests still restore
 them. Sheet lists features, chosen invocations and other options, feats and
 class choices (Divine Order, Wild Shape forms) in a grid with short summaries,
-then **Item properties**: the text of each active magic item. Armor, weapon,
+then **Item properties**: the text of each active magic item, formatted, with
+its rules links (such as a homebrew item's link to Temporary Hit Points)
+opening the rule. Armor, weapon,
 tool and language training, senses, size, defenses and what the character has
 Advantage on, with the feature or item behind each, share one list. Fly, swim and climb speeds sit under Speed, and an
 **A** marks saves, skills and Initiative with Advantage. Combat lists weapons

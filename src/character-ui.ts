@@ -135,6 +135,8 @@ export function plainDescription(markdown = ""): string {
     .replace(/\r\n?/gu, "\n")
     .replace(/^#{1,6}[ \t]+/gmu, "")
     .replace(/^[ \t]*[-*+][ \t]+/gmu, "• ")
+    // A wiki link [[words|kind:id]] reads as its words.
+    .replace(/\[\[([^\]|\n]{1,200})(?:\|[^\]\n]{0,300})?\]\]/gu, "$1")
     .replace(/\[([^\]]+)\]\([^)]*\)/gu, "$1")
     .replace(/(\*\*|__)(.+?)\1/gu, "$2")
     .replace(/(^|[^\p{L}\p{N}])([*_])(\S(?:[^*_\n]*\S)?)\2(?![\p{L}\p{N}])/gu, "$1$3")
@@ -144,6 +146,18 @@ export function plainDescription(markdown = ""): string {
   if (plain.length <= descriptionLimit) return plain;
   const cut = plain.slice(0, descriptionLimit);
   return cut.slice(0, Math.max(cut.lastIndexOf(" "), descriptionLimit / 2)).trimEnd() + "…";
+}
+/**
+ * Rules text as formatted prose through the host (`ui.markdown`): wiki links
+ * such as [[temporary hit points|rule:temporary-hit-points]] open as rule details.
+ */
+export function prose(markdown: string): HTMLElement {
+  const node = document.createElement("codex-addon-markdown") as HTMLElement & {
+    source: string;
+  };
+  node.className = "dsc-prose";
+  node.source = markdown;
+  return node;
 }
 export function select(
   value: string,

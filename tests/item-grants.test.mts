@@ -183,18 +183,21 @@ void test("item properties show each active item's record text from the catalog 
       name: "Luna",
       reference: { kind: "magic-item", id: "luna" },
       text: "Under open sky you see in the dark.",
+      markdown: "**Under open sky** you see in the dark.",
     },
     {
       itemId: "inv-2",
       name: "Courage",
       reference: { kind: "magic-item", id: "courage" },
       text: "You do not flee.",
+      markdown: "You do not flee.",
     },
     {
       itemId: "inv-3",
       name: "Lost card",
       reference: { kind: "magic-item", id: "lost" },
       text: "",
+      markdown: "",
     },
   ]);
   assert.equal(itemProperties(saved)[0]?.text, "Saved summary.", "Without rules, evidence is used");

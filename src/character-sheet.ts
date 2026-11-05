@@ -32,6 +32,7 @@ import {
   numberInput,
   panel,
   plainDescription,
+  prose,
   rule,
   signed,
   styled,
@@ -137,7 +138,7 @@ export function featDetails(
       el(
         "details",
         el("summary", savedRule(projection, heading, undefined, reference)),
-        el("p", plainDescription(evidence?.summary)),
+        prose(evidence?.summary ?? ""),
       ),
     );
   }
@@ -148,7 +149,10 @@ export interface ItemProperty {
   itemId: string;
   name: string;
   reference?: Reference;
+  /** Plain words, for short places. */
   text: string;
+  /** The record's Markdown, for the item's own panel. */
+  markdown: string;
 }
 // The Engine lists the active items, so the sheet never decides which ones
 // count. Their text comes from the loaded catalog, or from saved evidence.
@@ -173,6 +177,7 @@ export function itemProperties(
       name: text(item["name"]) || text(record?.["name"]) || evidence?.name || id,
       ...(reference ? { reference } : {}),
       text: plainDescription(body),
+      markdown: body ?? "",
     };
   });
 }
@@ -191,7 +196,7 @@ export function itemPropertyDetails(
       el(
         "details",
         el("summary", savedRule(projection, item.name, undefined, item.reference)),
-        ...(item.text ? [el("p", item.text)] : []),
+        ...(item.markdown ? [prose(item.markdown)] : []),
       ),
     );
   return root;
@@ -1003,13 +1008,10 @@ export function explorationDetails(view: SheetView): HTMLElement {
           savedRule(view.projection, text(feature["name"], id), undefined, { kind, id }),
           ...(count > 1 ? [" × " + count] : []),
         ),
-        el(
-          "p",
-          plainDescription(
-            view.projection?.evidence.find(
-              (row) => row.reference.kind === kind && row.reference.id === id,
-            )?.summary,
-          ),
+        prose(
+          view.projection?.evidence.find(
+            (row) => row.reference.kind === kind && row.reference.id === id,
+          )?.summary ?? "",
         ),
       ),
     );

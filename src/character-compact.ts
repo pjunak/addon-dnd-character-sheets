@@ -51,6 +51,7 @@ import {
   numberInput,
   panel,
   plainDescription,
+  prose,
   rule,
   select,
   signed,
@@ -922,7 +923,7 @@ function features(view: SheetView): HTMLElement {
             "dsc-feat-head",
             savedRule(view.projection, item.name, undefined, item.reference),
           ),
-          ...(item.text ? [el("p", item.text)] : []),
+          ...(item.markdown ? [prose(item.markdown)] : []),
         ),
       );
     root.append(styled("h4", "dsc-feats-heading", t("Item properties")), list);

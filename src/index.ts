@@ -5,6 +5,7 @@ import type { AddonContext, Disposable } from "./sdk.js";
 export async function activate(context: AddonContext): Promise<Disposable> {
   context.capabilities.require("ui.contributions");
   context.capabilities.require("ui.controls.v1");
+  context.capabilities.require("ui.markdown");
   context.signal.throwIfAborted();
   const client = await connectCharacter(context);
   context.signal.throwIfAborted();
