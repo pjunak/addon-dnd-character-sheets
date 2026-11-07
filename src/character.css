@@ -1236,6 +1236,9 @@
   border: 0;
   border-bottom: 1px dotted var(--accent-gold);
   padding: 0 var(--space-1);
+  /* Three digits at this size, with no spinner over them. */
+  width: 4ch;
+  appearance: textfield;
 }
 .addon-dnd-character .dse-counter .dse-hp-current:disabled {
   opacity: 1;
