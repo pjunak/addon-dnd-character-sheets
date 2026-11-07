@@ -133,12 +133,20 @@ export function handControls(view: SheetView, combat: boolean): HTMLElement {
     view.hands[two ? "canRelease" : "canTwo"] !== true,
   );
   grip.dataset["focusKey"] = "hands/grip";
+  grip.classList.add("dse-grip");
   grip.setAttribute("aria-pressed", String(two));
-  if (two) grip.dataset["uiVariant"] = "primary";
   const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg"),
     path = document.createElementNS(icon.namespaceURI, "path");
-  icon.setAttribute("viewBox", "0 0 24 24");
-  icon.setAttribute("aria-hidden", "true");
+  for (const [name, value] of Object.entries({
+    viewBox: "0 0 24 24",
+    width: "1.2em",
+    height: "1.2em",
+    fill: "none",
+    stroke: "currentColor",
+    "stroke-width": "2",
+    "aria-hidden": "true",
+  }))
+    icon.setAttribute(name, value);
   path.setAttribute(
     "d",
     "M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2",

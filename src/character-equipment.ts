@@ -9,6 +9,7 @@ import {
   field,
   label,
   numberInput,
+  quiet,
   rule,
   select,
   styled,
@@ -72,19 +73,23 @@ export function equipmentPicker(
   const render = (): void => {
     type.value = category;
     path.replaceChildren(
-      button(t("All equipment"), () => {
-        category = "";
-        folder = "";
-        render();
-      }),
+      quiet(
+        button(t("All equipment"), () => {
+          category = "";
+          folder = "";
+          render();
+        }),
+      ),
     );
     if (category)
       path.append(
         el("span", "›"),
-        button(t(label(category)), () => {
-          folder = "";
-          render();
-        }),
+        quiet(
+          button(t(label(category)), () => {
+            folder = "";
+            render();
+          }),
+        ),
       );
     if (folder) path.append(el("span", "›"), el("span", folderLabel(folder)));
     results.replaceChildren();
@@ -146,6 +151,7 @@ export function equipmentPicker(
         tray.delete(key);
         render();
       });
+      remove.className = "dsc-glyph";
       remove.setAttribute("aria-label", t("Remove {0}", [name]));
       const row = styled("div", "dnd-picker-row", el("span", name), quantity, remove);
       const reference = { kind: entry.record.kind, id: entry.record.id };

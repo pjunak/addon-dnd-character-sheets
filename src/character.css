@@ -20,18 +20,6 @@
 .addon-dnd-sheets *::after {
   box-sizing: border-box;
 }
-.addon-dnd-sheets input[type="number"] {
-  appearance: auto;
-}
-.addon-dnd-sheets input[type="number"]::-webkit-inner-spin-button {
-  opacity: 1;
-}
-.addon-dnd-sheets button {
-  cursor: pointer;
-}
-.addon-dnd-sheets button:disabled {
-  cursor: default;
-}
 .addon-dnd-sheets :is(h2, h3, h4, p) {
   margin: 0;
 }
@@ -45,10 +33,6 @@
   overflow-x: auto;
   max-width: 100%;
 }
-.dnd-sheet-tabs button {
-  flex-shrink: 0;
-  white-space: nowrap;
-}
 .dnd-save-status:empty {
   display: none;
 }
@@ -58,14 +42,6 @@
   gap: var(--space-2);
   align-items: center;
   font-size: var(--text-sm);
-}
-.addon-dnd-sheets
-  :is(.dnd-save-status, .dse-backpack, .dse-vitals, .dse-resource)
-  button:where(:not(.codex-tab)) {
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--bg-raised);
-  padding: var(--space-1) var(--space-2);
 }
 .dse-cols {
   display: flex;
@@ -271,9 +247,6 @@
   color: var(--text-parchment);
   font-size: var(--text-2xl);
 }
-.dse-counter button {
-  font-size: var(--text-sm);
-}
 .addon-dnd-sheets .dse-number {
   width: 3rem;
   padding: 0 var(--space-1);
@@ -361,12 +334,6 @@
   fill: none;
   stroke-width: 1.5;
 }
-.dse-bp-head button {
-  flex-shrink: 0;
-  max-width: 100%;
-  color: var(--accent-gold);
-  font-size: var(--text-sm);
-}
 .dse-bp-split {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -403,9 +370,6 @@
   width: 6rem;
   overflow-wrap: anywhere;
 }
-.addon-dnd-sheets .dse-item button {
-  padding: 0 var(--space-1);
-}
 .dse-item-location {
   width: 5.5rem;
   font-size: var(--text-xs) !important;
@@ -428,10 +392,6 @@
 }
 .dse-item-notes summary {
   cursor: pointer;
-}
-.dse-item-notes textarea {
-  width: 100%;
-  resize: vertical;
 }
 .dse-coins {
   display: grid;
@@ -561,16 +521,6 @@
   flex: 1;
   min-width: 8rem;
 }
-.dnd-workflow-controls button,
-.dnd-picker-row button,
-.dnd-rest-controls > button,
-.dnd-equipment-picker > button {
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--bg-raised);
-  color: var(--accent-gold);
-  padding: var(--space-1) var(--space-2);
-}
 .dnd-equipment-picker,
 .dnd-spell-browser {
   display: grid;
@@ -653,12 +603,6 @@
   color: var(--accent-gold);
   font-size: var(--text-sm);
 }
-.dnd-equipment-path button {
-  border: 0;
-  background: transparent;
-  color: inherit;
-  padding: var(--space-1);
-}
 .dnd-equipment-folder {
   display: block;
   width: 100%;
@@ -683,17 +627,6 @@
 .dse-worn-group > .dse-stat-label {
   min-width: 5rem;
 }
-.dse-worn-group button {
-  font-size: var(--text-xs);
-  color: var(--accent-gold);
-  background: transparent;
-  border: 1px dashed var(--border-subtle);
-  border-radius: var(--radius-sm);
-}
-.dse-equipment-slot button {
-  margin-left: var(--space-1);
-  border: 0;
-}
 .dnd-slot-picker {
   display: grid;
   gap: var(--space-3);
@@ -707,13 +640,6 @@
   margin: 0;
   color: var(--text-muted);
   overflow-wrap: anywhere;
-}
-.dnd-slot-picker button {
-  padding: var(--space-2);
-  background: var(--bg-raised);
-  color: var(--text-light);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
 }
 .dse-builder-shell {
   display: grid;
@@ -793,28 +719,12 @@
   color: var(--text-light);
   font-size: var(--text-sm);
 }
+/* Each open choice is a full-width action in the rail. */
 .dse-build-step > button {
-  min-height: 44px;
   width: 100%;
   margin-top: var(--space-1);
-  padding: var(--space-2);
-  color: var(--text-light);
-  background: rgba(var(--accent-gold-rgb), 0.06);
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  text-align: left;
-}
-.dse-build-step > button:hover {
-  color: var(--text-parchment);
-  background: rgba(var(--accent-gold-rgb), 0.12);
-  border-color: rgba(var(--accent-gold-rgb), 0.28);
-}
-.dnd-builder-tabs {
-  overflow: auto;
-}
-.dnd-builder-tabs > button {
-  flex-shrink: 0;
+  justify-content: flex-start;
+  text-align: start;
 }
 .dse-build-level {
   border-left: 2px solid var(--border-subtle);
@@ -873,18 +783,6 @@
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-.addon-dnd-character button {
-  cursor: pointer;
-  white-space: normal;
-}
-.addon-dnd-character button:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-.addon-dnd-character button[aria-current="page"] {
-  border-color: var(--accent-gold);
-  background: rgba(var(--accent-gold-rgb), 0.12);
-}
 .addon-dnd-character :is(h2, h3, p) {
   margin: 0.3rem 0 0.7rem;
 }
@@ -897,9 +795,6 @@
   padding: 0;
   margin: 0;
   min-width: 0;
-}
-.addon-dnd-character fieldset > button {
-  margin: 0.3rem;
 }
 .character-panel {
   border: 1px solid var(--border-subtle);
@@ -921,28 +816,12 @@
   font-weight: 600;
   min-width: 0;
 }
-.character-field select {
-  width: 100%;
-  min-width: 0;
-}
-.character-field textarea {
-  width: 100%;
-  min-height: 8rem;
-  resize: vertical;
-}
-.character-field input[type="number"] {
-  width: 8rem;
-}
 .character-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
   gap: 0.7rem;
 }
 .character-stats > div {
-  min-width: 0;
-}
-.character-stats input[type="number"] {
-  width: 100%;
   min-width: 0;
 }
 .character-stats strong {
@@ -1035,12 +914,6 @@
   cursor: pointer;
   min-height: 32px;
 }
-.character-dialog label:has(input[type="checkbox"]) {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0.7rem 0;
-}
 .character-dialog .character-panel {
   padding: clamp(0.4rem, 2vw, 0.75rem);
 }
@@ -1119,39 +992,20 @@
 .addon-dnd-character .dse-item {
   padding: 0.35rem 0;
 }
-.addon-dnd-character .dse-item :is(input, select, button) {
-  min-height: var(--ui-target);
-  padding: 0.2rem 0.35rem;
-}
 .addon-dnd-character .dse-item .dse-number {
   width: 3rem;
 }
 .addon-dnd-character .dse-item-location {
   width: 6.5rem;
 }
-.addon-dnd-character .dse-worn button {
-  min-height: 28px;
-  padding: 0.15rem 0.4rem;
-}
-.addon-dnd-character .dse-coins input {
+.addon-dnd-character :is(.dse-coins, .dse-resource) input {
   width: 4rem;
-  min-height: 32px;
-  padding: 0.2rem;
-}
-.addon-dnd-character .dse-resource input {
-  width: 4rem;
-  min-height: 32px;
 }
 .addon-dnd-character .dse-vitals strong {
   font-size: var(--text-xl);
 }
 .addon-dnd-character .dse-vitals .dse-counter strong {
   font-size: var(--text-2xl);
-}
-.addon-dnd-character .dse-vitals .dnd-workflow-controls button {
-  min-height: 32px;
-  font-size: var(--text-xs);
-  padding: 0.3rem 0.4rem;
 }
 .addon-dnd-character .dse-vitals .dse-hp-adjust .character-field {
   margin: 0.5rem 0;
@@ -1188,10 +1042,10 @@
   border-radius: 50%;
   background: currentColor;
 }
-.addon-dnd-character .dnd-sheet-shell > .dnd-save-status[data-ui-state="success"] {
+.addon-dnd-character .dnd-sheet-shell > .dnd-save-status[data-save-state="success"] {
   color: var(--color-success);
 }
-.addon-dnd-character .dnd-sheet-shell > .dnd-save-status[data-ui-state="loading"] {
+.addon-dnd-character .dnd-sheet-shell > .dnd-save-status[data-save-state="loading"] {
   color: var(--accent-gold);
 }
 .addon-dnd-character .dnd-sheet-shell > .dnd-save-status:has(> span:only-child:empty) {
@@ -1204,22 +1058,13 @@
 /* A modal is about its own task; only pending work and errors follow into it. */
 .addon-dnd-character
   .character-dialog:not(.character-window)
-  > .dnd-save-status[data-ui-state="success"] {
+  > .dnd-save-status[data-save-state="success"] {
   display: none;
 }
-.addon-dnd-character
-  :is(.dnd-sheet-shell, .dnd-sheet-workspace)
-  > .dnd-save-status:is([data-ui-state="success"], [data-ui-state="loading"]),
-.addon-dnd-character
-  .character-window
-  > .dnd-save-status:is([data-ui-state="success"], [data-ui-state="loading"]) {
+.addon-dnd-character .dnd-save-status[data-quiet="true"] {
   justify-content: flex-end;
   min-height: 1rem;
   line-height: 1rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  box-shadow: none;
   font-size: var(--text-xs);
 }
 .addon-dnd-character .dse-build-step p {
@@ -1267,20 +1112,6 @@
   gap: 0.35rem;
   margin-bottom: 0.5rem;
 }
-.addon-dnd-character .dnd-filter-chips button {
-  min-height: 0;
-  padding: 0.2rem 0.7rem;
-  border: 1px solid var(--addon-border);
-  border-radius: var(--radius-pill);
-  background: var(--bg-raised);
-  color: var(--text-light);
-  font-size: var(--text-xs);
-}
-.addon-dnd-character .dnd-filter-chips button[aria-pressed="true"] {
-  border-color: var(--accent-gold-dim);
-  background: rgba(var(--accent-gold-rgb), 0.13);
-  color: var(--accent-gold);
-}
 /* One line per spell: name and facts on the left, slot and action aligned in columns. */
 .addon-dnd-character .dnd-spell-row {
   grid-template-columns: minmax(0, 1fr) auto auto;
@@ -1309,7 +1140,6 @@
 }
 .addon-dnd-character .dnd-spell-row > button {
   grid-area: action;
-  min-width: 6rem;
 }
 .addon-dnd-character .dnd-spell-row[hidden] {
   display: none;
@@ -1393,10 +1223,6 @@
   .addon-dnd-character .dse-builder-main .dnd-builder-tabs {
     flex-wrap: nowrap;
   }
-  .addon-dnd-character .dse-item :is(button, select, input),
-  .addon-dnd-character .dse-worn button {
-    min-height: 40px;
-  }
 }
 
 .addon-dnd-character .dse-shield[data-proficient="true"] svg {
@@ -1445,10 +1271,6 @@
   overflow-x: auto;
   min-width: 0;
 }
-.dnd-builder-tabs button {
-  white-space: nowrap;
-  flex-shrink: 0;
-}
 .character-build {
   display: grid;
   gap: 0.75rem;
@@ -1475,11 +1297,9 @@
   align-items: stretch;
 }
 .character-stepper input {
-  width: 100%;
-  min-width: 0;
   text-align: center;
   font-size: var(--text-xl);
-  appearance: textfield !important;
+  appearance: textfield;
   border-radius: 0;
 }
 .character-stepper input::-webkit-inner-spin-button {
@@ -1487,27 +1307,21 @@
 }
 .character-stepper > button {
   min-width: var(--ui-target);
-  padding: 0;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-raised);
   font-size: var(--text-lg);
-  line-height: 1;
 }
 .character-stepper > button:first-child {
-  border-radius: 4px 0 0 4px;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
 }
 .character-stepper > button:last-child {
-  border-radius: 0 4px 4px 0;
-}
-.character-stepper > button:disabled {
-  opacity: 0.35;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
 }
 .character-field > label {
   display: block;
   margin-bottom: 0.3rem;
 }
 .character-field textarea {
-  width: 100%;
   min-height: 16rem;
 }
 @media (max-width: 550px) {
@@ -1544,6 +1358,7 @@
   overflow: visible;
 }
 .addon-dnd-character .dnd-sheet-tabs .codex-tab {
+  flex-shrink: 0;
   width: 100%;
   min-height: 42px;
   text-align: left;
@@ -1617,11 +1432,6 @@
 .addon-dnd-character .dse-build-step {
   padding: 0.6rem 0.7rem;
 }
-.addon-dnd-character .dse-build-step > button {
-  min-height: 36px;
-  padding: 0.4rem;
-  font-size: var(--text-sm);
-}
 .addon-dnd-character .dse-build-step.is-complete {
   display: block;
 }
@@ -1641,7 +1451,9 @@
   gap: 0.1rem;
 }
 .addon-dnd-character .dnd-builder-tabs .codex-tab {
+  flex-shrink: 0;
   padding: 0.45rem 0.6rem;
+  white-space: nowrap;
 }
 .addon-dnd-character .character-foundation {
   gap: 0.6rem;
@@ -1651,7 +1463,6 @@
 }
 .addon-dnd-character .character-field > :is(input, select, textarea),
 .addon-dnd-character .character-combo {
-  width: 100%;
   max-width: 30rem;
 }
 .addon-dnd-character .character-toolbar {
@@ -1850,11 +1661,6 @@
   max-width: 100%;
   flex-wrap: wrap;
 }
-.dse-quick-use button,
-.dse-item-actions button {
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
 .dse-storage-group {
   display: flex;
   flex-wrap: wrap;
@@ -1873,24 +1679,11 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.dse-storage :is(button, input) {
-  max-width: 100%;
-  min-height: var(--ui-target);
-}
-.dse-storage button {
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
 .dse-item-container,
 .dse-item-placement {
   flex-basis: 100%;
   min-width: 0;
   overflow-wrap: anywhere;
-}
-.dse-item-container select,
-.dse-item-placement select {
-  max-width: 100%;
-  min-width: 0;
 }
 .dse-hands {
   display: grid;
@@ -1898,9 +1691,8 @@
   gap: var(--space-2);
   align-items: start;
 }
-.dse-hands > :is(button, .character-field) {
+.dse-hands > .character-field {
   min-width: 0;
-  max-width: 100%;
 }
 .addon-dnd-character .dse-hands > .character-field {
   grid-column: 1;
@@ -1911,22 +1703,9 @@
 .addon-dnd-character .dse-hands > .character-field:last-child {
   grid-column: 3;
 }
-.dse-hands > button {
+.dse-grip {
   grid-column: 2;
   grid-row: 2;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-}
-.dse-hands > button svg {
-  width: 1.2em;
-  height: 1.2em;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
 }
 .dse-hand-suspended {
   color: var(--text-muted);
@@ -1955,11 +1734,10 @@
     grid-row: auto;
     grid-template-rows: none;
   }
-  .dse-hands > button {
+  .dse-grip {
     grid-column: 1;
     grid-row: auto;
     justify-self: start;
-    flex-direction: column;
   }
 }
 .dse-conditions .dse-condition {

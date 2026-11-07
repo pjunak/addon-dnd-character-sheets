@@ -88,6 +88,7 @@ export function attuneControl(
     },
     !item.attuned && !choice.allowed,
   );
+  control.className = "dsc-star-toggle";
   control.setAttribute("aria-label", t("Attune {0}", [item.name]));
   control.setAttribute("aria-pressed", String(item.attuned));
   const reason = equipmentReason(
@@ -169,7 +170,7 @@ export function pinStar(view: SheetView, item: Item): HTMLButtonElement {
     !view.canEditQuickUse,
     "pack/" + item.id + "/pin",
   );
-  control.className = "dsc-pin";
+  control.className = "dsc-star-toggle";
   control.setAttribute("aria-label", translator(view.locale)("Quick use: {0}", [item.name]));
   control.setAttribute("aria-pressed", String(pinned));
   return control;

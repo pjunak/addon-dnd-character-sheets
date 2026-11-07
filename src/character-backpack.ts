@@ -317,7 +317,7 @@ export function backpackDialog(
         const head = styled(
           "h4",
           "dsc-pack-group",
-          groupTitle(id),
+          styled("span", "dsc-pack-title", groupTitle(id)),
           el("small", String(members.length)),
         );
         const weight = packWeight(view, members, names.has(id) ? id : undefined);

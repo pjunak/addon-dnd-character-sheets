@@ -275,15 +275,13 @@
   font-size: var(--text-xs);
   color: var(--color-info);
 }
-.addon-dnd-character .dsc-temp input {
+.addon-dnd-character .dsc-temp-input {
   width: 3rem;
   min-height: 0;
   padding: 0.05rem 0.25rem;
+  border-bottom-color: color-mix(in srgb, var(--color-info) 45%, transparent);
   font-size: var(--text-sm);
   color: var(--color-info);
-}
-.addon-dnd-character .dse-layout-compact .dsc-temp input.ui-control {
-  border-bottom-color: color-mix(in srgb, var(--color-info) 45%, transparent);
 }
 .dsc-health-track {
   width: 100%;
@@ -374,7 +372,8 @@
   border-style: dashed;
   padding-right: 0.55rem;
 }
-.addon-dnd-character .dsc-chip button {
+/* A one-glyph action (×, ✓, −, +) inside a status chip or a list row. */
+.addon-dnd-character .dsc-glyph {
   min-height: 0;
   min-width: 0;
   padding: 0 0.3rem;
@@ -388,16 +387,13 @@
   align-items: center;
   gap: 0.1rem;
 }
-.addon-dnd-character .dsc-add-condition,
-.addon-dnd-character .dsc-rest {
+.addon-dnd-character .dsc-add-condition {
   width: auto;
   min-height: 0;
   padding: 0.15rem 0.6rem;
-  font-size: var(--text-xs);
-}
-.addon-dnd-character .dsc-add-condition {
   border-style: dashed;
   border-radius: 999px;
+  font-size: var(--text-xs);
 }
 
 /* Limited uses: pips for small counts, a bar with steps for large pools. */
@@ -485,6 +481,12 @@
   align-items: center;
   gap: 0.3rem;
 }
+/* Pool steps share a limited-uses row with the name and count, and Change
+   shares the spell bar's last cell, so their labels stay whole and tight. */
+:is(.dsc-pool, .dsc-prepared) > button {
+  padding-inline: var(--space-2);
+  white-space: nowrap;
+}
 .dsc-pool-track {
   width: 4rem;
   height: 0.4rem;
@@ -497,12 +499,6 @@
   height: 100%;
   width: var(--fill);
   background: var(--accent-gold);
-}
-.addon-dnd-character .dsc-pool button {
-  min-height: 0;
-  padding: 0.05rem 0.4rem;
-  font-size: var(--text-xs);
-  white-space: nowrap;
 }
 
 /* Sheet and Combat */
@@ -535,7 +531,7 @@
   border-radius: var(--radius);
   background: var(--bg-surface);
 }
-/* Panel headings in small capitals; heading buttons follow the heading's type. */
+/* Panel headings in small capitals. */
 .addon-dnd-character .dse-layout-compact :is(.character-panel, .dse-section) h3 {
   display: flex;
   flex-wrap: wrap;
@@ -548,45 +544,17 @@
   text-transform: uppercase;
   color: var(--text-light);
 }
-.addon-dnd-character .dse-layout-compact :is(.character-panel, .dse-section) h3 button {
-  font: inherit;
-  letter-spacing: inherit;
-}
-/* Editable values are fields with a gold underline; computed values are text. */
-.addon-dnd-character
-  .dse-layout-compact
-  :is(
+/* Editable values are fields with a gold underline; computed values are text.
+   :where keeps it below the sheet's own inline fields (hit points, coins). */
+.dse-layout-compact
+  :where(
     input.ui-control:not([type="checkbox"], [type="radio"]),
     select.ui-control:not(.dsc-add-condition)
   ) {
-  border: 1px solid transparent;
+  border-color: transparent;
   border-bottom: 2px solid var(--accent-gold-dim);
-  border-radius: 4px 4px 2px 2px;
+  border-radius: var(--radius-sm) var(--radius-sm) 2px 2px;
   background: var(--dsc-field);
-}
-.addon-dnd-character
-  .dse-layout-compact
-  :is(
-    input.ui-control:not([type="checkbox"], [type="radio"]),
-    select.ui-control:not(.dsc-add-condition)
-  ):hover {
-  background: color-mix(in srgb, var(--dsc-field) 85%, var(--text-parchment));
-}
-.addon-dnd-character
-  .dse-layout-compact
-  :is(
-    input.ui-control:not([type="checkbox"], [type="radio"]),
-    select.ui-control:not(.dsc-add-condition)
-  ):focus {
-  border-color: var(--accent-gold);
-}
-/* Small buttons by default; :where keeps pips, chips and steppers in charge of their own size. */
-@media (pointer: fine) {
-  :where(.addon-dnd-character .dse-layout-compact) button.ui-button {
-    min-height: 0;
-    padding: 0.2rem 0.6rem;
-    font-size: var(--text-xs);
-  }
 }
 .dsc-opens {
   margin-left: 0.35em;
@@ -696,40 +664,8 @@
   font-size: var(--text-xs);
   color: var(--text-muted);
 }
-.addon-dnd-character .dse-layout-compact .dse-hands > button {
+.addon-dnd-character .dse-layout-compact .dse-grip {
   order: 3;
-  max-width: none;
-  flex-direction: row;
-  gap: 0.45rem;
-  padding: 0.15rem 0.2rem;
-  border: 0;
-  background: none;
-  color: var(--text-parchment);
-  font: 400 var(--text-sm) var(--font-ui);
-}
-.addon-dnd-character .dse-layout-compact .dse-hands > button svg {
-  display: none;
-}
-.addon-dnd-character .dse-layout-compact .dse-hands > button::before {
-  content: "";
-  display: grid;
-  place-items: center;
-  width: 0.95rem;
-  height: 0.95rem;
-  border: 1.5px solid var(--text-muted);
-  border-radius: 3px;
-  background: var(--dsc-field);
-  color: var(--color-on-accent);
-  font-size: var(--text-xs);
-  line-height: 1;
-}
-.addon-dnd-character .dse-layout-compact .dse-hands > button[aria-pressed="true"]::before {
-  content: "✓";
-  border-color: var(--accent-gold);
-  background: var(--accent-gold);
-}
-.addon-dnd-character .dse-layout-compact .dse-hands > button:disabled {
-  opacity: 0.5;
 }
 
 /* Quick use: name and place, quantity, Use one and the pin star. */
@@ -766,7 +702,7 @@
   margin: 0;
   font-size: var(--text-xs);
 }
-.addon-dnd-character button.dse-unpin {
+.addon-dnd-character .dse-unpin {
   min-width: 0;
   min-height: 0;
   padding: 0 0.15rem;
@@ -990,13 +926,6 @@
   border-color: var(--accent-gold-dim);
   background: var(--accent-gold-dim);
 }
-.addon-dnd-character .dse-layout-compact .dnd-spell-row > button {
-  min-width: 0;
-}
-.addon-dnd-character .dse-layout-compact .dnd-spell-row select {
-  padding-block: 0.1rem;
-  font-size: var(--text-xs);
-}
 .addon-dnd-character .dnd-sheet-shell .dnd-spell-level {
   margin: 0.7rem 0 0.1rem;
   padding: 0 0.1rem 0.3rem;
@@ -1057,24 +986,12 @@
   font-size: var(--text-xs);
   color: var(--text-muted);
 }
-.addon-dnd-character .dsc-worn-row > button:last-child {
-  min-height: 0;
-  padding: 0.15rem 0.5rem;
-  font-size: var(--text-xs);
-}
 .dsc-empty-places {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.3rem;
   padding-top: 0.5rem;
-}
-.addon-dnd-character .dsc-empty-places button {
-  min-height: 0;
-  padding: 0.05rem 0.55rem;
-  border-style: dashed;
-  border-radius: 999px;
-  font-size: var(--text-xs);
 }
 .addon-dnd-character .dse-layout-compact .dsc-pack {
   align-self: stretch;
@@ -1090,16 +1007,14 @@
   margin: 0.75rem 0 0.25rem;
   font: 600 var(--text-xs) var(--font-ui);
   color: var(--text-muted);
+}
+.dsc-pack-title {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-.addon-dnd-character .dsc-pack-group button {
-  margin-left: auto;
-  min-height: 0;
-  padding: 0.05rem 0.5rem;
-  font-size: var(--text-xs);
-  text-transform: none;
-  letter-spacing: 0;
+/* The count ends the title; weight and Open sit at the right. */
+.dsc-pack-group > small {
+  margin-inline-end: auto;
 }
 /* Weight against capacity: a thin gold meter that turns red when over. */
 .dsc-meter {
@@ -1134,12 +1049,6 @@
   text-transform: none;
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
-}
-.dsc-pack-group .dsc-pack-weight {
-  margin-left: auto;
-}
-.addon-dnd-character .dsc-pack-group .dsc-pack-weight + button {
-  margin-left: 0;
 }
 .dsc-pack-weight .dsc-meter {
   width: 3.5rem;
@@ -1177,7 +1086,8 @@
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
-.addon-dnd-character .dsc-pin {
+/* A bare star that toggles: Quick use pins and attunement. */
+.addon-dnd-character .dsc-star-toggle {
   min-width: 0;
   min-height: 0;
   padding: 0 0.2rem;
@@ -1186,7 +1096,7 @@
   color: var(--text-muted);
   font-size: var(--text-base);
 }
-.addon-dnd-character .dsc-pin[aria-pressed="true"] {
+.addon-dnd-character .dsc-star-toggle[aria-pressed="true"] {
   color: var(--accent-gold);
 }
 /* Coins on the left, their worth in gold at the right; it wraps below when narrow. */
@@ -1218,7 +1128,9 @@
 .addon-dnd-character .dsc-currency .dse-coins label {
   display: grid;
   justify-items: stretch;
-  gap: 3px;
+  gap: var(--space-1);
+}
+.addon-dnd-character .dsc-currency .dse-coins label > span {
   color: var(--text-muted);
   font: 600 var(--text-xs)/1.2 var(--font-ui);
   letter-spacing: 0.09em;
@@ -1228,12 +1140,6 @@
 }
 .addon-dnd-character .dsc-currency .dse-coins input {
   width: 100%;
-  min-width: 0;
-  padding: 0.2rem 0.4rem;
-  color: var(--text-parchment);
-  font: 400 var(--text-base) var(--font-ui);
-  letter-spacing: 0;
-  text-align: left;
   appearance: textfield;
 }
 .addon-dnd-character .dsc-currency .dse-coins input::-webkit-inner-spin-button,
@@ -1396,11 +1302,6 @@
   font-size: var(--text-base);
 }
 .addon-dnd-character .character-window-close {
-  margin: 0;
-  min-height: 0;
-  padding: 0.1rem 0.55rem;
-  border: 0;
-  background: none;
   font-size: var(--text-xl);
   line-height: 1;
 }
@@ -1422,9 +1323,6 @@
 .dsc-pack-toolbar .character-field {
   flex: 1 1 10rem;
   min-width: 0;
-}
-.dsc-pack-toolbar button {
-  max-width: 100%;
 }
 /* Backpack window: tools on top, the list beside the selected item's editor.
    Both columns scroll inside the window. */
@@ -1582,12 +1480,15 @@
   align-items: center;
   gap: 0.25rem;
 }
-.addon-dnd-character .dsc-stepper button {
-  width: 1.25rem;
-  height: 1.25rem;
-  min-height: 0;
-  padding: 0;
-  line-height: 1;
+/* Small square steppers for mouse use; touch keeps the full-size action. */
+@media (pointer: fine) {
+  .addon-dnd-character .dsc-stepper button {
+    width: 1.25rem;
+    height: 1.25rem;
+    min-height: 0;
+    padding: 0;
+    line-height: 1;
+  }
 }
 .dsc-stepper > span {
   min-width: 1.6rem;
@@ -1780,10 +1681,20 @@
     margin: 0;
   }
 }
+/* The sheet's own small controls keep a full touch target. */
 @media (pointer: coarse) {
-  .addon-dnd-character .dse-layout-compact :is(button, input, select),
-  .addon-dnd-character[data-layout="compact"] .character-dialog :is(button, input, select) {
-    min-height: 44px;
+  .addon-dnd-character
+    :is(
+      .dsc-glyph,
+      .dsc-star-toggle,
+      .dse-unpin,
+      .dsc-worn-place,
+      .dsc-bp-name,
+      .dsc-add-condition,
+      .dsc-hp-input,
+      .dsc-temp-input
+    ) {
+    min-height: var(--ui-target);
   }
   .addon-dnd-character .dse-layout-compact .dsc-pip {
     width: 1.6rem;

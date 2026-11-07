@@ -52,6 +52,7 @@ import {
   panel,
   plainDescription,
   prose,
+  quiet,
   rule,
   select,
   signed,
@@ -204,6 +205,7 @@ function hitPoints(view: SheetView): HTMLElement {
     },
     0,
   );
+  temporary.className = "dsc-temp-input";
   temporary.disabled = !view.canPlay;
   temporary.setAttribute("aria-label", t("Temporary HP"));
   temporary.dataset["focusKey"] = "vitals/temporary-hp";
@@ -274,6 +276,7 @@ export function concentrationChip(view: SheetView): HTMLElement | undefined {
       !view.canPlay,
       "concentration/keep",
     );
+    kept.className = "dsc-glyph";
     kept.setAttribute("aria-label", t("Kept concentration on {0}", [name]));
     chip.append(save, kept);
   }
@@ -283,6 +286,7 @@ export function concentrationChip(view: SheetView): HTMLElement | undefined {
     !view.canPlay,
     "concentration/end",
   );
+  end.className = "dsc-glyph";
   end.setAttribute("aria-label", t("End concentration on {0}", [name]));
   chip.append(end);
   return chip;
@@ -368,6 +372,7 @@ export function statusRow(
           condition.level >= maximumLevel,
           "conditions/" + condition.id + "/raise",
         );
+      lower.className = raise.className = "dsc-glyph";
       lower.setAttribute("aria-label", t("Lower {0}", [name]));
       raise.setAttribute("aria-label", t("Raise {0}", [name]));
       const level = el("b", String(condition.level));
@@ -390,6 +395,7 @@ export function statusRow(
         false,
         "conditions/" + condition.id + "/remove",
       );
+      remove.className = "dsc-glyph";
       remove.setAttribute("aria-label", t("Remove {0}", [name]));
       chip.append(remove);
     }
@@ -470,7 +476,6 @@ export function statusRow(
         !view.canPlay,
         "rest/" + kind,
       );
-      action.className = "dsc-rest";
       root.append(action);
     }
   }
@@ -1333,7 +1338,10 @@ function wornList(view: SheetView, figure: (place?: string) => void): HTMLElemen
         false,
         "placement/" + place,
       );
-      choose.setAttribute("aria-label", t("Choose {0}", [bodyPlacementLabel(place, view.locale)]));
+      quiet(choose).setAttribute(
+        "aria-label",
+        t("Choose {0}", [bodyPlacementLabel(place, view.locale)]),
+      );
       places.append(choose);
     }
     root.append(places);
@@ -1358,7 +1366,12 @@ function backpackSummary(view: SheetView, open: (container?: string) => void): H
   );
   const group = (title: string, members: Item[], container?: string): void => {
     if (!members.length && !container) return;
-    const head = styled("h4", "dsc-pack-group", title, el("small", String(members.length)));
+    const head = styled(
+      "h4",
+      "dsc-pack-group",
+      styled("span", "dsc-pack-title", title),
+      el("small", String(members.length)),
+    );
     const weight = packWeight(view, members, container);
     if (weight) head.append(weight);
     if (container) {

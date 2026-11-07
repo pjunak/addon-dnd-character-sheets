@@ -344,7 +344,7 @@ export function defineCharacterElement(
       const { message, command, busy, blocked, dirty, attempt, saveIssues, ruleNotes, withdrawn } =
         this.#session.state;
       node.replaceChildren(el("span", this.#feedback(message)));
-      node.dataset["uiState"] = command
+      node.dataset["saveState"] = command
         ? busy
           ? "loading"
           : "error"
@@ -397,7 +397,7 @@ export function defineCharacterElement(
       } else if (this.#saved?.rulesChanged && this.#editable) {
         // Every play control waits for the new rules; say so on every tab,
         // not only in Tools where they are adopted.
-        node.dataset["uiState"] = "info";
+        node.dataset["saveState"] = "info";
         node.replaceChildren(
           el("span", this.#t("The rules changed. Adopt them to save edits and use play actions.")),
         );
@@ -414,11 +414,15 @@ export function defineCharacterElement(
           comparisonView(withdrawn, undefined, this.#context?.host.locale),
         );
       }
-      node.dataset["quiet"] = String(
-        node.childElementCount === 1 &&
+      const state = node.dataset["saveState"],
+        quiet =
+          node.childElementCount === 1 &&
           ["", "Saved", "Saving…"].includes(message) &&
-          ["success", "loading"].includes(node.dataset["uiState"]),
-      );
+          (state === "success" || state === "loading");
+      node.dataset["quiet"] = String(quiet);
+      // "Saving…" and "Saved" are plain corner text; anything else is a shared notice.
+      if (quiet) delete node.dataset["uiState"];
+      else node.dataset["uiState"] = state;
     }
     #reviewRules(): void {
       this.#dialog?.close();
@@ -1466,7 +1470,8 @@ export function defineCharacterElement(
       dialog.className = window ? "character-dialog character-window" : "character-dialog";
       if (window) {
         close.setAttribute("aria-label", this.#t("Close"));
-        close.className = "character-window-close";
+        close.classList.add("character-window-close");
+        close.dataset["uiVariant"] = "quiet";
         dialog.dataset["window"] = window;
         // Non-modal windows have no native cancel; Escape closes the window.
         dialog.addEventListener("keydown", (event) => {

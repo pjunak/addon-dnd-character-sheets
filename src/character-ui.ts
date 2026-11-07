@@ -17,6 +17,11 @@ export function builderTarget(id: string, node: HTMLElement): HTMLElement {
   node.dataset["builderTarget"] = id;
   return node;
 }
+/**
+ * A sheet action: the host's compact `ui-action`, with its `data-ui-variant`
+ * and `aria-pressed` looks. A bespoke control (pip, star, chip glyph) replaces
+ * the class with its own.
+ */
 export function button(
   label: string,
   action: () => void | Promise<void>,
@@ -25,11 +30,17 @@ export function button(
 ): HTMLButtonElement {
   const node = el("button", label);
   node.type = "button";
+  node.className = "ui-action";
   node.disabled = disabled;
   if (focusKey) node.dataset["focusKey"] = focusKey;
   node.addEventListener("click", () => {
     void action();
   });
+  return node;
+}
+/** An action without a border, for breadcrumbs and inline choices. */
+export function quiet<T extends HTMLElement>(node: T): T {
+  node.dataset["uiVariant"] = "quiet";
   return node;
 }
 /**

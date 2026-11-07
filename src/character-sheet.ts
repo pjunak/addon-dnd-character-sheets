@@ -559,6 +559,7 @@ export function wornEquipment(
           view.change();
           view.refresh();
         });
+        remove.className = "dsc-glyph";
         remove.setAttribute(
           "aria-label",
           slot === "attuned" ? t("Unattune {0}", [item.name]) : t("Remove {0}", [item.name]),
@@ -621,7 +622,9 @@ export function backpack(
         const quantity = quantityInput(view, item),
           attune = attuneControl(view, item),
           move = locationSelect(view, item);
-        row.append(quantity, attune.control, move, removeButton(view, item));
+        const remove = removeButton(view, item);
+        remove.className = "dsc-glyph";
+        row.append(quantity, attune.control, move, remove);
         row.append(styled("div", "dse-item-actions", quickUseButton(view, item)));
         const stow = stowButton(view, item, move);
         if (stow) row.append(styled("div", "dse-attunement-actions", stow));
