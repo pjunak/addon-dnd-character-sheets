@@ -2,6 +2,7 @@ import { changeGrant, grantForm } from "./character-grant.js";
 import { comparisonView } from "./character-comparison.js";
 import { translator } from "./character-locale.js";
 import { feedbackMessage } from "./character-feedback.js";
+import type { Wording } from "./character-locale.js";
 import { playActions } from "./character-play.js";
 import { quickUse } from "./character-quick-use.js";
 import { conditions } from "./character-conditions.js";
@@ -157,7 +158,7 @@ export function defineCharacterElement(
     readonly #frame = new CompactFrame();
     #t = (key: string, values?: readonly unknown[]): string =>
       translator(this.#context?.host.locale ?? "en")(key, values);
-    #feedback = (message: string): string =>
+    #feedback = (message: Wording): string =>
       feedbackMessage(message, this.#context?.host.locale ?? "en");
     #unsubscribe: (() => void) | undefined;
     #stopTexts: (() => void) | undefined;
@@ -417,6 +418,7 @@ export function defineCharacterElement(
       const state = node.dataset["saveState"],
         quiet =
           node.childElementCount === 1 &&
+          typeof message === "string" &&
           ["", "Saved", "Saving…"].includes(message) &&
           (state === "success" || state === "loading");
       node.dataset["quiet"] = String(quiet);
@@ -1429,7 +1431,7 @@ export function defineCharacterElement(
      * Opens the replacement review for an import. Answers why it cannot be
      * reviewed instead, so the import dialog keeps the DM's input.
      */
-    #previewImport(request: CharacterRequest): Promise<string[]> {
+    #previewImport(request: CharacterRequest): Promise<Wording[]> {
       return this.#session.preview(request, (review: Response) => {
         const content: Node[] = [
           el("p", this.#t("Replace this character with the imported build and play state?")),
@@ -1557,8 +1559,8 @@ export function defineCharacterElement(
       };
       // A refused review lists the rules' reasons under the service's message.
       const showError = (error: unknown): void => {
-        const [message = "", ...reasons] = Array.isArray(error)
-          ? error.map(String)
+        const [message = "", ...reasons]: Wording[] = Array.isArray(error)
+          ? (error as Wording[])
           : [error instanceof Error ? error.message : "Invalid character file."];
         notice.replaceChildren(el("p", this.#feedback(message)));
         if (reasons.length)

@@ -9,6 +9,8 @@ import {
   type CharacterRequest,
 } from "./character-client.js";
 import { previewProblems } from "./character-comparison.js";
+import { issueWording, responseWording } from "./character-feedback.js";
+import type { Wording } from "./character-locale.js";
 import {
   commandBlocker,
   readCharacterPending,
@@ -66,10 +68,10 @@ export interface SessionState {
   attempt: SaveAttempt | undefined;
   /** A command that is running or whose outcome is not confirmed. */
   command: CommandAttempt | undefined;
-  /** The save status, in English; the view translates it. */
-  message: string;
+  /** The save status, which the view translates. */
+  message: Wording;
   /** Why the rules refused the last automatic save. */
-  saveIssues: readonly string[];
+  saveIssues: readonly Wording[];
   /** Rules refusals shown next to what caused them. */
   ruleNotes: readonly RuleNote[];
   /** Saved selections the last save removed because the rules no longer allow them. */
@@ -249,7 +251,7 @@ export class CharacterSession {
   }
 
   /** Shows a message in the save status. */
-  inform(message: string): void {
+  inform(message: Wording): void {
     this.#state.message = message;
     this.#view.status();
   }
@@ -324,7 +326,7 @@ export class CharacterSession {
     s.attempt = undefined;
     s.saveIssues = [];
     s.withdrawn = [];
-    s.message = response.message;
+    s.message = responseWording(response);
     s.blocked = false;
     const recovered =
       pending &&
@@ -405,7 +407,7 @@ export class CharacterSession {
     s.ruleNotes = [];
     s.withdrawn = [];
     s.attempt = undefined;
-    s.message = response.message;
+    s.message = responseWording(response);
     this.#view.publish();
   }
 
@@ -477,7 +479,7 @@ export class CharacterSession {
           // A too-large request was never evaluated, so it carries no rules state.
           if (response.status !== "too-large") this.#report(response);
           s.blocked = true;
-          s.message = response.message;
+          s.message = responseWording(response);
           if (
             (response.status === "invalid" || response.status === "too-large") &&
             version !== s.changeVersion
@@ -486,9 +488,9 @@ export class CharacterSession {
             continue;
           }
           const blockers = response.status === "invalid" ? saveBlockers(response.evaluation) : [];
-          s.saveIssues = blockers.map((issue) => String(issue["message"]));
+          s.saveIssues = blockers.map(issueWording);
           s.ruleNotes = blockers.map((issue) => ({
-            message: String(issue["message"]),
+            message: issueWording(issue),
             target: String(issue["target"]),
           }));
           this.#view.render();
@@ -592,12 +594,12 @@ export class CharacterSession {
    * confirmed; otherwise the answer says why not, so the import dialog keeps
    * its input.
    */
-  async preview(request: CharacterRequest, show: (review: Response) => void): Promise<string[]> {
+  async preview(request: CharacterRequest, show: (review: Response) => void): Promise<Wording[]> {
     const blocker = await this.ready(request);
     if (blocker) return [blocker];
     clearTimeout(this.#timer);
     request.expectedRevision = this.#state.baseRevision;
-    let problems: string[] = [];
+    let problems: Wording[] = [];
     await this.guard(async () => {
       let response: Response;
       try {
@@ -608,7 +610,7 @@ export class CharacterSession {
       }
       problems = previewProblems(response);
       if (problems.length) return;
-      this.#state.message = response.message;
+      this.#state.message = responseWording(response);
       show(response);
     });
     return problems;
@@ -657,11 +659,11 @@ export class CharacterSession {
           // A too-large request was never evaluated, so it carries no rules state.
           s.command = undefined;
           if (response.status !== "too-large") this.#report(response);
-          s.message = response.message;
+          s.message = responseWording(response);
           if (response.status === "invalid" || response.status === "too-large")
             s.ruleNotes = [
               {
-                message: response.message,
+                message: responseWording(response),
                 ...(attempt.focusKey === undefined ? {} : { focusKey: attempt.focusKey }),
               },
             ];

@@ -6,6 +6,7 @@ import type { ContributionElementContext } from "./codex/browser-sdk.js";
 export type {
   AddonContext,
   Disposable,
+  LocalizedText,
   ServiceHandle,
   ServiceProvider,
 } from "./codex/browser-sdk.js";

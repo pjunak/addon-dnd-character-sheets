@@ -107,6 +107,10 @@ export class CharacterClient {
   private until(signal: AbortSignal | undefined): AbortSignal {
     return signal ? AbortSignal.any([this.signal, signal]) : this.signal;
   }
+  /** The connected rules engine add-on, whose catalog keys the Engine's wording. */
+  get engineAddonId(): string | undefined {
+    return this.engine.providers[0]?.addonId;
+  }
   async call(method: string, request: CharacterRequest, signal?: AbortSignal): Promise<Response> {
     const result = await this.service.call<Response>(
       method,
@@ -165,8 +169,8 @@ const transferLimit = 1000000;
 export function exportCharacter(state: State): string {
   const body = JSON.stringify(
     {
-      format: "dnd-character.v4",
-      schemaVersion: "6.1.0",
+      format: "dnd-character.v5",
+      schemaVersion: "6.2.0",
       inputs: state.inputs,
       savedRules: state.rules,
       savedProjection: state.projection,
@@ -184,6 +188,7 @@ const exportFormats: Record<string, string> = {
   "dnd-character.v2": "5.0.0",
   "dnd-character.v3": "6.0.0",
   "dnd-character.v4": "6.1.0",
+  "dnd-character.v5": "6.2.0",
 };
 export function parseCharacter(body: string): Inputs {
   if (new TextEncoder().encode(body).length > transferLimit)

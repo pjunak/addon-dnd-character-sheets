@@ -6,6 +6,7 @@ import (
 	"errors"
 	model "github.com/pjunak/addon-dnd-engine/character"
 	"github.com/pjunak/ttrpg-codex/sdk/go/workerrpc"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -403,12 +404,18 @@ func TestRejectedPlayActionAnswersWithTheRulesReason(t *testing.T) {
 	}
 	c.engine = providerCall(func(ctx context.Context, meta *workerrpc.Meta, call workerrpc.ServiceCall) (workerrpc.ServiceResult, error) {
 		if call.Method == "character-play" {
-			return workerrpc.ServiceResult{}, failure(workerrpc.KindInvalidRequest, "No uses remain for this resource.")
+			issue := workerrpc.Localized("Copying this spell requires {0} GP.", "Copying this spell requires 50 GP.", map[string]any{"0": "50"})
+			return workerrpc.ServiceResult{}, workerrpc.NewRPCError(workerrpc.JSONRPCInvalidParams, workerrpc.KindInvalidRequest, issue.Text, false, workerrpc.IssueDetails(issue))
 		}
 		return engine.Call(ctx, meta, call)
 	})
 	response, err := invoke(t, c, meta, "save", Request{Operation: "play", OperationID: "spend-resource", ExpectedRevision: saved.Revision, Change: playCommand(map[string]any{"operation": "rest", "rest": "short"})})
-	if err != nil || response.Status != "invalid" || response.Message != "No uses remain for this resource." || data.writes != 1 {
+	if err != nil || response.Status != "invalid" || response.Message != "Copying this spell requires 50 GP." || data.writes != 1 {
 		t.Fatalf("rejected play = %+v, %v, writes %d", response, err, data.writes)
+	}
+	// The refusal keeps the Engine's catalog key, so the sheet can translate it.
+	want := &MessageText{Text: response.Message, Key: "Copying this spell requires {0} GP.", Args: map[string]string{"0": "50"}, Addon: saved.State.Rules.EngineID}
+	if saved.State.Rules.EngineID == "" || !reflect.DeepEqual(response.MessageText, want) {
+		t.Fatalf("refusal text = %+v, want %+v", response.MessageText, want)
 	}
 }

@@ -22,7 +22,7 @@ import {
 import type { CatalogRecord } from "./character-client.js";
 import { abilities, object, rows, strings, text, catalogRecord } from "./character-client.js";
 import { abilityNames, builderLabel, translator } from "./character-locale.js";
-import { feedbackMessage } from "./character-feedback.js";
+import { termLabel } from "./character-feedback.js";
 import {
   button,
   checkbox,
@@ -1081,7 +1081,7 @@ export function senseDetails(projection: Projection | undefined, locale: string)
         senses.append(
           el(
             "p",
-            feedbackMessage(term.label, locale),
+            termLabel(term, locale),
             " · ",
             t(term.status === "applied" ? "Active" : "Inactive"),
           ),

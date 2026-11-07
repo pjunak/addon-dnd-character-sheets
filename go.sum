@@ -4,6 +4,8 @@ github.com/dlclark/regexp2 v1.11.0 h1:G/nrcoOa7ZXlpoa/91N3X7mM3r8eIlMBBJZvsz/mxK
 github.com/dlclark/regexp2 v1.11.0/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/pjunak/addon-dnd-engine v0.0.0-20261022143436-5da593284193 h1:7GZxzCF0MgNFguGRosrmrlCtzk7hcFK+4VcVBPatRaI=
 github.com/pjunak/addon-dnd-engine v0.0.0-20261022143436-5da593284193/go.mod h1:6SDbGg3864XkJ1weFSq+AzG/Rf0ffiqab5n0tnJbrxs=
+github.com/pjunak/addon-dnd-engine v0.0.0-20261107125533-90174650272b h1:l2+KZHEaiTGKIJhwwTKj0R1/r5PNh017kVVP8B4RanQ=
+github.com/pjunak/addon-dnd-engine v0.0.0-20261107125533-90174650272b/go.mod h1:2Vk7JbSYaDRdPKFK7IlN3TZuxwfRw8LGBypUqcTmHlE=
 github.com/pjunak/ttrpg-codex v0.0.0-20261107002505-3cce2048bf35 h1:pdCanIpYw4AX+QKMJDL+70xE0o8ZH37iNJKpTzGaQ7U=
 github.com/pjunak/ttrpg-codex v0.0.0-20261107002505-3cce2048bf35/go.mod h1:2vf90hEeTUf3i085FgoLpsNX8U4h8P2pcDIZgvQj2Lk=
 github.com/santhosh-tekuri/jsonschema/v6 v6.0.3 h1:1EYB5IzjZawrrnELUi78f9fPu57HuXjmddZPjrls/28=

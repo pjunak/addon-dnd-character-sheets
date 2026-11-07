@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
 import { blank, type CharacterRequest } from "#web/character-client";
 import { changeGrant } from "#web/character-grant";
+import { engineAddon } from "./support/translations.mts";
 import type {
   Grant,
   Guidance,
@@ -339,8 +340,18 @@ void test("a save the rules refuse keeps the edits and names what blocks it", as
     input.build.baseScores["STR"] = 18;
   });
   const message = "Allocate 27 ability points; currently 30.";
+  const key = "Allocate {0} ability points; currently {1}.";
   const refusal = evaluation(session.state.input, {
-    saveIssues: [{ id: "point-buy", severity: "blocker", message, target: "abilities" }],
+    saveIssues: [
+      {
+        id: "point-buy",
+        severity: "blocker",
+        message,
+        messageKey: key,
+        messageArgs: ["27", "30"],
+        target: "abilities",
+      },
+    ],
   });
   await (
     await next("save")
@@ -357,8 +368,10 @@ void test("a save the rules refuse keeps the edits and names what blocks it", as
   assert.equal(session.state.blocked, true);
   assert.equal(session.state.dirty, true);
   assert.equal(session.state.message, "This change is outside the character rules.");
-  assert.deepEqual(session.state.saveIssues, [message]);
-  assert.deepEqual(session.state.ruleNotes, [{ message, target: "abilities" }]);
+  // The blocker keeps the Engine's catalog key, so the page shows it translated.
+  const wording = { text: message, key, addon: engineAddon, args: { "0": "27", "1": "30" } };
+  assert.deepEqual(session.state.saveIssues, [wording]);
+  assert.deepEqual(session.state.ruleNotes, [{ message: wording, target: "abilities" }]);
   assert.equal(session.state.evaluation, refusal);
   assert.equal(session.state.input.build.baseScores["STR"], 18);
 });

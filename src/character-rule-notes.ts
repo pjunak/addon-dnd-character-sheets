@@ -1,4 +1,5 @@
 import { rows } from "./character-client.js";
+import type { Wording } from "./character-locale.js";
 import type { Result } from "./character-model.js";
 import { styled } from "./character-ui.js";
 
@@ -11,7 +12,7 @@ export function saveBlockers(evaluation: Result | undefined): Record<string, unk
 
 /** A rules refusal shown next to what caused it. */
 export interface RuleNote {
-  readonly message: string;
+  readonly message: Wording;
   /** `data-focus-key` of the control that requested the refused action. */
   readonly focusKey?: string;
   /** Engine issue target, matched against `data-rules-target` on sheet sections. */
@@ -33,7 +34,7 @@ export function showRuleNotes(
   root: ParentNode,
   notes: readonly RuleNote[],
   label: string,
-  translate: (message: string) => string,
+  translate: (message: Wording) => string,
 ): void {
   notes.forEach((note, index) => {
     const anchors = note.focusKey

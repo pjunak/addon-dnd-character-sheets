@@ -1,5 +1,6 @@
+import { issueWording } from "./character-feedback.js";
 import type { Difference, Projection, Response } from "./character-model.js";
-import { translator } from "./character-locale.js";
+import { translator, type Wording } from "./character-locale.js";
 import { saveBlockers } from "./character-rule-notes.js";
 import { el, human, label, rule, styled } from "./character-ui.js";
 
@@ -8,14 +9,14 @@ import { el, human, label, rule, styled } from "./character-ui.js";
  * service's status message and, when the rules refuse it, their blockers.
  */
 export function previewProblems(
-  response: Pick<Response, "status" | "message" | "token" | "evaluation">,
-): string[] {
+  response: Pick<Response, "status" | "message" | "messageText" | "token" | "evaluation">,
+): Wording[] {
   if (response.status === "ready" && response.token) return [];
-  const blockers =
-    response.status === "invalid"
-      ? saveBlockers(response.evaluation).map((issue) => String(issue["message"]))
-      : [];
-  return [response.message || "The import could not be reviewed.", ...blockers];
+  const blockers = response.status === "invalid" ? saveBlockers(response.evaluation) : [];
+  return [
+    response.messageText ?? (response.message || "The import could not be reviewed."),
+    ...blockers.map(issueWording),
+  ];
 }
 
 /** Stored keys such as "feat:magic-initiate@background%3Aguide:mi-spell" read as their last part. */

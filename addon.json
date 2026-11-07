@@ -3,7 +3,7 @@
   "packageFormat": 1,
   "id": "dnd-sheets",
   "name": "D&D Character Sheets",
-  "version": "6.3.0",
+  "version": "6.4.0",
   "description": "Reversible character builds, tracked DM grants and explained rules.",
   "license": "MIT",
   "compatibility": {
@@ -66,7 +66,7 @@
       "target": "characters",
       "visibility": "public",
       "schema": "contracts/sheet-state.schema.json",
-      "schemaVersion": "6.1.0",
+      "schemaVersion": "6.2.0",
       "workerOnly": true
     }
   ],

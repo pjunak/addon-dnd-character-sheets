@@ -1,29 +1,18 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { explanationText, feedbackMessage } from "#web/character-feedback";
-import "./support/translations.mts";
+import {
+  explanationText,
+  feedbackMessage,
+  issueWording,
+  responseWording,
+  termLabel,
+} from "#web/character-feedback";
+import { builderLabel } from "#web/character-locale";
+import { engineAddon } from "./support/translations.mts";
 
-void test("save, review and provider failures retain their specific explanation in Czech", () => {
+void test("the sheet's own save and review messages read in Czech", () => {
   for (const [source, expected] of [
     ["This change is outside the character rules.", "Tato změna neodpovídá pravidlům postavy."],
-    [
-      "No distinct options remain for another acquisition of this feat.",
-      "Pro další získání této odbornosti už nezbývá žádná odlišná možnost.",
-    ],
-    [
-      "This feat's repeatability rule is unsupported.",
-      "Pravidlo opakovaného získání této odbornosti není podporováno.",
-    ],
-    [
-      "Currency must use supported coins and non-negative amounts.",
-      "Použijte podporované mince a nezáporné částky.",
-    ],
-    ["The prerequisite is not met.", "Předpoklad není splněn."],
-    [
-      "The selected option is not eligible for this choice.",
-      "Vybraná možnost není pro tuto volbu povolená.",
-    ],
-    ["Only one item may occupy the shield slot.", "Pozici štítu smí obsadit pouze jeden předmět."],
     [
       "This review expired or belongs to another session. Review again.",
       "Platnost této kontroly vypršela nebo patří jiné relaci. Proveďte kontrolu znovu.",
@@ -36,63 +25,6 @@ void test("save, review and provider failures retain their specific explanation 
     assert.equal(feedbackMessage(source, "cs"), expected);
     assert.equal(feedbackMessage(source, "en"), source);
   }
-});
-
-void test("rule feedback preserves engine values and performs no calculation", () => {
-  for (const [source, expected] of [
-    [
-      "Choose between 1 and 30 ordered class levels.",
-      "Vyberte 1 až 30 seřazených úrovní povolání.",
-    ],
-    [
-      "Allocate 42 ability points; currently 43.",
-      "Rozdělte 42 bodů vlastností; nyní je rozděleno 43.",
-    ],
-    [
-      "Assign the ruleset standard array once each: [17 15 13 11 9 7].",
-      "Každou hodnotu standardní sady pravidel přiřaďte právě jednou: [17 15 13 11 9 7].",
-    ],
-    [
-      "Current HP must be between 0 and 17; review the required correction.",
-      "Současné životy musí být v rozmezí 0 až 17. Zkontrolujte nutnou opravu.",
-    ],
-    [
-      "Record 5 d8 and retain the highest 2 results without rerolling during recalculation.",
-      "Zaznamenejte 5 k8 a ponechte 2 nejvyšších výsledků. Při přepočtu neházejte znovu.",
-    ],
-    [
-      "Recorded hit die must be between 1 and 12.",
-      "Zaznamenaná kostka životů musí být v rozmezí 1 až 12.",
-    ],
-    [
-      "Current HP cannot exceed the effective maximum (28).",
-      "Současné životy nesmí překročit výsledné maximum (28).",
-    ],
-    [
-      "DEX must have a positive score and cap.",
-      "Vlastnost Obratnost musí mít kladnou hodnotu i limit.",
-    ],
-    [
-      "Attuned to more than 4 magic items (limit 4)",
-      "Sladěno s více než 4 kouzelnými předměty (limit 4)",
-    ],
-    [
-      "This character is 180001 bytes; the rules engine accepts at most 180000. Remove inventory entries or shorten item notes, then try again.",
-      "Tato postava má 180001 bajtů; engine pravidel přijme nejvýše 180000. Odeberte položky z inventáře nebo zkraťte jejich poznámky a zkuste to znovu.",
-    ],
-    [
-      "This character is 180001 bytes; the rules engine accepts at most 180000. The saved character remains readable, printable and exportable.",
-      "Tato postava má 180001 bajtů; engine pravidel přijme nejvýše 180000. Uloženou postavu lze nadále číst, tisknout a exportovat.",
-    ],
-    [
-      "This character's saved snapshot would be 251234 bytes; the storage limit is 250000. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.",
-      "Uložený snímek postavy by měl 251234 bajtů; limit úložiště je 250000. Snímek uchovává podklady pravidel pro každé použité povolání, odbornost, kouzlo a předmět, proto odeberte položky, které postava už nepotřebuje, a zkuste to znovu.",
-    ],
-  ] as const)
-    assert.equal(feedbackMessage(source, "cs"), expected);
-});
-
-void test("status, dialog and review explanations read in Czech", () => {
   for (const source of [
     "The character view changed. Try again.",
     "The import could not be reviewed.",
@@ -102,72 +34,105 @@ void test("status, dialog and review explanations read in Czech", () => {
     assert.notEqual(feedbackMessage(source, "cs"), source, source);
 });
 
-void test("feedback never interpolates or translates captured authored and source values", () => {
-  const value = "Saved and Mira {0} <em>Žár</em>\n$&";
-  for (const [prefix, suffix, translatedPrefix, translatedSuffix] of [
-    ["Conflicting DM replacement values: ", "", "Rozporné náhradní hodnoty od PJ: ", ""],
+void test("the worker's templated messages read in Czech with their values", () => {
+  for (const [key, args, expected] of [
     [
-      "Resolve the spent resource against its current capacity: ",
-      "",
-      "Upravte spotřebu zdroje podle jeho současné kapacity: ",
-      "",
+      "This character is {0} bytes; the rules engine accepts at most {1}. Remove inventory entries or shorten item notes, then try again.",
+      { "0": "180001", "1": "180000" },
+      "Tato postava má 180001 bajtů; engine pravidel přijme nejvýše 180000. Odeberte položky z inventáře nebo zkraťte jejich poznámky a zkuste to znovu.",
     ],
     [
-      "This prerequisite needs recorded DM adjudication: ",
-      "",
-      "Tento předpoklad vyžaduje zaznamenané rozhodnutí PJ: ",
-      "",
+      "This character's saved snapshot would be {0} bytes; the storage limit is {1}. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.",
+      { "0": "251234", "1": "250000" },
+      "Uložený snímek postavy by měl 251234 bajtů; limit úložiště je 250000. Snímek uchovává podklady pravidel pro každé použité povolání, odbornost, kouzlo a předmět, proto odeberte položky, které postava už nepotřebuje, a zkuste to znovu.",
     ],
-    [
-      "DM given: ",
-      " waives this requirement.",
-      "Udělení PJ: ",
-      " uděluje výjimku z tohoto požadavku.",
-    ],
-    [
-      "Spell ",
-      " is not eligible at its recorded gain at character level 7. Reorder level-granted spellbook choices or replace it.",
-      "Kouzlo ",
-      " nelze získat na zaznamenané úrovni postavy 7. Změňte pořadí kouzel do knihy získaných postupem na úroveň nebo kouzlo nahraďte.",
-    ],
-  ] as const)
-    assert.equal(
-      feedbackMessage(prefix + value + suffix, "cs"),
-      translatedPrefix + value + translatedSuffix,
-    );
+  ] as const) {
+    const wording = responseWording({
+      message: "English",
+      messageText: { text: "English", key, args },
+    });
+    assert.equal(feedbackMessage(wording, "cs"), expected);
+  }
+  assert.equal(responseWording({ message: "Saved" }), "Saved");
 });
 
-void test("unknown, changed and oversized feedback remains intact, including literal placeholders", () => {
+void test("Engine issues and refusals read through the Engine's catalog, names stay literal", () => {
+  const name = "Mira {0} <em>Žár</em>\n$&";
+  const waived = issueWording({
+    message: `DM given: ${name} waives this requirement.`,
+    messageKey: "DM given: {0} waives this requirement.",
+    messageArgs: [name],
+  });
+  assert.deepEqual(waived, {
+    text: `DM given: ${name} waives this requirement.`,
+    key: "DM given: {0} waives this requirement.",
+    addon: engineAddon,
+    args: { "0": name },
+  });
+  assert.equal(
+    feedbackMessage(waived, "cs"),
+    `Udělení PJ: ${name} uděluje výjimku z tohoto požadavku.`,
+  );
+  assert.equal(feedbackMessage(waived, "en"), `DM given: ${name} waives this requirement.`);
+  // A refused play change the worker forwards names the Engine's catalog.
+  const refusal = responseWording({
+    message: "Current HP cannot exceed the effective maximum (28).",
+    messageText: {
+      text: "Current HP cannot exceed the effective maximum (28).",
+      key: "Current HP cannot exceed the effective maximum ({0}).",
+      args: { "0": "28" },
+      addon: engineAddon,
+    },
+  });
+  assert.equal(
+    feedbackMessage(refusal, "cs"),
+    "Současné životy nesmí překročit výsledné maximum (28).",
+  );
+});
+
+void test("unkeyed and unknown wording stays intact, never matched against catalogs", () => {
+  // An Engine issue without a key repeats data; it is shown as given even when
+  // it equals a catalog entry.
+  assert.equal(
+    feedbackMessage(issueWording({ message: "Proficiency bonus" }), "cs"),
+    "Proficiency bonus",
+  );
   for (const source of [
     "Provider says {0}: <img src=x> — no translation",
-    "Current HP cannot exceed the effective maximum (28). More details: {1}",
-    "prefix Allocate 42 ability points; currently 43.",
-    "Resolve the spent resource against its current capacity: " + "Ž".repeat(8192),
     "__proto__",
     "constructor",
     "",
   ]) {
     assert.equal(feedbackMessage(source, "cs"), source);
-    assert.equal(feedbackMessage(source, "en"), source);
     assert.equal(feedbackMessage(source, "de"), source);
   }
+  // A key the Engine's catalog lacks shows the English text.
+  assert.equal(
+    feedbackMessage(
+      { text: "New Engine wording", key: "New Engine wording", addon: engineAddon },
+      "cs",
+    ),
+    "New Engine wording",
+  );
 });
 
-void test("engine explanations and dynamic wording read in Czech while names stay literal", () => {
-  assert.equal(feedbackMessage("CON saving throw", "cs"), "Odolnost: záchranný hod");
-  assert.equal(feedbackMessage("Coins (150 ÷ 50)", "cs"), "Mince (150 ÷ 50)");
-  assert.equal(
-    feedbackMessage("Choose which weapon Flame Tongue is.", "cs"),
-    "Vyberte, jakou zbraní je Flame Tongue.",
-  );
+void test("Engine explanations and guidance read in Czech while names stay literal", () => {
   const explanation = explanationText(
     {
       label: "Spell save DC",
+      labelKey: "Spell save DC",
       formula: "base + proficiency bonus + spellcasting ability modifier",
+      formulaKey: "base + proficiency bonus + spellcasting ability modifier",
       value: 13,
       terms: [
-        { label: "Proficiency bonus", value: 2 },
+        { label: "Proficiency bonus", labelKey: "Proficiency bonus", value: 2 },
         { label: "Ring of Protection", value: 1 },
+        {
+          label: "Coins (150 ÷ 50)",
+          labelKey: "Coins ({0} ÷ {1})",
+          labelArgs: ["150", "50"],
+          value: 3,
+        },
       ],
       sources: [],
     },
@@ -177,7 +142,42 @@ void test("engine explanations and dynamic wording read in Czech while names sta
   assert.equal(explanation.formula, "základ + zdatnostní bonus + oprava sesílací vlastnosti");
   assert.deepEqual(
     explanation.terms.map((term) => term.label),
-    ["Zdatnostní bonus", "Ring of Protection"],
+    ["Zdatnostní bonus", "Ring of Protection", "Mince (150 ÷ 50)"],
   );
   assert.equal(explanation.value, 13);
+  // The host's rule details accept only their own fields: no catalog keys.
+  assert.deepEqual(Object.keys(explanation).sort(), [
+    "formula",
+    "label",
+    "sources",
+    "terms",
+    "value",
+  ]);
+  assert.deepEqual(
+    explanation.terms.map((term) => Object.keys(term).sort()),
+    [
+      ["label", "value"],
+      ["label", "value"],
+      ["label", "value"],
+    ],
+  );
+  assert.equal(
+    termLabel({ label: "CON saving throw", labelKey: "CON saving throw", value: 4 }, "cs"),
+    "Odolnost: záchranný hod",
+  );
+  assert.equal(
+    builderLabel(
+      { label: "Choose Wizard subclass", labelKey: "Choose {0} subclass", labelArgs: ["Wizard"] },
+      "cs",
+    ),
+    "Vybrat podtřídu: Wizard",
+  );
+  // A saved explanation from before the Engine keyed its wording stays English.
+  assert.equal(
+    explanationText(
+      { label: "Spell save DC", formula: "x", value: 1, terms: [], sources: [] },
+      "cs",
+    ).label,
+    "Spell save DC",
+  );
 });

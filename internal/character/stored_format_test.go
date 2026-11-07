@@ -26,6 +26,7 @@ var storedFormats = map[string]struct{ schema, fixture string }{
 	},
 	"6.0.0": {schema: "3e12c7b8ae26aac0dd2271497ed66289013a2547be3df646978ca4c34045e457"},
 	"6.1.0": {schema: "4b25552edc8f517cb27828244bf2495409f9f39115d2b007d8df8a60304938bd"},
+	"6.2.0": {schema: "e2cd204caa5f9de94cb6f2ac4301b925418b6178705dc0e5f244f9dcc896c264"},
 }
 
 // digest hashes a JSON value independently of its formatting.

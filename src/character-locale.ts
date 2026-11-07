@@ -1,5 +1,5 @@
 import { text } from "./character-client.js";
-import type { AddonContext } from "./sdk.js";
+import type { AddonContext, LocalizedText } from "./sdk.js";
 
 export type I18n = AddonContext["i18n"];
 /** Gives the translator for a view language; see useTranslations. */
@@ -32,14 +32,55 @@ export const armorCategoryLabels: Readonly<Record<string, string>> = {
   shield: "Shields",
 };
 
+/**
+ * A text to show: this add-on's own English text (its catalog key), or
+ * English with its key in a message catalog, such as the rules engine's.
+ */
+export type Wording = string | LocalizedText;
+
+// The rules engine provider of this generation, whose catalog holds the
+// Engine's wording; unset until the engine connects.
+let engineCatalog: string | undefined;
+
+/** Names the rules engine add-on whose message catalog keys its wording. */
+export function useEngineCatalog(addonId: string | undefined): void {
+  engineCatalog = addonId;
+}
+
+/**
+ * Engine wording: its English text, and its key with {0}-style arguments in
+ * the Engine's catalog. Without a key or a connected engine it is plain text,
+ * never looked up in this add-on's catalog.
+ */
+export function engineWording(english: string, key?: unknown, args?: unknown): LocalizedText {
+  if (typeof key !== "string" || !key || !engineCatalog) return { text: english };
+  const values = Array.isArray(args) ? args.map((value) => text(value)) : [];
+  return {
+    text: english,
+    key,
+    addon: engineCatalog,
+    ...(values.length
+      ? { args: Object.fromEntries(values.map((value, index) => [String(index), value])) }
+      : {}),
+  };
+}
+
+/** Shows wording in the view's language. */
+export function wordingText(wording: Wording, locale: string): string {
+  if (typeof wording === "string") return translator(locale)(wording);
+  const i18n = translations(locale);
+  return i18n ? i18n.message(wording) : wording.text;
+}
+
+/** A guidance label (Engine `Text`) in the view's language. */
 export function builderLabel(
   guidance: Record<string, unknown>,
   locale: string,
   fallback = "",
 ): string {
-  return translator(locale)(
-    text(guidance["labelKey"] ?? guidance["label"], fallback),
-    Array.isArray(guidance["labelArgs"]) ? guidance["labelArgs"] : [],
+  return wordingText(
+    engineWording(text(guidance["label"], fallback), guidance["labelKey"], guidance["labelArgs"]),
+    locale,
   );
 }
 

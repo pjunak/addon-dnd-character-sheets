@@ -345,7 +345,7 @@ export interface Effect {
 
 export type EffectMode = "add" | "maximum" | "minimum" | "set";
 
-export type EffectTarget = "abilityCap" | "abilityScore" | "armorClass" | "attunementLimit" | "initiative" | "maxHp" | "proficiency" | "resourceMax" | "savingThrow" | "sense" | "speed";
+export type EffectTarget = "abilityCap" | "abilityScore" | "armorClass" | "attunementLimit" | "initiative" | "maxHp" | "proficiency" | "resourceMax" | "savingThrow" | "sense" | "speed" | "spellAttack" | "spellSaveDC";
 
 export interface EquipmentFacts {
   slot: string;
@@ -377,7 +377,11 @@ export interface Evidence {
 
 export interface Explanation {
   label: string;
+  labelKey?: string;
+  labelArgs?: Array<string>;
   formula: string;
+  formulaKey?: string;
+  formulaArgs?: Array<string>;
   value: unknown;
   unit?: string;
   minimum?: number;
@@ -530,6 +534,8 @@ export interface Issue {
   id: string;
   target: string;
   message: string;
+  messageKey?: string;
+  messageArgs?: Array<string>;
   severity: IssueSeverity;
   reference?: Reference;
 }
@@ -570,6 +576,13 @@ export interface Level {
 export interface LevelGuidance {
   level: number;
   features: Array<Option>;
+}
+
+export interface MessageText {
+  text: string;
+  key: string;
+  args?: Record<string, string>;
+  addon?: string;
 }
 
 export type MovementMode = "burrow" | "climb" | "fly" | "swim";
@@ -828,6 +841,7 @@ export interface Response {
   contractVersion: string;
   status: string;
   message: string;
+  messageText?: MessageText;
   key: string;
   revision: number;
   actorId: string;
@@ -1230,6 +1244,8 @@ export interface SuspendedHand {
 
 export interface Term {
   label: string;
+  labelKey?: string;
+  labelArgs?: Array<string>;
   value: unknown;
   source?: Reference;
   grantId?: string;

@@ -1,7 +1,7 @@
 # Character saves and failure semantics
 
 The coordinator owns the current `dnd-sheets` extension for each core character
-lifetime. The stored schema is 6.1.0; its optional authored play fields are
+lifetime. The stored schema is 6.2.0; its optional authored play fields are
 described below. The core profile, portrait and relationships are host-owned.
 
 ## Schema updates
@@ -52,9 +52,12 @@ Engine 6 results before it is next saved.
 
 The 6.0.0 upgrade only renames the format: 6.1.0 added the optional
 `baseItemId` and `bonus` picks of a magic weapon or armor
-([Magic weapons and armor](#magic-weapons-and-armor)). Each frozen schema is
-embedded with its own definitions, so an older format is checked against its
-own types.
+([Magic weapons and armor](#magic-weapons-and-armor)). The 6.1.0 upgrade also
+only renames it: 6.2.0 added the Engine's optional catalog keys on saved
+issues, explanations and terms ([Service feedback](#service-feedback)); a
+sheet saved earlier shows those texts in English until it is next evaluated.
+Each frozen schema is embedded with its own definitions, so an older format is
+checked against its own types.
 
 ## Authored conditions
 
@@ -400,17 +403,23 @@ informs wrapping without fixed column counts.
 
 ## Service feedback
 
-The shared save/recovery status translates known coordinator responses and
-Engine blockers into the browser's English/Czech language. Numeric limits and
-counts come from the returned message; presentation never calculates a rule or
-changes the pending input, save outcome, revision or retry request.
+The shared save/recovery status translates coordinator responses and Engine
+blockers into the browser's language. Numeric limits and counts come from the
+returned message; presentation never calculates a rule or changes the pending
+input, save outcome, revision or retry request.
 
-The current service contract returns readable strings. `character-feedback.ts`
-recognizes exact catalog entries and a bounded set of complete message templates.
-It preserves captured IDs, grant names and source wording verbatim, including
-literal placeholders. Unknown or changed wording remains intact as plain text,
-so a new provider diagnostic cannot lose its specific reason or be mistaken for
-a successful save. This applies to load failures, rejected autosaves, commands
+The Engine keys its own wording in its catalog: issues carry `messageKey` and
+`messageArgs`, explanations and terms `labelKey`/`labelArgs` and
+`formulaKey`/`formulaArgs`, and guidance labels `labelKey`/`labelArgs`.
+`character-feedback.ts` and `character-locale.ts` show them with
+`i18n.message`, naming the connected Engine add-on's catalog. The worker's own
+fixed messages are keyed by their English wording in this add-on's catalog;
+templated ones and play changes the Engine refused arrive as `messageText`
+(the Engine's refusal names its catalog through the saved rules context).
+Record names, grant names and source wording stay verbatim. Unkeyed wording,
+such as a provider diagnostic, remains intact as plain text, so a new
+diagnostic cannot lose its specific reason or be mistaken for a successful
+save. This applies to load failures, rejected autosaves, commands
 and reviews through the existing shared controls; saved projections are unchanged.
 When evaluation reports unavailable rules, loading uses the saved projection and
 skips live catalog requests. A secondary catalog failure cannot overwrite the
@@ -467,8 +476,8 @@ views without claiming complete accessibility conformance.
 
 The Engine owns required decisions, prerequisite checks, counts and repair
 targets. Builder exposes the next required choice even with its progress rail
-collapsed, prioritizes invalid decisions, and translates Engine label templates
-in English and Czech. Authored catalog names remain source text.
+collapsed, prioritizes invalid decisions, and shows Engine label templates
+through the Engine's catalog. Authored catalog names remain source text.
 First-class, lineage, subclass, advancement and spell targets open the relevant
 section and focus its first unfinished visible control. Host `ui.controls.v1`
 owns comboboxes and tabs; refresh enhancement before restoring keyboard focus

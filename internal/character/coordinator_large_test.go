@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -84,6 +85,9 @@ func TestCharacterDataOverTheEngineLimitIsTooLarge(t *testing.T) {
 		want := fmt.Sprintf("This character is %d bytes; the rules engine accepts at most %d. Remove inventory entries or shorten item notes, then try again.", size, model.MaxRequestBytes)
 		if err != nil || response.Status != "too-large" || response.Message != want || data.writes != 1 {
 			t.Fatalf("answered %q %q %v, want too-large %q", response.Status, response.Message, err, want)
+		}
+		if text := response.MessageText; text == nil || text.Text != want || text.Key != tooLargeTemplate || text.Args["0"] != strconv.Itoa(size) || text.Addon != "" {
+			t.Fatalf("too-large text = %+v", text)
 		}
 	}
 	// The Engine is never asked to evaluate a payload it would refuse.

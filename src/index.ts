@@ -1,6 +1,6 @@
 import { connectCharacter } from "./character-client.js";
 import { defineCharacterElement } from "./character-element.js";
-import { useTranslations } from "./character-locale.js";
+import { useEngineCatalog, useTranslations } from "./character-locale.js";
 import type { AddonContext, Disposable } from "./sdk.js";
 
 export async function activate(context: AddonContext): Promise<Disposable> {
@@ -13,6 +13,7 @@ export async function activate(context: AddonContext): Promise<Disposable> {
   context.signal.throwIfAborted();
   // A closed generation answers no more calls; its last views fall back to English.
   useTranslations(() => (context.signal.aborted ? undefined : context.i18n));
+  useEngineCatalog(client.engineAddonId);
   const sheetElementTag = defineCharacterElement(
     context.addon.generation,
     client,

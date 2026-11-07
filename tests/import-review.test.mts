@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { previewProblems } from "#web/character-comparison";
 import type { Result } from "#web/character-model";
+import { engineAddon } from "./support/translations.mts";
 
 void test("an import preview that cannot be confirmed says why instead of offering a replacement", () => {
   assert.deepEqual(previewProblems({ status: "ready", message: "", token: "review" }), []);
@@ -28,7 +29,12 @@ void test("an import preview that cannot be confirmed says why instead of offeri
   const evaluation = {
     guidance: {
       saveIssues: [
-        { id: "unavailable-species", severity: "blocker", message: "Choose an available species." },
+        {
+          id: "unavailable-species",
+          severity: "blocker",
+          message: "Choose an available species.",
+          messageKey: "Choose an available species.",
+        },
         { id: "note", severity: "warning", message: "Not a blocker." },
       ],
     },
@@ -40,7 +46,14 @@ void test("an import preview that cannot be confirmed says why instead of offeri
       message: "This change is outside the character rules.",
       evaluation,
     }),
-    ["This change is outside the character rules.", "Choose an available species."],
+    [
+      "This change is outside the character rules.",
+      {
+        text: "Choose an available species.",
+        key: "Choose an available species.",
+        addon: engineAddon,
+      },
+    ],
   );
   // Without a review token there is nothing to confirm.
   assert.deepEqual(previewProblems({ status: "ready", message: "" }), [

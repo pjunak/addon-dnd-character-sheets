@@ -103,10 +103,10 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 			// A saved character too large for the Engine stays readable, as it
 			// does without compatible rules.
 			response.Status = "too-large"
-			response.Message = large.Error()
+			response.say(tooLargeTemplate, large.size, model.MaxRequestBytes)
 			if method == "load" {
 				response.Status = "unavailable"
-				response.Message = fmt.Sprintf("This character is %d bytes; the rules engine accepts at most %d. The saved character remains readable, printable and exportable.", large.size, model.MaxRequestBytes)
+				response.say("This character is {0} bytes; the rules engine accepts at most {1}. The saved character remains readable, printable and exportable.", large.size, model.MaxRequestBytes)
 			}
 			return response, nil
 		}
@@ -116,7 +116,11 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 		// the reason so the sheet can show it next to the action.
 		if rejected && request.Change != nil {
 			response.Status = "invalid"
-			response.Message = rpcError.Message
+			engineID := ""
+			if state != nil {
+				engineID = state.Rules.EngineID
+			}
+			response.refused(rpcError, engineID)
 			return response, nil
 		}
 		// Reading depends on our saved schema, not a replacement provider's
@@ -193,12 +197,12 @@ func (c *Coordinator) HandleRPC(ctx context.Context, rpc workerrpc.Request) (any
 	// catalogs and builder guidance.
 	if size := len(raw(payload(next.Inputs, nil))); size > model.MaxRequestBytes {
 		response.Status = "too-large"
-		response.Message = tooLargeMessage(size)
+		response.say(tooLargeTemplate, size, model.MaxRequestBytes)
 		return response, nil
 	}
 	if size := len(raw(next)); size > storedLimit {
 		response.Status = "too-large"
-		response.Message = fmt.Sprintf("This character's saved snapshot would be %d bytes; the storage limit is %d. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.", size, storedLimit)
+		response.say("This character's saved snapshot would be {0} bytes; the storage limit is {1}. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.", size, storedLimit)
 		return response, nil
 	}
 	if !saveable(evaluation.Evaluation) {
@@ -443,11 +447,11 @@ func payload(input model.Inputs, change *model.PlayCommand) map[string]any {
 // tooLargeError reports an Engine payload over the Engine's published limit.
 type tooLargeError struct{ size int }
 
-func (e tooLargeError) Error() string { return tooLargeMessage(e.size) }
-
-func tooLargeMessage(size int) string {
-	return fmt.Sprintf("This character is %d bytes; the rules engine accepts at most %d. Remove inventory entries or shorten item notes, then try again.", size, model.MaxRequestBytes)
+func (e tooLargeError) Error() string {
+	return model.NewText(tooLargeTemplate, e.size, model.MaxRequestBytes).Label
 }
+
+const tooLargeTemplate = "This character is {0} bytes; the rules engine accepts at most {1}. Remove inventory entries or shorten item notes, then try again."
 
 func (c *Coordinator) evaluate(ctx context.Context, meta *workerrpc.Meta, input model.Inputs, change *model.PlayCommand) (evaluated, RulesContext, error) {
 	method := "evaluate-character"

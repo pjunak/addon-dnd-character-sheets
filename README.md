@@ -178,9 +178,9 @@ remain usable without a rules provider; missing data stays distinct from an
 empty group. Saving-throw shields show and name their saved training state.
 
 **Tools** owns export, reviewed replacement import, printing, layout and rules
-status. Transfers use `dnd-character.v4` / schema 6.1.0 and contain the current
-character only; older `dnd-character.v3` / 6.0.0 and `dnd-character.v2` / 5.0.0
-exports still import. Changed
+status. Transfers use `dnd-character.v5` / schema 6.2.0 and contain the current
+character only; older `dnd-character.v4` / 6.1.0, `dnd-character.v3` / 6.0.0 and
+`dnd-character.v2` / 5.0.0 exports still import. Changed
 installed rules require explicit adoption. If an autosave discovers changed
 rules, **Review changed rules** opens Tools; explicit adoption can save the
 pending edits together with the new rules, and removes (and lists) saved
@@ -220,9 +220,10 @@ facts rather than a log of edits.
 
 The interface texts live in `message-catalog.v1` files (`locales/en.json`,
 `locales/cs.json`) that the host serves and translates through `ui.i18n`; Czech
-covers every control, the manifest's names and the rules engine's messages,
-explanation labels and formulas. Source prose, record names, authored values and
-unknown provider diagnostics keep their original wording. See [save semantics](docs/RULES_EDGE_CASES.md), the
+covers every control and the manifest's names. The rules engine's messages,
+guidance, explanation labels and formulas carry keys into the Engine's own
+catalog, which the sheet shows with `i18n.message`. Source prose, record names,
+authored values and unknown provider diagnostics keep their original wording. See [save semantics](docs/RULES_EDGE_CASES.md), the
 engine's [public contract](../addon-dnd-engine/contract/README.md), and the
 [character workflow](docs/WORKFLOW.md).
 
@@ -268,7 +269,7 @@ Use `npm run check:workflows` and `npm run check:vulnerabilities` to run the
 matching workflow and reachable Go vulnerability checks locally.
 
 Inspect the resulting ZIP with the host's inspector:
-`go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-6.3.0.zip`.
+`go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-6.4.0.zip`.
 The package command rebuilds web assets and native workers from source, including
 when neither output directory exists. `web/`, `worker/` and `dist/` are ignored
 build artifacts; public schemas and generated TypeScript models remain versioned.
