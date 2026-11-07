@@ -34,12 +34,12 @@
   },
   "devDependencies": {
     "@types/archiver": "^8.0.0",
-    "@types/node": "26.6.4",
+    "@types/node": "26.6.6",
     "archiver": "^8.0.0",
-    "oxc-parser": "0.153.0",
-    "oxlint": "1.87.0",
-    "oxlint-tsgolint": "7.0.2003",
-    "prettier": "3.9.9",
+    "oxc-parser": "0.157.0",
+    "oxlint": "1.91.0",
+    "oxlint-tsgolint": "7.0.2005",
+    "prettier": "3.9.10",
     "typescript": "7.0.2"
   }
 }
