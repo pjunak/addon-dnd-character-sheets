@@ -1,9 +1,11 @@
-import { catalogs } from "./character-messages.js";
-import { translator } from "./character-locale.js";
+import type { Explanation } from "./character-model.js";
+import { abilityNames, translator } from "./character-locale.js";
 
-// The current service returns readable messages rather than localization keys.
-// Match only known complete wording; captured names, source prose and IDs stay literal.
-const templates: readonly (readonly [keyof typeof catalogs.en, RegExp])[] = [
+// The rules engine writes English and keys only its builder guidance, so its
+// messages, explanation labels and formulas are translated by their exact
+// wording or by these templates. Captured names, source prose and IDs stay
+// literal; a captured ability code shows as the ability's name.
+const templates: readonly (readonly [string, RegExp])[] = [
   [
     "Choose between 1 and {0} ordered class levels.",
     /^Choose between 1 and (\d+) ordered class levels\.$/u,
@@ -66,17 +68,77 @@ const templates: readonly (readonly [keyof typeof catalogs.en, RegExp])[] = [
     "This character's saved snapshot would be {0} bytes; the storage limit is {1}. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again.",
     /^This character's saved snapshot would be (\d+) bytes; the storage limit is (\d+)\. It keeps rules evidence for each referenced class, feat, spell and item, so remove entries the character no longer needs, then try again\.$/u,
   ],
+  ["Copying this spell requires {0} GP.", /^Copying this spell requires (\d+(?:\.\d+)?) GP\.$/u],
+  [
+    "The class selection limit has been reached ({0}).",
+    /^The class selection limit has been reached \((\d+)\)\.$/u,
+  ],
+  ["Only one item may occupy the {0} slot.", /^Only one item may occupy the (.+) slot\.$/su],
+  [
+    "{0} has no base weapon or armor or bonus to choose; clear its base and bonus.",
+    /^(.+) has no base weapon or armor or bonus to choose; clear its base and bonus\.$/su,
+  ],
+  [
+    "{0} has no base weapon or armor to choose; clear its base.",
+    /^(.+) has no base weapon or armor to choose; clear its base\.$/su,
+  ],
+  ["Choose which weapon {0} is.", /^Choose which weapon (.+) is\.$/su],
+  ["Choose which armor {0} is.", /^Choose which armor (.+) is\.$/su],
+  ["No weapon in the rules data can be {0}.", /^No weapon in the rules data can be (.+)\.$/su],
+  ["No armor in the rules data can be {0}.", /^No armor in the rules data can be (.+)\.$/su],
+  [
+    "{0} cannot be that weapon; choose one of its options.",
+    /^(.+) cannot be that weapon; choose one of its options\.$/su,
+  ],
+  [
+    "{0} cannot be that armor; choose one of its options.",
+    /^(.+) cannot be that armor; choose one of its options\.$/su,
+  ],
+  ["Choose the bonus of {0}.", /^Choose the bonus of (.+)\.$/su],
+  [
+    "{0} does not offer that bonus; choose one of its options.",
+    /^(.+) does not offer that bonus; choose one of its options\.$/su,
+  ],
+  ["Coins ({0} ÷ {1})", /^Coins \((\d+(?:\.\d+)?) ÷ (\d+(?:\.\d+)?)\)$/u],
+  ["Capacity: Strength {0} × {1}", /^Capacity: Strength (\d+) × (\d+(?:\.\d+)?)$/u],
+  ["{0} saving throw", /^(STR|DEX|CON|INT|WIS|CHA) saving throw$/u],
+  ["{0} score", /^(STR|DEX|CON|INT|WIS|CHA) score$/u],
+  ["{0} modifier", /^(STR|DEX|CON|INT|WIS|CHA) modifier$/u],
+  ["{0} remaining", /^(.+) remaining$/su],
+  [
+    "each coin count × its value, divided by the value of one {0}",
+    /^each coin count × its value, divided by the value of one (\w+)$/u,
+  ],
 ];
 
 export function feedbackMessage(message: string, locale: string): string {
-  if (locale !== "cs") return message;
-  const catalog: Readonly<Record<string, string>> = catalogs.cs;
-  if (Object.hasOwn(catalog, message)) return catalog[message]!;
+  const t = translator(locale);
+  const exact = t(message);
+  if (exact !== message) return exact;
   // Unusually large diagnostics remain intact without running template matching.
   if (message.length > 8192) return message;
   for (const [key, pattern] of templates) {
     const match = pattern.exec(message);
-    if (match) return translator(locale)(key, match.slice(1));
+    if (match)
+      return t(
+        key,
+        match.slice(1).map((value) => {
+          const name = abilityNames[value];
+          return name === undefined ? value : t(name);
+        }),
+      );
   }
   return message;
+}
+
+/** An Engine explanation with its wording in the reader's language, for the host's rule details. */
+export function explanationText(explanation: Explanation, locale: string): Explanation {
+  const text = (value: string): string => (value ? feedbackMessage(value, locale) : value);
+  return {
+    ...explanation,
+    label: text(explanation.label),
+    formula: text(explanation.formula),
+    ...(explanation.unit === undefined ? {} : { unit: text(explanation.unit) }),
+    terms: explanation.terms.map((term) => ({ ...term, label: text(term.label) })),
+  };
 }

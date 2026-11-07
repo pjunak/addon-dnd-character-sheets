@@ -3,7 +3,7 @@
   "packageFormat": 1,
   "id": "dnd-sheets",
   "name": "D&D Character Sheets",
-  "version": "6.2.0",
+  "version": "6.3.0",
   "description": "Reversible character builds, tracked DM grants and explained rules.",
   "license": "MIT",
   "compatibility": {
@@ -16,6 +16,7 @@
       "ui.contributions",
       "ui.controls.v1",
       "ui.markdown",
+      "ui.i18n",
       "worker.native",
       "ui.rule-details",
       "services.own"
@@ -55,10 +56,7 @@
         "ui.contributions"
       ],
       "config": {
-        "collection": "characters",
-        "labels": {
-          "cs": "Deník postavy D&D"
-        }
+        "collection": "characters"
       }
     }
   ],
@@ -90,5 +88,9 @@
         "schema": "contracts/character.service.json"
       }
     ]
+  },
+  "locales": {
+    "en": "locales/en.json",
+    "cs": "locales/cs.json"
   }
 }

@@ -9,12 +9,5 @@
     "typescript/await-thenable": "error",
     "typescript/switch-exhaustiveness-check": "error"
   },
-  "ignorePatterns": [
-    "src/character-messages.ts",
-    "src/character-model.ts",
-    "web/**",
-    "worker/**",
-    "dist/**",
-    "node_modules/**"
-  ]
+  "ignorePatterns": ["src/character-model.ts", "web/**", "worker/**", "dist/**", "node_modules/**"]
 }

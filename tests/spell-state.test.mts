@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { reconcileCharacterMap } from "#web/character-client";
 import { spellbookHeading, spellSourceLabel } from "#web/character-spells";
+import "./support/translations.mts";
 void test("accepted spell withdrawals preserve later selections and edits", () => {
   const sent = { first: ["a", "b"], second: ["c"] },
     current = { first: ["a", "b"], second: ["later"] };

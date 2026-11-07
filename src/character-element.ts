@@ -93,14 +93,15 @@ import { rulesTarget, showRuleNotes } from "./character-rule-notes.js";
 
 const runtimes = new Map<
   string,
-  { client: CharacterClient; enhance: AddonContext["ui"]["enhance"] }
+  { client: CharacterClient; enhance: AddonContext["ui"]["enhance"]; i18n: AddonContext["i18n"] }
 >();
 export function defineCharacterElement(
   generation: string,
   client: CharacterClient,
   enhance: AddonContext["ui"]["enhance"],
+  i18n: AddonContext["i18n"],
 ): string {
-  const runtime = { client, enhance };
+  const runtime = { client, enhance, i18n };
   runtimes.set(generation, runtime);
   client.signal.addEventListener(
     "abort",
@@ -159,6 +160,7 @@ export function defineCharacterElement(
     #feedback = (message: string): string =>
       feedbackMessage(message, this.#context?.host.locale ?? "en");
     #unsubscribe: (() => void) | undefined;
+    #stopTexts: (() => void) | undefined;
     #refreshTimer: ReturnType<typeof setTimeout> | undefined;
     set codexContribution(value: ContributionContext) {
       const previous = this.#context;
@@ -185,6 +187,10 @@ export function defineCharacterElement(
       this.#controls = this.#runtime.enhance(this);
       this.#session.connect(this.#context?.edits.handoff?.take());
       this.classList.add("addon-dnd-character", "addon-dnd-sheets");
+      // Catalogs for a new language arrive after the switch.
+      this.#stopTexts = this.#runtime.i18n.onChange(() => this.#render(), {
+        signal: this.#runtime.client.signal,
+      });
       this.#unsubscribe = this.#runtime.client.subscribe(() => {
         clearTimeout(this.#refreshTimer);
         this.#refreshTimer = setTimeout(() => {
@@ -199,6 +205,8 @@ export function defineCharacterElement(
       this.#controls = undefined;
       this.#session.disconnect();
       this.#unsubscribe?.();
+      this.#stopTexts?.();
+      this.#stopTexts = undefined;
       clearTimeout(this.#refreshTimer);
       this.#dialog?.close();
       this.#context?.edits.set({ dirty: false, saving: false });

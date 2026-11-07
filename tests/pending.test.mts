@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { blank } from "#web/character-client";
 import { commandBlocker, readCharacterPending, sheetAccess } from "#web/character-pending";
 import { feedbackMessage } from "#web/character-feedback";
+import "./support/translations.mts";
 
 function pending() {
   const inputs = blank(),

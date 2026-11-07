@@ -22,6 +22,7 @@ import {
 import type { CatalogRecord } from "./character-client.js";
 import { abilities, object, rows, strings, text, catalogRecord } from "./character-client.js";
 import { abilityNames, builderLabel, translator } from "./character-locale.js";
+import { feedbackMessage } from "./character-feedback.js";
 import {
   button,
   checkbox,
@@ -1075,7 +1076,12 @@ export function senseDetails(projection: Projection | undefined, locale: string)
     for (const term of explanation?.terms ?? [])
       if (term.status)
         senses.append(
-          el("p", term.label, " · ", t(term.status === "applied" ? "Active" : "Inactive")),
+          el(
+            "p",
+            feedbackMessage(term.label, locale),
+            " · ",
+            t(term.status === "applied" ? "Active" : "Inactive"),
+          ),
         );
   }
   if (senses.children.length === 1) senses.append(el("p", t("No additional senses.")));

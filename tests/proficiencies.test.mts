@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { proficiencyGroups } from "#web/character-proficiencies";
 import type { Projection, Sheet } from "#web/character-model";
 import { partial, required } from "./support/helpers.mts";
+import "./support/translations.mts";
 
 const projection = (training: unknown): Projection => ({
   sheet: partial<Sheet>({ proficiencies: training }),

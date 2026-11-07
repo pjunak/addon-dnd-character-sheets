@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { feedbackMessage } from "#web/character-feedback";
+import { explanationText, feedbackMessage } from "#web/character-feedback";
+import "./support/translations.mts";
 
 void test("save, review and provider failures retain their specific explanation in Czech", () => {
   for (const [source, expected] of [
@@ -67,7 +68,10 @@ void test("rule feedback preserves engine values and performs no calculation", (
       "Current HP cannot exceed the effective maximum (28).",
       "Současné životy nesmí překročit výsledné maximum (28).",
     ],
-    ["DEX must have a positive score and cap.", "Vlastnost DEX musí mít kladnou hodnotu i limit."],
+    [
+      "DEX must have a positive score and cap.",
+      "Vlastnost Obratnost musí mít kladnou hodnotu i limit.",
+    ],
     [
       "Attuned to more than 4 magic items (limit 4)",
       "Sladěno s více než 4 kouzelnými předměty (limit 4)",
@@ -147,4 +151,33 @@ void test("unknown, changed and oversized feedback remains intact, including lit
     assert.equal(feedbackMessage(source, "en"), source);
     assert.equal(feedbackMessage(source, "de"), source);
   }
+});
+
+void test("engine explanations and dynamic wording read in Czech while names stay literal", () => {
+  assert.equal(feedbackMessage("CON saving throw", "cs"), "Odolnost: záchranný hod");
+  assert.equal(feedbackMessage("Coins (150 ÷ 50)", "cs"), "Mince (150 ÷ 50)");
+  assert.equal(
+    feedbackMessage("Choose which weapon Flame Tongue is.", "cs"),
+    "Vyberte, jakou zbraní je Flame Tongue.",
+  );
+  const explanation = explanationText(
+    {
+      label: "Spell save DC",
+      formula: "base + proficiency bonus + spellcasting ability modifier",
+      value: 13,
+      terms: [
+        { label: "Proficiency bonus", value: 2 },
+        { label: "Ring of Protection", value: 1 },
+      ],
+      sources: [],
+    },
+    "cs",
+  );
+  assert.equal(explanation.label, "SO záchranného hodu proti kouzlům");
+  assert.equal(explanation.formula, "základ + zdatnostní bonus + oprava sesílací vlastnosti");
+  assert.deepEqual(
+    explanation.terms.map((term) => term.label),
+    ["Zdatnostní bonus", "Ring of Protection"],
+  );
+  assert.equal(explanation.value, 13);
 });

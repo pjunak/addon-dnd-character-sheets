@@ -1,6 +1,7 @@
 import type { Explanation, Projection, Reference } from "./character-model.js";
 import { object } from "./character-client.js";
 import { translator } from "./character-locale.js";
+import { explanationText } from "./character-feedback.js";
 
 export type Child = Node | string | number | undefined;
 export function el<K extends keyof HTMLElementTagNameMap>(
@@ -257,7 +258,10 @@ export function rule(
   node.details = {
     label: name,
     ...(reference ? { reference } : {}),
-    ...(explanation ? { explanation } : {}),
+    // The host shows the explanation as given; the add-on owns its wording.
+    ...(explanation
+      ? { explanation: explanationText(explanation, document.documentElement.lang || "en") }
+      : {}),
     ...(summary ? { summary } : {}),
     ...(savedSources.length ? { savedSources } : {}),
   };

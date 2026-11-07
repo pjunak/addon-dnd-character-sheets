@@ -4,6 +4,7 @@ import { gearLabel, gearOptions } from "#web/character-magic-gear";
 import { canStackOnto } from "#web/character-inventory";
 import type { Item, Projection } from "#web/character-model";
 import { partial } from "./support/helpers.mts";
+import "./support/translations.mts";
 
 const item = (extra: Partial<Item> = {}): Item => ({
   id: "pick",

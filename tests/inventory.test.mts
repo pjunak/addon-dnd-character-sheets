@@ -17,6 +17,7 @@ import {
 import { blank } from "#web/character-client";
 import type { Item, Projection, Sheet } from "#web/character-model";
 import { partial, required } from "./support/helpers.mts";
+import "./support/translations.mts";
 
 const item = (id: string, location = "carried"): Item => ({
   id,

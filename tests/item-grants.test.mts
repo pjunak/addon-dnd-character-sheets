@@ -10,6 +10,7 @@ import { grantedConditions } from "#web/character-conditions";
 import type { CatalogRecord } from "#web/character-client";
 import type { Evidence, Projection, Sheet } from "#web/character-model";
 import { partial } from "./support/helpers.mts";
+import "./support/translations.mts";
 
 const projection = (sheet: Record<string, unknown>, evidence: Evidence[] = []): Projection => ({
   sheet: partial<Sheet>(sheet),

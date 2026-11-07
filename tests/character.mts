@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { blank, parseCharacter, exportCharacter, mergeCharacter } from "#web/character-client";
 import type { Choice, Item, Sheet } from "#web/character-model";
 import { array, partial, record, required, storage as storageFixture } from "./support/helpers.mts";
+import "./support/translations.mts";
 
 void test("provider option labels translate only explicit UI keys", async () => {
   const { guidanceOptions } = await import("#web/character-build");

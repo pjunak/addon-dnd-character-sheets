@@ -18,7 +18,7 @@ const archivePath = resolve(distributionRoot, `${manifest.id}-${manifest.version
 await rm(packageRoot, { recursive: true, force: true });
 await rm(archivePath, { force: true });
 await mkdir(packageRoot, { recursive: true });
-for (const entry of ["addon.json", "contracts", "web", "worker"]) {
+for (const entry of ["addon.json", "contracts", "locales", "web", "worker"]) {
   await cp(resolve(repositoryRoot, entry), resolve(packageRoot, entry), {
     recursive: true,
     force: false,

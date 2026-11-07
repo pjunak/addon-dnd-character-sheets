@@ -1,4 +1,3 @@
-src/character-messages.ts
 src/character-model.ts
 web/
 worker/

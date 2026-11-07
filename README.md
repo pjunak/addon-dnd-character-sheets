@@ -218,9 +218,11 @@ DM grants remain authenticated; amending or removing a grant changes its current
 entry. Ordered levels and mechanics-required spell acquisitions are character
 facts rather than a log of edits.
 
-English and Czech catalogs cover controls and known save/recovery explanations.
-Source prose, authored values and unknown provider diagnostics keep their original
-wording. See [save semantics](docs/RULES_EDGE_CASES.md), the
+The interface texts live in `message-catalog.v1` files (`locales/en.json`,
+`locales/cs.json`) that the host serves and translates through `ui.i18n`; Czech
+covers every control, the manifest's names and the rules engine's messages,
+explanation labels and formulas. Source prose, record names, authored values and
+unknown provider diagnostics keep their original wording. See [save semantics](docs/RULES_EDGE_CASES.md), the
 engine's [public contract](../addon-dnd-engine/contract/README.md), and the
 [character workflow](docs/WORKFLOW.md).
 
@@ -233,7 +235,9 @@ engine's [public contract](../addon-dnd-engine/contract/README.md), and the
 - `src/character-element.ts`: workspace lifetime, rendering, dialogs and focus.
 - `src/character-build.ts` and `character-builder-nav.ts`: Builder controls and tabs.
 - `src/character-sheet.ts`: direct play controls and calculated display.
-- Go types generate schemas; the owning build generates web assets and locales.
+- Go types generate schemas; the owning build generates web assets.
+- `src/character-locale.ts` and `character-feedback.ts`: the translator and the
+  rules engine's wording; `npm run check:source` checks the catalogs.
 
 ## Development
 
@@ -254,8 +258,8 @@ npm run package
 `check:fast` rejects authored JavaScript, type-checks browser source, tools and
 tests, runs typed Oxlint and Prettier checks, and performs the fast Go checks.
 Use `npm run typecheck`, `npm run lint`, `npm run lint:fix`, `npm run format` or
-`npm run format:check` for a focused iteration. Generated schemas, models,
-catalogs and package output stay under their owning generators and are excluded
+`npm run format:check` for a focused iteration. Generated schemas, models
+and package output stay under their owning generators and are excluded
 from source formatting and linting.
 Browser source and Node tools/tests have separate typed-lint passes. CI and
 weekly maintenance also run `npm run check:dependencies` against the npm lockfile;
@@ -264,7 +268,7 @@ Use `npm run check:workflows` and `npm run check:vulnerabilities` to run the
 matching workflow and reachable Go vulnerability checks locally.
 
 Inspect the resulting ZIP with the host's inspector:
-`go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-5.3.0.zip`.
+`go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-6.3.0.zip`.
 The package command rebuilds web assets and native workers from source, including
 when neither output directory exists. `web/`, `worker/` and `dist/` are ignored
 build artifacts; public schemas and generated TypeScript models remain versioned.
