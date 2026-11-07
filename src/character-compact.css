@@ -7,7 +7,7 @@
    scrolls inside it, so switching tabs never changes the page height and the
    rail, with Builder and Tools at its foot, stays in view. */
 .addon-dnd-character .dse-layout-compact {
-  --dsc-gap: 0.65rem;
+  --dsc-gap: var(--space-3);
   /* Mockup shades derived from host tokens, so skins carry over. */
   --dsc-field: color-mix(in srgb, var(--bg-raised) 92%, var(--text-parchment));
   --dsc-faint: color-mix(in srgb, var(--text-muted) 65%, var(--bg-surface));
@@ -15,21 +15,21 @@
   align-items: stretch;
   grid-template-columns: 7.5rem minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
-  gap: 0.75rem;
+  gap: var(--space-3);
   height: max(30rem, calc(100dvh - var(--dsc-frame-top, 0px) - 1.5rem));
 }
 .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs {
   position: static;
   height: auto;
   min-height: 0;
-  padding-right: 0.4rem;
+  padding-right: var(--space-2);
 }
 .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs .codex-tab {
   font-size: var(--text-sm);
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding-inline: 0.4rem;
+  gap: var(--space-2);
+  padding-inline: var(--space-2);
   border: 0;
   border-radius: var(--radius);
   color: var(--text-light);
@@ -74,7 +74,7 @@
 .addon-dnd-character .dse-layout-compact .dse-cards {
   display: flex;
   min-width: 0;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 .addon-dnd-character .dse-layout-compact .dse-ability-title {
   border: 0;
@@ -98,7 +98,7 @@
   font-weight: 600;
 }
 .addon-dnd-character .dse-layout-compact .dse-ability-body {
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 .addon-dnd-character .dse-layout-compact .dse-ability-details {
   display: block;
@@ -107,10 +107,10 @@
 .addon-dnd-character .dse-layout-compact .dse-skill {
   padding: 0;
   line-height: 1.5;
-  gap: 0.3rem;
+  gap: var(--space-1);
 }
 .addon-dnd-character .dse-layout-compact .dse-score {
-  padding: 0.25rem 0 0.2rem;
+  padding: var(--space-1) 0;
   border: 1px solid var(--border-subtle);
   background: var(--bg-raised);
 }
@@ -136,7 +136,7 @@
 .addon-dnd-character .dse-layout-compact .dse-dock-slot {
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 .addon-dnd-character .dse-layout-compact .dse-dock-slot > .dse-dock {
   white-space: nowrap;
@@ -145,13 +145,13 @@
 .dse-casting-numbers {
   display: inline-flex;
   align-items: baseline;
-  gap: 0.35rem;
+  gap: var(--space-1);
   white-space: nowrap;
 }
 .dsc-bar {
   display: grid;
-  gap: 0.5rem;
-  padding: 0.55rem 0.75rem;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
   background: var(--bg-surface);
@@ -162,13 +162,13 @@
    wrapped row disappears; 4px stay visible for focus rings. The clip makes
    a stacking context, raised so the HP hint stays above later panels. */
 .dsc-vitals {
-  --dsc-cell-gap: 1.2rem;
+  --dsc-cell-gap: var(--space-5);
   position: relative;
   z-index: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  gap: 0.5rem var(--dsc-cell-gap);
+  gap: var(--space-2) var(--dsc-cell-gap);
   min-width: 0;
   clip-path: inset(-100vh -100vw -100vh -4px);
 }
@@ -176,7 +176,7 @@
   position: relative;
   display: grid;
   align-content: center;
-  gap: 0.15rem;
+  gap: var(--space-1);
   min-width: 0;
 }
 .dsc-vitals > * + *::before {
@@ -196,7 +196,7 @@
 .dsc-stat-label {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
   font-size: var(--text-xs);
   color: var(--text-muted);
   text-transform: uppercase;
@@ -211,7 +211,7 @@
   font-variant-numeric: tabular-nums;
 }
 .dsc-cell-value small {
-  margin-left: 0.2rem;
+  margin-left: var(--space-1);
   font-size: var(--text-xs);
   font-weight: 400;
   color: var(--text-muted);
@@ -223,7 +223,7 @@
 .dsc-health {
   position: relative;
   display: grid;
-  gap: 0.2rem;
+  gap: var(--space-1);
   min-width: 13rem;
 }
 /* How to enter damage or healing appears while hit points are being edited,
@@ -234,8 +234,8 @@
   top: 100%;
   left: 0;
   right: 0;
-  margin-top: 0.25rem;
-  padding: 0.3rem 0.5rem;
+  margin-top: var(--space-1);
+  padding: var(--space-1) var(--space-2);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background: var(--bg-surface);
@@ -255,14 +255,14 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.35rem;
+  gap: var(--space-1);
   font-size: var(--text-base);
   font-variant-numeric: tabular-nums;
 }
 .addon-dnd-character .dsc-hp-values .dsc-hp-input {
   width: 4ch;
   min-height: 0;
-  padding: 0.05rem 0.25rem;
+  padding: 0.05rem var(--space-1);
   font-size: var(--text-xl);
   font-weight: 600;
   text-align: right;
@@ -270,15 +270,15 @@
 .dsc-temp {
   display: inline-flex;
   align-items: baseline;
-  gap: 0.25rem;
-  margin-left: 0.5rem;
+  gap: var(--space-1);
+  margin-left: var(--space-2);
   font-size: var(--text-xs);
   color: var(--color-info);
 }
 .addon-dnd-character .dsc-temp-input {
   width: 3rem;
   min-height: 0;
-  padding: 0.05rem 0.25rem;
+  padding: 0.05rem var(--space-1);
   border-bottom-color: color-mix(in srgb, var(--color-info) 45%, transparent);
   font-size: var(--text-sm);
   color: var(--color-info);
@@ -336,8 +336,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
-  padding-top: 0.45rem;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
   border-top: 1px solid var(--border-subtle);
 }
 .dsc-spacer {
@@ -346,8 +346,8 @@
 .dsc-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.1rem 0.25rem 0.1rem 0.55rem;
+  gap: var(--space-1);
+  padding: 0.1rem var(--space-1) 0.1rem var(--space-2);
   border: 1px solid color-mix(in srgb, var(--color-danger) 45%, transparent);
   border-radius: 999px;
   color: var(--color-danger);
@@ -370,13 +370,13 @@
 }
 .dsc-adjustment {
   border-style: dashed;
-  padding-right: 0.55rem;
+  padding-right: var(--space-2);
 }
 /* A one-glyph action (×, ✓, −, +) inside a status chip or a list row. */
 .addon-dnd-character .dsc-glyph {
   min-height: 0;
   min-width: 0;
-  padding: 0 0.3rem;
+  padding: 0 var(--space-1);
   border: 0;
   background: none;
   color: inherit;
@@ -385,12 +385,12 @@
 .dsc-chip-stepper {
   display: inline-flex;
   align-items: center;
-  gap: 0.1rem;
+  gap: var(--space-1);
 }
 .addon-dnd-character .dsc-add-condition {
   width: auto;
   min-height: 0;
-  padding: 0.15rem 0.6rem;
+  padding: 0.15rem var(--space-2);
   border-style: dashed;
   border-radius: 999px;
   font-size: var(--text-xs);
@@ -401,7 +401,7 @@
   display: grid;
   grid-template-columns: minmax(min(8.5rem, 100%), 1fr) auto auto;
   align-items: center;
-  gap: 0.45rem 0.6rem;
+  gap: var(--space-2);
 }
 .dsc-use {
   display: contents;
@@ -410,7 +410,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.15rem 0.4rem;
+  gap: var(--space-1) var(--space-2);
   min-width: 0;
   font-size: var(--text-sm);
 }
@@ -436,7 +436,7 @@
 }
 .dsc-recharge,
 .dsc-tag {
-  padding: 0.05rem 0.3rem;
+  padding: 0.05rem var(--space-1);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   font-size: var(--text-xs);
@@ -447,7 +447,7 @@
 .dsc-pips {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: var(--space-1);
   align-items: center;
 }
 .addon-dnd-character .dsc-pip {
@@ -479,7 +479,7 @@
 .dsc-pool {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: var(--space-1);
 }
 /* Pool steps share a limited-uses row with the name and count, and Change
    shares the spell bar's last cell, so their labels stay whole and tight. */
@@ -525,7 +525,7 @@
 }
 .addon-dnd-character .dse-layout-compact :is(.character-panel, .dse-section) {
   margin: 0;
-  padding: 0.65rem;
+  padding: var(--space-3);
   min-width: 0;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
@@ -537,8 +537,8 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin: 0 0 0.5rem;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
   font: 600 var(--text-xs)/1.2 var(--font-title);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -584,15 +584,15 @@
 .dsc-combat-abilities {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 /* The abbreviation over its save on the left, the modifier on the right. */
 .dsc-combat-ability {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 0.15rem 0.5rem;
-  padding: 0.4rem 0.6rem;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-2);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
   background: var(--bg-surface);
@@ -615,18 +615,18 @@
 .dsc-save {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: var(--space-1);
 }
 .dsc-casting {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.5rem;
-  margin-top: 0.6rem;
+  gap: var(--space-2) var(--space-6);
+  margin-top: var(--space-2);
   font-size: var(--text-sm);
 }
 .dsc-casting .dse-casting {
   display: flex;
-  gap: 0.6rem;
+  gap: var(--space-2);
   align-items: baseline;
 }
 .dsc-casting .dse-casting > small {
@@ -638,13 +638,13 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 1.1rem;
+  gap: var(--space-2) var(--space-4);
 }
 .addon-dnd-character .dse-layout-compact .dse-hands > .character-field {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.25rem 0.5rem;
+  gap: var(--space-1) var(--space-2);
   order: 1;
 }
 .addon-dnd-character .dse-layout-compact .dse-hands > .character-field:last-child {
@@ -673,8 +673,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 0.2rem 0.6rem;
-  padding: 0.3rem 0;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-1) 0;
   border-top: 1px solid var(--border-subtle);
 }
 .addon-dnd-character .dse-layout-compact .dse-quick-use-name {
@@ -694,7 +694,7 @@
 .addon-dnd-character .dse-layout-compact .dse-quick-use-item > .dnd-workflow-controls {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: var(--space-1);
   margin: 0;
 }
 .addon-dnd-character .dse-layout-compact .dse-quick-use-item > :is(p, .dse-quick-use-notes) {
@@ -717,18 +717,18 @@
 .dsc-feats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 1rem;
+  gap: 0 var(--space-4);
 }
 .dsc-feat {
   min-width: 0;
-  padding: 0.4rem 0;
+  padding: var(--space-2) 0;
   border-bottom: 1px solid var(--border-subtle);
 }
 .dsc-feat-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0 0.4rem;
+  gap: 0 var(--space-2);
   font-size: var(--text-sm);
   font-weight: 600;
 }
@@ -748,7 +748,7 @@
 }
 /* Item properties follow the features under a smaller heading. */
 .dsc-feats-heading {
-  padding-top: 0.75rem;
+  padding-top: var(--space-3);
   font: 600 var(--text-xs)/1.2 var(--font-title);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -757,7 +757,7 @@
 .dsc-training {
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);
-  gap: 0.25rem 0.9rem;
+  gap: var(--space-1) var(--space-4);
   margin: 0;
   font-size: var(--text-sm);
 }
@@ -781,7 +781,7 @@
   font-size: var(--text-sm);
 }
 .dsc-attack-table thead th {
-  padding: 0.25rem 0.5rem 0.4rem;
+  padding: var(--space-1) var(--space-2) var(--space-2);
   border-bottom: 1px solid var(--addon-border);
   color: var(--text-muted);
   font: 600 var(--text-xs)/1 var(--font-ui);
@@ -790,7 +790,7 @@
   text-transform: uppercase;
 }
 .dsc-attack-table tbody :is(th, td) {
-  padding: 0.4rem 0.5rem;
+  padding: var(--space-2);
   border-bottom: 1px solid var(--border-subtle);
   text-align: left;
   vertical-align: middle;
@@ -841,12 +841,12 @@
 .dsc-prepared {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 .dnd-spell-facts {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 0.2rem 0.6rem;
+  gap: var(--space-1) var(--space-2);
   align-items: center;
   font-size: var(--text-xs);
   color: var(--text-muted);
@@ -858,7 +858,7 @@
   min-width: 4.5rem;
 }
 .dnd-spell-tag {
-  padding: 0.15rem 0.3rem;
+  padding: 0.15rem var(--space-1);
   border: 1px solid var(--addon-border);
   border-radius: 3px;
   color: var(--text-muted);
@@ -884,11 +884,11 @@
   display: inline-flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.35rem;
+  gap: var(--space-1);
   min-width: 0;
 }
 .dnd-spell-active {
-  padding: 0 0.4rem;
+  padding: 0 var(--space-2);
   border: 1px solid color-mix(in srgb, var(--color-mystery) 50%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--color-mystery) 8%, transparent);
@@ -907,7 +907,7 @@
     "mark name facts slot action"
     "mark source facts slot action";
   row-gap: 0;
-  padding: 0.3rem 0.1rem;
+  padding: var(--space-1) 0.1rem;
   border-bottom: 1px solid var(--border-subtle);
 }
 .addon-dnd-character .dse-layout-compact .dnd-spell-row::before {
@@ -927,8 +927,8 @@
   background: var(--accent-gold-dim);
 }
 .addon-dnd-character .dnd-sheet-shell .dnd-spell-level {
-  margin: 0.7rem 0 0.1rem;
-  padding: 0 0.1rem 0.3rem;
+  margin: var(--space-3) 0 0.1rem;
+  padding: 0 0.1rem var(--space-1);
   border-bottom: 1px solid var(--addon-border);
   color: var(--text-light);
   font: 600 var(--text-sm)/1 var(--font-title);
@@ -956,8 +956,8 @@
   display: grid;
   grid-template-columns: 5.5rem minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.6rem;
-  padding-block: 0.4rem;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
   border-bottom: 1px solid var(--border-subtle);
   font-size: var(--text-sm);
 }
@@ -977,7 +977,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.2rem 0.4rem;
+  gap: var(--space-1) var(--space-2);
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -990,21 +990,21 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.3rem;
-  padding-top: 0.5rem;
+  gap: var(--space-1);
+  padding-top: var(--space-2);
 }
 .addon-dnd-character .dse-layout-compact .dsc-pack {
   align-self: stretch;
 }
 .dsc-actions {
   display: inline-flex;
-  gap: 0.35rem;
+  gap: var(--space-1);
 }
 .dsc-pack-group {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin: 0.75rem 0 0.25rem;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-1);
   font: 600 var(--text-xs) var(--font-ui);
   color: var(--text-muted);
 }
@@ -1035,7 +1035,7 @@
   background: var(--color-danger);
 }
 .dsc-cell[data-stat="carrying"] {
-  gap: 0.2rem;
+  gap: var(--space-1);
   min-width: 7rem;
 }
 .dsc-cell[data-state="over"] .dsc-cell-value {
@@ -1044,7 +1044,7 @@
 .dsc-pack-weight {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
@@ -1062,7 +1062,7 @@
 .dsc-coin-weight {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-1);
   margin-left: auto;
   font: 400 var(--text-xs) var(--font-ui);
   text-transform: none;
@@ -1073,8 +1073,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto auto;
   align-items: center;
-  gap: 0.5rem;
-  padding-block: 0.3rem;
+  gap: var(--space-2);
+  padding-block: var(--space-1);
   border-bottom: 1px solid var(--border-subtle);
   font-size: var(--text-sm);
 }
@@ -1090,7 +1090,7 @@
 .addon-dnd-character .dsc-star-toggle {
   min-width: 0;
   min-height: 0;
-  padding: 0 0.2rem;
+  padding: 0 var(--space-1);
   border: 0;
   background: none;
   color: var(--text-muted);
@@ -1104,7 +1104,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: end;
-  gap: 0.5rem 1.2rem;
+  gap: var(--space-2) var(--space-5);
 }
 .dsc-coin-row > .dse-coins {
   flex: 1 1 18rem;
@@ -1112,7 +1112,7 @@
 .dsc-worth {
   display: grid;
   justify-items: end;
-  gap: 3px;
+  gap: var(--space-1);
   margin-left: auto;
 }
 .dsc-worth .dsc-cell-value {
@@ -1122,7 +1122,7 @@
 .addon-dnd-character .dsc-currency .dse-coins {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 /* Coins: the label above an underlined field, gold for GP, no spin arrows. */
 .addon-dnd-character .dsc-currency .dse-coins label {
@@ -1151,13 +1151,13 @@
 /* The body figure, shown only in its window. */
 .dsc-figure {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 .dsc-mannequin {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 5rem minmax(0, 1fr);
   grid-template-rows: repeat(5, minmax(3.5rem, auto));
-  gap: 0.5rem 0.2rem;
+  gap: var(--space-2) var(--space-1);
   align-items: center;
 }
 .dsc-body {
@@ -1187,8 +1187,8 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 0.2rem;
-  padding: 0.45rem;
+  gap: var(--space-1);
+  padding: var(--space-2);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background: var(--bg-surface);
@@ -1216,35 +1216,35 @@
 }
 .dsc-worn-item {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-3);
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-subtle);
-  padding-block: 0.4rem;
+  padding-block: var(--space-2);
   min-width: 0;
   overflow-wrap: anywhere;
 }
 .dsc-placement-picker {
   display: grid;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 .dsc-rest-list {
   display: grid;
-  gap: 0.2rem;
-  margin: 0 0 0.75rem;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-3);
   padding: 0;
   list-style: none;
 }
 .dsc-rest-list li {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
-  padding-block: 0.3rem;
+  gap: var(--space-4);
+  padding-block: var(--space-1);
   border-bottom: 1px solid var(--border-subtle);
 }
 .dsc-rest-list li > span {
   display: inline-flex;
-  gap: 0.4rem;
+  gap: var(--space-2);
   align-items: center;
 }
 .dsc-rest-list li small {
@@ -1252,7 +1252,7 @@
   font-size: var(--text-xs);
 }
 .dsc-rest-window h3 {
-  margin: 0 0 0.5rem;
+  margin: 0 0 var(--space-2);
   font-size: var(--text-sm);
 }
 
@@ -1288,8 +1288,8 @@
 .character-window-head {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-raised);
   cursor: move;
@@ -1306,18 +1306,18 @@
   line-height: 1;
 }
 .character-window > .dnd-save-status {
-  padding: 0.35rem 1rem 0;
+  padding: var(--space-1) var(--space-4) 0;
 }
 .character-window > [data-dialog-body] {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 0.75rem 1rem 1rem;
+  padding: var(--space-3) var(--space-4) var(--space-4);
 }
 .dsc-pack-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--space-2);
   align-items: end;
 }
 .dsc-pack-toolbar .character-field {
@@ -1335,14 +1335,14 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-2);
   min-height: 0;
 }
 .dsc-bp-tools,
 .dsc-bp-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem 0.6rem;
+  gap: var(--space-2);
   align-items: center;
 }
 .dsc-bp-tools input[type="search"] {
@@ -1355,12 +1355,12 @@
 .dsc-bp-sort {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-1);
   font-size: var(--text-xs);
   color: var(--text-muted);
 }
 .dsc-bp-container {
-  padding: 0.5rem 0.6rem;
+  padding: var(--space-2);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background: var(--bg-raised);
@@ -1390,20 +1390,20 @@
   overflow: auto;
 }
 .dsc-bp-scroll {
-  padding-right: 0.5rem;
+  padding-right: var(--space-2);
 }
 .dsc-bp-side {
   display: grid;
   align-content: start;
-  gap: 0.6rem;
-  padding: 0.6rem 0 0.6rem 0.75rem;
+  gap: var(--space-2);
+  padding: var(--space-2) 0 var(--space-2) var(--space-3);
   border-left: 1px solid var(--border-subtle);
 }
 .dsc-bp-side-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--space-2);
   margin: 0;
   font-size: var(--text-md);
 }
@@ -1415,9 +1415,9 @@
 .dsc-bp-row {
   display: grid;
   grid-template-columns: 1.4rem minmax(0, 1fr) auto 3.6rem 6.5rem 4.6rem;
-  gap: 0.5rem;
+  gap: var(--space-2);
   align-items: center;
-  padding: 0.25rem 0.35rem;
+  padding: var(--space-1);
   border-bottom: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
@@ -1433,7 +1433,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.3rem;
+  gap: var(--space-1);
   min-width: 0;
 }
 .addon-dnd-character .dsc-bp-name {
@@ -1450,7 +1450,7 @@
 }
 .dsc-bp-tags {
   display: inline-flex;
-  gap: 0.3rem;
+  gap: var(--space-1);
   align-items: center;
 }
 .dsc-tag-magic {
@@ -1478,7 +1478,7 @@
 .dsc-stepper {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 /* Small square steppers for mouse use; touch keeps the full-size action. */
 @media (pointer: fine) {
@@ -1499,7 +1499,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-1);
 }
 /* Narrow windows scroll as one page: the list, then the selected item's editor. */
 @media (max-width: 48rem) {
@@ -1518,8 +1518,8 @@
     padding-right: 0;
   }
   .dsc-bp-side {
-    margin-top: 0.75rem;
-    padding: 0.75rem 0 0;
+    margin-top: var(--space-3);
+    padding: var(--space-3) 0 0;
     border-top: 1px solid var(--border-subtle);
     border-left: 0;
   }
@@ -1550,7 +1550,7 @@
   }
   .dsc-health {
     flex-basis: 100%;
-    padding-bottom: 0.4rem;
+    padding-bottom: var(--space-2);
   }
   /* The name shares the hit point row; the other values wrap below. */
   .addon-dnd-character .dsc-vitals > .dnd-sheet-name {
@@ -1588,7 +1588,7 @@
       "mark source source"
       "mark facts facts"
       "mark slot action";
-    row-gap: 0.2rem;
+    row-gap: var(--space-1);
   }
   .dsc-attack-table thead {
     display: none;
@@ -1600,8 +1600,8 @@
   .dsc-attack-table tr {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 0.15rem 0.5rem;
-    padding: 0.35rem 0;
+    gap: var(--space-1) var(--space-2);
+    padding: var(--space-1) 0;
     border-bottom: 1px solid var(--border-subtle);
   }
   .dsc-attack-table tbody :is(th, td) {
@@ -1653,7 +1653,7 @@
     grid-column: 1/-1;
   }
   .addon-dnd-character .dsc-currency .dse-coins {
-    gap: 0.3rem;
+    gap: var(--space-1);
     grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr));
   }
 }
@@ -1668,8 +1668,8 @@
     flex-wrap: wrap;
     border-right: 0;
     border-bottom: 1px solid var(--border-subtle);
-    gap: 0.25rem;
-    padding: 0 0 0.4rem;
+    gap: var(--space-1);
+    padding: 0 0 var(--space-2);
   }
   .addon-dnd-character .dse-layout-compact .dnd-sheet-tabs .codex-tab {
     flex: 1 0 auto;
