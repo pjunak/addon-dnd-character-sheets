@@ -1,6 +1,6 @@
 module github.com/pjunak/addon-dnd-character-sheets/tools
 
-go 1.27.3
+go 1.27.4
 
 tool (
 	github.com/pjunak/ttrpg-codex/cmd/codex-addon-inspect
