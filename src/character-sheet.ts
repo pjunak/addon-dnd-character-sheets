@@ -15,8 +15,11 @@ import { proficiencyDetails } from "./character-proficiencies.js";
 import type { Inputs, Item, PlayCommand, Projection, Reference, Sheet } from "./character-model.js";
 import {
   attuneEquipment,
+  carryingLoad,
   equipmentSlot,
   moveEquipment,
+  setCoinWeight,
+  weightText,
   type EquipmentSlot,
 } from "./character-inventory.js";
 import type { CatalogRecord } from "./character-client.js";
@@ -497,6 +500,15 @@ export function vitals(view: SheetView): HTMLElement {
     const initiative = tile("Initiative", "initiative", true);
     initiative.append(...present(initiativeTag(view)));
     stats.append(initiative, tile("Passive perception", "passivePerception"));
+    const carrying = carriedWeight(view, (name, value, unit) =>
+      styled(
+        "div",
+        "codex-tile dse-carrying",
+        styled("span", "dse-stat-label", name),
+        el("strong", value, el("small", unit)),
+      ),
+    );
+    if (carrying) stats.append(carrying);
   }
   const inspiration = checkbox(t("Inspiration"), view.input.play.inspiration === true, (value) => {
     view.input.play.inspiration = value;
@@ -650,7 +662,11 @@ export function backpack(
   }
   split.append(carried, stored);
   pack.append(split);
-  if (options.coins !== false) pack.append(currency(view));
+  if (options.coins !== false) {
+    pack.append(currency(view));
+    const coinWeight = coinWeightToggle(view);
+    if (coinWeight) pack.append(coinWeight);
+  }
   return pack;
 }
 export function currency(view: SheetView): HTMLElement {
@@ -674,6 +690,57 @@ export function currency(view: SheetView): HTMLElement {
     coins.append(entry);
   }
   return coins;
+}
+/**
+ * Carried weight against capacity with a meter, in the frame a layout gives
+ * its stats; the Engine's breakdown shows on hover. Undefined without a
+ * capacity.
+ */
+export function carriedWeight(
+  view: SheetView,
+  frame: (name: string, value: HTMLElement, unit: string) => HTMLElement,
+): HTMLElement | undefined {
+  const carrying = carryingLoad(view.projection);
+  if (!carrying) return undefined;
+  const t = translator(view.locale),
+    number = new Intl.NumberFormat(view.locale, { maximumFractionDigits: 1 }),
+    node = frame(
+      t("Carrying"),
+      savedRule(view.projection, number.format(carrying.load), "carrying"),
+      t("/ {0} lb", [number.format(carrying.capacity)]),
+    ),
+    meter = styled("span", "dsc-meter", el("span"));
+  meter.style.setProperty("--fill", carrying.fill + "%");
+  node.append(meter);
+  if (carrying.over) node.dataset["state"] = "over";
+  if (carrying.unknown)
+    node.title = t("Items without a known weight are not counted: {0}", [carrying.unknown]);
+  return node;
+}
+/** Coins count toward carried weight unless this is turned off. */
+export function coinWeightToggle(view: SheetView): HTMLElement | undefined {
+  const t = translator(view.locale),
+    carrying = object(view.projection?.sheet["carrying"]);
+  if (!Object.keys(carrying).length) return undefined;
+  const counted = carrying["coinWeight"] !== false,
+    box = el("input");
+  box.type = "checkbox";
+  box.checked = counted;
+  box.disabled = !view.editing;
+  box.dataset["focusKey"] = "currency/coin-weight";
+  box.addEventListener("change", () => {
+    setCoinWeight(view.input, box.checked);
+    view.change();
+    view.refresh();
+  });
+  return styled(
+    "label",
+    "dsc-coin-weight",
+    box,
+    counted
+      ? t("Count coin weight ({0})", [weightText(carrying["coinsLb"], view.locale)])
+      : t("Count coin weight"),
+  );
 }
 export function combatDetails(view: SheetView): HTMLElement {
   return styled(

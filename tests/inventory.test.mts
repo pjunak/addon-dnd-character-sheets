@@ -4,6 +4,7 @@ import {
   appendEquipment,
   attuneEquipment,
   attunementChoice,
+  carryingLoad,
   equipmentReason,
   equipmentSlot,
   inventoryOwnsKey,
@@ -11,6 +12,7 @@ import {
   pinQuickUse,
   removeInventoryItem,
   quickUseReason,
+  setCoinWeight,
   stowAndUnattune,
 } from "#web/character-inventory";
 
@@ -270,4 +272,34 @@ void test("all equipment rejection codes have translated explanations", () => {
     assert.notEqual(equipmentReason(reason, "cs"), equipmentReason(reason, "en"), reason);
   }
   assert.equal(equipmentReason(undefined, "en"), "");
+});
+
+void test("both layouts read carried weight and the coin-weight switch the same way", () => {
+  const saved = (carrying: Record<string, unknown> | undefined): Projection => ({
+    sheet: partial<Sheet>(carrying ? { carrying } : {}),
+    explanations: {},
+    evidence: [],
+    issues: [],
+  });
+  assert.deepEqual(
+    carryingLoad(saved({ weightLb: 117, capacityLb: 450, unknown: ["mystery", "relic"] })),
+    { load: 117, capacity: 450, fill: 26, over: false, unknown: 2 },
+    "A Powerful Build capacity comes from the Engine as it is",
+  );
+  assert.deepEqual(carryingLoad(saved({ weightLb: 300, capacityLb: 150, unknown: [] })), {
+    load: 300,
+    capacity: 150,
+    fill: 100,
+    over: true,
+    unknown: 0,
+  });
+  assert.equal(carryingLoad(saved(undefined)), undefined, "No carrying without a ruleset policy");
+  assert.equal(carryingLoad(saved({ weightLb: 5, capacityLb: 0 })), undefined);
+  assert.equal(carryingLoad(undefined), undefined, "Saved reading without a projection");
+
+  const input = blank();
+  setCoinWeight(input, false);
+  assert.equal(input.play.coinWeight, false);
+  setCoinWeight(input, true);
+  assert.equal(Object.hasOwn(input.play, "coinWeight"), false, "Counting coins is the default");
 });

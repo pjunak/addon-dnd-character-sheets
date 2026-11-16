@@ -1,5 +1,5 @@
 import type { Container, Inputs, Item, Projection } from "./character-model.js";
-import { object } from "./character-client.js";
+import { object, strings } from "./character-client.js";
 import { translator } from "./character-locale.js";
 
 export function assignBodyPlacement(
@@ -101,6 +101,38 @@ export function removeInventoryItem(input: Inputs, id: string): void {
   ];
   for (const saved of owned)
     for (const key of Object.keys(saved)) if (key.startsWith(itemKeyPrefix(id))) delete saved[key];
+}
+
+/** Carried weight against capacity, from the saved sheet's carrying. */
+export interface CarryingLoad {
+  load: number;
+  capacity: number;
+  /** How full, as a percentage capped at 100. */
+  fill: number;
+  over: boolean;
+  /** How many items have no known weight and are left out. */
+  unknown: number;
+}
+
+/** The saved carried weight against capacity, or undefined without a capacity. */
+export function carryingLoad(projection: Projection | undefined): CarryingLoad | undefined {
+  const carrying = object(projection?.sheet["carrying"]),
+    load = Number(carrying["weightLb"]),
+    capacity = Number(carrying["capacityLb"]);
+  if (!Number.isFinite(load) || !(capacity > 0)) return undefined;
+  return {
+    load,
+    capacity,
+    fill: Math.min(100, (load / capacity) * 100),
+    over: load > capacity,
+    unknown: strings(carrying["unknown"]).length,
+  };
+}
+
+/** Counts coins toward carried weight (the default, kept as no field) or not. */
+export function setCoinWeight(input: Inputs, counted: boolean): void {
+  if (counted) delete input.play.coinWeight;
+  else input.play.coinWeight = false;
 }
 
 /** "5 lb" or "0.5 lb" in the locale's digits, for weights the Engine reports. */

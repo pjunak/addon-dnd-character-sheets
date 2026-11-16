@@ -8,8 +8,10 @@ import {
   defenseNames,
   casterSource,
   castingDetails,
+  carriedWeight,
   characterName,
   classValueRows,
+  coinWeightToggle,
   currency,
   featureDCRows,
   itemProperties,
@@ -25,12 +27,7 @@ import {
 import { abilities, object, rows, strings, text } from "./character-client.js";
 import { gearNote } from "./character-magic-gear.js";
 import type { Item, Sheet } from "./character-model.js";
-import {
-  assignBodyPlacement,
-  moveEquipment,
-  stowAndUnattune,
-  weightText,
-} from "./character-inventory.js";
+import { assignBodyPlacement, moveEquipment, stowAndUnattune } from "./character-inventory.js";
 import { bodyPlacementLabel } from "./character-placement.js";
 import { handControls } from "./character-hands.js";
 import { quickUse } from "./character-quick-use.js";
@@ -1196,33 +1193,10 @@ function equipmentBar(view: SheetView): HTMLElement {
       ),
     );
   }
-  const carrying = carryingCell(view);
+  const carrying = carriedWeight(view, (name, value, unit) => cell(name, value, "carrying", unit));
   if (carrying) values.append(carrying);
   root.append(values);
   return root;
-}
-
-// Carried weight against capacity; the Engine's breakdown shows on hover.
-function carryingCell(view: SheetView): HTMLElement | undefined {
-  const t = translator(view.locale),
-    carrying = object(view.projection?.sheet["carrying"]),
-    load = Number(carrying["weightLb"]),
-    capacity = Number(carrying["capacityLb"]);
-  if (!Number.isFinite(load) || !(capacity > 0)) return undefined;
-  const number = new Intl.NumberFormat(view.locale, { maximumFractionDigits: 1 }),
-    node = cell(
-      t("Carrying"),
-      savedRule(view.projection, number.format(load), "carrying"),
-      "carrying",
-      t("/ {0} lb", [number.format(capacity)]),
-    ),
-    meter = styled("span", "dsc-meter", el("span"));
-  meter.style.setProperty("--fill", Math.min(100, (load / capacity) * 100) + "%");
-  node.append(meter);
-  if (load > capacity) node.dataset["state"] = "over";
-  const unknown = strings(carrying["unknown"]).length;
-  if (unknown) node.title = t("Items without a known weight are not counted: {0}", [unknown]);
-  return node;
 }
 
 const bodyPlaces = [
@@ -1445,33 +1419,6 @@ function currencyWorth(view: SheetView): HTMLElement[] {
       ),
     ),
   ];
-}
-
-// Coins count toward carried weight unless this is turned off.
-function coinWeightToggle(view: SheetView): HTMLElement | undefined {
-  const t = translator(view.locale),
-    carrying = object(view.projection?.sheet["carrying"]);
-  if (!Object.keys(carrying).length) return undefined;
-  const counted = carrying["coinWeight"] !== false,
-    box = el("input");
-  box.type = "checkbox";
-  box.checked = counted;
-  box.disabled = !view.editing;
-  box.dataset["focusKey"] = "currency/coin-weight";
-  box.addEventListener("change", () => {
-    if (box.checked) delete view.input.play.coinWeight;
-    else view.input.play.coinWeight = false;
-    view.change();
-    view.refresh();
-  });
-  return styled(
-    "label",
-    "dsc-coin-weight",
-    box,
-    counted
-      ? t("Count coin weight ({0})", [weightText(carrying["coinsLb"], view.locale)])
-      : t("Count coin weight"),
-  );
 }
 
 export function compactEquipment(view: SheetView, actions: CompactActions): HTMLElement {

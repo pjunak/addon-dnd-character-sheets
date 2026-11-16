@@ -277,6 +277,19 @@
   max-width: 100%;
   overflow-wrap: anywhere;
 }
+/* Carried weight against capacity; the shared meter turns red when over. */
+.dse-carrying small {
+  margin-left: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.dse-carrying .dsc-meter {
+  align-self: stretch;
+}
+.dse-carrying[data-state="over"] strong {
+  color: var(--color-danger);
+}
 .dse-inspiration label {
   display: flex;
   flex-wrap: wrap;

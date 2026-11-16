@@ -24,11 +24,13 @@ clears only its membership. A container can be linked to the item it is (a
 Backpack, a Bag of Holding); the Engine then gives its capacity and whether its
 contents count. Saved reading, print and export retain organization without a
 provider.
-**Weight**: Equipment's bar shows carried weight against capacity (Strength ×
-15 in the 2024 rules) with the Engine's breakdown on hover, and each Backpack
-group shows its weight, a container its load against capacity. Stored items and
-Bag of Holding contents are listed but not counted; coin weight can be turned
-off on the Currency panel. Rules items take their weight from the Compendium;
+**Weight**: Compact's Equipment bar and Classic's stat tiles show carried
+weight against capacity (Strength × 15 in the 2024 rules, times the size's
+multiplier, a size larger with a feature such as Powerful Build) with the
+Engine's breakdown on hover, and each Backpack group shows its weight, a
+container its load against capacity. Stored items and Bag of Holding contents
+are listed but not counted; coin weight can be turned off beside the coins in
+either layout. Rules items take their weight from the Compendium;
 custom items, and items the rules give no weight, take one in an item's
 details. Nothing is enforced.
 **Body placement** organizes equipped instances using Engine-provided source
