@@ -149,7 +149,7 @@ export async function connectCharacter(context: AddonContext): Promise<Character
   const [service, engine] = await Promise.all([
     context.services.own("dnd5e.character", { signal: context.signal }),
     context.services.connect("dnd5e.rules-engine", {
-      range: "^6.0.0",
+      range: "^6.1.0",
       cardinality: "one",
       signal: context.signal,
     }),

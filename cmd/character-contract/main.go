@@ -35,7 +35,7 @@ func main() {
 // release still upgrades, so the host can keep existing sheets on update.
 // Each older format's schema is frozen in contracts/legacy/.
 func storedSchema() any {
-	current := model.Schema(character.State{})
+	current := character.StoredSchema()
 	legacy := character.LegacySchemaVersions()
 	if len(legacy) == 0 {
 		return current

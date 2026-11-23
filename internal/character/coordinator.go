@@ -436,8 +436,10 @@ func linkGrantItem(input *model.Inputs, grantID, itemID string) {
 }
 
 // payload is the Engine request for one evaluation or play command.
+// payload always asks for the values temporary effects change; the consumed
+// rules-engine range (^6.1.0) guarantees an Engine that knows the flag.
 func payload(input model.Inputs, change *model.PlayCommand) map[string]any {
-	params := map[string]any{"contractVersion": model.ContractVersion, "inputs": input}
+	params := map[string]any{"contractVersion": model.ContractVersion, "inputs": input, "temporaryEffects": true}
 	if change != nil {
 		params["change"] = change
 	}
@@ -528,9 +530,13 @@ func (c *Coordinator) commit(ctx context.Context, meta *workerrpc.Meta, r Reques
 	return c.persist(ctx, meta, p.Key, p.Revision, p.State, response)
 }
 
-// projectionOf is the part of an evaluation a saved sheet keeps.
+// projectionOf is the part of an evaluation a saved sheet keeps. Temporary
+// effect marks are derived anew by every evaluation and live only in the
+// response's evaluation, so the stored format never holds them.
 func projectionOf(result model.Result) Projection {
-	return Projection{Sheet: result.Sheet, Explanations: result.Explanations, Evidence: result.Evidence, Issues: result.Issues}
+	sheet := result.Sheet
+	sheet.TemporaryEffects = nil
+	return Projection{Sheet: sheet, Explanations: result.Explanations, Evidence: result.Evidence, Issues: result.Issues}
 }
 
 func saveable(result model.Result) bool { return result.Ready || result.Guidance.CanSave }

@@ -29,6 +29,21 @@ type Projection struct {
 	Evidence     []model.Evidence             `json:"evidence"`
 	Issues       []model.Issue                `json:"issues"`
 }
+
+// StoredSchema is the schema of the saved format, State. It leaves out the
+// Engine's temporary effect marks: every evaluation derives them anew, the
+// worker never saves them (projectionOf), and so the stored format and its
+// digest stay as released and no saved sheet needs an upgrade for them.
+func StoredSchema() map[string]any {
+	schema := model.Schema(State{})
+	defs := schema["$defs"].(map[string]any)
+	delete(defs["Sheet"].(map[string]any)["properties"].(map[string]any), "temporaryEffects")
+	for _, name := range []string{"TemporaryEffect", "EffectCause", "EffectChange"} {
+		delete(defs, name)
+	}
+	return schema
+}
+
 type State struct {
 	SchemaVersion string       `json:"schemaVersion"`
 	Inputs        model.Inputs `json:"inputs"`

@@ -10,12 +10,11 @@ import (
 	"strings"
 	"testing"
 
-	model "github.com/pjunak/addon-dnd-engine/character"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 // storedFormats pins every released stored format: the digest of its schema
-// (model.Schema(State{})) and, when it has one, of its frozen sheet fixture in
+// (StoredSchema()) and, when it has one, of its frozen sheet fixture in
 // testdata/sheet-state-<version>.json. Neither may change. A change to the
 // stored types needs a new SchemaVersion, an upgrade from the old format and
 // a new row; see docs/RULES_EDGE_CASES.md#changing-the-stored-format.
@@ -45,7 +44,7 @@ func digest(t *testing.T, body []byte) string {
 }
 
 func TestStoredSchemaChangesNeedANewVersion(t *testing.T) {
-	current := digest(t, raw(model.Schema(State{})))
+	current := digest(t, raw(StoredSchema()))
 	format, released := storedFormats[SchemaVersion]
 	if !released {
 		t.Fatalf("stored format %s has no row in storedFormats; its schema digest is %s", SchemaVersion, current)

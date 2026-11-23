@@ -55,6 +55,9 @@ type fakeEngine struct {
 	unavailable bool
 	invalid     bool
 	calls       int
+	// unasked counts calls that did not ask for temporary effects.
+	unasked int
+	marks   []model.TemporaryEffect
 }
 
 func (engine *fakeEngine) Call(_ context.Context, _ *workerrpc.Meta, call workerrpc.ServiceCall) (workerrpc.ServiceResult, error) {
@@ -63,6 +66,9 @@ func (engine *fakeEngine) Call(_ context.Context, _ *workerrpc.Meta, call worker
 		return workerrpc.ServiceResult{}, failure(workerrpc.KindUnavailable, "missing rules")
 	}
 	params := call.Params.(map[string]any)
+	if params["temporaryEffects"] != true {
+		engine.unasked++
+	}
 	input := params["inputs"].(model.Inputs)
 	calculation := &model.Calculation{CurrencyWorth: &model.CurrencyWorth{Coin: "gp", Value: input.Play.Currency["gp"]}}
 	if engine.derived != nil {
@@ -71,6 +77,7 @@ func (engine *fakeEngine) Call(_ context.Context, _ *workerrpc.Meta, call worker
 		input.Play.HP = min(input.Play.HP, calculation.Derived.MaxHP)
 	}
 	result := evaluated{ContractVersion: model.ResponseVersion, Identity: map[string]any{"rulesetId": "synthetic"}, Policy: map[string]any{}, Evaluation: model.Result{ContractVersion: model.ContractVersion, Inputs: input, Ready: !engine.invalid, Sheet: model.Sheet{Status: model.SheetCalculated, Calculation: calculation}, Evidence: []model.Evidence{}, Explanations: map[string]model.Explanation{}, Issues: []model.Issue{}}}
+	result.Evaluation.Sheet.TemporaryEffects = engine.marks
 	if engine.inspect != nil {
 		result.Evaluation.Issues = engine.inspect(input)
 		result.Evaluation.Ready = len(result.Evaluation.Issues) == 0

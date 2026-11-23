@@ -117,7 +117,7 @@ void test("manifest declares worker-only authority", async () => {
   const consumes = array(services["consumes"]).map(record);
   assert.equal(
     required(consumes.find((service) => service["contract"] === "dnd5e.rules-engine"))["range"],
-    "^6.0.0",
+    "^6.1.0",
   );
   // The UI reaches its own worker with services.own, not as a consumer.
   assert.equal(

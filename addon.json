@@ -74,7 +74,7 @@
     "consumes": [
       {
         "contract": "dnd5e.rules-engine",
-        "range": "^6.0.0",
+        "range": "^6.1.0",
         "cardinality": "one",
         "required": false,
         "selection": "operator"

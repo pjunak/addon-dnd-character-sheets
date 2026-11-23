@@ -211,6 +211,10 @@ export interface CastingAbilityChoice {
   selected: string | null;
 }
 
+export type CauseKind = "active-feature" | "condition" | "timed-grant";
+
+export type ChangeKind = "add" | "advantage" | "disadvantage" | "other" | "set";
+
 export interface Choice {
   id: string;
   slot: number;
@@ -343,9 +347,27 @@ export interface Effect {
   value: number;
 }
 
+export interface EffectCause {
+  kind: CauseKind;
+  id: string;
+  name: string;
+  labelKey?: string;
+  level?: number;
+  tone: EffectTone;
+  changes: Array<EffectChange>;
+}
+
+export interface EffectChange {
+  kind: ChangeKind;
+  value?: number;
+  included?: boolean;
+}
+
 export type EffectMode = "add" | "maximum" | "minimum" | "set";
 
 export type EffectTarget = "abilityCap" | "abilityScore" | "armorClass" | "attunementLimit" | "initiative" | "maxHp" | "proficiency" | "resourceMax" | "savingThrow" | "sense" | "speed" | "spellAttack" | "spellSaveDC";
+
+export type EffectTone = "bonus" | "mixed" | "penalty";
 
 export interface EquipmentFacts {
   slot: string;
@@ -993,6 +1015,7 @@ export interface Sheet {
   equipment: Record<string, EquipmentFacts>;
   carrying?: Carrying;
   concentration?: SheetConcentration;
+  temporaryEffects?: Array<TemporaryEffect>;
 }
 
 export interface SheetClass {
@@ -1240,6 +1263,13 @@ export interface SuspendedHand {
   itemId: string;
   expectedItemSha256: string;
   bodyPlacement?: string;
+}
+
+export interface TemporaryEffect {
+  path: string;
+  row?: string;
+  tone: EffectTone;
+  causes: Array<EffectCause>;
 }
 
 export interface Term {
