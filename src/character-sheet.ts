@@ -42,6 +42,7 @@ import {
   styled,
 } from "./character-ui.js";
 import { rulesTarget } from "./character-rule-notes.js";
+import { displayedMark, explainedMark, marked } from "./character-marks.js";
 import { gearNote } from "./character-magic-gear.js";
 
 export type Layout = "compact" | "classic";
@@ -102,14 +103,26 @@ export function characterName(view: Pick<SheetView, "name">): HTMLElement {
   node.title = view.name;
   return node;
 }
+// A value with its saved explanation; a value temporary effects change also
+// shows its tone and lists the causes in that explanation. A rule that names a
+// record (a skill beside its total) is a label, so only the value is marked.
 export function savedRule(
   projection: Projection | undefined,
   name: string,
   path?: string,
   reference?: Reference,
 ): HTMLElement {
-  const explanation = path ? projection?.explanations[path] : undefined;
-  return rule(name, reference, explanation, undefined, projection);
+  const explanation = path ? projection?.explanations[path] : undefined,
+    mark = path && !reference ? displayedMark(projection, path) : undefined,
+    locale = document.documentElement.lang || "en";
+  const node = rule(
+    name,
+    reference,
+    mark ? explainedMark(explanation, mark, locale) : explanation,
+    undefined,
+    projection,
+  );
+  return marked(node, mark, locale);
 }
 export function sizeDetails(view: Pick<SheetView, "locale" | "projection">): HTMLElement {
   const t = translator(view.locale),

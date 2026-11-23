@@ -202,7 +202,12 @@
       "Count coin weight": "Počítat váhu mincí",
       "The current rules no longer allow these saved selections, so they were removed:": "Současná pravidla tyto uložené volby už nepovolují, proto byly odebrány:",
       "Item properties": "Vlastnosti předmětů",
-      "Granted by {0}": "Uděluje: {0}"
+      "Granted by {0}": "Uděluje: {0}",
+      "{0} on the roll, not in the number": "{0} na hod, není v čísle",
+      "Set to {0}": "Nastaveno na {0}",
+      "Changed": "Změněno",
+      "Changed for now by {0}": "Nyní mění {0}",
+      "For now: {0}": "Nyní: {0}"
     },
     "build": {
       "{0} / {1} points used · {2} remaining": "Využito {0} / {1} bodů · zbývá {2}",

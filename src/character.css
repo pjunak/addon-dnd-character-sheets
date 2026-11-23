@@ -181,6 +181,55 @@
 .dse-roll-tag.is-quiet:not(.is-linked) {
   display: none;
 }
+/*
+ * A value temporary effects change shows its tone three ways: the tone's
+ * colour, a soft glow in it and a marker (up, down, diamond). The tones point
+ * at the host's tokens by name, so every theme supplies its own colours.
+ */
+.addon-dnd-sheets {
+  --dse-tone-bonus: var(--color-success);
+  --dse-tone-penalty: var(--color-danger);
+  --dse-tone-mixed: var(--color-mystery);
+}
+.dse-mark {
+  --dse-tone: var(--dse-tone-mixed);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+}
+.dse-mark[data-tone="bonus"] {
+  --dse-tone: var(--dse-tone-bonus);
+}
+.dse-mark[data-tone="penalty"] {
+  --dse-tone: var(--dse-tone-penalty);
+}
+.dse-mark,
+.dse-mark > codex-addon-rule-details::part(trigger) {
+  color: var(--dse-tone);
+  text-shadow: 0 0 0.4em color-mix(in srgb, var(--dse-tone) 45%, transparent);
+}
+.dse-mark-marker {
+  display: inline-flex;
+  flex: none;
+  width: 0.55em;
+  height: 0.55em;
+  cursor: help;
+}
+.dse-mark-marker svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+@media print {
+  .dse-mark,
+  .dse-mark > codex-addon-rule-details::part(trigger) {
+    color: inherit;
+    text-shadow: none;
+  }
+  .dse-mark-marker {
+    display: none;
+  }
+}
 /* Special movement beside Speed. */
 .dnd-movement {
   display: block;

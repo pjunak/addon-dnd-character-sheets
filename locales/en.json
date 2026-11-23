@@ -197,7 +197,12 @@
       "Count coin weight": "Count coin weight",
       "The current rules no longer allow these saved selections, so they were removed:": "The current rules no longer allow these saved selections, so they were removed:",
       "Item properties": "Item properties",
-      "Granted by {0}": "Granted by {0}"
+      "Granted by {0}": "Granted by {0}",
+      "{0} on the roll, not in the number": "{0} on the roll, not in the number",
+      "Set to {0}": "Set to {0}",
+      "Changed": "Changed",
+      "Changed for now by {0}": "Changed for now by {0}",
+      "For now: {0}": "For now: {0}"
     },
     "build": {
       "{0} / {1} points used · {2} remaining": "{0} / {1} points used · {2} remaining",

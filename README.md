@@ -153,6 +153,15 @@ from features and armor (heavy armor on Stealth) always show. Marks that only a
 condition causes stay hidden on the ability cards until you hover or focus that
 condition, and always show on Combat's attacks, saves and Initiative.
 
+A value that something temporary changes right now (a condition, a feature
+switched on, a DM grant that expires) takes a colour: green-toned for a bonus,
+red-toned for a penalty or Disadvantage, violet for both or neither, with a
+soft glow and a small marker (up, down, diamond) so it never rests on colour
+alone. Its explanation lists what changes it, such as "Exhaustion 2: -4 on the
+roll, not in the number". The Engine decides which values and why; worn armor
+and other permanent effects keep only their tags. The colours are the host
+theme's own success, danger and mystery colours. Print shows plain values.
+
 Valid changes save automatically. Build completion is separate from validity:
 an unfinished character is saved as it is built, while rules-dependent play
 requires outstanding choices to be completed. There are no device drafts,
@@ -271,7 +280,7 @@ Use `npm run check:workflows` and `npm run check:vulnerabilities` to run the
 matching workflow and reachable Go vulnerability checks locally.
 
 Inspect the resulting ZIP with the host's inspector:
-`go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-6.4.0.zip`.
+`go tool -modfile=go.tools.mod codex-addon-inspect dist/dnd-sheets-6.5.0.zip`.
 The package command rebuilds web assets and native workers from source, including
 when neither output directory exists. `web/`, `worker/` and `dist/` are ignored
 build artifacts; public schemas and generated TypeScript models remain versioned.

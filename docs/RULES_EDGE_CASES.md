@@ -81,6 +81,24 @@ projection, not authored state. Both layouts and print show their level and
 granting items without remove or level controls; an authored condition with the
 same ID keeps its own row.
 
+## Temporary effect marks
+
+The worker always asks the Engine (`dnd5e.rules-engine` 6.1.0 or newer) for
+`temporaryEffects`. The marks travel in the response's `evaluation.sheet`,
+to the sheet and to other `dnd5e.character` clients, and are never saved:
+`projectionOf` drops them and `StoredSchema` leaves them out, so the stored
+format stays 6.2.0 and no saved sheet needs an upgrade for them. A sheet saved
+before reads as it was; the next evaluation brings its marks. Without
+compatible rules there is no evaluation and so no marks, and print uses the
+saved projection.
+
+`src/character-marks.ts` is the one place that reads a value's tone and
+causes, by the Engine's path and row (attack rows by item, feature attack or
+`unarmed`, casters by class). Views never derive a tone from conditions or
+roll marks. The three tones are the add-on's `--dse-tone-*` properties, which
+name the host's `--color-success`, `--color-danger` and `--color-mystery`.
+See the [Engine contract](../../addon-dnd-engine/contract/README.md#temporary-effects).
+
 ## Inspiration
 
 `inputs.play.inspiration` is an optional boolean. Absent means unavailable

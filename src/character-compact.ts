@@ -1,4 +1,5 @@
 import type { SheetView } from "./character-sheet.js";
+import { displayedMark, marked } from "./character-marks.js";
 import {
   abilityRail,
   initiativeTag,
@@ -262,6 +263,7 @@ export function concentrationChip(view: SheetView): HTMLElement | undefined {
     chip.title = t("{0} ended concentration on {1}.", [endedBy, name]);
   } else if (typeof dc === "number") {
     const save = styled("b", "dsc-concentration-save", t("DC {0}", [dc]));
+    const savedMark = displayedMark(view.projection, "concentrationSaveBonus");
     save.title = t("{0} save {1} keeps concentration on {2}.", [
       t(abilityNames[text(concentration["saveAbility"])] ?? ""),
       signed(concentration["saveBonus"]),
@@ -275,7 +277,7 @@ export function concentrationChip(view: SheetView): HTMLElement | undefined {
     );
     kept.className = "dsc-glyph";
     kept.setAttribute("aria-label", t("Kept concentration on {0}", [name]));
-    chip.append(save, kept);
+    chip.append(marked(save, savedMark, view.locale), kept);
   }
   const end = button(
     "×",

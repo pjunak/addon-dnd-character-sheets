@@ -91,6 +91,7 @@ import {
 } from "./character-ui.js";
 import { sheetAccess, type CharacterTab as Tab } from "./character-pending.js";
 import { rulesTarget, showRuleNotes } from "./character-rule-notes.js";
+import { withMarks } from "./character-marks.js";
 
 const runtimes = new Map<
   string,
@@ -671,7 +672,7 @@ export function defineCharacterElement(
         layout: this.#layout,
         name: this.#name,
         input: this.#input,
-        projection: this.#saved?.state?.projection,
+        projection: withMarks(this.#saved?.state?.projection, this.#evaluation),
         catalogs: this.#catalogs,
         equipment:
           this.#saved?.status === "unavailable"
